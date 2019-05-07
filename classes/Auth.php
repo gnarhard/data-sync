@@ -1,10 +1,10 @@
 <?php
 
 
-namespace WPDataSyndicator;
+namespace WPDataSync;
 
 
-class Authorize
+class Auth
 {
 
   public function __construct()

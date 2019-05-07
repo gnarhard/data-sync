@@ -4,7 +4,6 @@
 namespace WPDataSync;
 
 
-class Push
-{
+class Settings {
 
 }

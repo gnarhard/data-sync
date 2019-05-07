@@ -1,7 +1,7 @@
 <?php
 
 
-namespace WPDataSyndicator;
+namespace WPDataSync;
 
 
 class Unpack

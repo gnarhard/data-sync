@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WP Data Synchronize
+ * Plugin Name: WP Data Sync
  * Version:     1.0.0
  * Description: Synchronizes all post data, custom ACF fields, and Yoast data across multiple, authenticated sites.
  * Author:      Copper Leaf Creative
@@ -35,4 +35,4 @@ if ( ! defined( 'WP_DATA_SYNDICATOR_PATH' ) ) {
 
 // Load the plugin files.
 require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/vendor/autoload.php';
-require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/includes/enqueue.php';
+require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/includes/include.php';
