@@ -4,7 +4,7 @@
 namespace WPDataSyndicator;
 
 
-class Syndicate
+class Push
 {
 
 }

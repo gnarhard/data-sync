@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: WP Data Syndicator
+ * Plugin Name: WP Data Synchronize
  * Version:     1.0.0
- * Description: Syndicates all post data, custom ACF fields, and Yoast data across multiple, authenticated sites.
+ * Description: Synchronizes all post data, custom ACF fields, and Yoast data across multiple, authenticated sites.
  * Author:      Copper Leaf Creative
  * Author URI:  https://copperleafcreative.com
- * Text Domain: wp-data-syndicator
+ * Text Domain: wp-data-sync
  * Domain Path: /languages/
  * License:     GPL v3
  *
