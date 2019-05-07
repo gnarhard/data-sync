@@ -1,0 +1,9 @@
+{
+  "name": "wp-data-syndicator",
+  "version": "1.0.0",
+  "autoload": {
+    "psr-4": {
+      "classes\\": "classes/"
+    }
+  }
+}

@@ -29,10 +29,10 @@ if ( ! function_exists( 'add_filter' ) ) {
   exit();
 }
 
-if ( ! defined( 'WP_DATA_SYNDICATOR_FILE' ) ) {
-  define( 'WP_DATA_SYNDICATOR_FILE', __FILE__ );
+if ( ! defined( 'WP_DATA_SYNDICATOR_PATH' ) ) {
+  define( 'WP_DATA_SYNDICATOR_PATH', __FILE__ );
 }
 
 // Load the plugin files.
-require_once dirname( WPSEO_FILE ) . '/Includes/autoload.php';
-require_once dirname( WPSEO_FILE ) . '/Includes/enqueue.php';
+require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/vendor/autoload.php';
+require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/includes/enqueue.php';
