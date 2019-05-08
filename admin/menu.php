@@ -10,13 +10,9 @@ function wp_data_sync_plugin_menu() {
 		'wp_data_sync_settings'
 	);
 
-	add_action('admin_init', 'wp_data_sync_settings_registration');
+	add_action('admin_init', 'display_wp_data_sync_settings');
 }
 
 function wp_data_sync_settings() {
 	require_once 'settings.php';
-}
-
-function wp_data_sync_settings_registration() {
-	register_setting("wp_data_sync_settings_group", "");
 }

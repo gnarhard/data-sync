@@ -30,9 +30,9 @@ if ( ! function_exists( 'add_filter' ) ) {
 }
 
 if ( ! defined( 'WP_DATA_SYNDICATOR_PATH' ) ) {
-  define( 'WP_DATA_SYNDICATOR_PATH', __FILE__ );
+  define( 'WP_DATA_SYNDICATOR_PATH', plugin_dir_path( __FILE__ ) );
 }
 
 // Load the plugin files.
-require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/vendor/autoload.php';
-require_once dirname( WP_DATA_SYNDICATOR_PATH ) . '/includes/include.php';
+require_once (WP_DATA_SYNDICATOR_PATH . 'vendor/autoload.php');
+require_once (WP_DATA_SYNDICATOR_PATH . 'includes/include.php');
