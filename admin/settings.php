@@ -28,6 +28,7 @@ if ($source == 1) {
 } else {
 
 	/////// RECEIVER OPTIONS ///////
+// UNIQUE SITE TOKEN (public key)
 
 }
 ?>

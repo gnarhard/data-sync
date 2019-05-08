@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'classes\\' => array($baseDir . '/classes'),
+    'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
 );

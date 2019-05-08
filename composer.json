@@ -5,5 +5,8 @@
     "psr-4": {
       "classes\\": "classes/"
     }
+  },
+  "require": {
+    "firebase/php-jwt": "^5.0"
   }
 }
