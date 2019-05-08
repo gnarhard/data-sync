@@ -9,10 +9,9 @@ function wp_data_sync_plugin_menu() {
 		'wp-data-sync-settings',
 		'wp_data_sync_settings'
 	);
-
-	add_action('admin_init', 'display_wp_data_sync_settings');
 }
 
 function wp_data_sync_settings() {
+	require_once 'register.php';
 	require_once 'settings.php';
 }

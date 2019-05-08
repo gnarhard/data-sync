@@ -44,3 +44,4 @@ function display_token() {
 
 	////// RECEIVER OPTIONS /////
 /// Users to be notified of emails
+/// Which post types to accept

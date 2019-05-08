@@ -1,9 +1,13 @@
 <?php
 
-require_once 'fields.php';
-add_sections();
-add_fields();
-register();
+add_action('admin_init', 'wp_data_sync_settings');
+wp_data_sync_settings();
+function wp_data_sync_settings() {
+	require_once 'fields.php';
+	add_sections();
+//	add_fields();
+	register();
+}
 
 function add_sections() {
 	$option_group = 'wp-data-sync-settings';
