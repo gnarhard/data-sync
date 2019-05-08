@@ -35,13 +35,14 @@ function display_token() {
 }
 
 /////// SOURCE OPTIONS ///////
-// Connected Sites
+// Connected Site blogname, Site ID, URL, date connected
 // Synced Post Types
-// Which is canonical per post?
-// Re-sync button
+// Bulk push button
 // See error log
+    // Push new template file - cpt-templates.php
 
 
 	////// RECEIVER OPTIONS /////
 /// Users to be notified of emails
 /// Which post types to accept
+/// Pull data from source

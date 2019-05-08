@@ -34,5 +34,4 @@ if ( ! defined( 'WP_DATA_SYNDICATOR_PATH' ) ) {
 }
 
 // Load the plugin files.
-require_once (WP_DATA_SYNDICATOR_PATH . 'vendor/autoload.php');
-require_once (WP_DATA_SYNDICATOR_PATH . 'includes/include.php');
+require_once (WP_DATA_SYNDICATOR_PATH . 'includes/load.php');

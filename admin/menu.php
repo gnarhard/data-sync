@@ -10,8 +10,3 @@ function wp_data_sync_plugin_menu() {
 		'wp_data_sync_settings'
 	);
 }
-
-function wp_data_sync_settings() {
-	require_once 'register.php';
-	require_once 'settings.php';
-}
