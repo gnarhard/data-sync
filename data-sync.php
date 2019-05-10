@@ -1,4 +1,4 @@
-<?php
+<?php namespace DataSync;
 /**
  * Plugin Name: Data Sync
  * Version:     1.0.0
@@ -23,19 +23,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'DataSync\add_action_links' );
+
+function add_action_links ( $links ) {
+  $mylinks = array(
+      '<a href="' . admin_url( 'options-general.php?page=data-sync-settings' ) . '">Settings</a>',
+  );
+  return array_merge( $links, $mylinks );
+}
+
 if ( ! function_exists( 'add_filter' ) ) {
   header( 'Status: 403 Forbidden' );
   header( 'HTTP/1.1 403 Forbidden' );
   exit();
 }
 
-if ( ! defined( 'WP_DATA_SYNC_PATH' ) ) {
-  define( 'WP_DATA_SYNC_PATH', plugin_dir_path( __FILE__ ) );
+if ( ! defined( 'DATA_SYNC_PATH' ) ) {
+  define( 'DATA_SYNC_PATH', plugin_dir_path( __FILE__ ) );
 }
 
-if ( ! defined( 'WP_DATA_SYNC_URL' ) ) {
-	define( 'WP_DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
+if ( ! defined( 'DATA_SYNC_URL' ) ) {
+	define( 'DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
 }
 
 // Load the plugin files.
-require_once (WP_DATA_SYNC_PATH . 'includes/load.php');
+require_once (DATA_SYNC_PATH . 'includes/load.php');

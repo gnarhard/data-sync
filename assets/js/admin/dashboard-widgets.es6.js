@@ -1,20 +1,20 @@
 jQuery(function($) {
 
-  $.ajax({
-    method: 'GET',
-    url: WPDS.api.url,
-    beforeSend: function ( xhr ) {
-      xhr.setRequestHeader( 'X-WP-Nonce', WPDS.api.nonce );
-    }
-  }).then( function ( r ) {
-    if( r.hasOwnProperty( 'industry' ) ){
-      $( '#industry' ).val( r.industry );
-    }
-
-    if( r.hasOwnProperty( 'amount' ) ){
-      $( '#amount' ).val( r.amount );
-    }
-  });
+  // $.ajax({
+  //   method: 'GET',
+  //   url: DataSync.api.url,
+  //   beforeSend: function ( xhr ) {
+  //     xhr.setRequestHeader( 'X-WP-Nonce', DataSync.api.nonce );
+  //   }
+  // }).then( function ( r ) {
+  //   if( r.hasOwnProperty( 'industry' ) ){
+  //     $( '#industry' ).val( r.industry );
+  //   }
+  //
+  //   if( r.hasOwnProperty( 'amount' ) ){
+  //     $( '#amount' ).val( r.amount );
+  //   }
+  // });
 
   // $( '#apex-form' ).on( 'submit', function (e) {
   //   e.preventDefault();
@@ -25,15 +25,15 @@ jQuery(function($) {
   //
   //   $.ajax({
   //     method: 'POST',
-  //     url: WPDS.api.url,
+  //     url: DataSync.api.url,
   //     beforeSend: function ( xhr ) {
-  //       xhr.setRequestHeader('X-WP-Nonce', WPDS.api.nonce);
+  //       xhr.setRequestHeader('X-WP-Nonce', DataSync.api.nonce);
   //     },
   //     data:data
   //   }).then( function (r) {
-  //     $( '#feedback' ).html( '<p>' + WPDS.strings.saved + '</p>' );
+  //     $( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
   //   }).error( function (r) {
-  //     var message = WPDS.strings.error;
+  //     var message = DataSync.strings.error;
   //     if( r.hasOwnProperty( 'message' ) ){
   //       message = r.message;
   //     }
@@ -50,15 +50,15 @@ jQuery(function($) {
 
       $.ajax({
         method: 'POST',
-        url: WPDS.api.url,
+        url: DataSync.api.url,
         beforeSend: function ( xhr ) {
-          xhr.setRequestHeader('X-WP-Nonce', WPDS.api.nonce);
+          xhr.setRequestHeader('X-WP-Nonce', DataSync.api.nonce);
         },
         data:data
       }).then( function (r) {
-        $( '#feedback' ).html( '<p>' + WPDS.strings.saved + '</p>' );
+        $( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
       }).error( function (r) {
-        var message = WPDS.strings.error;
+        var message = DataSync.strings.error;
         if( r.hasOwnProperty( 'message' ) ){
           message = r.message;
         }

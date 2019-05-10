@@ -56,7 +56,7 @@ let sassConfig = {
   indentWidth: 1
 };
 
-mix.sass( `${devPath}/sass/wp-data-sync.scss`, 'styles', sassConfig );
+mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
 
 /*
  * Compile JavaScript.

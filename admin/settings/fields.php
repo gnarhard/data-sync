@@ -1,22 +1,16 @@
-<?php
+<?php namespace DataSync;
 
-use WPDataSync\Auth as Auth;
+use WP_User_Query;
 
 function display_source_input() {
-	$source = get_option( 'source_site' ); ?>
-
+	$source = get_option( 'source_site' );?>
+	<input type="radio" name="source_site" id="source_site" value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
 	<br>
-	<input type="radio" name="source_site" id="source_site"
-	       value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
-	<br>
-	<input type="radio" name="source_site" id="source_site" value="0" <?php checked( '0', get_option( 'source_site' ) );
-	if ( $source === false ) {
-		echo 'checked';
-	}
-	?>
-	/> Receiver
+	<input type="radio" name="source_site" id="source_site" value="0" <?php checked( '0', get_option( 'source_site' ) );?>/> Receiver
 
 	<?php
+
+  var_dump($source);
 }
 
 
@@ -50,7 +44,7 @@ function display_bulk_data_push_button() {
 
 
 function display_error_log() {
-  $error_log = file_get_contents(WP_DATA_SYNC_PATH . 'error.log');
+  $error_log = file_get_contents(DATA_SYNC_PATH . 'error.log');
   ?><textarea class="error_log" style="height: 500px; width: 100%;"><?php echo $error_log?></textarea><?php
 }
 

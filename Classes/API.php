@@ -1,18 +1,13 @@
 <?php namespace DataSync;
-//use DataSync\Settings as Settings;
 
 
 class API {
-
-	public function __construct() {
-
-	}
 
 	/**
 	 * Add routes
 	 */
 	public function addRoutes( ) {
-		register_rest_route( 'wpds-api/v1', '/settings',
+		register_rest_route( 'data-sync-api/v1', '/settings',
 			array(
 				'methods'         => 'POST',
 				'callback'        => array( $this, 'update_settings' ),
@@ -31,7 +26,7 @@ class API {
 				'permissions_callback' => array( $this, 'permissions' )
 			)
 		);
-		register_rest_route( 'wpds-api/v1', '/settings',
+		register_rest_route( 'data-sync-api/v1', '/settings',
 			array(
 				'methods'         => 'GET',
 				'callback'        => array( $this, 'get_settings' ),
@@ -54,10 +49,10 @@ class API {
 	 *
 	 * @param WP_REST_Request $request
 	 */
-	public function updateSettings( WP_REST_Request $request ){
+	public function update_settings( WP_REST_Request $request ){
 		$settings = array(
-			'industry' => $request->get_param( 'industry' ),
-			'amount' => $request->get_param( 'amount' )
+//			'industry' => $request->get_param( 'industry' ),
+//			'amount' => $request->get_param( 'amount' )
 		);
 		Settings::save($settings);
 		return rest_ensure_response( Settings::get())->set_status( 201 );

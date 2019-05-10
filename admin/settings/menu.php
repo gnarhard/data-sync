@@ -1,12 +1,11 @@
-<?php
-
-add_action( 'admin_menu', 'wp_data_sync_plugin_menu' );
-function wp_data_sync_plugin_menu() {
+<?php namespace DataSync;
+add_action( 'admin_menu', __NAMESPACE__ . '\plugin_menu' );
+function plugin_menu() {
 	add_options_page(
 		'WP Data Sync',
 		'WP Data Sync',
 		'manage_options',
-		'wp-data-sync-settings',
-		'wp_data_sync_settings'
+		'data-sync-settings',
+		__NAMESPACE__ . '\data_sync_settings'
 	);
 }

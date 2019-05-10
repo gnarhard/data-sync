@@ -1,7 +1,4 @@
-<?php
-
-
-namespace WPDataSync;
+<?php namespace DataSync;
 
 
 class Settings {
@@ -11,7 +8,7 @@ class Settings {
 	 *
 	 * @var string
 	 */
-	protected static $option_key = '_wpds_settings';
+	protected static $option_key = '';
 	/**
 	 * Default settings
 	 *
