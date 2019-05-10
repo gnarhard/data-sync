@@ -4,7 +4,12 @@ use WP_REST_Response;
 
 class API {
 
-	/**
+  public function __construct()
+  {
+    add_action('rest_api_init', [$this, 'add_routes'] );
+  }
+
+  /**
 	 * Add routes
 	 */
 	public function add_routes( ) {
@@ -27,15 +32,15 @@ class API {
 				'permissions_callback' => array( $this, 'permissions' )
 			)
 		);
-//		register_rest_route( 'data-sync-api/v1', '/settings',
-//			array(
-//				'methods'         => 'GET',
-//				'callback'        => array( $this, 'get_settings' ),
-//				'args'            => array(
-//				),
-//				'permissions_callback' => array( $this, 'permissions' )
-//			)
-//		);
+		register_rest_route( 'data-sync-api/v1', '/settings',
+			array(
+				'methods'         => 'GET',
+				'callback'        => array( $this, 'get_settings' ),
+				'args'            => array(
+				),
+				'permissions_callback' => array( $this, 'permissions' )
+			)
+		);
 	}
 	/**
 	 * Check request permissions
@@ -51,12 +56,8 @@ class API {
 	 * @param WP_REST_Request $request
 	 */
 	public function update_settings( WP_REST_Request $request ){
-		$settings = array(
-//			'industry' => $request->get_param( 'industry' ),
-//			'amount' => $request->get_param( 'amount' )
-		);
-		Settings::save($settings);
-		return rest_ensure_response( Settings::get())->set_status( 201 );
+		Settings::save($request->get_params());
+		return rest_ensure_response( Settings::get($request->get_params()))->set_status( 201 );
 	}
 	/**
 	 * Get settings via API

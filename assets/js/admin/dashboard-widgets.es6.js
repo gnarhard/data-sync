@@ -1,70 +1,29 @@
-jQuery(function($) {
+import AJAX from './AJAX.es6.js';
 
-  // $.ajax({
-  //   method: 'GET',
-  //   url: DataSync.api.url,
-  //   beforeSend: function ( xhr ) {
-  //     xhr.setRequestHeader( 'X-WP-Nonce', DataSync.api.nonce );
-  //   }
-  // }).then( function ( r ) {
-  //   if( r.hasOwnProperty( 'industry' ) ){
-  //     $( '#industry' ).val( r.industry );
-  //   }
-  //
-  //   if( r.hasOwnProperty( 'amount' ) ){
-  //     $( '#amount' ).val( r.amount );
-  //   }
-  // });
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById('save_push_enabled_post_types').onclick = function(e) {
+    e.preventDefault();
 
-  // $( '#apex-form' ).on( 'submit', function (e) {
-  //   e.preventDefault();
-  //   var data = {
-  //     amount: $( '#amount' ).val(),
-  //     industry: $( '#industry' ).val()
-  //   };
-  //
-  //   $.ajax({
-  //     method: 'POST',
-  //     url: DataSync.api.url,
-  //     beforeSend: function ( xhr ) {
-  //       xhr.setRequestHeader('X-WP-Nonce', DataSync.api.nonce);
-  //     },
-  //     data:data
-  //   }).then( function (r) {
-  //     $( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
-  //   }).error( function (r) {
-  //     var message = DataSync.strings.error;
-  //     if( r.hasOwnProperty( 'message' ) ){
-  //       message = r.message;
-  //     }
-  //     $( '#feedback' ).html( '<p>' + message + '</p>' );
-  //
-  //   })
-  // })
+    let data = {};
+    let input_name = document.getElementById('push_enabled_post_types').getAttribute('name').replace(/[^a-z0-9_]/gi,'');
+    // let input_name = document.getElementById('enabled_post_types').getAttribute('name');
+    data[input_name] = getSelectValues(document.getElementById('push_enabled_post_types'));
 
-  $(document).ready(function() {
-    $('#save_enabled_post_types').unbind().click(function(e) {
-      e.preventDefault();
-
-      data = $('#enabled_post_types').val();
-
-      $.ajax({
-        method: 'POST',
-        url: DataSync.api.url,
-        beforeSend: function ( xhr ) {
-          xhr.setRequestHeader('X-WP-Nonce', DataSync.api.nonce);
-        },
-        data:data
-      }).then( function (r) {
-        $( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
-      }).error( function (r) {
-        var message = DataSync.strings.error;
-        if( r.hasOwnProperty( 'message' ) ){
-          message = r.message;
-        }
-        $( '#feedback' ).html( '<p>' + message + '</p>' );
-
-      })
-    });
-  });
+    AJAX.post(data);
+  }
 });
+
+function getSelectValues(select) {
+  var result = [];
+  var options = select && select.options;
+  var opt;
+
+  for (var i=0, iLen=options.length; i<iLen; i++) {
+    opt = options[i];
+
+    if (opt.selected) {
+      result.push(opt.value || opt.text);
+    }
+  }
+  return result;
+}

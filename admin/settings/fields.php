@@ -85,6 +85,7 @@ function display_connected_sites() {
       <tr><td><button id="add_site">Add Site</button></td></tr>
     </tbody>
   </table>
+  <input type="hidden" name="connected_sites[]" value="<?php echo $connectedSites?>" />
   <?php
 
   display_modal();

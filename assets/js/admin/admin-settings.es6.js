@@ -1,3 +1,5 @@
+import AJAX from './AJAX.es6.js';
+
 jQuery(function($) {
 
   $(document).ready(function() {
@@ -13,28 +15,16 @@ jQuery(function($) {
       $('#submit_site').unbind().click(function(e) {
         e.preventDefault();
 
-        data['name'] = $('#name').val();
-        data['url'] = $('#url').val();
-        data['token'] = $('#token').val();
-        data['date_connected'] = new Date().toLocaleString();
+        let data = {};
+        data.connected_sites = [];
+        data.connected_sites[0] = {};
+        data.connected_sites[0].name = $('#name').val();
+        data.connected_sites[0].url = $('#url').val();
+        data.connected_sites[0].token = $('#token').val();
+        data.connected_sites[0].date_connected = new Date().toLocaleString();
+        console.log(data);
 
-        $.ajax({
-          method: 'POST',
-          url: DataSync.api.url,
-          beforeSend: function ( xhr ) {
-            xhr.setRequestHeader('X-WP-Nonce', DataSync.api.nonce);
-          },
-          data:data
-        }).then( function (r) {
-          $( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
-        }).error( function (r) {
-          var message = DataSync.strings.error;
-          if( r.hasOwnProperty( 'message' ) ){
-            message = r.message;
-          }
-          $( '#feedback' ).html( '<p>' + message + '</p>' );
-
-        })
+        AJAX.post(data);
 
       });
 
