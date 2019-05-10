@@ -29,9 +29,13 @@ if ( ! function_exists( 'add_filter' ) ) {
   exit();
 }
 
-if ( ! defined( 'WP_DATA_SYNDICATOR_PATH' ) ) {
-  define( 'WP_DATA_SYNDICATOR_PATH', plugin_dir_path( __FILE__ ) );
+if ( ! defined( 'WP_DATA_SYNC_PATH' ) ) {
+  define( 'WP_DATA_SYNC_PATH', plugin_dir_path( __FILE__ ) );
+}
+
+if ( ! defined( 'WP_DATA_SYNC_URL' ) ) {
+	define( 'WP_DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
 }
 
 // Load the plugin files.
-require_once (WP_DATA_SYNDICATOR_PATH . 'includes/load.php');
+require_once (WP_DATA_SYNC_PATH . 'includes/load.php');

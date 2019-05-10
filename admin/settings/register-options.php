@@ -54,14 +54,27 @@ function add_wp_data_sync_options() {
 	register_setting( "wp_data_sync_receiver_settings", "notified_users" );
 
 	/// POST TYPES TO ACCEPT
-	add_settings_field( "post_types_to_accept", "Notified Users", "display_post_types_to_accept", 'wp-data-sync-settings', "wp_data_sync_receiver_settings" );
-	register_setting( "wp_data_sync_receiver_settings", "post_types_to_accept" );
+	register_setting( "wp_data_sync_receiver_settings", "enabled_post_types");
+	add_settings_field(
+		'enabled_post_types', // id
+		'Enabled Post Types', // title
+		'display_post_types_to_accept', // callback
+		'wp-data-sync-settings', // page
+		'wp_data_sync_receiver_settings' // section
+	);
 
 	// POST TYPE PERMISSIONS
-	// Specify whether receiver site can create new posts in that CPT.  (blog, yes)
-	// Specify whether receiver site can create new taxonomy terms  (blog, yes)
-	// Editable post content, tags, custom fields
-	// ONLY able to edit status
+	$enabledPostTypes = get_option('enabled_post_types');
+	if (count($enabledPostTypes) > 0) {
+		foreach($enabledPostTypes as $post_type) {
+
+			$post_type_object = get_post_type_object( $post_type );
+
+			add_settings_field( $post_type_object->name."_perms", $post_type_object->label . " Permissions", "display_post_type_permissions_settings", 'wp-data-sync-settings', "wp_data_sync_receiver_settings", array($post_type_object) );
+			register_setting( "wp_data_sync_receiver_settings", $post_type_object->name."_perms");
+
+		}
+	}
 
 
 	// PULL DATA BUTTON

@@ -50,7 +50,7 @@ function display_bulk_data_push_button() {
 
 
 function display_error_log() {
-  $error_log = file_get_contents(WP_DATA_SYNDICATOR_PATH . 'error.log');
+  $error_log = file_get_contents(WP_DATA_SYNC_PATH . 'error.log');
   ?><textarea class="error_log" style="height: 500px; width: 100%;"><?php echo $error_log?></textarea><?php
 }
 
@@ -79,40 +79,58 @@ function display_notified_users() {
 	) );  // query to get admin users
 
 	$users = $users_query->get_results();
-	$i=0;
 
-	?><select name="notified_users[]" multiple style="width: 200px;"><?php
+	?><select name="notified_users[]" multiple><?php
 
 	foreach ($users as $user) {
-      ?><option value="<?php echo $user->id?>" ><?php echo $user->user_nicename?></option><?php
+
+      ?><option value="<?php echo $user->id?>" <?php selected( in_array($user->id, get_option( 'notified_users' )) );?>><?php echo $user->user_nicename?></option><?php
   }
 
 	?></select><?php
-	var_dump(get_option('notified_users'));
 }
 
-//selected( get_option( 'notified_users' ), $user->id );
+
 
 
 function display_post_types_to_accept() {
 
-	$registered_post_types = get_post_types();
+	$args = array(
+		'public'   => true,
+//            '_builtin' => false
+	);
+	$output = 'names'; // names or objects, note names is the default
+	$operator = 'and'; // 'and' or 'or'
 
-	?><select name="post_types_to_accept[]" multiple style="width: 200px;"><?php
+	$registered_post_types = get_post_types($args, $output, $operator);
+
+	?><select name="enabled_post_types[]" multiple id="enabled_post_types"><?php
 
 	foreach ($registered_post_types as $key => $post_type) {
-		?><option value="<?php echo $key?>" ><?php echo $post_type?></option><?php
+
+	  $post_type_object = get_post_type_object( $post_type );
+		?><option value="<?php echo $post_type_object->name?>" <?php selected( in_array($post_type_object->name, get_option( 'enabled_post_types' )) );?>><?php echo $post_type_object->label?></option><?php
+
 	}
 
 	?></select><?php
 
-	var_dump(get_option('post_types_to_accept'));
 
 }
 
 
 
-function display_post_types_permissions() {
+function display_post_type_permissions_settings($post_type_object) {
+
+	$post_type_object = $post_type_object[0];
+  ?>
+    <select name="<?php echo $post_type_object->name . '_perms[]'?>" multiple>
+  <option value="create_posts" <?php selected( in_array('create_posts', get_option( $post_type_object->name . '_perms' )) ); ?>>Create Posts<br>
+  <option value="create_terms" <?php selected( in_array('create_terms', get_option( $post_type_object->name . '_perms' )) ); ?>>Create Terms<br>
+  <option value="edit_content" <?php selected( in_array('edit_content', get_option( $post_type_object->name . '_perms' )) ); ?>>Edit Content<br>
+  <option value="edit_status" <?php selected( in_array('edit_status', get_option( $post_type_object->name . '_perms' )) ); ?>> Edit Status & Visibility<br>
+    </select>
+  <?php
 
 }
 
