@@ -1,12 +1,13 @@
 <?php namespace DataSync;
-
+use WP_REST_Request;
+use WP_REST_Response;
 
 class API {
 
 	/**
 	 * Add routes
 	 */
-	public function addRoutes( ) {
+	public function add_routes( ) {
 		register_rest_route( 'data-sync-api/v1', '/settings',
 			array(
 				'methods'         => 'POST',
@@ -26,15 +27,15 @@ class API {
 				'permissions_callback' => array( $this, 'permissions' )
 			)
 		);
-		register_rest_route( 'data-sync-api/v1', '/settings',
-			array(
-				'methods'         => 'GET',
-				'callback'        => array( $this, 'get_settings' ),
-				'args'            => array(
-				),
-				'permissions_callback' => array( $this, 'permissions' )
-			)
-		);
+//		register_rest_route( 'data-sync-api/v1', '/settings',
+//			array(
+//				'methods'         => 'GET',
+//				'callback'        => array( $this, 'get_settings' ),
+//				'args'            => array(
+//				),
+//				'permissions_callback' => array( $this, 'permissions' )
+//			)
+//		);
 	}
 	/**
 	 * Check request permissions

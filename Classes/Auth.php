@@ -1,8 +1,4 @@
-<?php
-
-
-namespace WPDataSync;
-
+<?php namespace DataSync;
 
 class Auth {
 

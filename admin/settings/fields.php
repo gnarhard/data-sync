@@ -9,8 +9,6 @@ function display_source_input() {
 	<input type="radio" name="source_site" id="source_site" value="0" <?php checked( '0', get_option( 'source_site' ) );?>/> Receiver
 
 	<?php
-
-  var_dump($source);
 }
 
 
@@ -23,17 +21,27 @@ function display_push_template_button() {
 
 
 function display_push_enabled_post_types() {
-	$registered_post_types = get_post_types();
 
-	?><select name="push_enabled_post_types[]" multiple style="width: 200px; height: 300px"><?php
+  $args = array(
+      'public'   => true,
+//            '_builtin' => false
+  );
+  $output = 'names'; // names or objects, note names is the default
+  $operator = 'and'; // 'and' or 'or'
 
-	foreach ($registered_post_types as $key => $post_type) {
-		?><option value="<?php echo $key?>" ><?php echo $post_type?></option><?php
-	}
+  $registered_post_types = get_post_types($args, $output, $operator);
 
-	?></select><?php
+  ?><select name="push_enabled_post_types[]" multiple id="push_enabled_post_types"><?php
 
-	var_dump(get_option('push_enabled_post_types'));
+  foreach ($registered_post_types as $key => $post_type) {
+
+    $post_type_object = get_post_type_object( $post_type );
+    ?><option value="<?php echo $post_type_object->name?>" <?php selected( in_array($post_type_object->name, get_option( 'push_enabled_post_types' )) );?>><?php echo $post_type_object->label?></option><?php
+
+  }
+
+  ?></select><?php
+
 }
 
 
@@ -50,17 +58,86 @@ function display_error_log() {
 
 
 
-function display_token() {
+function display_connected_sites() {
+
+  // blogname, Site ID, URL, date connected, remove button, connect new
+  $connectedSites = get_option('connected_sites');
+  ?>
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>URL</th>
+      <th>Date Connected</th>
+      <th></th>
+    </tr>
+    </thead>
+
+    <tbody>
+      <?php
+      if (is_array($connectedSites)) {
+        foreach($connectedSites as $site) {
+
+        }
+      }
+      ?>
+      <tr><td><button id="add_site">Add Site</button></td></tr>
+    </tbody>
+  </table>
+  <?php
+
+  display_modal();
+
+}
+
+function display_modal() {
+  ?>
+    <div class="lightbox_wrap">
+      <div class="add_site_modal">
+        <a id="close">X</a>
+        <h2>Add New Site</h2>
+        <form>
+          <div class="input_wrap">
+            <label for="name">Site Name</label>
+            <input type="text" name="name" value="" id="name"/>
+          </div>
+
+          <div class="input_wrap">
+            <label for="url">Site URL</label>
+            <input type="text" name="url" value="" id="url"/>
+          </div>
+
+          <div class="input_wrap">
+            <label for="token">Reciever Security Token</label>
+            <textarea name="token" id="token"></textarea>
+          </div>
+
+          <p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary" value="Add Site"></p>
+        </form>
+      </div>
+    </div>
+  <?php
+
+}
+
+
+
+function display_token_receiver() {
+
+  ?><label for="security_token_receiver">Copy and paste this into your source site's security token field:</label><br><?php
+
 	// UNIQUE SITE TOKEN (public key)
-	if (get_option('public_key') === false) {
+	if (get_option('security_token_receiver') === false) {
 		$auth = new Auth();
+		$auth->setKeys();
 		$publicKey = $auth->getPublicKey();
 		?>
-		<textarea name="public_key" id="public_key"><?php echo $publicKey;?></textarea>
+		<textarea name="security_token_receiver" id="security_token_receiver"><?php echo $publicKey;?></textarea>
 		<?php
 	} else {
 		?>
-		<textarea name="public_key" id="public_key"><?php echo get_option('public_key');?></textarea>
+		<textarea name="security_token_receiver" id="public_key"><?php echo get_option('security_token_receiver');?></textarea>
 		<?php
 	}
 }
@@ -68,7 +145,7 @@ function display_token() {
 function display_notified_users() {
 
 	$users_query = new WP_User_Query( array(
-		'role' => 'administrator',
+//		'role' => 'administrator',
 		'orderby' => 'display_name'
 	) );  // query to get admin users
 

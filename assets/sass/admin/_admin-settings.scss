@@ -1,3 +1,67 @@
-select {
-  width: 400px;
+.settings_page_data-sync-settings {
+  select, textarea {
+    width: 400px;
+  }
+
+  textarea {
+    height: 300px;
+  }
+
+  .lightbox_wrap {
+    display: none;
+    background: rgba(0,0,0,.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+
+    .add_site_modal {
+      max-width: 500px;
+      height: 600px;
+      position: relative;
+      margin: 100px auto 0 auto;
+      background: white;
+      border-radius: 2px;
+      padding: 10px;
+      box-shadow: 1px 1px 4px black;
+
+      h2 {
+        text-align: center;
+      }
+
+      #close {
+        float: right;
+        cursor: pointer;
+      }
+
+      .input_wrap {
+        width: 100%;
+        display: block;
+        clear: both;
+
+        input, textarea {
+          float: right;
+        }
+
+        textarea {
+          width: 100%;
+          float: none;
+        }
+      }
+
+      .submit {
+        width: 50px;
+        display: block;
+        clear: both;
+        margin: 40px auto;
+      }
+    }
+  }
+
+  .display {
+    display: block;
+  }
+
 }

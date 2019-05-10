@@ -1,7 +1,7 @@
 <?php
 
 
-namespace WPDataSync;
+namespace DataSync;
 
 
 class Consolidate

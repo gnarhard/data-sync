@@ -8,5 +8,5 @@ require_once 'enqueue.php';
 require_once (DATA_SYNC_PATH. 'admin/admin-require.php');
 
 $api = new API();
-//$api->addRoutes();
+//$api->add_routes();
 //new Settings();

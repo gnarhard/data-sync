@@ -22,27 +22,33 @@ function add_options() {
 
 
     // Connected Sites
-    // blogname, Site ID, URL, date connected, remove button, connect new
+    add_settings_field( "connected_sites", "Connected Sites", __NAMESPACE__ . "\display_connected_sites", 'data-sync-settings', "data_sync_settings" );
+    register_setting( "data_sync_settings", "connected_sites" );
 
     // Push new template file - cpt-templates.php
     add_settings_field( "push_template", "Push Template to Receivers", __NAMESPACE__ . "\display_push_template_button", 'data-sync-settings', "data_sync_settings" );
 
-    // Select which Post Types syndicate to which Receiver sites.
-    add_settings_field( "push_enabled_post_types", "Push-Enabled Post Types", __NAMESPACE__ . "\display_push_enabled_post_types", 'data-sync-settings', "data_sync_settings" );
-    register_setting( "data_sync_settings", "display_post_types_with_push_perm" );
-
     //	A “manual re-push” function will allow content to be selected at the Source and re-pushed to all receiving sites.  This is necessary to push out bulk uploaded / updated content.
     add_settings_field( "bulk_data_push", "Push All Data to Receivers", __NAMESPACE__ . "\display_bulk_data_push_button", 'data-sync-settings', "data_sync_settings" );
 
+    // Select which Post Types syndicate to which Receiver sites.
+    add_settings_field( "push_enabled_post_types", "Push-Enabled Post Types", __NAMESPACE__ . "\display_push_enabled_post_types", 'data-sync-settings', "data_sync_settings" );
+    register_setting( "data_sync_settings", "push_enabled_post_types" );
+
+
+
     // Error log
     add_settings_field( "error_log", "Error Log", __NAMESPACE__ . "\display_error_log", 'data-sync-settings', "data_sync_settings" );
+
+
+
   } else if ($source === '0') {
 
     /////////// RECEIVER ///////////////////////////////
 
     // SECURITY TOKEN
-//	add_settings_field( "security_token", "Security Token", "display_token", 'data-sync-settings', "data_sync_settings" );
-//	register_setting( "data_sync_settings", "security_token" );
+    add_settings_field( "security_token_receiver", "Security Token", __NAMESPACE__ . "\display_token_receiver", 'data-sync-settings', "data_sync_settings" );
+    register_setting( "data_sync_settings", "security_token_receiver" );
 
     /// NOTIFIED USERS
     add_settings_field( "notified_users", "Notified Users", __NAMESPACE__ . "\display_notified_users", 'data-sync-settings', "data_sync_settings" );
