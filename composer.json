@@ -5,8 +5,5 @@
     "psr-4": {
       "DataSync\\": "./Classes/"
     }
-  },
-  "require": {
-    "firebase/php-jwt": "^5.0"
   }
 }

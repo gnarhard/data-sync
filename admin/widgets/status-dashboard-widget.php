@@ -1,6 +1,6 @@
-<?php
+<?php namespace DataSync;
 
-function wp_data_sync_status_widget() {
+function status_widget() {
 	?>
 	<table>
 		<thead>

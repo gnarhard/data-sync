@@ -1,6 +1,6 @@
-<?php
+<?php namespace DataSync;
 
-function wp_data_sync_enabled_post_types_widget() {
+function enabled_post_types_widget() {
 
 	$args = array(
 		'public'   => true,
