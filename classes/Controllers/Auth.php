@@ -3,7 +3,6 @@
 
 namespace DataSync\Controllers;
 
-
 use Exception;
 
 class Auth {

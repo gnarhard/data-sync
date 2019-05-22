@@ -17,7 +17,7 @@ jQuery( function ( $ ) {
             $( '#submit_site' ).unbind().click( function ( e ) {
                 e.preventDefault();
 
-                AJAX.get( 'connected_sites' ).then(function( response ) {
+                AJAX.get( DataSync.api.url + '/connected_sites' ).then(function( response ) {
 
                     let data = {};
 
@@ -40,7 +40,7 @@ jQuery( function ( $ ) {
 
                     }
 
-                    AJAX.post( data );
+                    AJAX.post( DataSync.api.url + '/connected_sites', data );
 
                     $( '.settings_page_data-sync-settings .lightbox_wrap' ).removeClass( 'display' );
                 });

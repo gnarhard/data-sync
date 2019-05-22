@@ -3,7 +3,6 @@
 
 namespace DataSync\Controllers;
 
-use DataSync\Routes;
 /**
  * Class Enqueue
  * @package DataSync
@@ -21,7 +20,7 @@ class Enqueue {
 	/**
 	 * Enqueues scripts
 	 */
-	private function scripts() {
+	public function scripts() {
 		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', false, 1, true );
 		wp_localize_script(
 			'data-sync-admin',
@@ -32,7 +31,7 @@ class Enqueue {
 					'error' => __( 'Error', 'text-domain' ),
 				),
 				'api'     => array(
-					'url'   => esc_url_raw( rest_url( Routes::$namespace ) ),
+					'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
 					'nonce' => wp_create_nonce( 'wp_rest' ),
 				),
 			)
@@ -43,7 +42,7 @@ class Enqueue {
 	/**
 	 * Enqueues styles
 	 */
-	private function styles() {
+	public function styles() {
 		wp_register_style( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1 );
 		wp_enqueue_style( 'data-sync-admin' );
 	}

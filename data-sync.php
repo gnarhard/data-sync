@@ -2,7 +2,8 @@
 
 namespace DataSync;
 
-use DataSync\Routes;
+use DataSync\Controllers\Enqueue;
+use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
 
 /**
@@ -35,7 +36,7 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
-
+register_activation_hook( __FILE__, 'flush_rewrite_rules' );
 
 /**
  * @param $links
@@ -64,11 +65,15 @@ if ( ! defined( 'DATA_SYNC_BASENAME' ) ) {
 	define( 'DATA_SYNC_BASENAME', 'data-sync' );
 }
 
+if ( ! defined( 'DATA_SYNC_API_BASE_URL' ) ) {
+	define( 'DATA_SYNC_API_BASE_URL', 'data-sync/v1' );
+}
+
 // Load the plugin classes.
 if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 	require_once DATA_SYNC_PATH . 'vendor/autoload.php';
 }
 
-
+new Enqueue();
 new Options();
-new Routes();
+new ConnectedSites();

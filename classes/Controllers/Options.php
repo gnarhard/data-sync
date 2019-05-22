@@ -2,6 +2,8 @@
 
 namespace DataSync\Controllers;
 
+use WP_REST_Server;
+
 /**
  * Class Options
  * @package DataSync\Controllers
@@ -41,6 +43,7 @@ class Options {
 		require_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
 		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		add_action( 'admin_init', [ $this, 'register' ] );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	/**
@@ -115,6 +118,57 @@ class Options {
 		);
 	}
 
+	public function register_routes() {
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/settings/(?P<setting>[a-zA-Z-_]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'setting' => array(
+							'description'       => 'Setting key',
+							'type'              => 'string',
+							'validate_callback' => function ( $param, $request, $key ) {
+								return true;
+							},
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'setting' => array(
+							'description'       => 'Setting key',
+							'type'              => 'string',
+							'validate_callback' => function ( $param, $request, $key ) {
+								return true;
+							},
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'setting' => array(
+							'description'       => 'Setting key',
+							'type'              => 'string',
+							'validate_callback' => function ( $param, $request, $key ) {
+								return true;
+							},
+						),
+					),
+				),
+			)
+		);
+	}
+
 	/**
 	 * Add sections and options to Data Sync WordPress admin settings page.
 	 * This also registers all options for updating.
@@ -130,7 +184,6 @@ class Options {
 		if ( '1' === $source ) :
 
 			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-settings', 'data_sync_settings' );
-//			register_setting( 'data_sync_settings', 'connected_sites' );
 
 			add_settings_field( 'push_template', 'Push Template to Receivers', $this->view_namespace . '\display_push_template_button', 'data-sync-settings', 'data_sync_settings' );
 

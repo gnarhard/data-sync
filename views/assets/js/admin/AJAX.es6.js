@@ -1,8 +1,8 @@
 class AJAX {
 
-    static async post( data ) {
+    static async post( url, data ) {
 
-        const response = await fetch( DataSync.api.url, {
+        const response = await fetch( url, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -18,8 +18,8 @@ class AJAX {
 
     }
 
-    static async get( setting ) {
-        let response = await fetch( DataSync.api.url + '/' + setting, {
+    static async get( url ) {
+        let response = await fetch( url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
