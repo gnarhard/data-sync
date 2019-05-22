@@ -1,34 +1,61 @@
 import AJAX from './AJAX.es6.js';
 
-jQuery(function($) {
+jQuery( function ( $ ) {
 
-  $(document).ready(function() {
-    $('#add_site').unbind().click(function(e) {
-      e.preventDefault();
+    $( document ).ready( function () {
 
-      $('.settings_page_data-sync-settings .lightbox_wrap').addClass('display');
+        // ADD SITE
+        $( '#add_site' ).unbind().click( function ( e ) {
+            e.preventDefault();
 
-      $('#close').unbind().click(function() {
-        $('.settings_page_data-sync-settings .lightbox_wrap').removeClass('display');
-      });
+            $( '.settings_page_data-sync-settings .lightbox_wrap' ).addClass( 'display' );
 
-      $('#submit_site').unbind().click(function(e) {
-        e.preventDefault();
+            $( '#close' ).unbind().click( function () {
+                $( '.settings_page_data-sync-settings .lightbox_wrap' ).removeClass( 'display' );
+            } );
 
-        let data = {};
-        data.connected_sites = [];
-        data.connected_sites[0] = {};
-        data.connected_sites[0].name = $('#name').val();
-        data.connected_sites[0].url = $('#url').val();
-        data.connected_sites[0].token = $('#token').val();
-        data.connected_sites[0].date_connected = new Date().toLocaleString();
-        console.log(data);
+            $( '#submit_site' ).unbind().click( function ( e ) {
+                e.preventDefault();
 
-        AJAX.post(data);
+                AJAX.get( 'connected_sites' ).then(function( response ) {
 
-      });
+                    let data = {};
+
+                    if ( response.length ) {
+
+                        data.connected_sites = response;
+                        data.connected_sites.push({
+                            name: $( '#name' ).val(),
+                            url: $( '#url' ).val(),
+                            date_connected: new Date().toLocaleString()
+                        });
+
+                    } else {
+
+                        data.connected_sites = [];
+                        data.connected_sites[0] = {};
+                        data.connected_sites[0].name = $( '#site_name' ).val();
+                        data.connected_sites[0].url = $( '#site_url' ).val();
+                        data.connected_sites[0].date_connected = new Date().toLocaleString();
+
+                    }
+
+                    AJAX.post( data );
+
+                    $( '.settings_page_data-sync-settings .lightbox_wrap' ).removeClass( 'display' );
+                });
 
 
-    });
-  });
-});
+
+            } );
+
+
+        } );
+
+        $( '.remove_site' ).unbind().click( function ( e ) {
+            let site_id = parseInt($(this).parent().attr('id').split('site-')[1]);
+            console.log(site_id);
+        });
+
+    } );
+} );

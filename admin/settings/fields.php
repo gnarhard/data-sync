@@ -84,21 +84,32 @@ function display_connected_sites() {
 	// blogname, Site ID, URL, date connected, remove button, connect new.
 	$connected_sites = get_option( 'connected_sites' );
 	?>
-	<table>
+	<table id="connected_sites">
 		<thead>
 		<tr>
 			<th>ID</th>
 			<th>Name</th>
 			<th>URL</th>
 			<th>Date Connected</th>
-			<th></th>
+			<th>Remove</th>
 		</tr>
 		</thead>
 
 		<tbody>
 		<?php
 		if ( is_array( $connected_sites ) ) {
+			$i=0;
 			foreach ( $connected_sites as $site ) {
+				?>
+				<tr>
+					<td id="id"><?php echo esc_html( $i ); ?></td>
+					<td id="name"><?php echo esc_html( $site['name'] ); ?></td>
+					<td id="url"><?php echo esc_html( $site['url'] ); ?></td>
+					<td id="date_connected"><?php echo esc_html( $site['date_connected'] ); ?></td>
+					<td id="site-<?php echo esc_html( $i ); ?>"><span class="dashicons dashicons-trash remove_site"></span></td>
+				</tr>
+				<?php
+				$i++;
 			}
 		}
 		?>
@@ -127,12 +138,12 @@ function display_modal() {
 			<form>
 				<div class="input_wrap">
 					<label for="name">Site Name</label>
-					<input type="text" name="name" value="" id="name"/>
+					<input type="text" name="name" value="" id="site_name"/>
 				</div>
 
 				<div class="input_wrap">
 					<label for="url">Site URL</label>
-					<input type="text" name="url" value="" id="url"/>
+					<input type="text" name="url" value="" id="site_url"/>
 				</div>
 
 				<p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary" value="Add Site"></p>

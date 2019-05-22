@@ -5,6 +5,7 @@
  */
 function data_sync_settings() {
 	?>
+	<div id="feedback"></div>
 	<div class="wrap">
 		<h2>Data Sync Settings</h2>
 		<form method="POST" action="options.php">

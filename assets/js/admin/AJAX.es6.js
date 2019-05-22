@@ -1,42 +1,34 @@
 class AJAX {
 
-  constructor() {
+    static async post( data ) {
 
-  }
+        const response = await fetch( DataSync.api.url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': DataSync.api.nonce
+            },
+            body: JSON.stringify( data )
+        } );
+        let result = await response.json();
+        console.log(result);
 
-  static async post(data) {
+        jQuery( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
 
-    console.log('hi');
-    const rawResponse = await fetch(DataSync.api.url, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': DataSync.api.nonce
-      },
-      body: JSON.stringify(data)
-    });
-    const content = await rawResponse;
+    }
 
-    jQuery('#feedback').html('<p>' + DataSync.strings.saved + '</p>');
-    console.log(content);
-
-  }
-
-  static async get(url) {
-    const rawResponse = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': DataSync.api.nonce
-      }
-    });
-    const content = await rawResponse;
-
-    jQuery('#feedback').html('<p>' + DataSync.strings.saved + '</p>');
-    console.log(content);
-  }
+    static async get( setting ) {
+        let response = await fetch( DataSync.api.url + '/' + setting, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': DataSync.api.nonce
+            },
+        } );
+        return await response.json();
+    }
 
 
 }

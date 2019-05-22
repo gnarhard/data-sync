@@ -1,5 +1,6 @@
 <?php namespace DataSync;
 
+use DataSync\Error as Error;
 
 class Settings {
 
@@ -27,16 +28,21 @@ class Settings {
 	 * @param array $settings
 	 * @return array
 	 */
-	public static function get($settings){
+	public static function get( $settings ){
 
-    foreach ( $settings as $key => $value){
-      $saved = get_option( $key, array() );
-//      if( ! is_array( $saved ) || ! empty( $saved )){
-//        return self::$defaults;
-//      }
-    }
+		if ( is_array( $settings ) ) {
+			foreach ( $settings as $key => $value ) {
+				$saved = get_option( $key, array() );
+			}
+		} else {
+			$saved = get_option( $settings, array() );
+		}
 
 		return wp_parse_args( $saved );
+	}
+
+	public static function get_connected_sites() {
+
 	}
 
 	/**
@@ -45,10 +51,15 @@ class Settings {
 	 *
 	 * @param array $settings
 	 */
-	public static function save( array  $settings ){
-		//remove any non-allowed indexes before save
-		foreach ( $settings as $key => $value){
-      update_option( $key, $value );
+	public static function save_options( array $settings ) {
+		foreach ( $settings as $key => $value ) {
+			$success = update_option( $key, $value );
+
+			if ( $success ) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 

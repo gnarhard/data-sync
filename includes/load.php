@@ -9,8 +9,8 @@ require_once DATA_SYNC_PATH . 'admin/admin-require.php';
 
 
 add_action( 'admin_init', __NAMESPACE__ . '\ensure_admin_functionality' );
+new API();
 function ensure_admin_functionality() {
-	$api = new API();
-	$api->sync();
+	new API();
 }
 
