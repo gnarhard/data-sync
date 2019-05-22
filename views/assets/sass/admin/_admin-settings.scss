@@ -19,7 +19,6 @@
 
     .add_site_modal {
       max-width: 500px;
-      height: 600px;
       position: relative;
       margin: 100px auto 0 auto;
       background: white;
@@ -43,6 +42,7 @@
 
         input, textarea {
           float: right;
+          width: 75%;
         }
 
         textarea {

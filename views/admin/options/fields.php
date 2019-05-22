@@ -1,7 +1,7 @@
 <?php namespace DataSync;
 
 use WP_User_Query;
-use DataSync\Error as Error;
+use classes\Error as Error;
 
 /**
  *

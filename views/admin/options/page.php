@@ -3,7 +3,7 @@
 /**
  * Outputs HTML for settings page
  */
-function data_sync_settings() {
+function data_sync_options_page() {
 	?>
 	<div id="feedback"></div>
 	<div class="wrap">

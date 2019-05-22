@@ -52,7 +52,7 @@ class Routes {
 
 		register_rest_route(
 			$this->namespace,
-			'/settings/connected_sites',
+			'/connected_sites',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( 'ConnectedSites', 'get' ),

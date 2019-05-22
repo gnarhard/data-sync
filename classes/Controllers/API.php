@@ -2,7 +2,7 @@
 
 use WP_REST_Request;
 use Exception;
-use DataSync\Error as Error;
+use classes\Error as Error;
 use Routes;
 
 //use WP_REST_Response;
@@ -47,14 +47,6 @@ class API {
 		$setting     = $parameters[ $setting_key[0] ];
 
 		return rest_ensure_response( Settings::get( $setting ) );
-	}
-
-	public function get_connected_sites( WP_REST_Request $request ) {
-		return Settings::get_connected_sites();
-	}
-
-	public function save_connected_sites( WP_REST_Request $request ) {
-		return Settings::save_connected_sites();
 	}
 
 	/**

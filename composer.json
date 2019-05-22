@@ -1,12 +1,9 @@
 {
-  "name": "wp-data-sync",
+  "name": "copper-leaf-creative/data-sync",
   "version": "1.0.0",
   "autoload": {
     "psr-4": {
-      "DataSync\\": "./Classes/"
+      "DataSync\\": "./classes/"
     }
-  },
-  "require": {
-    "symfony/stopwatch": "4.3.x-dev"
   }
 }
