@@ -3,6 +3,7 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Routes;
 /**
  * Class Enqueue
  * @package DataSync
@@ -31,7 +32,7 @@ class Enqueue {
 					'error' => __( 'Error', 'text-domain' ),
 				),
 				'api'     => array(
-					'url'   => esc_url_raw( rest_url( 'data-sync-api/v1/settings' ) ),
+					'url'   => esc_url_raw( rest_url( Routes::$namespace ) ),
 					'nonce' => wp_create_nonce( 'wp_rest' ),
 				),
 			)

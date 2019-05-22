@@ -1,4 +1,9 @@
-<?php namespace DataSync;
+<?php
+
+namespace DataSync;
+
+use DataSync\Routes;
+use DataSync\Controllers\Options;
 
 /**
  * Plugin Name: Data Sync
@@ -30,6 +35,23 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
+
+
+/**
+ * @param $links
+ *
+ * Adds Settings link to the plugin on the plugin page
+ * @return array
+ */
+function add_settings_link( $links ) {
+	$my_links = array(
+		'<a href="' . admin_url( 'options-general.php?page=data-sync-settings' ) . '">Settings</a>',
+	);
+
+	return array_merge( $links, $my_links );
+}
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), __NAMESPACE__ . '\add_settings_link' );
+
 if ( ! defined( 'DATA_SYNC_PATH' ) ) {
 	define( 'DATA_SYNC_PATH', plugin_dir_path( __FILE__ ) );
 }
@@ -38,14 +60,15 @@ if ( ! defined( 'DATA_SYNC_URL' ) ) {
 	define( 'DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
 }
 
+if ( ! defined( 'DATA_SYNC_BASENAME' ) ) {
+	define( 'DATA_SYNC_BASENAME', 'data-sync' );
+}
+
 // Load the plugin classes.
 if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 	require_once DATA_SYNC_PATH . 'vendor/autoload.php';
 }
 
 
-add_action( 'admin_init', __NAMESPACE__ . '\ensure_admin_functionality' );
-
-function ensure_admin_functionality() {
-	new API();
-}
+new Options();
+new Routes();

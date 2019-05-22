@@ -11,13 +11,6 @@ class Auth {
 	/**
 	 * @var string
 	 *
-	 * Default prepended string for every endpoint
-	 */
-	public $namespace = 'data-sync-api/v1';
-
-	/**
-	 * @var string
-	 *
 	 * WordPress username for CORs authentication
 	 * MUST BE ON EVERY SITE
 	 */

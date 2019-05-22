@@ -12,7 +12,8 @@ function data_sync_options_page() {
 			<?php
 			settings_fields( 'data_sync_settings' );
 			do_settings_sections( 'data-sync-settings' );
-			submit_button(); ?>
+			submit_button();
+			?>
 		</form>
 	</div>
 	<?php
