@@ -6,6 +6,7 @@ namespace DataSync\Controllers;
 use WP_REST_Request;
 use DataSync\Models\ConnectedSite;
 use DataSync\Controllers\Error;
+use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 
@@ -42,7 +43,7 @@ class ConnectedSites {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
 						'id' => array(
 							'description'       => 'ID of connected_site',
@@ -80,17 +81,20 @@ class ConnectedSites {
 	}
 
 	public function get( WP_REST_Request $request ) {
+		print_r( $request );
 //		global $wpdb;
 //		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
 //		$id = $request;
 //		$wpdb->query( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $table_name, $id ) );
 	}
 
-	public function get_all() {
+	public static function get_all() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
 		$result = $wpdb->get_results( 'SELECT * FROM ' . $table_name );
-		return wp_parse_args( $result );
+		$response = new WP_REST_Response( $result );
+		$response->set_status( 201 );
+		return $response;
 	}
 
 	public function save( WP_REST_Request $request ) {

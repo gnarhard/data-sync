@@ -1,17 +1,17 @@
-.settings_page_data-sync-settings select,
-.settings_page_data-sync-settings textarea {
+.settings_page_data-sync-options select,
+.settings_page_data-sync-options textarea {
   width: 400px;
 }
 
-.settings_page_data-sync-settings textarea {
+.settings_page_data-sync-options textarea {
   height: 300px;
 }
 
-.settings_page_data-sync-settings .remove_site {
+.settings_page_data-sync-options .remove_site {
   cursor: pointer;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap {
+.settings_page_data-sync-options .lightbox_wrap {
   display: none;
   background: rgba(0, 0, 0, 0.5);
   position: absolute;
@@ -22,7 +22,7 @@
   height: 100%;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal {
   max-width: 500px;
   position: relative;
   margin: 100px auto 0 auto;
@@ -33,40 +33,40 @@
           box-shadow: 1px 1px 4px black;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal h2 {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal h2 {
   text-align: center;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal #close {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal #close {
   float: right;
   cursor: pointer;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap {
   width: 100%;
   display: block;
   clear: both;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap input,
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap textarea {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap input,
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap textarea {
   float: right;
   width: 75%;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap textarea {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap textarea {
   width: 100%;
   float: none;
 }
 
-.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .submit {
+.settings_page_data-sync-options .lightbox_wrap .add_site_modal .submit {
   width: 50px;
   display: block;
   clear: both;
   margin: 40px auto;
 }
 
-.settings_page_data-sync-settings .display {
+.settings_page_data-sync-options .display {
   display: block;
 }
 

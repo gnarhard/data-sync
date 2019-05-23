@@ -5,6 +5,7 @@ namespace DataSync;
 use DataSync\Controllers\Enqueue;
 use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
+use DataSync\Controllers\SourceData;
 use DataSync\Controllers\Widgets;
 
 /**
@@ -79,3 +80,4 @@ new Enqueue();
 new Options();
 new Widgets();
 new ConnectedSites();
+new SourceData();

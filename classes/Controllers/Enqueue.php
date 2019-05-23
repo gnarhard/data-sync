@@ -27,7 +27,7 @@ class Enqueue {
 			'DataSync',
 			array(
 				'strings' => array(
-					'saved' => __( 'Settings Saved', 'text-domain' ),
+					'saved' => __( 'Options Saved', 'text-domain' ),
 					'error' => __( 'Error', 'text-domain' ),
 				),
 				'api'     => array(

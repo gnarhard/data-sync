@@ -12,8 +12,8 @@ function data_sync_options_page() {
 		<h2>Data Sync Settings</h2>
 		<form method="POST" action="options.php">
 			<?php
-			settings_fields( 'data_sync_settings' );
-			do_settings_sections( 'data-sync-settings' );
+			settings_fields( 'data_sync_options' );
+			do_settings_sections( 'data-sync-options' );
 			submit_button();
 			$error = new Error();
 			?>

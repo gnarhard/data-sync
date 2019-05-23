@@ -22,7 +22,7 @@ function display_source_input() { ?>
  */
 function display_push_template_button() {
 	?>
-	<button id="push_template">Push</button>
+	<button id="push_template">Push Template</button>
 	<?php
 }
 
@@ -61,7 +61,7 @@ function display_push_enabled_post_types() {
  */
 function display_bulk_data_push_button() {
 	?>
-	<button id="bulk_data_push">Push</button>
+	<button id="bulk_data_push">Push Data</button>
 	<?php
 }
 
@@ -71,7 +71,7 @@ function display_bulk_data_push_button() {
  */
 function display_connected_sites() {
 	$connected_sites_obj = new ConnectedSites();
-	$connected_sites     = $connected_sites_obj->get_all();
+	$connected_sites     = $connected_sites_obj->get_all()->data;
 	?>
 	<table id="connected_sites">
 		<thead>
@@ -201,7 +201,7 @@ function display_post_types_to_accept() {
 /**
  * @param $post_type_object
  */
-function display_post_type_permissions_settings( $post_type_object ) {
+function display_post_type_permissions_options( $post_type_object ) {
 	$post_type_object = $post_type_object[0];
 	?>
 	<select name="<?php echo $post_type_object->name . '_perms[]'; ?>" multiple>

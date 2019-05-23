@@ -4,6 +4,7 @@ namespace DataSync\Controllers;
 
 use WP_REST_Server;
 use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * Class Options
@@ -16,19 +17,19 @@ use WP_REST_Request;
 class Options {
 
 	/**
-	 * Table prefix to save custom settings
+	 * Table prefix to save custom options
 	 *
 	 * @var string
 	 */
 	protected static $table_prefix = 'data_sync_';
 	/**
-	 * Option key to save settings
+	 * Option key to save options
 	 *
 	 * @var string
 	 */
-	protected static $option_key = 'setting';
+	protected static $option_key = 'option';
 	/**
-	 * Default settings
+	 * Default options
 	 *
 	 * @var array
 	 */
@@ -48,40 +49,50 @@ class Options {
 	}
 
 	/**
-	 * Get saved settings
+	 * Get saved options
 	 *
-	 * @param array $settings
+	 * @param array $options
 	 *
 	 * @return array
 	 */
-	public static function get( $settings ) {
+	public static function get( WP_REST_Request $request ) {
 
-//		$parameters  = $request->get_params();
-//		$setting_key = array_keys( $parameters );
-//		$setting     = $parameters[ $setting_key[0] ];
-//
-//		return rest_ensure_response( Settings::get( $setting ) );
-//
-//
-//
-//		if ( is_array( $settings ) ) {
-//			foreach ( $settings as $key => $value ) {
-//				$saved = get_option( $key, array() );
-//			}
-//		} else {
-//			$saved = get_option( $settings, array() );
-//		}
-//
-//		return wp_parse_args( $saved );
+		$key = $request->get_url_params()[ self::$option_key ];
 
+		if ( ! isset( $key ) ) {
+			return rest_ensure_response( $key );
+		}
+
+		$response = new WP_REST_Response( get_option( $key, array() ) );
+		$response->set_status( 201 );
+
+		return $response;
+	}
+
+	public static function get_all() {
+		$option_keys = array(
+			'push_enabled_post_types',
+		);
+
+		$options = array();
+
+		foreach ( $option_keys as $key ) {
+			$request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
+			$request->set_url_params( array( self::$option_key => $key ) );
+			$options[ $key ] = self::get( $request )->data;
+		}
+
+		$response = new WP_REST_Response( $options );
+		$response->set_status( 201 );
+		return $response;
 
 	}
 
 	/**
-	 * Save settings
+	 * Save options
 	 *
 	 *
-	 * @param array $settings
+	 * @param array $options
 	 */
 	public static function save( WP_REST_Request $request ) {
 
@@ -94,7 +105,7 @@ class Options {
 			return wp_send_json_success();
 		} else {
 			$error = new Error();
-			( $error ) ? $error->log( 'Settings NOT saved.' . "\n" ) : null;
+			( $error ) ? $error->log( 'Options NOT saved.' . "\n" ) : null;
 
 			return wp_send_json_error();
 		}
@@ -108,7 +119,7 @@ class Options {
 			'Data Sync',
 			'Data Sync',
 			'manage_options',
-			'data-sync-settings',
+			'data-sync-options',
 			$this->view_namespace . '\data_sync_options_page'
 		);
 	}
@@ -116,15 +127,15 @@ class Options {
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/settings/(?P<setting>[a-zA-Z-_]+)',
+			'/options/(?P<option>[a-zA-Z-_]+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-					'args'                => array(
-						'setting' => array(
-							'description' => 'Setting key',
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get' ),
+//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'     => array(
+						'option' => array(
+							'description' => 'Option key',
 							'type'        => 'string',
 						),
 					),
@@ -134,8 +145,8 @@ class Options {
 					'callback'            => array( $this, 'save' ),
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
-						'setting' => array(
-							'description' => 'Setting key',
+						'option' => array(
+							'description' => 'Option key',
 							'type'        => 'string',
 						),
 					),
@@ -145,8 +156,8 @@ class Options {
 					'callback'            => array( $this, 'delete' ),
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
-						'setting' => array(
-							'description' => 'Setting key',
+						'option' => array(
+							'description' => 'Option key',
 							'type'        => 'string',
 //							'validate_callback' => function ( $param, $request, $key ) {
 //								return true;
@@ -159,42 +170,42 @@ class Options {
 	}
 
 	/**
-	 * Add sections and options to Data Sync WordPress admin settings page.
+	 * Add sections and options to Data Sync WordPress admin options page.
 	 * This also registers all options for updating.
 	 */
 	public function register() {
-		add_settings_section( 'data_sync_settings', '', null, 'data-sync-settings' );
+		add_settings_section( 'data_sync_options', '', null, 'data-sync-options' );
 
-		add_settings_field( 'source_site', 'Source or Receiver?', $this->view_namespace . '\display_source_input', 'data-sync-settings', 'data_sync_settings' );
-		register_setting( 'data_sync_settings', 'source_site' );
+		add_settings_field( 'source_site', 'Source or Receiver?', $this->view_namespace . '\display_source_input', 'data-sync-options', 'data_sync_options' );
+		register_setting( 'data_sync_options', 'source_site' );
 
 		$source = get_option( 'source_site' );
 
 		if ( '1' === $source ) :
 
-			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-settings', 'data_sync_settings' );
+			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-options', 'data_sync_options' );
 
-			add_settings_field( 'push_template', 'Push Template to Receivers', $this->view_namespace . '\display_push_template_button', 'data-sync-settings', 'data_sync_settings' );
+			add_settings_field( 'bulk_data_push', 'Push All Data to Receivers', $this->view_namespace . '\display_bulk_data_push_button', 'data-sync-options', 'data_sync_options' );
 
-			add_settings_field( 'bulk_data_push', 'Push All Data to Receivers', $this->view_namespace . '\display_bulk_data_push_button', 'data-sync-settings', 'data_sync_settings' );
+			add_settings_field( 'push_template', 'Push Template to Receivers', $this->view_namespace . '\display_push_template_button', 'data-sync-options', 'data_sync_options' );
 
-			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-settings', 'data_sync_settings' );
-			register_setting( 'data_sync_settings', 'push_enabled_post_types' );
+			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'push_enabled_post_types' );
 
 		elseif ( '0' === $source ) :
 
-			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-settings', 'data_sync_settings' );
+			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-options', 'data_sync_options' );
 
-			add_settings_field( 'notified_users', 'Notified Users', $this->view_namespace . '\display_notified_users', 'data-sync-settings', 'data_sync_settings' );
-			register_setting( 'data_sync_settings', 'notified_users' );
+			add_settings_field( 'notified_users', 'Notified Users', $this->view_namespace . '\display_notified_users', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'notified_users' );
 
-			register_setting( 'data_sync_settings', 'enabled_post_types' );
+			register_setting( 'data_sync_options', 'enabled_post_types' );
 			add_settings_field(
 				'enabled_post_types',
 				'Enabled Post Types',
 				$this->view_namespace . '\display_post_types_to_accept',
-				'data-sync-settings',
-				'data_sync_settings'
+				'data-sync-options',
+				'data_sync_options'
 			);
 
 			$enabled_post_types = get_option( 'enabled_post_types' );
@@ -203,8 +214,8 @@ class Options {
 					foreach ( $enabled_post_types as $post_type ) {
 						$post_type_object = get_post_type_object( $post_type );
 
-						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_settings', 'data-sync-settings', 'data_sync_settings', array( $post_type_object ) );
-						register_setting( 'data_sync_settings', $post_type_object->name . '_perms' );
+						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
+						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
 					}
 				}
 			}

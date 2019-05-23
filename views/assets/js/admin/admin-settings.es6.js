@@ -5,6 +5,19 @@ jQuery( function ( $ ) {
 
     $( document ).ready( function () {
 
+        connected_sites();
+        bulk_data_push();
+
+    } );
+
+    function bulk_data_push() {
+        document.getElementById('bulk_data_push').addEventListener('click', function( e ) {
+            e.preventDefault();
+            AJAX.get(DataSync.api.url + '/source_data/push' );
+        }, false);
+    }
+
+    function connected_sites() {
         // ADD SITE
         $( '#add_site' ).unbind().click( function ( e ) {
             e.preventDefault();
@@ -20,13 +33,13 @@ jQuery( function ( $ ) {
                 ConnectedSites.save();
             } );
 
-
         } );
 
         $( '.remove_site' ).unbind().click( function ( e ) {
             let site_id = parseInt($(this).parent().attr('id').split('site-')[1]);
             ConnectedSites.delete( site_id );
         });
+    }
 
-    } );
 } );
+
