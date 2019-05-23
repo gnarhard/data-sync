@@ -181,8 +181,9 @@ class Options {
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-settings', 'data_sync_settings' );
 			register_setting( 'data_sync_settings', 'push_enabled_post_types' );
 
-			add_settings_field( 'error_log', 'Error Log', $this->view_namespace . '\display_error_log', 'data-sync-settings', 'data_sync_settings' );
 		elseif ( '0' === $source ) :
+
+			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-settings', 'data_sync_settings' );
 
 			add_settings_field( 'notified_users', 'Notified Users', $this->view_namespace . '\display_notified_users', 'data-sync-settings', 'data_sync_settings' );
 			register_setting( 'data_sync_settings', 'notified_users' );
@@ -207,8 +208,6 @@ class Options {
 					}
 				}
 			}
-
-			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-settings', 'data_sync_settings' );
 
 		endif;
 	}

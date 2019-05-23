@@ -41,16 +41,13 @@ function display_push_enabled_post_types() {
 
 	$registered_post_types = get_post_types( $args, $output, $operator );
 	?>
-	<select name="push_enabled_post_types[]" multiple style="width: 200px;" id="push_enabled_post_types">\
+	<select name="push_enabled_post_types[]" multiple style="width: 200px;" id="push_enabled_post_types">
 		<?php
-
 		foreach ( $registered_post_types as $key => $post_type ) {
 			$post_type_object = get_post_type_object( $post_type );
+			// DO NOT SEPARATE OUT OPTION CODE INTO DIFFERENT LINES. IT MAKES THE DATA SAVE WITH LINE BREAKS.
 			?>
-			<option value="
-			<?php echo esc_html( $post_type_object->name ); ?>"
-				<?php esc_html( selected( in_array( $post_type_object->name, get_option( 'push_enabled_post_types' ), true ) ) ); ?>>
-				<?php echo esc_html( $post_type_object->label ); ?></option>
+			<option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ), get_option( 'push_enabled_post_types' ) ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
 			<?php
 		}
 		?>
@@ -65,18 +62,6 @@ function display_push_enabled_post_types() {
 function display_bulk_data_push_button() {
 	?>
 	<button id="bulk_data_push">Push</button>
-	<?php
-}
-
-
-/**
- *
- */
-function display_error_log() {
-	$error = new Error();
-	?>
-	<textarea class="error_log"
-			  style="height: 500px; width: 100%;"><?php echo esc_html( $error->get_log() ); ?></textarea>
 	<?php
 }
 
@@ -212,7 +197,6 @@ function display_post_types_to_accept() {
 	</select>
 	<?php
 }
-
 
 /**
  * @param $post_type_object
