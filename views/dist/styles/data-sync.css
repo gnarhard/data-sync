@@ -1,0 +1,72 @@
+.settings_page_data-sync-settings select,
+.settings_page_data-sync-settings textarea {
+  width: 400px;
+}
+
+.settings_page_data-sync-settings textarea {
+  height: 300px;
+}
+
+.settings_page_data-sync-settings .remove_site {
+  cursor: pointer;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap {
+  display: none;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal {
+  max-width: 500px;
+  position: relative;
+  margin: 100px auto 0 auto;
+  background: white;
+  border-radius: 2px;
+  padding: 10px;
+  -webkit-box-shadow: 1px 1px 4px black;
+          box-shadow: 1px 1px 4px black;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal h2 {
+  text-align: center;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal #close {
+  float: right;
+  cursor: pointer;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap {
+  width: 100%;
+  display: block;
+  clear: both;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap input,
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap textarea {
+  float: right;
+  width: 75%;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .input_wrap textarea {
+  width: 100%;
+  float: none;
+}
+
+.settings_page_data-sync-settings .lightbox_wrap .add_site_modal .submit {
+  width: 50px;
+  display: block;
+  clear: both;
+  margin: 40px auto;
+}
+
+.settings_page_data-sync-settings .display {
+  display: block;
+}
+
