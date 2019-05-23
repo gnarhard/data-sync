@@ -8,12 +8,12 @@ function status_widget() {  ?>
 		<thead>
 		</thead>
 		<tr>
-			<th><?php _e('Post', 'wp_data_sync'); ?></th>
-			<th><?php _e('Type', 'wp_data_sync'); ?></th>
-			<th><?php _e('Created', 'wp_data_sync'); ?></th>
+			<th><?php _e( 'Post', 'data_sync' ); ?></th>
+			<th><?php _e( 'Type', 'data_sync' ); ?></th>
+			<th><?php _e( 'Created', 'data_sync' ); ?></th>
 		</tr>
 	</table>
-	<button id="bulk_data_push"><?php _e('Bulk Push', 'wp_data_sync'); ?></button>
-	<button id="recent_data_push"><?php _e('Only Push New', 'wp_data_sync'); ?></button>
+	<button id="bulk_data_push"><?php _e( 'Bulk Push', 'data_sync' ); ?></button>
+	<button id="recent_data_push"><?php _e( 'Only Push New', 'data_sync' ); ?></button>
 	<?php
 }

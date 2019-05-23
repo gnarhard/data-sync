@@ -3,6 +3,7 @@
 namespace DataSync\Controllers;
 
 use WP_REST_Server;
+use WP_REST_Request;
 
 /**
  * Class Options
@@ -14,18 +15,18 @@ use WP_REST_Server;
  */
 class Options {
 
-  /**
-   * Table prefix to save custom settings
-   *
-   * @var string
-   */
-  protected static $table_prefix = 'data_sync_';
+	/**
+	 * Table prefix to save custom settings
+	 *
+	 * @var string
+	 */
+	protected static $table_prefix = 'data_sync_';
 	/**
 	 * Option key to save settings
 	 *
 	 * @var string
 	 */
-	protected static $option_key = '';
+	protected static $option_key = 'setting';
 	/**
 	 * Default settings
 	 *
@@ -48,10 +49,12 @@ class Options {
 
 	/**
 	 * Get saved settings
+	 *
 	 * @param array $settings
+	 *
 	 * @return array
 	 */
-	public static function get( $settings ){
+	public static function get( $settings ) {
 
 //		$parameters  = $request->get_params();
 //		$setting_key = array_keys( $parameters );
@@ -80,29 +83,21 @@ class Options {
 	 *
 	 * @param array $settings
 	 */
-	public static function save( array $settings ) {
+	public static function save( WP_REST_Request $request ) {
 
-//		$success = Settings::save_options( $request->get_params() );
-//
-//		if ( $success ) {
-//			return rest_ensure_response( Settings::get_options( $request->get_params() ) )->set_status( 201 );
-//		} else {
-//			$error = new Error();
-//			( $error ) ? $error->log( 'Settings NOT saved.' . "\n" ) : null;
-//		}
-//
+		$key  = $request->get_url_params()[ self::$option_key ];
+		$data = $request->get_json_params();
 
+		$success = update_option( $key, $data );
 
+		if ( $success ) {
+			return wp_send_json_success();
+		} else {
+			$error = new Error();
+			( $error ) ? $error->log( 'Settings NOT saved.' . "\n" ) : null;
 
-//		foreach ( $settings as $key => $value ) {
-//			$success = update_option( $key, $value );
-//
-//			if ( $success ) {
-//				return true;
-//			} else {
-//				return false;
-//			}
-//		}
+			return wp_send_json_error();
+		}
 	}
 
 	/**
@@ -129,11 +124,8 @@ class Options {
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
 						'setting' => array(
-							'description'       => 'Setting key',
-							'type'              => 'string',
-							'validate_callback' => function ( $param, $request, $key ) {
-								return true;
-							},
+							'description' => 'Setting key',
+							'type'        => 'string',
 						),
 					),
 				),
@@ -143,11 +135,8 @@ class Options {
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
 						'setting' => array(
-							'description'       => 'Setting key',
-							'type'              => 'string',
-							'validate_callback' => function ( $param, $request, $key ) {
-								return true;
-							},
+							'description' => 'Setting key',
+							'type'        => 'string',
 						),
 					),
 				),
@@ -157,11 +146,11 @@ class Options {
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
 						'setting' => array(
-							'description'       => 'Setting key',
-							'type'              => 'string',
-							'validate_callback' => function ( $param, $request, $key ) {
-								return true;
-							},
+							'description' => 'Setting key',
+							'type'        => 'string',
+//							'validate_callback' => function ( $param, $request, $key ) {
+//								return true;
+//							},
 						),
 					),
 				),

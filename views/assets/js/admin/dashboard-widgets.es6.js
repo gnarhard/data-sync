@@ -7,10 +7,9 @@ document.addEventListener( "DOMContentLoaded", function () {
 
             let data = {};
             let input_name = document.getElementById( 'push_enabled_post_types' ).getAttribute( 'name' ).replace( /[^a-z0-9_]/gi, '' );
-            // let input_name = document.getElementById('enabled_post_types').getAttribute('name');
-            data[input_name] = getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
-
-            AJAX.post( data );
+            data = getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
+            // console.log(data);
+            AJAX.post( DataSync.api.url + '/settings/push_enabled_post_types', data );
         }
     }
 
@@ -25,7 +24,7 @@ function getSelectValues( select ) {
         opt = options[i];
 
         if ( opt.selected ) {
-            result.push( opt.value || opt.text );
+            result.push( opt.value.replace(/\s/g,'') || opt.text.replace(/\s/g,'') );
         }
     }
     return result;

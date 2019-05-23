@@ -12,10 +12,7 @@ class AJAX {
             body: JSON.stringify( data )
         } );
         let result = await response.json();
-        console.log(result);
-
-        jQuery( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
-
+        // jQuery( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
     }
 
     static async get( url ) {

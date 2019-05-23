@@ -5,6 +5,7 @@ namespace DataSync;
 use DataSync\Controllers\Enqueue;
 use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
+use DataSync\Controllers\Widgets;
 
 /**
  * Plugin Name: Data Sync
@@ -76,4 +77,5 @@ if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 
 new Enqueue();
 new Options();
+new Widgets();
 new ConnectedSites();
