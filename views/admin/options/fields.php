@@ -1,15 +1,18 @@
 <?php namespace DataSync;
 
+use DataSync\Controllers\ConnectedSites;
 use WP_User_Query;
 use DataSync\Controllers\Error as Error;
 
 /**
  *
  */
-function display_source_input() {   ?>
-	<input type="radio" name="source_site" id="source_site" value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
+function display_source_input() { ?>
+	<input type="radio" name="source_site" id="source_site"
+		   value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
 	<br>
-	<input type="radio" name="source_site" id="source_site" value="0" <?php checked( '0', get_option( 'source_site' ) ); ?>/> Receiver
+	<input type="radio" name="source_site" id="source_site"
+		   value="0" <?php checked( '0', get_option( 'source_site' ) ); ?>/> Receiver
 	<?php
 }
 
@@ -30,7 +33,7 @@ function display_push_template_button() {
 function display_push_enabled_post_types() {
 	$args = array(
 		'public' => true,
-	// '_builtin' => false
+		// '_builtin' => false
 	);
 
 	$output   = 'names'; // Names or objects, note names is the default.
@@ -72,7 +75,8 @@ function display_bulk_data_push_button() {
 function display_error_log() {
 	$error = new Error();
 	?>
-	<textarea class="error_log" style="height: 500px; width: 100%;"><?php echo esc_html( $error->get_log() ); ?></textarea>
+	<textarea class="error_log"
+			  style="height: 500px; width: 100%;"><?php echo esc_html( $error->get_log() ); ?></textarea>
 	<?php
 }
 
@@ -81,8 +85,8 @@ function display_error_log() {
  *
  */
 function display_connected_sites() {
-	// blogname, Site ID, URL, date connected, remove button, connect new.
-	$connected_sites = get_option( 'connected_sites' );
+	$connected_sites_obj = new ConnectedSites();
+	$connected_sites     = $connected_sites_obj->get_all();
 	?>
 	<table id="connected_sites">
 		<thead>
@@ -90,7 +94,7 @@ function display_connected_sites() {
 			<th>ID</th>
 			<th>Name</th>
 			<th>URL</th>
-			<th>Date Connected</th>
+			<th>Connected</th>
 			<th>Remove</th>
 		</tr>
 		</thead>
@@ -98,18 +102,17 @@ function display_connected_sites() {
 		<tbody>
 		<?php
 		if ( is_array( $connected_sites ) ) {
-			$i=0;
 			foreach ( $connected_sites as $site ) {
 				?>
-				<tr>
-					<td id="id"><?php echo esc_html( $i ); ?></td>
-					<td id="name"><?php echo esc_html( $site['name'] ); ?></td>
-					<td id="url"><?php echo esc_html( $site['url'] ); ?></td>
-					<td id="date_connected"><?php echo esc_html( $site['date_connected'] ); ?></td>
-					<td id="site-<?php echo esc_html( $i ); ?>"><span class="dashicons dashicons-trash remove_site"></span></td>
+				<tr id="site-<?php echo esc_html( $site->id ); ?>">
+					<td id="id"><?php echo esc_html( $site->id ); ?></td>
+					<td id="name"><?php echo esc_html( $site->name ); ?></td>
+					<td id="url"><?php echo esc_url( $site->url ); ?></td>
+					<td id="date_connected"><?php echo esc_html( $site->date_connected ); ?></td>
+					<td id="site-<?php echo esc_html( $site->id ); ?>"><span
+							class="dashicons dashicons-trash remove_site"></span></td>
 				</tr>
 				<?php
-				$i++;
 			}
 		}
 		?>
@@ -146,7 +149,8 @@ function display_modal() {
 					<input type="text" name="url" value="" id="site_url"/>
 				</div>
 
-				<p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary" value="Add Site"></p>
+				<p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary"
+										 value="Add Site"></p>
 			</form>
 		</div>
 	</div>
@@ -160,22 +164,22 @@ function display_notified_users() {
 	$users_query = new WP_User_Query(
 		array(
 			// 'role' => 'administrator',
-				'orderby' => 'display_name',
+			'orderby' => 'display_name',
 		)
 	);  // query to get admin users
 
 	$users = $users_query->get_results();
 	?>
 	<select name="notified_users[]" multiple>
-	<?php
+		<?php
 
-	foreach ( $users as $user ) {
+		foreach ( $users as $user ) {
+			?>
+			<option
+				value="<?php echo $user->id; ?>" <?php selected( in_array( $user->id, get_option( 'notified_users' ) ) ); ?>><?php echo $user->user_nicename; ?></option>
+			<?php
+		}
 		?>
-		<option
-		value="<?php echo $user->id; ?>" <?php selected( in_array( $user->id, get_option( 'notified_users' ) ) ); ?>><?php echo $user->user_nicename; ?></option>
-						  <?php
-	}
-	?>
 	</select>
 	<?php
 }
@@ -185,9 +189,9 @@ function display_notified_users() {
  *
  */
 function display_post_types_to_accept() {
-	$args = array(
+	$args     = array(
 		'public' => true,
-	// '_builtin' => false
+		// '_builtin' => false
 	);
 	$output   = 'names'; // names or objects, note names is the default
 	$operator = 'and'; // 'and' or 'or'
@@ -195,16 +199,16 @@ function display_post_types_to_accept() {
 	$registered_post_types = get_post_types( $args, $output, $operator );
 	?>
 	<select name="enabled_post_types[]" multiple id="enabled_post_types">
-	<?php
+		<?php
 
-	foreach ( $registered_post_types as $key => $post_type ) {
-		$post_type_object = get_post_type_object( $post_type );
+		foreach ( $registered_post_types as $key => $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+			?>
+			<option
+				value="<?php echo $post_type_object->name; ?>" <?php selected( in_array( $post_type_object->name, get_option( 'enabled_post_types' ) ) ); ?>><?php echo $post_type_object->label; ?></option>
+			<?php
+		}
 		?>
-		<option
-		value="<?php echo $post_type_object->name; ?>" <?php selected( in_array( $post_type_object->name, get_option( 'enabled_post_types' ) ) ); ?>><?php echo $post_type_object->label; ?></option>
-						  <?php
-	}
-	?>
 	</select>
 	<?php
 }

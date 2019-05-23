@@ -71,9 +71,7 @@ class Error {
 	 * Gets current timestamp
 	 */
 	private function get_timestamp() {
-		date_default_timezone_set( 'America/Denver' );
-
-		return date( 'm/d/Y h:i:s' );
+		return current_time( 'm/d/Y h:i:s' );
 	}
 
 }

@@ -5,12 +5,12 @@ namespace DataSync\Controllers;
 
 use WP_REST_Request;
 use DataSync\Models\ConnectedSite;
+use DataSync\Controllers\Error;
 use WP_REST_Server;
+use WP_Error;
 
 
 class ConnectedSites {
-
-	private $table_name = 'data_sync_connected_sites';
 
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -23,47 +23,120 @@ class ConnectedSites {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get' ),
+					'callback'            => array( $this, 'get_all' ),
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 				),
 				array(
-					'methods'  => WP_REST_Server::EDITABLE,
-					'callback' => array( $this, 'save' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 				),
+			)
+
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/connected_sites/(?P<id>\d+)',
+			array(
 				array(
-					'methods'  => WP_REST_Server::DELETABLE,
-					'callback' => array( $this, 'delete' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'id' => array(
+							'description'       => 'ID of connected_site',
+							'type'              => 'int',
+							'validate_callback' => 'is_numeric',
+						),
+					),
+				),
+//				array(
+//					'methods'             => WP_REST_Server::EDITABLE,
+//					'callback'            => array( $this, 'save' ),
 //					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+//					'args'                => array(
+//						'id' => array(
+//							'description'       => 'ID of connected_site',
+//							'type'              => 'int',
+//							'validate_callback' => 'is_numeric',
+//						),
+//					),
+//				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'id' => array(
+							'description'       => 'ID of connected_site',
+							'type'              => 'int',
+							'validate_callback' => 'is_numeric',
+						),
+					),
 				),
 			)
 		);
 	}
 
 	public function get( WP_REST_Request $request ) {
-		global $wpdb;
+//		global $wpdb;
+//		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
+//		$id = $request;
+//		$wpdb->query( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $table_name, $id ) );
+	}
 
+	public function get_all() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
+		$result = $wpdb->get_results( 'SELECT * FROM ' . $table_name );
+		return wp_parse_args( $result );
+	}
+
+	public function save( WP_REST_Request $request ) {
 		if ( ! $this->table_exists() ) {
 			ConnectedSite::create_db_table();
 		}
 
-		$id = $request;
-		$wpdb->query( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $this->table_name, $id ) );
-	}
+		$new_data = array();
 
-	public function save( WP_REST_Request $request ) {
+		foreach ( $request->get_params() as $data) {
+			if ( in_array( 'id', array_keys( $data ) ) ) {
+				ConnectedSite::update( $data );
+			} else {
+				$new_id = ConnectedSite::create( $data );
+				if ( is_numeric( $new_id ) ) {
+					$data['id'] = $new_id;
+				}
+			}
+			$new_data[] = $data;
+		}
 
-//		connectedSite::save();
+		return wp_parse_args( $new_data );
 	}
 
 	public function delete( WP_REST_Request $request ) {
-		ConnectedSite::delete();
+		$id = (int) $request->get_url_params()['id'];
+		if ( $id ) {
+			$response = ConnectedSite::delete( $id );
+			if ( $response ) {
+				return wp_send_json_success();
+			} else {
+				$error = new Error();
+				( $error ) ? $error->log( 'Connected site was not deleted.' . "\n" ) : null;
+				return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted.', array( 'status' => 501 ) );
+			}
+		} else {
+			$error = new Error();
+			( $error ) ? $error->log( 'Connected site was not deleted. No ID present in URL.' . "\n" ) : null;
+			return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ) );
+		}
 	}
 
 	private function table_exists() {
 		global $wpdb;
-
-		return in_array( $this->table_name, $wpdb->tables );
+		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
+		return in_array( $table_name, $wpdb->tables );
 	}
 
 }

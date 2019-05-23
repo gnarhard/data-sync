@@ -30,6 +30,18 @@ class AJAX {
         return await response.json();
     }
 
+    static async delete( url ) {
+        let response = await fetch( url, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': DataSync.api.nonce
+            },
+        } );
+        return await response.json();
+    }
+
 
 }
 
