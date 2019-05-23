@@ -40,8 +40,6 @@ class SourceData {
 				'connected_sites' => $connected_sites,
 			),
 			'posts'           => $posts,
-			'yoast_seo_links' => array(),
-			'yoast_seo_meta'  => array(),
 			'acf'             => array(),
 			'acf_json'        => array(),
 		);

@@ -11,6 +11,8 @@ class Posts {
 
 		$posts = array();
 
+		print_r( get_taxonomies() );
+
 		foreach ( $types as $type ) {
 
 			$posts[ $type ] = Posts::get_posts( $type );
@@ -19,9 +21,12 @@ class Posts {
 
 				$post->post_meta = get_post_meta( $post->ID );
 
-				$post->tags = wp_get_post_tags( $post->ID );
+//				$post->tags = wp_get_post_tags( $post->ID );
+				$post->taxonomies = array();
 
-				$post->categories = get_the_terms( $post->ID, 'category' );
+				foreach ( get_taxonomies() as $taxonomy ) {
+					$post->taxonomies[$taxonomy] = get_the_terms( $post->ID, $taxonomy );
+				}
 
 				$post->media = Posts::get_media( $post->ID );
 
@@ -40,7 +45,7 @@ class Posts {
 			'post_status'    => array( 'publish' ),
 			'orderby'        => 'post_date',
 			'order'          => 'DESC',
-			'posts_per_page' => - 1, // show all posts
+			'posts_per_page' => - 1, // show all posts.
 		);
 
 		$loop = new WP_Query( $args );
