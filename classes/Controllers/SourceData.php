@@ -35,13 +35,15 @@ class SourceData {
 		$posts = Posts::get( $options['push_enabled_post_types'] );
 
 		$source_data = array(
-			'source'             => array(
+			'source'          => array(
 				'options'         => $options,
 				'connected_sites' => $connected_sites,
 			),
-			'posts'              => $posts,
-			'yoast_seo_links'    => array(),
-			'yoast_seo_meta'     => array(),
+			'posts'           => $posts,
+			'yoast_seo_links' => array(),
+			'yoast_seo_meta'  => array(),
+			'acf'             => array(),
+			'acf_json'        => array(),
 		);
 
 		print_r( $source_data );
