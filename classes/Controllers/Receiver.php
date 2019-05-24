@@ -28,14 +28,14 @@ class Receiver {
 
 	public function receive() {
 
-
 		if ( isset( $_POST ) ) {
-			$verified        = Auth::verify_request( wp_unslash( $_POST['source']['nonce'] ) );
-			$source_data     = wp_unslash( $_POST );
+			$json_str = file_get_contents('php://input');
+			$source_data = json_decode($json_str);
+
+			Auth::verify_request( $source_data['source']['nonce'] );
 			$source_options  = $source_data['source']['options'];
 			$connected_sites = $source_data['source']['connected_sites'];
-
-			$receiver_options                            = Options::get_all_receiver()->data;
+			$receiver_options                            = Options::get_all_receiver()->get_data();
 			$receiver_options['add_and_enable_new_cpts'] = true;
 			$post_types_to_import                        = array();
 
@@ -46,7 +46,8 @@ class Receiver {
 			}
 
 //			print_r( $receiver_options );
-//			print_r( $source_data );
+
+			print_r($source_data);
 		}
 
 	}

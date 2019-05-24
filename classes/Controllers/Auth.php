@@ -53,8 +53,6 @@ class Auth {
 			$response->set_status( 501 );
 
 			return $response;
-		} elseif ( 1 === $response ) {
-			return true;
 		}
 	}
 
