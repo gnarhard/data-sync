@@ -31,6 +31,7 @@ class SourceData {
 
 	public function push() {
 		$source_data     = $this->consolidate();
+		$json = wp_json_encode( $source_data );
 		$connected_sites = $source_data['source']['connected_sites'];
 
 		foreach ( $connected_sites as $site ) {
@@ -42,7 +43,7 @@ class SourceData {
 				$token    = json_decode( $auth_response )->token;
 				$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 				$args     = array(
-					'body'    => json_encode( $source_data ),
+					'body'    => $json,
 					'headers' => array(
 						'Authorization' => 'Bearer ' . $token,
 					),
