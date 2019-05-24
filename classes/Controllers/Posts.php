@@ -8,12 +8,11 @@ use WP_Query;
 class Posts {
 
 	public static function get( $types ) {
-
 		$posts = array();
 
 		foreach ( $types as $type ) {
 
-			$posts[ $type ] = Posts::get_posts( $type );
+			$posts[ $type ] = self::get_posts( $type );
 
 			foreach ( $posts[ $type ] as $post ) {
 
@@ -24,7 +23,7 @@ class Posts {
 					$post->taxonomies[ $taxonomy ] = get_the_terms( $post->ID, $taxonomy );
 				}
 
-				$post->media = Posts::get_media( $post->ID );
+				$post->media = self::get_media( $post->ID );
 
 
 			}
@@ -109,9 +108,9 @@ class Posts {
 		$registered_receiver_cpts = array_keys( $wp_post_types );
 
 		if ( $receiver_options['add_and_enable_new_cpts'] ) {
-			foreach( $source_options['push_enabled_post_types'] as $post_type ) {
+			foreach ( $source_options['push_enabled_post_types'] as $post_type ) {
 				if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
-					Posts::create_post_type( $post_type );
+					self::create_post_type( $post_type );
 				}
 			}
 		}

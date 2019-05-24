@@ -4,6 +4,7 @@
 namespace DataSync\Controllers;
 
 use Exception;
+use WP_Error;
 
 class Auth {
 
@@ -35,6 +36,19 @@ class Auth {
 			'username' => $this->username,
 			'password' => $this->password,
 		);
+	}
+
+	public static function verify_request( $nonce ) {
+		$response = wp_verify_nonce( $nonce, 'data_push' );
+		if ( false === $response ) {
+			$error = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 501 ) );
+			wp_die( $error );
+		} elseif ( 2 === $response ) {
+			$error = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 501 ) );
+			wp_die( $error );
+		} elseif ( 1 === $response ) {
+			return true;
+		}
 	}
 
 	public function authenticate_site( $data_receiver_url ) {

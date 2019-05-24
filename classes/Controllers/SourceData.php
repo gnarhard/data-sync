@@ -47,7 +47,7 @@ class SourceData {
 					),
 				);
 				$response = wp_remote_post( $url, $args );
-				print_r($response['body']);
+				print_r( $response['body'] );
 			}
 
 		}
@@ -62,8 +62,9 @@ class SourceData {
 			'source' => array(
 				'options'         => $options,
 				'connected_sites' => ConnectedSites::get_all()->data,
+				'nonce'           => wp_create_nonce( 'data_push' ),
 			),
-			'posts'  => Posts::get( $options['push_enabled_post_types'] ),
+			'posts'  => Posts::get( array_keys( $options['push_enabled_post_types'] ) ),
 			'acf'    => Posts::get_acf_fields(), // use acf_add_local_field_group() to install this array.
 		);
 
