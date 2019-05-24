@@ -27,7 +27,7 @@ class Receiver {
 	}
 
 	public function receive() {
-
+		print_r($_POST);
 	}
 
 }

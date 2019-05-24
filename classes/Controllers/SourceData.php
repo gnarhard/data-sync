@@ -29,11 +29,29 @@ class SourceData {
 	}
 
 	public function push() {
-		$source_data = $this->consolidate();
+		$source_data     = $this->consolidate();
 		$connected_sites = $source_data['source']['connected_sites'];
-		foreach( $connected_sites as $site ) {
-			Auth::create_jwt();
-			wp_remote_post(trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive' );
+
+		foreach ( $connected_sites as $site ) {
+			Auth::create_jwt( $source_data );
+			$auth                    = new Auth();
+			$auth_response           = $auth->authenticate_site( $site->url );
+			$authorization_validated = $auth->validate( $site->url, $auth_response );
+
+			if ( $authorization_validated ) {
+				$token    = json_decode( $auth_response )->token;
+				$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+				$args     = array(
+					'body'    => $source_data,
+					'headers' => array(
+						'Authorization' => 'Bearer ' . $token,
+					),
+				);
+				$response = wp_remote_post( $url, $args );
+				print_r( $response );
+			}
+
+
 		}
 
 	}

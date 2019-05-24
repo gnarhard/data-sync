@@ -37,14 +37,16 @@ class Auth {
 		);
 	}
 
-	public static function create_jwt() {
+	public static function create_jwt( $source_data ) {
 		add_filter( 'jwt_auth_token_before_sign', function ( $token, $user ) {
-			print_r($token);
-			print_r($user);
+			print_r( $token );
+//			$token['data']['source_data'] = $source_data;
+			print_r( $user );
+			die();
 		}, 2 );
 	}
 
-	private function get_token( $data_receiver_url ) {
+	public function authenticate_site( $data_receiver_url ) {
 
 		$token_url = trailingslashit( $data_receiver_url ) . 'wp-json/jwt-auth/v1/token';
 
@@ -80,6 +82,20 @@ class Auth {
 			}
 		}
 
+	}
+
+	public function validate( $site_url, $auth_response ) {
+
+		$token         = json_decode( $auth_response )->token;
+		$url           = trailingslashit( $site_url ) . 'wp-json/jwt-auth/v1/token/validate';
+		$args          = array(
+			'headers' => array(
+				'Authorization' => 'Bearer ' . $token,
+			),
+		);
+		$json_response = wp_remote_post( $url, $args );
+		$json          = json_decode( $json_response['body'] );
+		return ( 200 === $json->data->status );
 	}
 
 	private function try_login() {
