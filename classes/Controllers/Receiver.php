@@ -31,8 +31,8 @@ class Receiver {
 		if ( isset( $_POST ) ) {
 			$json_str    = file_get_contents( 'php://input' );
 			$source_data = json_decode( $json_str );
-			print_r( $source_data->source->options );
-			Auth::verify_request( $source_data->source->options->nonce );
+//			print_r( $source_data->source );
+			Auth::verify_request( $source_data->source->nonce );
 
 			$source_options                            = $source_data->source->options;
 			$connected_sites                           = $source_data->source->connected_sites;

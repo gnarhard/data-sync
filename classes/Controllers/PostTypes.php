@@ -15,20 +15,18 @@ class PostTypes {
 		if ( $receiver_options->add_and_enable_new_cpts ) {
 			foreach ( $source_options->push_enabled_post_types as $post_type ) {
 				if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
-					$data = array(
-						'name' => $post_type->name,
-						'data' => $post_type,
-					);
-					$this->save( $data );
+					$this->save( (object) $post_type );
 				}
 			}
 		}
 	}
 
-	private function save( $data ) {
+	private function save( object $data ) {
 		if ( ! $this->table_exists() ) {
 			PostType::create_db_table();
 		}
+		echo gettype($data);
+		print_r($data);
 
 		if ( in_array( 'id', array_keys( $data ) ) ) {
 			PostType::update( $data );

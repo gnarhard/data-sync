@@ -70,15 +70,16 @@ class SourceData {
 
 		$options = Options::source()->data;
 
-		return array(
-			'source' => array(
-				'options'         => $options,
-				'connected_sites' => ConnectedSites::get_all()->data,
-				'nonce'           => wp_create_nonce( 'data_push' ),
-			),
-			'posts'  => Posts::get( array_keys( $options['push_enabled_post_types'] ) ),
-			'acf'    => Posts::get_acf_fields(), // use acf_add_local_field_group() to install this array.
-		);
+		print_r($options);die();
+
+		$source_data = new stdClass();
+		$source_data->options = (array) $options;
+		$source_data->connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$source_data->nonce = (string) wp_create_nonce( 'data_push' );
+		$source_data->posts = Posts::get( array_keys( $options['push_enabled_post_types'] ) );
+		$source_data->acf = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+
+		return $source_data;
 
 
 	}
