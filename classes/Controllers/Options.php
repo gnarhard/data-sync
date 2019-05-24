@@ -79,29 +79,38 @@ class Options {
 	}
 
 	public static function get_all_receiver() {
-    $option_keys = array(
-        'notified_users',
-        'enabled_post_types',
-    );
+		$option_keys = array(
+			'notified_users',
+			'enabled_post_types',
+		);
 
+		$enabled_post_types = get_option( 'enabled_post_types' );
+		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
+			if ( count( $enabled_post_types ) > 0 ) {
+				foreach ( $enabled_post_types as $post_type ) {
+					$post_type_object = get_post_type_object( $post_type );
+					$option_keys[]    = $post_type_object->name . '_perms';
+				}
+			}
+		}
 
+		return Options::get_all( $option_keys );
+	}
 
-    return Options::get_all( $option_keys );
-  }
+	public static function get_all( $option_keys ) {
+		$options = array();
 
-  public static function get_all( $option_keys ) {
-    $options = array();
+		foreach ( $option_keys as $key ) {
+			$request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
+			$request->set_url_params( array( self::$option_key => $key ) );
+			$options[ $key ] = self::get( $request )->data;
+		}
 
-    foreach ( $option_keys as $key ) {
-      $request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
-      $request->set_url_params( array( self::$option_key => $key ) );
-      $options[ $key ] = self::get( $request )->data;
-    }
+		$response = new WP_REST_Response( $options );
+		$response->set_status( 201 );
 
-    $response = new WP_REST_Response( $options );
-    $response->set_status( 201 );
-    return $response;
-  }
+		return $response;
+	}
 
 	/**
 	 * Save options
@@ -145,10 +154,10 @@ class Options {
 			'/options/(?P<option>[a-zA-Z-_]+)',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get' ),
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-					'args'     => array(
+					'args'                => array(
 						'option' => array(
 							'description' => 'Option key',
 							'type'        => 'string',

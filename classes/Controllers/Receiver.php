@@ -27,8 +27,8 @@ class Receiver {
 	}
 
 	public function receive() {
-	  echo 'asdf';die();
 	  $options = Options::get_all_receiver()->data;
+	  print_r($options);
 		print_r($_POST);
 	}
 
