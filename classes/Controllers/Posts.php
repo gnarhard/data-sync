@@ -11,21 +11,17 @@ class Posts {
 
 		$posts = array();
 
-		print_r( get_taxonomies() );
-
 		foreach ( $types as $type ) {
 
 			$posts[ $type ] = Posts::get_posts( $type );
 
 			foreach ( $posts[ $type ] as $post ) {
 
-				$post->post_meta = get_post_meta( $post->ID );
-
-//				$post->tags = wp_get_post_tags( $post->ID );
+				$post->post_meta  = get_post_meta( $post->ID );
 				$post->taxonomies = array();
 
 				foreach ( get_taxonomies() as $taxonomy ) {
-					$post->taxonomies[$taxonomy] = get_the_terms( $post->ID, $taxonomy );
+					$post->taxonomies[ $taxonomy ] = get_the_terms( $post->ID, $taxonomy );
 				}
 
 				$post->media = Posts::get_media( $post->ID );
@@ -59,6 +55,48 @@ class Posts {
 			'audio' => get_attached_media( 'audio', $post_id ),
 			'video' => get_attached_media( 'video', $post_id ),
 		);
+	}
+
+	public static function get_acf_fields() {
+		$args = array(
+			'post_type'      => 'acf-field-group',
+			'post_status'    => array( 'publish' ),
+			'orderby'        => 'post_date',
+			'order'          => 'DESC',
+			'posts_per_page' => - 1, // show all posts.
+		);
+
+		$loop = new WP_Query( $args );
+
+		$acf_groups = $loop->posts;
+
+		$field_group = array();
+
+		foreach ( $acf_groups as $field ) {
+
+			$key = $field->post_name;
+
+			// load field group.
+			$field_group = acf_get_field_group( $key );
+
+			// validate field group.
+			if ( empty( $field_group ) ) {
+				continue;
+			}
+
+			// load fields.
+			$field_group['fields'] = acf_get_fields( $field_group );
+
+			// prepare for export.
+			$field_group = acf_prepare_field_group_for_export( $field_group );
+
+			// add to json array.
+			$json[] = $field_group;
+
+		}
+
+		return $json;
+
 	}
 
 }

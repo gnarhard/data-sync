@@ -43,7 +43,7 @@ class ConnectedSites {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 					'args'                => array(
 						'id' => array(
 							'description'       => 'ID of connected_site',

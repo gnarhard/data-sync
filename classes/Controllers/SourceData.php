@@ -6,6 +6,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
 use WP_REST_Server;
+use ACF_Admin_Tool_Export;
 
 class SourceData {
 
@@ -31,17 +32,16 @@ class SourceData {
 
 		$options         = Options::get_all()->data;
 		$connected_sites = ConnectedSites::get_all()->data;
-		// Includes post_meta, tags, categories.
-		$posts = Posts::get( $options['push_enabled_post_types'] );
+		$posts           = Posts::get( $options['push_enabled_post_types'] ); // Includes post type, post_meta (includes ACF data), tags, taxonomies, media.
+		$acf_fields      = Posts::get_acf_fields();
 
 		$source_data = array(
-			'source'          => array(
+			'source' => array(
 				'options'         => $options,
 				'connected_sites' => $connected_sites,
 			),
-			'posts'           => $posts,
-			'acf'             => array(),
-			'acf_json'        => array(),
+			'posts'  => $posts,
+			'acf'    => $acf_fields, // use acf_add_local_field_group() to install this array.
 		);
 
 		print_r( $source_data );
