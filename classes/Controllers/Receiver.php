@@ -29,13 +29,15 @@ class Receiver {
 	public function receive() {
 
 		if ( isset( $_POST ) ) {
-			$json_str = file_get_contents('php://input');
-			$source_data = json_decode($json_str);
+			$json_str    = file_get_contents( 'php://input' );
+			$source_data = json_decode( $json_str );
+			print_r( $source_data );
+			Auth::verify_request( $source_data->source->options->nonce );
 
-			Auth::verify_request( $source_data['source']['nonce'] );
-			$source_options  = $source_data['source']['options'];
-			$connected_sites = $source_data['source']['connected_sites'];
-			$receiver_options                            = Options::get_all_receiver()->get_data();
+			$source_options                              = $source_data->source->options;
+			$connected_sites                             = $source_data->source->connected_sites;
+
+			$receiver_options                            = Options::receiver()->get_data();
 			$receiver_options['add_and_enable_new_cpts'] = true;
 			$post_types_to_import                        = array();
 
@@ -45,9 +47,8 @@ class Receiver {
 				$post_types_to_import[] = $source_data[ $post_type ];
 			}
 
-//			print_r( $receiver_options );
+			print_r( $receiver_options );
 
-			print_r($source_data);
 		}
 
 	}

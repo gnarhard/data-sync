@@ -69,7 +69,7 @@ class Options {
 		return $response;
 	}
 
-	public static function get_all_source() {
+	public static function source() {
 //		$option_keys = array(
 //			'push_enabled_post_types',
 //		);
@@ -94,7 +94,7 @@ class Options {
 
 	}
 
-	public static function get_all_receiver() {
+	public static function receiver() {
 		$option_keys = array(
 			'notified_users',
 			'enabled_post_types',

@@ -68,7 +68,7 @@ class SourceData {
 
 	private function consolidate() {
 
-		$options = Options::get_all_source()->data;
+		$options = Options::source()->data;
 
 		return array(
 			'source' => array(
