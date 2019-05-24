@@ -81,3 +81,4 @@ new Options();
 new Widgets();
 new ConnectedSites();
 new SourceData();
+new Receiver();

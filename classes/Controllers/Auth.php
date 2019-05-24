@@ -37,6 +37,12 @@ class Auth {
 		);
 	}
 
+	public static function create_jwt() {
+		add_filter( 'jwt_auth_token_before_sign', function () {
+
+		} );
+	}
+
 	private function get_token( $data_receiver_url ) {
 
 		$token_url = trailingslashit( $data_receiver_url ) . 'wp-json/jwt-auth/v1/token';

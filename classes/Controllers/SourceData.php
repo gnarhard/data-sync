@@ -21,30 +21,36 @@ class SourceData {
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get' ),
+					'callback' => array( $this, 'push' ),
 //					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 				)
 			)
 		);
 	}
 
-	public function get() {
+	public function push() {
+		$source_data = $this->consolidate();
+		$connected_sites = $source_data['source']['connected_sites'];
+		foreach( $connected_sites as $site ) {
+			$jwt = Auth::create_jwt();
+			wp_remote_post(trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive' );
+		}
 
-		$options         = Options::get_all()->data;
-		$connected_sites = ConnectedSites::get_all()->data;
-		$posts           = Posts::get( $options['push_enabled_post_types'] ); // Includes post type, post_meta (includes ACF data), tags, taxonomies, media.
-		$acf_fields      = Posts::get_acf_fields();
+	}
 
-		$source_data = array(
+	private function consolidate() {
+
+		$options = Options::get_all()->data;
+
+		return array(
 			'source' => array(
 				'options'         => $options,
-				'connected_sites' => $connected_sites,
+				'connected_sites' => ConnectedSites::get_all()->data,
 			),
-			'posts'  => $posts,
-			'acf'    => $acf_fields, // use acf_add_local_field_group() to install this array.
+			'posts'  => Posts::get( $options['push_enabled_post_types'] ),
+			'acf'    => Posts::get_acf_fields(), // use acf_add_local_field_group() to install this array.
 		);
 
-		print_r( $source_data );
 
 	}
 
