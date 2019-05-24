@@ -38,9 +38,10 @@ class Auth {
 	}
 
 	public static function create_jwt() {
-		add_filter( 'jwt_auth_token_before_sign', function () {
-
-		} );
+		add_filter( 'jwt_auth_token_before_sign', function ( $token, $user ) {
+			print_r($token);
+			print_r($user);
+		}, 2 );
 	}
 
 	private function get_token( $data_receiver_url ) {

@@ -32,7 +32,7 @@ class SourceData {
 		$source_data = $this->consolidate();
 		$connected_sites = $source_data['source']['connected_sites'];
 		foreach( $connected_sites as $site ) {
-			$jwt = Auth::create_jwt();
+			Auth::create_jwt();
 			wp_remote_post(trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive' );
 		}
 

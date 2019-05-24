@@ -7,6 +7,7 @@ use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\SourceData;
 use DataSync\Controllers\Widgets;
+use DataSync\Controllers\Receiver;
 
 /**
  * Plugin Name: Data Sync
