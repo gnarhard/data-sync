@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 
 use Exception;
 use WP_Error;
+use WP_REST_Response;
 
 class Auth {
 
@@ -41,11 +42,17 @@ class Auth {
 	public static function verify_request( $nonce ) {
 		$response = wp_verify_nonce( $nonce, 'data_push' );
 		if ( false === $response ) {
-			$error = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 501 ) );
-			wp_die( $error );
+			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 501 ) );
+			$response = new WP_REST_Response( $error );
+			$response->set_status( 501 );
+
+			return $response;
 		} elseif ( 2 === $response ) {
-			$error = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 501 ) );
-			wp_die( $error );
+			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 501 ) );
+			$response = new WP_REST_Response( $error );
+			$response->set_status( 501 );
+
+			return $response;
 		} elseif ( 1 === $response ) {
 			return true;
 		}
