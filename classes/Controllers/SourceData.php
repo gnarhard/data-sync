@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
+use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
 
@@ -41,13 +42,23 @@ class SourceData {
 				$token    = json_decode( $auth_response )->token;
 				$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 				$args     = array(
-					'body'    => $source_data,
+					'body'    => json_encode( $source_data ),
 					'headers' => array(
 						'Authorization' => 'Bearer ' . $token,
 					),
 				);
 				$response = wp_remote_post( $url, $args );
-				print_r( $response['body'] );
+//				if ( $response->is_error() ) {
+//					// Convert to a WP_Error object.
+//					$error = $response->as_error();
+//					$message = $response->get_error_message();
+//					$error_data = $response->get_error_data();
+//					$status = isset( $error_data['status'] ) ? $error_data['status'] : 500;
+//					wp_die( printf( '<p>An error occurred: %s (%d)</p>', $message, $error_data ) );
+//				}
+
+				$body     = wp_remote_retrieve_body( $response );
+				print_r( $body );
 			}
 
 		}

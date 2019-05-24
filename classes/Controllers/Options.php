@@ -83,7 +83,7 @@ class Options {
 			$cpt_data = cptui_get_post_type_data();
 
 			foreach ( get_option( 'push_enabled_post_types' ) as $post_type ) {
-				$options['push_enabled_post_types'][$post_type] = $cpt_data[$post_type];
+				$options['push_enabled_post_types'][ $post_type ] = $cpt_data[ $post_type ];
 			}
 		}
 
@@ -117,9 +117,14 @@ class Options {
 		$options = array();
 
 		foreach ( $option_keys as $key ) {
-			$request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
+			$request = new WP_REST_Request();
+			$request->set_method( 'GET' );
+			$request->set_route( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
+			$request->set_body( wp_json_encode( $source_data ) );
 			$request->set_url_params( array( self::$option_key => $key ) );
-			$options[ $key ] = self::get( $request )->data;
+
+			$response        = rest_do_request( $request );
+			$options[ $key ] = $response->get_data();
 		}
 
 		$response = new WP_REST_Response( $options );

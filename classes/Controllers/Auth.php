@@ -42,13 +42,13 @@ class Auth {
 	public static function verify_request( $nonce ) {
 		$response = wp_verify_nonce( $nonce, 'data_push' );
 		if ( false === $response ) {
-			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 501 ) );
+			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 403 ) );
 			$response = new WP_REST_Response( $error );
 			$response->set_status( 501 );
 
 			return $response;
 		} elseif ( 2 === $response ) {
-			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 501 ) );
+			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 403 ) );
 			$response = new WP_REST_Response( $error );
 			$response->set_status( 501 );
 
