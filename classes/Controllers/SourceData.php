@@ -8,6 +8,7 @@ use DataSync\Controllers\ConnectedSites;
 use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
+use stdClass;
 
 class SourceData {
 
@@ -31,8 +32,8 @@ class SourceData {
 
 	public function push() {
 		$source_data     = $this->consolidate();
-		$json = wp_json_encode( $source_data );
-		$connected_sites = $source_data['source']['connected_sites'];
+		$json            = wp_json_encode( $source_data );
+		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
 			$auth                    = new Auth();
@@ -58,7 +59,7 @@ class SourceData {
 //					wp_die( printf( '<p>An error occurred: %s (%d)</p>', $message, $error_data ) );
 //				}
 
-				$body     = wp_remote_retrieve_body( $response );
+				$body = wp_remote_retrieve_body( $response );
 				print_r( $body );
 			}
 
@@ -68,16 +69,14 @@ class SourceData {
 
 	private function consolidate() {
 
-		$options = Options::source()->data;
+		$options = Options::source()->get_data();
 
-		print_r($options);die();
-
-		$source_data = new stdClass();
-		$source_data->options = (array) $options;
+		$source_data                  = new stdClass();
+		$source_data->options         = (array) $options;
 		$source_data->connected_sites = (array) ConnectedSites::get_all()->get_data();
-		$source_data->nonce = (string) wp_create_nonce( 'data_push' );
-		$source_data->posts = Posts::get( array_keys( $options['push_enabled_post_types'] ) );
-		$source_data->acf = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+		$source_data->nonce           = (string) wp_create_nonce( 'data_push' );
+		$source_data->posts           = (array) Posts::get( array_keys( $options->push_enabled_post_types ) );
+		$source_data->acf             = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
 
 		return $source_data;
 

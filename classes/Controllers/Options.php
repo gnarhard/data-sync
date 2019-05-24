@@ -71,20 +71,15 @@ class Options {
 	}
 
 	public static function source() {
-//		$option_keys = array(
-//			'push_enabled_post_types',
-//		);
-//
-//		$response = Options::get_all( $option_keys );
 
-		$options = array();
+		$options = new stdClass();
 
 		if ( function_exists( 'cptui_get_post_type_data' ) ) {
 
 			$cpt_data = cptui_get_post_type_data();
 
 			foreach ( get_option( 'push_enabled_post_types' ) as $post_type ) {
-				$options['push_enabled_post_types'][ $post_type ] = $cpt_data[ $post_type ];
+				$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
 			}
 		}
 
