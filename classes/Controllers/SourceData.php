@@ -33,7 +33,6 @@ class SourceData {
 		$connected_sites = $source_data['source']['connected_sites'];
 
 		foreach ( $connected_sites as $site ) {
-			Auth::create_jwt( $source_data );
 			$auth                    = new Auth();
 			$auth_response           = $auth->authenticate_site( $site->url );
 			$authorization_validated = $auth->validate( $site->url, $auth_response );
