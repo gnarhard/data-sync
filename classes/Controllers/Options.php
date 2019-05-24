@@ -69,24 +69,39 @@ class Options {
 		return $response;
 	}
 
-	public static function get_all() {
+	public static function get_all_source() {
 		$option_keys = array(
 			'push_enabled_post_types',
 		);
 
-		$options = array();
-
-		foreach ( $option_keys as $key ) {
-			$request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
-			$request->set_url_params( array( self::$option_key => $key ) );
-			$options[ $key ] = self::get( $request )->data;
-		}
-
-		$response = new WP_REST_Response( $options );
-		$response->set_status( 201 );
-		return $response;
+		return Options::get_all( $option_keys );
 
 	}
+
+	public static function get_all_receiver() {
+    $option_keys = array(
+        'notified_users',
+        'enabled_post_types',
+    );
+
+
+
+    return Options::get_all( $option_keys );
+  }
+
+  public static function get_all( $option_keys ) {
+    $options = array();
+
+    foreach ( $option_keys as $key ) {
+      $request = new WP_REST_Request( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
+      $request->set_url_params( array( self::$option_key => $key ) );
+      $options[ $key ] = self::get( $request )->data;
+    }
+
+    $response = new WP_REST_Response( $options );
+    $response->set_status( 201 );
+    return $response;
+  }
 
 	/**
 	 * Save options

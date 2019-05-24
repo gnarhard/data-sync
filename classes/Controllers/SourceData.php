@@ -47,7 +47,6 @@ class SourceData {
 					),
 				);
 				$response = wp_remote_post( $url, $args );
-				print_r( $response );
 			}
 
 
@@ -62,7 +61,7 @@ class SourceData {
 		return array(
 			'source' => array(
 				'options'         => $options,
-				'connected_sites' => ConnectedSites::get_all()->data,
+				'connected_sites' => ConnectedSites::get_all_source()->data,
 			),
 			'posts'  => Posts::get( $options['push_enabled_post_types'] ),
 			'acf'    => Posts::get_acf_fields(), // use acf_add_local_field_group() to install this array.

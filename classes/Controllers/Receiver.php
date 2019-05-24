@@ -20,13 +20,15 @@ class Receiver {
 				array(
 					'methods'  => WP_REST_Server::EDITABLE,
 					'callback' => array( $this, 'receive' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 				)
 			)
 		);
 	}
 
 	public function receive() {
+	  echo 'asdf';die();
+	  $options = Options::get_all_receiver()->data;
 		print_r($_POST);
 	}
 
