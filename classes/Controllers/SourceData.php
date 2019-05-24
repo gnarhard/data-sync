@@ -50,7 +50,6 @@ class SourceData {
 				print_r($response['body']);
 			}
 
-
 		}
 
 	}

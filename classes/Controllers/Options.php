@@ -74,7 +74,13 @@ class Options {
 			'push_enabled_post_types',
 		);
 
-		return Options::get_all( $option_keys );
+		$response = Options::get_all( $option_keys );
+
+		foreach( $response->data['push_enabled_post_types'] as $post_type ) {
+			
+		}
+
+		return $response;
 
 	}
 
