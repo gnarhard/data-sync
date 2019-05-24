@@ -11,8 +11,8 @@ class PostTypes {
 
 		global $wp_post_types;
 		$registered_receiver_cpts = array_keys( $wp_post_types );
-print_r($receiver_options);
-		if ( $receiver_options['add_and_enable_new_cpts'] ) {
+
+		if ( $receiver_options->add_and_enable_new_cpts ) {
 			foreach ( $source_options->push_enabled_post_types as $post_type ) {
 				if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
 					$data = array(
