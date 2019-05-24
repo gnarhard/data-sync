@@ -7,6 +7,8 @@ use WP_Query;
 
 class Posts {
 
+	public $table_name = 'data_sync_post_types';
+
 	public static function get( $types ) {
 		$posts = array();
 
@@ -98,22 +100,6 @@ class Posts {
 
 	}
 
-	public static function create_post_type( $post_type_slug ) {
 
-	}
-
-	public static function process_post_types( $receiver_options, $source_options ) {
-
-		global $wp_post_types;
-		$registered_receiver_cpts = array_keys( $wp_post_types );
-
-		if ( $receiver_options['add_and_enable_new_cpts'] ) {
-			foreach ( $source_options['push_enabled_post_types'] as $post_type ) {
-				if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
-					self::create_post_type( $post_type );
-				}
-			}
-		}
-	}
 
 }

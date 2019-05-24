@@ -127,7 +127,7 @@ class Auth {
 	 *
 	 * @return bool
 	 */
-	public function permissions() {
+	public static function permissions() {
 		return current_user_can( 'manage_options' );
 	}
 

@@ -31,17 +31,16 @@ class Receiver {
 		if ( isset( $_POST ) ) {
 			$json_str    = file_get_contents( 'php://input' );
 			$source_data = json_decode( $json_str );
-			print_r( $source_data );
+//			print_r( $source_data );
 			Auth::verify_request( $source_data->source->options->nonce );
 
-			$source_options                              = $source_data->source->options;
-			$connected_sites                             = $source_data->source->connected_sites;
+			$source_options                            = $source_data->source->options;
+			$connected_sites                           = $source_data->source->connected_sites;
+			$receiver_options                          = Options::receiver()->get_data();
+			$receiver_options->add_and_enable_new_cpts = true;
+			$post_types_to_import                      = array();
 
-			$receiver_options                            = Options::receiver()->get_data();
-			$receiver_options['add_and_enable_new_cpts'] = true;
-			$post_types_to_import                        = array();
-
-			Posts::process_post_types( $receiver_options, $source_options );
+			$post_type_obj = new PostTypes( $receiver_options, $source_options );
 
 			foreach ( $receiver_options['enabled_post_types'] as $post_type ) {
 				$post_types_to_import[] = $source_data[ $post_type ];

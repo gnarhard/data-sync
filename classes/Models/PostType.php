@@ -3,27 +3,20 @@
 
 namespace DataSync\Models;
 
-use DataSync\Controllers\Error;
-use DataSync\Helpers;
-use WP_Error;
-use WP_Query;
 
-class ConnectedSite {
+class PostType {
 
-	public static $table_name = 'data_sync_connected_sites';
+	public static $table_name = 'data_sync_post_types';
 
 	public static function create( $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$table_name;
 
-		$url = Helpers::format_url( $data['url'] );
-
 		$result = $wpdb->insert(
 			$table_name,
 			array(
 				'name'           => $data['name'],
-				'url'            => esc_url_raw( $url ),
-				'date_connected' => current_time( 'mysql' ),
+				'date_created' => current_time( 'mysql' ),
 			),
 			array(
 				'%s',
@@ -68,8 +61,7 @@ class ConnectedSite {
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
-	        url               VARCHAR(255),
-	        date_connected    DATETIME NOT NULL
+	        date_created    DATETIME NOT NULL
 	    );'
 		);
 	}

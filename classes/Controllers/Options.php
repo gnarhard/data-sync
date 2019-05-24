@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
+use stdClass;
 
 /**
  * Class Options
@@ -114,17 +115,16 @@ class Options {
 	}
 
 	public static function get_all( $option_keys ) {
-		$options = array();
+		$options = new stdClass();
 
 		foreach ( $option_keys as $key ) {
 			$request = new WP_REST_Request();
 			$request->set_method( 'GET' );
-			$request->set_route( 'GET', DATA_SYNC_API_BASE_URL . '/options/' . $key );
-			$request->set_body( wp_json_encode( $source_data ) );
+			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/options/' . $key );
 			$request->set_url_params( array( self::$option_key => $key ) );
 
 			$response        = rest_do_request( $request );
-			$options[ $key ] = $response->get_data();
+			$options->$key = $response->get_data();
 		}
 
 		$response = new WP_REST_Response( $options );
