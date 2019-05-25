@@ -6,9 +6,9 @@ namespace DataSync\Models;
 
 class PostType {
 
-	public static $table_name = 'data_sync_post_types';
+	public static $table_name = 'data_sync_custom_post_types';
 
-	public static function create( $data ) {
+	public static function create( object $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$table_name;
 
@@ -30,13 +30,24 @@ class PostType {
 		}
 	}
 
-	public static function update() {
+	public static function update( object $data ) {
 		global $wpdb;
+		$table_name = $wpdb->prefix . self::$table_name;
 
-//		$updated = $wpdb->update( $table, $data, $where );
+		$db_data         = array();
+		$db_data['name'] = $data->name;
+		$db_data['data'] = wp_json_encode( $data );
+
+		$updated = $wpdb->update( $table_name, $db_data, [ 'id' => $data->id ] );
+
+		if ( false === $updated ) {
+			// TODO: RETURN ERROR
+		} else {
+			return $updated;
+		}
 	}
 
-	public static function delete( $id ) {
+	public static function delete( int $id ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$table_name;
 		$result     = $wpdb->delete(
@@ -66,7 +77,10 @@ class PostType {
 	        date_created    DATETIME NOT NULL
 	    );'
 		);
-		var_dump($result); echo get_site_url();
+	}
+
+	public static function register_cpt() {
+		// TODO: ADD PHP CODE FOR REGISTERING CPTs SAVED TO DB
 	}
 
 }

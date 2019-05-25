@@ -31,24 +31,26 @@ class Receiver {
 		if ( isset( $_POST ) ) {
 			$json_str    = file_get_contents( 'php://input' );
 			$source_data = (object) json_decode( $json_str );
-//			print_r( $source_data );
 			Auth::verify_request( $source_data->nonce );
-
-			$source_options       = (object) $source_data->options;
-			$connected_sites      = (object) $source_data->connected_sites;
-			$receiver_options     = (object) Options::receiver()->get_data();
-			$post_types_to_import = array();
-
-			$post_type_obj = new PostTypes( $receiver_options, $source_options );
-
-			foreach ( $receiver_options->enabled_post_types as $post_type ) {
-				$post_types_to_import[] = $source_data->$post_type;
-			}
-
-			print_r( $receiver_options );
-
+			$this->parse( $source_data );
 		}
 
+	}
+
+	private function parse( object $source_data ) {
+
+//		print_r( $source_data );
+
+		$source_options       = (object) $source_data->options;
+		$connected_sites      = (object) $source_data->connected_sites;
+		$receiver_options     = (object) Options::receiver()->get_data();
+		$post_types_to_import = array();
+
+		$post_type_obj = new PostTypes( $source_options );
+
+//		foreach ( $receiver_options->enabled_post_types as $post_type ) {
+//			$post_types_to_import[] = $source_data->$post_type;
+//		}
 	}
 
 }
