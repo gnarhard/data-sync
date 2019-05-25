@@ -8,6 +8,7 @@ use DataSync\Controllers\Options;
 use DataSync\Controllers\SourceData;
 use DataSync\Controllers\Widgets;
 use DataSync\Controllers\Receiver;
+use DataSync\Controllers\PostTypes;
 
 /**
  * Plugin Name: Data Sync
@@ -83,3 +84,4 @@ new Widgets();
 new ConnectedSites();
 new SourceData();
 new Receiver();
+$register_cpts = new PostTypes();

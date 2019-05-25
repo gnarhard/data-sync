@@ -79,8 +79,4 @@ class PostType {
 		);
 	}
 
-	public static function register_cpt() {
-		// TODO: ADD PHP CODE FOR REGISTERING CPTs SAVED TO DB
-	}
-
 }
