@@ -39,7 +39,7 @@ class Auth {
 		);
 	}
 
-	public static function verify_request( $nonce ) {
+	public static function verify_request( string $nonce ) {
 		$response = wp_verify_nonce( $nonce, 'data_push' );
 		if ( false === $response ) {
 			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 403 ) );
@@ -94,7 +94,7 @@ class Auth {
 
 	}
 
-	public function validate( $site_url, $auth_response ) {
+	public function validate( string $site_url, $auth_response ) {
 
 		$token         = json_decode( $auth_response )->token;
 		$url           = trailingslashit( $site_url ) . 'wp-json/jwt-auth/v1/token/validate';

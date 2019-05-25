@@ -109,7 +109,7 @@ class Options {
 		return Options::get_all( $option_keys );
 	}
 
-	public static function get_all( $option_keys ) {
+	public static function get_all( array $option_keys ) {
 		$options = new stdClass();
 
 		foreach ( $option_keys as $key ) {
@@ -228,6 +228,9 @@ class Options {
 			add_settings_field( 'bulk_data_push', 'Push All Data to Receivers', $this->view_namespace . '\display_bulk_data_push_button', 'data-sync-options', 'data_sync_options' );
 
 			add_settings_field( 'push_template', 'Push Template to Receivers', $this->view_namespace . '\display_push_template_button', 'data-sync-options', 'data_sync_options' );
+
+			add_settings_field( 'add_and_enable_new_cpts', 'Automatically Add and Register All Pushed Custom Post Types', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'add_and_enable_new_cpts' );
 
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'push_enabled_post_types' );

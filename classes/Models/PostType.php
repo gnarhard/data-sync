@@ -15,7 +15,8 @@ class PostType {
 		$result = $wpdb->insert(
 			$table_name,
 			array(
-				'name'           => $data['name'],
+				'name'         => $data->name,
+				'data'         => wp_json_encode( $data ),
 				'date_created' => current_time( 'mysql' ),
 			),
 			array(
@@ -61,9 +62,11 @@ class PostType {
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
+	        data              json,
 	        date_created    DATETIME NOT NULL
 	    );'
 		);
+		var_dump($result); echo get_site_url();
 	}
 
 }
