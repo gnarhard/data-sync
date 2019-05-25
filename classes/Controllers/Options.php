@@ -83,6 +83,8 @@ class Options {
 			}
 		}
 
+		$options->add_and_enable_new_cpts = get_option( 'add_and_enable_new_cpts' );
+
 		$response = new WP_REST_Response( $options );
 		$response->set_status( 201 );
 
