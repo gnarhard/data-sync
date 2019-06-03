@@ -8,7 +8,7 @@ use DataSync\Models\PostType;
 class PostTypes {
 
 	public function __construct() {
-		$this->register();
+		add_action( 'init', [$this, 'register'] );
 	}
 
 	public static function add_new_cpts( object $source_options ) {
@@ -88,9 +88,9 @@ class PostTypes {
 	public function register() {
 
 		$synced_custom_post_types = $this->get_all_cpts();
-		foreach( $synced_custom_post_types as $post_type ) {
+
+		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );
-			print_r($args);
 			register_post_type( $post_type->name, $args );
 		}
 

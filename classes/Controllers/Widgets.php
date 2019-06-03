@@ -12,7 +12,9 @@ class Widgets {
 	 * Widgets constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_dashboard_setup', [ $this, 'dashboard' ] );
+		if ( get_option( 'source_site' ) ) {
+			add_action( 'wp_dashboard_setup', [ $this, 'dashboard' ] );
+		}
 	}
 
 	/**
