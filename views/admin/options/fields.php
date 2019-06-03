@@ -71,7 +71,7 @@ function display_bulk_data_push_button() {
 
 function display_auto_add_cpt_checkbox() {
 	?>
-  <input name='add_and_enable_new_cpts' type="checkbox" value="1" <?php checked( get_option( 'add_and_enable_new_cpts' ), 1 ); ?>>
+  <input name='enable_new_cpts' type="checkbox" value="1" <?php checked( get_option( 'enable_new_cpts' ), 1 ); ?>>
 	<?php
 }
 

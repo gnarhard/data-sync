@@ -46,8 +46,9 @@ class Receiver {
 		$receiver_options     = (object) Options::receiver()->get_data();
 		$post_types_to_import = array();
 
-		if ( $source_options->add_and_enable_new_cpts )
-			PostTypes::add_and_enable_new_cpts( $source_options );
+		PostTypes::add_new_cpts( $source_options );
+		if ( $source_options->enable_new_cpts )
+			PostTypes::save_options();
 
 
 //		foreach ( $receiver_options->enabled_post_types as $post_type ) {

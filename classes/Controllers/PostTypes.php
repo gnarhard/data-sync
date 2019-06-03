@@ -8,10 +8,10 @@ use DataSync\Models\PostType;
 class PostTypes {
 
 	public function __construct() {
-		$this->register_cpts();
+		$this->register();
 	}
 
-	public static function add_and_enable_new_cpts( object $source_options ) {
+	public static function add_new_cpts( object $source_options ) {
 		global $wp_post_types;
 		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
 
@@ -63,12 +63,10 @@ class PostTypes {
 
 		$new_data[] = $data;
 
-		self::save_options();
-
 		return wp_parse_args( $new_data );
 	}
 
-	private static function save_options() {
+	public static function save_options() {
 		$data = (array) get_option( 'enabled_post_types' );
 
 		$synced_custom_post_types = self::get_all_cpts();
@@ -87,7 +85,7 @@ class PostTypes {
 		return in_array( $table_name, $wpdb->tables );
 	}
 
-	public function register_cpts() {
+	public function register() {
 
 		$synced_custom_post_types = $this->get_all_cpts();
 		foreach( $synced_custom_post_types as $post_type ) {
