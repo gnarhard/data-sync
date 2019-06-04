@@ -85,7 +85,7 @@ class Posts {
 			update_post_meta( $post_id, '_canonical_site', $data );
 		}
 		if ( isset( $_POST['excluded_sites'] ) ) {
-			$data = $_POST['excluded_sites'];
+			$data           = $_POST['excluded_sites'];
 			$sanitized_data = array_map( 'absint', $data );
 			update_post_meta( $post_id, '_excluded_sites', $sanitized_data );
 		}
@@ -136,10 +136,11 @@ class Posts {
 	}
 
 	private static function get_media( $post_id ) {
-		$media = new stdClass();
+		$media        = new stdClass();
 		$media->image = get_attached_media( 'image', $post_id );
 		$media->audio = get_attached_media( 'audio', $post_id );
 		$media->video = get_attached_media( 'video', $post_id );
+
 		return $media;
 	}
 
@@ -186,24 +187,17 @@ class Posts {
 	}
 
 	public static function filter( object $post, int $receiver_site_id ) {
-		// TODO: IF EXCLUDED SITE, CONTINUE
-		print_r($post->post_meta);
-		$excluded_sites = unserialize( $post->post_meta['_excluded_sites'][0] );
-		echo 'filter_asdf';
-		print_r($excluded_sites); die();
-		foreach ($excluded_sites as $excluded_site_id ) {
-
+		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
+		foreach ( $excluded_sites as $excluded_site_id ) {
 			if ( (int) $excluded_site_id === (int) $receiver_site_id ) {
-
+				return false;
+			} else {
+				return $post;
 			}
-
 		}
-
-		return $post;
 	}
 
-	private static function save( object $post ) {
-
+	public static function save( object $post ) {
 
 
 		print_r( $post );
@@ -253,15 +247,6 @@ class Posts {
 
 	private static function save_to_sync_table() {
 		// TODO: send to source to save in wp_data_sync_posts
-	}
-
-
-	public static function sync( array $post_data ) {
-
-		foreach ( $post_data as $post ) {
-			Posts::save( $post );
-		}
-
 	}
 
 

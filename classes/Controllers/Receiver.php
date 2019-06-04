@@ -39,7 +39,7 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
-		print_r( $source_data );
+//		print_r( $source_data );
 
 		$source_options   = (object) $source_data->options;
 		$connected_sites  = (object) $source_data->connected_sites;
@@ -54,9 +54,11 @@ class Receiver {
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 			foreach ( $source_data->posts->$post_type_slug as $post ) {
 				$filtered_post = Posts::filter( $post, $receiver_site_id );
-				if ( $post_type_slug === 'locations' ) {
-					Posts::sync( $filtered_post );
+				if ( false !== $filtered_post ) {
+					Posts::save( $filtered_post );
 				}
+//				if ( $post_type_slug === 'locations' ) {
+//				}
 			}
 		}
 
