@@ -52,18 +52,29 @@ class Post {
 //
 //	}
 //
-//	public static function create_db_table() {
-//		global $wpdb;
-//		$table_name = $wpdb->prefix . self::$table_name;
-//
-//		$result = $wpdb->query(
-//			'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (
-//	        id INT NOT NULL AUTO_INCREMENT,
-//	        PRIMARY KEY(id),
-//	        name              VARCHAR(255),
-//	        date_created    DATETIME NOT NULL
-//	    );'
-//		);
-//	}
+	public static function create_db_table() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$table_name;
+
+		$result = $wpdb->query(
+			'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (
+	        id INT NOT NULL AUTO_INCREMENT,
+	        PRIMARY KEY(id),
+	        source_post_id     INT,
+	        receiver_post_id   INT,
+	        site_id            INT UNSIGNED NOT NULL,
+	        name              VARCHAR(255),
+	        date_modified    DATETIME NOT NULL
+	    );'
+		);
+
+		$result = $wpdb->query(
+			'ALTER TABLE ' . $table_name . ' 
+			ADD CONSTRAINT fk_site_id FOREIGN KEY (site_id) 
+			REFERENCES ' . $wpdb->prefix . ConnectedSite::$table_name . '(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE;'
+		);
+	}
 
 }

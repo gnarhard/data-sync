@@ -50,10 +50,7 @@ class Receiver {
 		if ( $source_options->enable_new_cpts )
 			PostTypes::save_options();
 
-
-//		foreach ( $receiver_options->enabled_post_types as $post_type ) {
-//			$post_types_to_import[] = $source_data->$post_type;
-//		}
+		Posts::pull();
 	}
 
 }

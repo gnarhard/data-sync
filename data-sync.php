@@ -2,13 +2,7 @@
 
 namespace DataSync;
 
-use DataSync\Controllers\Enqueue;
-use DataSync\Controllers\ConnectedSites;
-use DataSync\Controllers\Options;
-use DataSync\Controllers\SourceData;
-use DataSync\Controllers\Widgets;
-use DataSync\Controllers\Receiver;
-use DataSync\Controllers\PostTypes;
+use DataSync\Controllers\Load;
 
 /**
  * Plugin Name: Data Sync
@@ -78,10 +72,4 @@ if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 	require_once DATA_SYNC_PATH . 'vendor/autoload.php';
 }
 
-new Enqueue();
-new Options();
-new Widgets();
-new ConnectedSites();
-new SourceData();
-new Receiver();
-$register_cpts = new PostTypes();
+new Load();

@@ -101,5 +101,10 @@ class Posts {
 	}
 
 
+	public static function pull() {
+
+	}
+
+
 
 }
