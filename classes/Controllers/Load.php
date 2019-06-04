@@ -2,14 +2,14 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Controllers\Enqueue;
+use DataSync\Controllers\ConnectedSites;
+use DataSync\Controllers\Options;
+use DataSync\Controllers\SourceData;
+use DataSync\Controllers\Widgets;
+use DataSync\Controllers\Receiver;
+use DataSync\Controllers\PostTypes;
 use DataSync\Models\ConnectedSite;
-use Enqueue;
-use ConnectedSites;
-use Options;
-use SourceData;
-use Widgets;
-use Receiver;
-use PostTypes;
 use DataSync\Models\Post;
 
 
