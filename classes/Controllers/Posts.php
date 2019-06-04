@@ -9,13 +9,92 @@ class Posts {
 
 	public $table_name = 'data_sync_post_types';
 
-	public static function add_canonical_checkbox() {
-		//TODO: ADD CHECKBOX IN POST SIDEBAR
+	public $view_namespace = 'DataSync';
+
+	public function __construct() {
+		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
+		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
+		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
 	}
 
-	public static function add_excluded_sites_select_field() {
-		// TODO: excluded site IDs multiple selector field
+	public function add_meta_boxes() {
+		add_meta_box(
+			'canonical_sites',
+			__(
+				'Canonical Sites',
+				'textdomain'
+			),
+			$this->view_namespace . '\add_canonical_radio_inputs',
+			'post'
+		);
+		add_meta_box(
+			'excluded_sites',
+			__(
+				'Sites Excluded From Sync',
+				'textdomain'
+			),
+			$this->view_namespace . '\add_excluded_sites_select_field',
+			'post'
+		);
 	}
+
+	public function save_meta_boxes( $post_id ) {
+		/*
+		 * We need to verify this came from the our screen and with proper authorization,
+		 * because save_post can be triggered at other times.
+		 */
+
+		// Check if our nonce is set.
+		if ( ! isset( $_POST['data_sync_post_meta_box_nonce'] ) ) {
+			return $post_id;
+		}
+
+		$nonce = wp_unslash( $_POST['data_sync_post_meta_box_nonce'] );
+
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $nonce, 'data_sync_post_meta_box' ) ) {
+			return $post_id;
+		}
+
+		/*
+		 * If this is an autosave, our form has not been submitted,
+		 * so we don't want to do anything.
+		 */
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
+
+		// Check the user's permissions.
+		if ( 'page' == $_POST['post_type'] ) {
+			if ( ! current_user_can( 'edit_page', $post_id ) ) {
+				return $post_id;
+			}
+		} else {
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return $post_id;
+			}
+		}
+
+		/* OK, it's safe for us to save the data now. */
+		if ( isset( $_POST['canonical_sites'] ) ) {
+			$this->save_canonical_sites( $post_id );
+		} elseif ( isset( $_POST['excluded_sites'] ) ) {
+			$this->save_excluded_sites( $post_id );
+		}
+
+		return true;
+	}
+
+	public function save_canonical_sites( $post_id ) {
+		$mydata = $_POST['canonical_sites'];
+		update_post_meta( $post_id, '_canonical_sites', $mydata );
+	}
+
+	public function save_excluded_sites( $post_id ) {
+		$mydata = $_POST['excluded_sites'];
+		update_post_meta( $post_id, '_excluded_sites', $mydata );
+	}
+
 
 	public static function get( $types ) {
 		$posts = array();
@@ -111,46 +190,46 @@ class Posts {
 
 	private static function save( object $post ) {
 
-		print_r($post);
+		print_r( $post );
 
-		$post_id = $post->ID;
-		$post_meta = $post->post_meta;
+		$post_id    = $post->ID;
+		$post_meta  = $post->post_meta;
 		$taxonomies = $post->taxonomies;
-		$media = $post->media;
+		$media      = $post->media;
 
 
-		print_r($post_meta);
-		print_r($taxonomies);
+		print_r( $post_meta );
+		print_r( $taxonomies );
 		die();
 		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
-		unset($post_array['ID']);
-		unset($post_array['post_meta']);
-		unset($post_array['taxonomies']);
-		unset($post_array['media']);
-		unset($post_array['guid']);
+		unset( $post_array['ID'] );
+		unset( $post_array['post_meta'] );
+		unset( $post_array['taxonomies'] );
+		unset( $post_array['media'] );
+		unset( $post_array['guid'] );
 
-		foreach( $post_array as $key => $value ) {
-			$post_array[$key] = str_replace( $post_array['source_url'], get_site_url(), $value );
+		foreach ( $post_array as $key => $value ) {
+			$post_array[ $key ] = str_replace( $post_array['source_url'], get_site_url(), $value );
 		}
 		$post_id = wp_insert_post( $post_array );
 
 		if ( $post_id ) {
 
-			foreach( $post_meta as $meta_key => $meta_value ) {
+			foreach ( $post_meta as $meta_key => $meta_value ) {
 				// Yoast and ACF data will be in here.
 				update_post_meta( $post_id, $meta_key, $meta_value );
 			}
 
-			foreach( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
-				foreach( $taxonomy_data as $term ) {
+			foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
+				foreach ( $taxonomy_data as $term ) {
 					wp_set_object_terms( $post_id, $term->slug, $taxonomy_slug );
 				}
 			}
 
 		}
 
-		var_dump($post_id);
+		var_dump( $post_id );
 		die();
 
 		Posts::save_to_sync_table( $post_id, $site_id );
@@ -161,14 +240,13 @@ class Posts {
 	}
 
 
-	public static function sync( array $post_data) {
+	public static function sync( array $post_data ) {
 
-		foreach( $post_data as $post ) {
+		foreach ( $post_data as $post ) {
 			Posts::save( $post );
 		}
 
 	}
-
 
 
 }

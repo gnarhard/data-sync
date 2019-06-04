@@ -9,6 +9,7 @@ use DataSync\Controllers\SourceData;
 use DataSync\Controllers\Widgets;
 use DataSync\Controllers\Receiver;
 use DataSync\Controllers\PostTypes;
+use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\Post;
 
@@ -22,6 +23,7 @@ class Load {
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
+		new Posts();
 		$register_cpts = new PostTypes();
 
 		if ( get_option( 'source_site' ) ) {
