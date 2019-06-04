@@ -4,6 +4,7 @@
 namespace DataSync\Controllers;
 
 use WP_Query;
+use stdClass;
 
 class Posts {
 
@@ -94,13 +95,13 @@ class Posts {
 
 
 	public static function get( $types ) {
-		$posts = array();
+		$posts = new stdClass();
 
 		foreach ( $types as $type ) {
 
-			$posts[ $type ] = self::get_posts( $type );
+			$posts->$type = self::get_posts( $type );
 
-			foreach ( $posts[ $type ] as $post ) {
+			foreach ( $posts->$type as $post ) {
 
 				$post->source_url = get_site_url();
 				$post->post_meta  = get_post_meta( $post->ID );
@@ -115,7 +116,6 @@ class Posts {
 
 			}
 		}
-
 
 		return $posts;
 
@@ -136,11 +136,11 @@ class Posts {
 	}
 
 	private static function get_media( $post_id ) {
-		return array(
-			'image' => get_attached_media( 'image', $post_id ),
-			'audio' => get_attached_media( 'audio', $post_id ),
-			'video' => get_attached_media( 'video', $post_id ),
-		);
+		$media = new stdClass();
+		$media->image = get_attached_media( 'image', $post_id );
+		$media->audio = get_attached_media( 'audio', $post_id );
+		$media->video = get_attached_media( 'video', $post_id );
+		return $media;
 	}
 
 	public static function get_acf_fields() {

@@ -41,7 +41,7 @@ class SourceData {
 			$authorization_validated = $auth->validate( $site->url, $auth_response );
 
 			if ( $authorization_validated ) {
-				$source_data->receiver_site_id = $site->id;
+				$source_data->_receiver_site_id = (int) $site->id;
 				$json                          = wp_json_encode( $source_data );
 				$token                         = json_decode( $auth_response )->token;
 				$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
@@ -78,7 +78,7 @@ class SourceData {
 		$source_data->url             = (string) get_site_url();
 		$source_data->connected_sites = (array) ConnectedSites::get_all()->get_data();
 		$source_data->nonce           = (string) wp_create_nonce( 'data_push' );
-		$source_data->posts           = (array) Posts::get( array_keys( $options->push_enabled_post_types ) );
+		$source_data->posts           = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->acf             = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
 
 		$validated_source_data = $this->validate( $source_data );
@@ -95,13 +95,13 @@ class SourceData {
 			foreach ( $post_data as $key => $post ) {
 
 				if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
-					unset( $source_data->$post_type[ $key ] );
+					unset( $source_data->posts->$post_type[ $key ] );
 //					$error = new Error();
 //					( $error ) ? $error->log( 'Canonical site not set in post: ' . $post->post_title . "\n" ) : null;
 				}
 
 				if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
-					unset( $source_data->$post_type[ $key ] );
+					unset( $source_data->posts->$post_type[ $key ] );
 //					$error = new Error();
 //					( $error ) ? $error->log( 'Excluded sites not set in post: ' . $post->post_title . "\n" ) : null;
 				}
