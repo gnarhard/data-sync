@@ -199,19 +199,10 @@ class Posts {
 
 	public static function save( object $post ) {
 
-
-		print_r( $post );
-
-		$post_id    = $post->ID;
+		$source_post_id    = $post->ID;
 		$post_meta  = $post->post_meta;
-		$taxonomies = $post->taxonomies;
-		$media      = $post->media;
-
-
-		print_r( $post_meta );
-		print_r( $taxonomies );
-		die();
 		$post_array = (array) $post; // must convert to array to use wp_insert_post.
+
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
 		unset( $post_array['ID'] );
 		unset( $post_array['post_meta'] );
@@ -222,20 +213,22 @@ class Posts {
 		foreach ( $post_array as $key => $value ) {
 			$post_array[ $key ] = str_replace( $post_array['source_url'], get_site_url(), $value );
 		}
-		$post_id = wp_insert_post( $post_array );
 
-		if ( $post_id ) {
+		print_r( $post_array );
+
+		die();
+
+		$receiver_post_id = wp_insert_post( $post_array );
+
+		if ( $receiver_post_id ) {
 
 			foreach ( $post_meta as $meta_key => $meta_value ) {
 				// Yoast and ACF data will be in here.
-				update_post_meta( $post_id, $meta_key, $meta_value );
+				update_post_meta( $receiver_post_id, $meta_key, $meta_value );
 			}
 
-			foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
-				foreach ( $taxonomy_data as $term ) {
-					wp_set_object_terms( $post_id, $term->slug, $taxonomy_slug );
-				}
-			}
+			new Taxonomies( $receiver_post_id, $post->taxonomies );
+			new Media( $receiver_post_id, $post->media );
 
 		}
 
