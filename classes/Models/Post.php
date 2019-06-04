@@ -54,26 +54,32 @@ class Post {
 //
 	public static function create_db_table() {
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
+		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
 
 		$result = $wpdb->query(
-			'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (
+			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
-	        source_post_id     INT,
-	        receiver_post_id   INT,
-	        site_id            INT UNSIGNED NOT NULL,
-	        name              VARCHAR(255),
+	        source_post_id     INT NOT NULL,
+	        receiver_post_id   INT NOT NULL,
+	        site_id            INT NOT NULL,
+	        name              VARCHAR(255) NOT NULL,
 	        date_modified    DATETIME NOT NULL
 	    );'
 		);
 
 		$result = $wpdb->query(
-			'ALTER TABLE ' . $table_name . ' 
+			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
+			CONVERT TO ' . $charset_collate . ';'
+		);
+
+		$result = $wpdb->query(
+			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . ' 
 			ADD CONSTRAINT fk_site_id FOREIGN KEY (site_id) 
 			REFERENCES ' . $wpdb->prefix . ConnectedSite::$table_name . '(id)
 			ON DELETE CASCADE
-			ON UPDATE CASCADE;'
+			ON UPDATE CASCADE
+			;'
 		);
 	}
 

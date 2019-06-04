@@ -22,8 +22,10 @@ class Enqueue {
 	 */
 	public function scripts() {
 
+		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', false, 1, true );
+
 		if ( get_option( 'source_site' ) ) {
-			wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', false, 1, true );
+
 			wp_localize_script(
 				'data-sync-admin',
 				'DataSync',
@@ -36,7 +38,6 @@ class Enqueue {
 						'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
 						'nonce' => wp_create_nonce( 'wp_rest' ),
 					),
-					'source_site'  => get_option( 'source_site' ),
 				)
 			);
 

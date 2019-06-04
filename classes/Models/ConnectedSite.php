@@ -14,12 +14,11 @@ class ConnectedSite {
 
 	public static function create( $data ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
 
 		$url = Helpers::format_url( $data['url'] );
 
 		$result = $wpdb->insert(
-			$table_name,
+			$wpdb->prefix . self::$table_name,
 			array(
 				'name'           => $data['name'],
 				'url'            => esc_url_raw( $url ),
@@ -44,9 +43,8 @@ class ConnectedSite {
 
 	public static function delete( $id ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
 		$result     = $wpdb->delete(
-			$table_name,
+			$wpdb->prefix . self::$table_name,
 			array(
 				'id' => $id,
 			),
@@ -61,16 +59,22 @@ class ConnectedSite {
 
 	public static function create_db_table() {
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
+
+		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
 
 		$result = $wpdb->query(
-			'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (
+			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
 	        url               VARCHAR(255),
-	        date_connected    DATETIME NOT NULL
+	        date_connected    DATETIME NOT NULL 
 	    );'
+		);
+
+		$result = $wpdb->query(
+			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
+			CONVERT TO ' . $charset_collate . ';'
 		);
 	}
 
