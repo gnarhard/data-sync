@@ -185,12 +185,17 @@ class Posts {
 
 	}
 
-	public static function filter( object $post, $source_data ) {
+	public static function filter( object $post, int $receiver_site_id ) {
 		// TODO: IF EXCLUDED SITE, CONTINUE
+		print_r($post->post_meta);
 		$excluded_sites = unserialize( $post->post_meta['_excluded_sites'][0] );
-		echo 'here';
+		echo 'filter_asdf';
 		print_r($excluded_sites); die();
 		foreach ($excluded_sites as $excluded_site_id ) {
+
+			if ( (int) $excluded_site_id === (int) $receiver_site_id ) {
+
+			}
 
 		}
 

@@ -41,18 +41,22 @@ class Receiver {
 
 //		print_r( $source_data );
 
-		$source_options       = (object) $source_data->options;
-		$connected_sites      = (object) $source_data->connected_sites;
-		$receiver_options     = (object) Options::receiver()->get_data();
+		$source_options   = (object) $source_data->options;
+		$connected_sites  = (object) $source_data->connected_sites;
+		$receiver_options = (object) Options::receiver()->get_data();
+		$receiver_site_id = (int) $source_data->receiver_site_id;
 
 		PostTypes::add_new_cpts( $source_options );
-		if ( $source_options->enable_new_cpts )
+		if ( $source_options->enable_new_cpts ) {
 			PostTypes::save_options();
+		}
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
-			$posts = Posts::filter( $source_data->posts->$post_type_slug );
-			if ($post_type_slug === 'locations') {
-				Posts::sync( $posts );
+			foreach ( $source_data->posts->$post_type_slug as $post ) {
+				$filtered_post = Posts::filter( $post, $receiver_site_id );
+				if ( $post_type_slug === 'locations' ) {
+					Posts::sync( $filtered_post );
+				}
 			}
 		}
 

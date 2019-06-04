@@ -94,13 +94,13 @@ class SourceData {
 
 			foreach ( $post_data as $key => $post ) {
 
-				if ( ! isset( $post->post_meta['_canonical_site'][0] ) ) {
+				if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
 					unset( $source_data->$post_type[ $key ] );
 //					$error = new Error();
 //					( $error ) ? $error->log( 'Canonical site not set in post: ' . $post->post_title . "\n" ) : null;
 				}
 
-				if ( ! isset( $post->post_meta['_excluded_sites'][0] ) ) {
+				if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
 					unset( $source_data->$post_type[ $key ] );
 //					$error = new Error();
 //					( $error ) ? $error->log( 'Excluded sites not set in post: ' . $post->post_title . "\n" ) : null;
