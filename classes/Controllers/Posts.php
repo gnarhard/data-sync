@@ -18,15 +18,18 @@ class Posts {
 	}
 
 	public function add_meta_boxes() {
+		$push_enabled_post_types = get_option( 'push_enabled_post_types' );
+
 		add_meta_box(
-			'canonical_sites',
+			'canonical_site',
 			__(
-				'Canonical Sites',
+				'Canonical Site',
 				'textdomain'
 			),
 			$this->view_namespace . '\add_canonical_radio_inputs',
-			'post'
+			$push_enabled_post_types
 		);
+
 		add_meta_box(
 			'excluded_sites',
 			__(
@@ -34,7 +37,7 @@ class Posts {
 				'textdomain'
 			),
 			$this->view_namespace . '\add_excluded_sites_select_field',
-			'post'
+			$push_enabled_post_types
 		);
 	}
 
@@ -76,23 +79,17 @@ class Posts {
 		}
 
 		/* OK, it's safe for us to save the data now. */
-		if ( isset( $_POST['canonical_sites'] ) ) {
-			$this->save_canonical_sites( $post_id );
-		} elseif ( isset( $_POST['excluded_sites'] ) ) {
-			$this->save_excluded_sites( $post_id );
+		if ( isset( $_POST['canonical_site'] ) ) {
+			$data = sanitize_text_field( wp_unslash( $_POST['canonical_site'] ) );
+			update_post_meta( $post_id, '_canonical_site', $data );
+		}
+		if ( isset( $_POST['excluded_sites'] ) ) {
+			$data = $_POST['excluded_sites'];
+			$sanitized_data = array_map( 'absint', $data );
+			update_post_meta( $post_id, '_excluded_sites', $sanitized_data );
 		}
 
 		return true;
-	}
-
-	public function save_canonical_sites( $post_id ) {
-		$mydata = $_POST['canonical_sites'];
-		update_post_meta( $post_id, '_canonical_sites', $mydata );
-	}
-
-	public function save_excluded_sites( $post_id ) {
-		$mydata = $_POST['excluded_sites'];
-		update_post_meta( $post_id, '_excluded_sites', $mydata );
 	}
 
 
