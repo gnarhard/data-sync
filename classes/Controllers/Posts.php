@@ -107,17 +107,38 @@ class Posts {
 		$post_meta = $post->post_meta;
 		$taxonomies = $post->taxonomies;
 		$media = $post->media;
-		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 
+
+		print_r($post_meta);
+		print_r($taxonomies);
+		die();
+		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
 		unset($post_array['ID']);
+		unset($post_array['post_meta']);
+		unset($post_array['taxonomies']);
+		unset($post_array['media']);
+		unset($post_array['guid']);
 
 		foreach( $post_array as $key => $value ) {
-			str_replace( $post->source_url, get_site_url(), $value );
+			$post_array[$key] = str_replace( $post_array['source_url'], get_site_url(), $value );
+		}
+		$post_id = wp_insert_post( $post_array );
+
+		if ( $post_id ) {
+
+			foreach( $post_meta as $meta_key => $meta_value ) {
+				update_post_meta( $post_id, $meta_key, $meta_value );
+			}
+
+			foreach( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
+				foreach( $taxonomy_data as $term ) {
+					wp_set_object_terms( $post_id, $term->slug, $taxonomy_slug );
+				}
+			}
+
 		}
 
-		print_r($post_array);
-		$post_id = wp_insert_post( $post_array );
 		var_dump($post_id);
 		die();
 	}
