@@ -20,16 +20,6 @@ function display_source_input() { ?>
 /**
  *
  */
-function display_push_template_button() {
-	?>
-  <button id="push_template">Push Template</button>
-	<?php
-}
-
-
-/**
- *
- */
 function display_push_enabled_post_types() {
 	$args = array(
 		'public' => true,
@@ -55,16 +45,6 @@ function display_push_enabled_post_types() {
 	  }
 	  ?>
   </select>
-	<?php
-}
-
-
-/**
- *
- */
-function display_bulk_data_push_button() {
-	?>
-  <button id="bulk_data_push">Push Data</button>
 	<?php
 }
 
@@ -231,15 +211,5 @@ function display_post_type_permissions_options( $post_type_object ) {
         value="edit_status" <?php selected( in_array( 'edit_status', get_option( $post_type_object->name . '_perms' ) ) ); ?>>
       Edit Status & Visibility<br>
   </select>
-	<?php
-}
-
-
-/**
- *
- */
-function display_pull_data_button() {
-	?>
-  <button id="data_pull">Pull</button>
 	<?php
 }

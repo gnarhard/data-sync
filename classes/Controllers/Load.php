@@ -23,10 +23,10 @@ class Load {
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
-		new Posts();
 		$register_cpts = new PostTypes();
 
 		if ( get_option( 'source_site' ) ) {
+			new Posts();
 			ConnectedSite::create_db_table();
 			Post::create_db_table(); // Create post sync table.
 		}

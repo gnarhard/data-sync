@@ -17,5 +17,6 @@ function status_widget() {
 	</table>
 	<button id="bulk_data_push"><?php _e( 'Bulk Push', 'data_sync' ); ?></button>
 	<button id="recent_data_push"><?php _e( 'Only Push New', 'data_sync' ); ?></button>
+	<button id="template_push"><?php _e( 'Push Template', 'data_sync' ); ?></button>
 	<?php
 }
