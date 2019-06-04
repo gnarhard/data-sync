@@ -8,6 +8,7 @@ use DataSync\Controllers\ConnectedSites;
 use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
+use DataSync\Controllers\Error as Error;
 use stdClass;
 
 class SourceData {
@@ -32,7 +33,6 @@ class SourceData {
 
 	public function push() {
 		$source_data     = $this->consolidate();
-		$json            = wp_json_encode( $source_data );
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
@@ -41,15 +41,17 @@ class SourceData {
 			$authorization_validated = $auth->validate( $site->url, $auth_response );
 
 			if ( $authorization_validated ) {
-				$token    = json_decode( $auth_response )->token;
-				$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-				$args     = array(
+				$source_data->receiver_site_id = $site->id;
+				$json                          = wp_json_encode( $source_data );
+				$token                         = json_decode( $auth_response )->token;
+				$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+				$args                          = array(
 					'body'    => $json,
 					'headers' => array(
 						'Authorization' => 'Bearer ' . $token,
 					),
 				);
-				$response = wp_remote_post( $url, $args );
+				$response                      = wp_remote_post( $url, $args );
 //				if ( $response->is_error() ) {
 //					// Convert to a WP_Error object.
 //					$error = $response->as_error();
@@ -79,14 +81,33 @@ class SourceData {
 		$source_data->posts           = (array) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->acf             = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
 
-		return $source_data;
+		$validated_source_data = $this->validate( $source_data );
+
+		return $validated_source_data;
 
 
 	}
 
-	private function validate() {
-		// TODO: Does this post type have canonical flag?
-		// TODO: Does this post type have excluded site IDs flag?
+	private function validate( object $source_data ) {
+
+		foreach ( $source_data->posts as $post_type => $post_data ) {
+
+			foreach ( $post_data as $key => $post ) {
+
+				if ( ! isset( $post->post_meta['_canonical_site'][0] ) ) {
+					unset( $source_data->$post_type[ $key ] );
+//					$error = new Error();
+//					( $error ) ? $error->log( 'Canonical site not set in post: ' . $post->post_title . "\n" ) : null;
+				}
+
+				if ( ! isset( $post->post_meta['_excluded_sites'][0] ) ) {
+					unset( $source_data->$post_type[ $key ] );
+//					$error = new Error();
+//					( $error ) ? $error->log( 'Excluded sites not set in post: ' . $post->post_title . "\n" ) : null;
+				}
+			}
+		}
+		return $source_data;
 	}
 
 }

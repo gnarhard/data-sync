@@ -17,8 +17,9 @@ class Error {
 	 */
 	public function __construct() {
 
-		$url = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-settings', 'error_log' );
-		if ( false === ( $creds = request_filesystem_credentials( $url, '', false, false, null ) ) ) {
+		$url   = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-settings', 'error_log' );
+		$creds = request_filesystem_credentials( $url, '', false, false, null );
+		if ( false === $creds ) {
 			return false;
 		}
 

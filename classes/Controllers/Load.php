@@ -30,6 +30,8 @@ class Load {
 			ConnectedSite::create_db_table();
 			Post::create_db_table(); // Create post sync table.
 		}
+
+		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically
 	}
 
 }

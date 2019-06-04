@@ -33,12 +33,13 @@ function add_excluded_sites_select_field( $post ) {
 	$connected_sites_obj = new ConnectedSites();
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	?>
-	<select name="excluded_sites[]" multiple id="excluded_sites">
+	<select name="excluded_sites[]" multiple id="excluded_sites" style="width: 100%; min-width: 400px; min-height: 200px;">
+		<option value="0" <?php selected( in_array( 0, $value ) ); ?>>None</option>
 		<?php
 		if ( is_array( $connected_sites ) ) {
 			foreach ( $connected_sites as $site ) {
 				?>
-				<option value="<?php echo $site->id; ?>" <?php selected( in_array( $site->id, $value ) ); ?> style="width: 100%; min-width: 400px;"><?php echo $site->name; ?></option>
+				<option value="<?php echo $site->id; ?>" <?php selected( in_array( $site->id, $value ) ); ?>><?php echo $site->name; ?></option>
 				<?php
 			}
 		}

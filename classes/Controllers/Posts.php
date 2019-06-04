@@ -185,7 +185,21 @@ class Posts {
 
 	}
 
+	public static function filter( object $post, $source_data ) {
+		// TODO: IF EXCLUDED SITE, CONTINUE
+		$excluded_sites = unserialize( $post->post_meta['_excluded_sites'][0] );
+		echo 'here';
+		print_r($excluded_sites); die();
+		foreach ($excluded_sites as $excluded_site_id ) {
+
+		}
+
+		return $post;
+	}
+
 	private static function save( object $post ) {
+
+
 
 		print_r( $post );
 
