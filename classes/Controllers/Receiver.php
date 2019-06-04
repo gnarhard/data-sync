@@ -39,18 +39,22 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
-//		print_r( $source_data );
+		print_r( $source_data );
 
 		$source_options       = (object) $source_data->options;
 		$connected_sites      = (object) $source_data->connected_sites;
 		$receiver_options     = (object) Options::receiver()->get_data();
+		$all_post_data        = (array) $source_data->posts;
 		$post_types_to_import = array();
 
 		PostTypes::add_new_cpts( $source_options );
 		if ( $source_options->enable_new_cpts )
 			PostTypes::save_options();
 
-		Posts::pull();
+		foreach ( $receiver_options->enabled_post_types as $post_type ) {
+			Posts::sync( $source_data->posts[$source_data->$post_type] );
+		}
+
 	}
 
 }

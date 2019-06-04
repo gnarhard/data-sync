@@ -101,7 +101,11 @@ class Posts {
 	}
 
 
-	public static function pull() {
+	public static function sync( array $post_data) {
+
+		foreach( $post_data as $post ) {
+			print_r($post);
+		}
 
 	}
 

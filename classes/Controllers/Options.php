@@ -83,7 +83,7 @@ class Options {
 			}
 		}
 
-		$options->add_and_enable_new_cpts = get_option( 'add_and_enable_new_cpts' );
+		$options->enable_new_cpts = get_option( 'enable_new_cpts' );
 
 		$response = new WP_REST_Response( $options );
 		$response->set_status( 201 );
@@ -232,14 +232,14 @@ class Options {
 			add_settings_field( 'push_template', 'Push Template to Receivers', $this->view_namespace . '\display_push_template_button', 'data-sync-options', 'data_sync_options' );
 
 			add_settings_field( 'enable_new_cpts', 'Automatically Enable New Custom Post Types On Receiver', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
-			register_setting( 'data_sync_options', 'add_and_enable_new_cpts' );
+			register_setting( 'data_sync_options', 'enable_new_cpts' );
 
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'push_enabled_post_types' );
 
 		elseif ( '0' === $source ) :
 
-			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-options', 'data_sync_options' );
+//			add_settings_field( 'pull_data', 'Pull All Data From Source', $this->view_namespace . '\display_pull_data_button', 'data-sync-options', 'data_sync_options' );
 
 			add_settings_field( 'notified_users', 'Notified Users', $this->view_namespace . '\display_notified_users', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'notified_users' );
@@ -253,17 +253,17 @@ class Options {
 				'data_sync_options'
 			);
 
-			$enabled_post_types = get_option( 'enabled_post_types' );
-			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-				if ( count( $enabled_post_types ) ) {
-					foreach ( $enabled_post_types as $post_type ) {
-						$post_type_object = get_post_type_object( $post_type );
-
-						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
-						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
-					}
-				}
-			}
+//			$enabled_post_types = get_option( 'enabled_post_types' );
+//			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
+//				if ( count( $enabled_post_types ) ) {
+//					foreach ( $enabled_post_types as $post_type ) {
+//						$post_type_object = get_post_type_object( $post_type );
+//
+//						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
+//						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
+//					}
+//				}
+//			}
 
 		endif;
 	}
