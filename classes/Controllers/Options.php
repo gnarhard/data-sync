@@ -253,6 +253,7 @@ class Options {
 				'data_sync_options'
 			);
 
+			// TODO: Which user permission out of all permissions can edit content
 //			$enabled_post_types = get_option( 'enabled_post_types' );
 //			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
 //				if ( count( $enabled_post_types ) ) {

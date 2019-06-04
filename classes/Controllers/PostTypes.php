@@ -4,11 +4,12 @@
 namespace DataSync\Controllers;
 
 use DataSync\Models\PostType;
+use DataSync\Controllers\Error;
 
 class PostTypes {
 
 	public function __construct() {
-		add_action( 'init', [$this, 'register'] );
+		add_action( 'init', [ $this, 'register' ] );
 	}
 
 	public static function add_new_cpts( object $source_options ) {
@@ -52,7 +53,11 @@ class PostTypes {
 		if ( count( $existing_post_types ) ) {
 			foreach ( $existing_post_types as $post_type ) {
 				$data->id = $post_type->id;
-				PostType::update( $data );
+				$return   = PostType::update( $data );
+				if ( is_wp_error( $return ) ) {
+					$error = new Error();
+					( $error ) ? $error->log( 'Connected site was not updated.' . "\n" . $return->get_error_message() ) : null;
+				}
 			}
 		} else {
 			$new_id = PostType::create( $data );
@@ -71,7 +76,7 @@ class PostTypes {
 
 		$synced_custom_post_types = self::get_all_cpts();
 
-		foreach( $synced_custom_post_types as $post_type ) {
+		foreach ( $synced_custom_post_types as $post_type ) {
 			$data[] = $post_type->name;
 		}
 
