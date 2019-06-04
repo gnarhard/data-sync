@@ -73,6 +73,7 @@ class SourceData {
 
 		$source_data                  = new stdClass();
 		$source_data->options         = (array) $options;
+		$source_data->url             = (string) get_site_url();
 		$source_data->connected_sites = (array) ConnectedSites::get_all()->get_data();
 		$source_data->nonce           = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts           = (array) Posts::get( array_keys( $options->push_enabled_post_types ) );

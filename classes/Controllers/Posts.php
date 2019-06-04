@@ -18,6 +18,7 @@ class Posts {
 
 			foreach ( $posts[ $type ] as $post ) {
 
+				$post->source_url = get_site_url();
 				$post->post_meta  = get_post_meta( $post->ID );
 				$post->taxonomies = array();
 
@@ -100,11 +101,32 @@ class Posts {
 
 	}
 
+	private static function save( object $post ) {
+
+		$post_id = $post->ID;
+		$post_meta = $post->post_meta;
+		$taxonomies = $post->taxonomies;
+		$media = $post->media;
+		$post_array = (array) $post; // must convert to array to use wp_insert_post.
+
+		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
+		unset($post_array['ID']);
+
+		foreach( $post_array as $key => $value ) {
+			str_replace( $post->source_url, get_site_url(), $value );
+		}
+
+		print_r($post_array);
+		$post_id = wp_insert_post( $post_array );
+		var_dump($post_id);
+		die();
+	}
+
 
 	public static function sync( array $post_data) {
 
 		foreach( $post_data as $post ) {
-			print_r($post);
+			Posts::save( $post );
 		}
 
 	}
