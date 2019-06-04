@@ -50,7 +50,9 @@ class Receiver {
 			PostTypes::save_options();
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
-			Posts::sync( $source_data->posts->$post_type_slug );
+			if ($post_type_slug === 'locations') {
+				Posts::sync( $source_data->posts->$post_type_slug );
+			}
 		}
 
 	}

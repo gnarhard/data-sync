@@ -3,7 +3,9 @@
 /**
  * Dashboard widget that displays status of posts that haven't been synced
  */
-function status_widget() {  ?>
+function status_widget() {
+  // TODO: add update failed section
+  ?>
 	<table>
 		<thead>
 		</thead>

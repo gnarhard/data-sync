@@ -84,4 +84,9 @@ class SourceData {
 
 	}
 
+	private function validate() {
+		// TODO: Does this post type have canonical flag?
+		// TODO: Does this post type have excluded site IDs flag?
+	}
+
 }

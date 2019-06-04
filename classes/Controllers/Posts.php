@@ -9,6 +9,14 @@ class Posts {
 
 	public $table_name = 'data_sync_post_types';
 
+	public static function add_canonical_checkbox() {
+		//TODO: ADD CHECKBOX IN POST SIDEBAR
+	}
+
+	public static function add_excluded_sites_select_field() {
+		// TODO: excluded site IDs multiple selector field
+	}
+
 	public static function get( $types ) {
 		$posts = array();
 
@@ -103,6 +111,8 @@ class Posts {
 
 	private static function save( object $post ) {
 
+		print_r($post);
+
 		$post_id = $post->ID;
 		$post_meta = $post->post_meta;
 		$taxonomies = $post->taxonomies;
@@ -128,6 +138,7 @@ class Posts {
 		if ( $post_id ) {
 
 			foreach( $post_meta as $meta_key => $meta_value ) {
+				// Yoast and ACF data will be in here.
 				update_post_meta( $post_id, $meta_key, $meta_value );
 			}
 
@@ -141,6 +152,12 @@ class Posts {
 
 		var_dump($post_id);
 		die();
+
+		Posts::save_to_sync_table( $post_id, $site_id );
+	}
+
+	private static function save_to_sync_table() {
+		// TODO: send to source to save in wp_data_sync_posts
 	}
 
 
