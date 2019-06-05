@@ -110,4 +110,12 @@ class Auth {
 		return $key;
 	}
 
+	public function sanitize_signature_data( $value ) {
+		if ( is_bool( $value ) ) {
+			$value = $value ? 'true' : 'false';
+		}
+
+		return $value;
+	}
+
 }
