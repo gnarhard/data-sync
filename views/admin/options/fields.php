@@ -58,10 +58,11 @@ function display_auto_add_cpt_checkbox() {
 
 
 function display_secret_key() {
+
 	$auth = new Auth();
 	$secret_key = $auth->generate_key();
 	$saved_secret_key = get_option( 'secret_key' );
-	if ( '' !== $saved_secret_key ) {
+	if ( $saved_secret_key ) {
 		$secret_key = $saved_secret_key;
 	}
 	?>
