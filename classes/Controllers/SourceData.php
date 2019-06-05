@@ -36,26 +36,21 @@ class SourceData {
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
-			$auth                    = new Auth();
-			$auth_response           = $auth->authenticate_site( $site->url );
-			print_r($auth_response);die();
-			$authorization_validated = $auth->validate( $site->url, $auth_response );
 
-			if ( $authorization_validated ) {
-				$source_data->_receiver_site_id = (int) $site->id;
-				$json                           = wp_json_encode( $source_data );
-				$token                          = json_decode( $auth_response )->token;
-				$url                            = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-				$args                           = array(
-					'body'    => $json,
-					'headers' => array(
-						'Authorization' => 'Bearer ' . $token,
-					),
-				);
-				$response                       = wp_remote_post( $url, $args );
-				$body                           = wp_remote_retrieve_body( $response );
-				print_r( $body );
-			}
+			$source_data->_receiver_site_id = (int) $site->id;
+			$auth                           = new Auth();
+			$source_data->sig               = $auth->create_signature( $source_data, $site->secret_key );
+			$json                           = wp_json_encode( $source_data );
+			$url                            = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$args                           = array(
+				'body'    => $json,
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $token,
+				),
+			);
+			$response                       = wp_remote_post( $url, $args );
+			$body                           = wp_remote_retrieve_body( $response );
+			print_r( $body );die();
 
 		}
 

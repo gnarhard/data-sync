@@ -4,6 +4,7 @@
 namespace DataSync\Controllers;
 
 
+use WP_REST_Request;
 use WP_REST_Server;
 
 class Receiver {
@@ -31,7 +32,15 @@ class Receiver {
 		if ( isset( $_POST ) ) {
 			$json_str    = file_get_contents( 'php://input' );
 			$source_data = (object) json_decode( $json_str );
-			Auth::verify_request( $source_data->nonce );
+
+			$request    = new WP_REST_Request( 'GET', '/' . DATA_SYNC_API_BASE_URL . '/options/secret_key' );
+			$response   = rest_do_request( $request );
+			$secret_key = $response->get_data();
+			print_r($secret_key);die();
+
+			$auth = new Auth();
+			$auth->verify_signature( $source_data, $secret_key );
+
 			$this->parse( $source_data );
 		}
 

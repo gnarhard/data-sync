@@ -3,15 +3,15 @@ import AJAX from './AJAX.es6.js';
 class ConnectedSites {
 
     static save() {
-        $=jQuery;
         let data = [];
         data[0] = {};
-        data[0].name = $( '#site_name' ).val();
-        data[0].url = $( '#site_url' ).val();
-        // data[0].date_connected = new Date().toLocaleString();
+        data[0].name = document.getElementById( 'site_name' ).value;
+        data[0].url = document.getElementById( 'site_url' ).value;
+        data[0].secret_key = document.getElementById( 'site_secret_key' ).value;
 
         AJAX.post( DataSync.api.url + '/connected_sites', data );
 
+        $=jQuery;
         $( '.settings_page_data-sync-settings .lightbox_wrap' ).removeClass( 'display' );
 
         window.location.reload();

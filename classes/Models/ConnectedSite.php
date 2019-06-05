@@ -22,9 +22,11 @@ class ConnectedSite {
 			array(
 				'name'           => $data['name'],
 				'url'            => esc_url_raw( $url ),
+				'secret_key'     => sanitize_text_field( $data['secret_key'] ),
 				'date_connected' => current_time( 'mysql' ),
 			),
 			array(
+				'%s',
 				'%s',
 				'%s',
 			)
@@ -43,7 +45,7 @@ class ConnectedSite {
 
 	public static function delete( $id ) {
 		global $wpdb;
-		$result     = $wpdb->delete(
+		$result = $wpdb->delete(
 			$wpdb->prefix . self::$table_name,
 			array(
 				'id' => $id,
@@ -67,7 +69,8 @@ class ConnectedSite {
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
-	        url               VARCHAR(255),
+	        url               VARCHAR(255) NOT NULL,
+	        secret_key        VARCHAR(255) NOT NULL,
 	        date_connected    DATETIME NOT NULL 
 	    );'
 		);

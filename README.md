@@ -3,7 +3,7 @@ Synchronizes all post data, custom ACF fields, and Yoast data across multiple, a
 
 <b>Installation:</b>
 <ol>
-<li>Add user <code>data_sync</code> with password <code>x&J8vQxxrI9@mnGUWaDpQtsO</code> to both source and receiver sites.</li>
+
 <li>Make sure HTTP_AUTHORIZATION is enabled for headers by adding this to .htaccess:<br>
 <code>RewriteEngine on<br>
       RewriteCond %{HTTP:Authorization} ^(.*)<br>

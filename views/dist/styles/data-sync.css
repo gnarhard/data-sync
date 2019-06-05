@@ -1,5 +1,6 @@
 .settings_page_data-sync-options select,
-.settings_page_data-sync-options textarea {
+.settings_page_data-sync-options textarea,
+.settings_page_data-sync-options input[type=text] {
   width: 400px;
 }
 

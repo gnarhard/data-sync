@@ -139,7 +139,7 @@ function display_connected_sites_modal() {
         </div>
 	      <div class="input_wrap">
 		      <label for="url">Secret key</label>
-		      <textbox name="secret_key" id="site_secret_key"></textbox>
+		      <input name="secret_key" id="site_secret_key" value=""/>
 	      </div>
 
         <p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary"
