@@ -235,6 +235,9 @@ class Options {
 
 		elseif ( '0' === $source ) :
 
+			add_settings_field( 'secret_key', 'Secret Key', $this->view_namespace . '\display_secret_key', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'secret_key' );
+
 			add_settings_field( 'notified_users', 'Notified Users', $this->view_namespace . '\display_notified_users', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'notified_users' );
 

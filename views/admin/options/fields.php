@@ -1,6 +1,6 @@
 <?php namespace DataSync;
 
-use DataSync\Controllers\ConnectedSites;
+use DataSync\Controllers\Auth;use DataSync\Controllers\ConnectedSites;
 use WP_User_Query;
 use DataSync\Controllers\Error as Error;
 
@@ -56,6 +56,19 @@ function display_auto_add_cpt_checkbox() {
 }
 
 
+
+function display_secret_key() {
+	$auth = new Auth();
+	$secret_key = $auth->generate_key();
+	$saved_secret_key = get_option( 'secret_key' );
+	if ( '' !== $saved_secret_key ) {
+		$secret_key = $saved_secret_key;
+	}
+	?>
+	<input type="text" name="secret_key" value="<?php echo $secret_key; ?>" id="secret_key"/>
+	<?php
+}
+
 /**
  *
  */
@@ -101,13 +114,13 @@ function display_connected_sites() {
   <input type="hidden" name="connected_sites[]" value="<?php echo esc_html( $connected_sites ); ?>"/>
 	<?php
 
-	display_modal();
+	display_connected_sites_modal();
 }
 
 /**
  *
  */
-function display_modal() {
+function display_connected_sites_modal() {
 	?>
   <div class="lightbox_wrap">
     <div class="add_site_modal">
@@ -123,6 +136,10 @@ function display_modal() {
           <label for="url">Site URL</label>
           <input type="text" name="url" value="" id="site_url"/>
         </div>
+	      <div class="input_wrap">
+		      <label for="url">Secret key</label>
+		      <textbox name="secret_key" id="site_secret_key"></textbox>
+	      </div>
 
         <p class="submit"><input type="submit" name="submit_site" id="submit_site" class="button button-primary"
                                  value="Add Site"></p>
