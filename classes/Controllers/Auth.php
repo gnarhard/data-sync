@@ -10,22 +10,6 @@ use WP_REST_Response;
 class Auth {
 
 	/**
-	 * @var string
-	 *
-	 * WordPress username for CORs authentication
-	 * MUST BE ON EVERY SITE
-	 */
-	private $username = 'data_sync';
-
-	/**
-	 * @var string
-	 * WordPress password for CORs authentication
-	 * MUST BE ON EVERY SITE
-	 */
-	private $password = 'x&J8vQxxrI9@mnGUWaDpQtsO';
-
-
-	/**
 	 * @var array
 	 *
 	 * Will contain username and password for authorized user
@@ -33,9 +17,12 @@ class Auth {
 	private $logins = array();
 
 	public function __construct() {
+
+		$user_data = get_user_by( 'slug', 'data_sync' );
+
 		$this->logins = array(
-			'username' => $this->username,
-			'password' => $this->password,
+			'username' => $user_data->user_login,
+			'password' => $user_data->user_pass,
 		);
 	}
 
