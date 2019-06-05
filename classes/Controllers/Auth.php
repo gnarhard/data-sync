@@ -18,6 +18,11 @@ class Auth {
 
 	public function __construct() {
 		add_filter( 'rest_authentication_errors', [ $this, 'verify_user' ] );
+		add_action('init','add_cors_http_header');
+	}
+
+	public function add_cors_http_header(){
+		header("Access-Control-Allow-Origin: *");
 	}
 
 	public function verify_user( $result ) {
@@ -74,7 +79,8 @@ class Auth {
 
 		$data_array = array_map( array( $this, 'sanitize_signature_data' ), $data_array );
 		ksort( $data_array );
-		$flat_data = implode( '', $data_array );
+		serialize( $data_array );
+//		$flat_data = implode( '', $data_array );
 
 		return base64_encode( hash_hmac( 'sha1', $flat_data, $key, true ) );
 
