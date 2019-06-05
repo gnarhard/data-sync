@@ -17,8 +17,22 @@ class Auth {
 	private $logins = array();
 
 	public function __construct() {
-		add_filter( 'rest_authentication_errors', [ $this, 'verify_user' ] );
+//		add_filter( 'rest_authentication_errors', [ $this, 'verify_user' ] );
 		add_action('init','add_cors_http_header');
+		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15);
+
+	}
+
+	public function allow_cors_headers_on_endpoints() {
+		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+		add_filter( 'rest_pre_serve_request', function( $value ) {
+			header( 'Access-Control-Allow-Origin: *' );
+			header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
+			header( 'Access-Control-Allow-Credentials: true' );
+
+			return $value;
+
+		});
 	}
 
 	public function add_cors_http_header(){
@@ -79,7 +93,7 @@ class Auth {
 
 		$data_array = array_map( array( $this, 'sanitize_signature_data' ), $data_array );
 		ksort( $data_array );
-		serialize( $data_array );
+		$flat_data = serialize( $data_array );
 //		$flat_data = implode( '', $data_array );
 
 		return base64_encode( hash_hmac( 'sha1', $flat_data, $key, true ) );
