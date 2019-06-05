@@ -38,6 +38,7 @@ class SourceData {
 		foreach ( $connected_sites as $site ) {
 			$auth                    = new Auth();
 			$auth_response           = $auth->authenticate_site( $site->url );
+			print_r($auth_response);die();
 			$authorization_validated = $auth->validate( $site->url, $auth_response );
 
 			if ( $authorization_validated ) {

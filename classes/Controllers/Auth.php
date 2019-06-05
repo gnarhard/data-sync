@@ -56,9 +56,9 @@ class Auth {
 		}
 	}
 
-	public function authenticate_site( $data_receiver_url ) {
+	public function authenticate_site( $url ) {
 
-		$token_url = trailingslashit( $data_receiver_url ) . 'wp-json/jwt-auth/v1/token';
+		$token_url = trailingslashit( $url ) . 'wp-json/jwt-auth/v1/token';
 
 		// Use key 'http' even if you send the request to https://.
 		$args = array(
@@ -83,7 +83,7 @@ class Auth {
 					$error = new Error();
 					( $error ) ? $error->log( $response->get_error_message() . "\n" ) : null;
 				} else {
-					return $response['body'];
+					return wp_remote_retrieve_body( $response );
 				}
 
 			} catch ( Exception $e ) {
@@ -114,6 +114,7 @@ class Auth {
 		$user = wp_authenticate( $this->username, $this->password );
 
 		if ( $user->get_error_message() ) {
+			// TODO: FIX THIS.
 			$error = new Error();
 			( $error ) ? $error->log( "User doesn't exist on source site OR " . $user->get_error_message() . "\n" ) : null;
 		} else {
