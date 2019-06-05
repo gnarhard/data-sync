@@ -5,6 +5,9 @@ namespace DataSync\Controllers;
 
 use WP_Query;
 use stdClass;
+use WP_REST_Response;
+use WP_REST_Server;
+use WP_REST_Request;
 
 class Posts {
 
@@ -16,6 +19,60 @@ class Posts {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
 		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
 		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
+	}
+
+	public function register_routes() {
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/posts/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+))',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sync_status' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save_to_sync_table' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_from_sync_table' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'args'                => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	public function add_meta_boxes() {
@@ -187,7 +244,10 @@ class Posts {
 	}
 
 	public static function filter( object $post, int $receiver_site_id ) {
+
+		$post->synced   = Posts::is_synced( $post, $receiver_site_id );
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
+
 		foreach ( $excluded_sites as $excluded_site_id ) {
 			if ( (int) $excluded_site_id === (int) $receiver_site_id ) {
 				return false;
@@ -199,12 +259,16 @@ class Posts {
 
 	public static function save( object $post ) {
 
-		$source_post_id    = $post->ID;
-		$post_meta  = $post->post_meta;
+		$source_post_id = $post->ID;
 		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 
+
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
+
 		unset( $post_array['ID'] );
+		if ( $post->synced ) {
+			// TODO: get post ID from sync table
+		}
 		unset( $post_array['post_meta'] );
 		unset( $post_array['taxonomies'] );
 		unset( $post_array['media'] );
@@ -238,8 +302,45 @@ class Posts {
 		Posts::save_to_sync_table( $post_id, $site_id );
 	}
 
-	private static function save_to_sync_table() {
+	public static function is_synced( object $post, int $receiver_site_id ) {
+
+			$auth                    = new Auth();
+			$auth_response           = $auth->authenticate_site( $post->source_url );
+			$authorization_validated = $auth->validate( $post->source_url, $auth_response );
+
+			if ( $authorization_validated ) {
+				$token                          = json_decode( $auth_response )->token;
+				$url                            = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/' . $post->ID . '/' . $receiver_site_id;
+				$args                           = array(
+					'headers' => array(
+						'Authorization' => 'Bearer ' . $token,
+					),
+				);
+				$response                       = wp_remote_get( $url, $args );
+				$body                           = wp_remote_retrieve_body( $response );
+				print_r( $body ); die();
+			}
+
+//		$response = new WP_REST_Response( $options );
+//		$response->set_status( 201 );
+//
+//		return $response;
+
+
+	}
+
+	public function get_sync_status( WP_REST_Request $request ) {
+		$data = $request->get_url_params();
+		print_r($data);die();
+		return Post::get( $source_post_id, $receiver_site_id );
+	}
+
+	public function save_to_sync_table( WP_REST_Request $request ) {
 		// TODO: send to source to save in wp_data_sync_posts
+	}
+
+	public function delete_from_sync_table( WP_REST_Request $request ) {
+
 	}
 
 

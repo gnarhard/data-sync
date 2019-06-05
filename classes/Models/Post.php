@@ -8,6 +8,14 @@ class Post {
 
 	public static $table_name = 'data_sync_posts';
 
+	public static function get( int $source_post_id, int $receiver_site_id ) {
+		global $wpdb;
+		$query = $wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE source_post_id = %d AND site_id = %d;', $source_post_id, $receiver_site_id );
+		$result = $wpdb->get_results( $query );
+		print_r($result);
+
+	}
+
 //	public static function create( $data ) {
 //		global $wpdb;
 //		$table_name = $wpdb->prefix . self::$table_name;
