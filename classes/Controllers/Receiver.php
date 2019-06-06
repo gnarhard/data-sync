@@ -31,9 +31,8 @@ class Receiver {
 		$data        = file_get_contents( 'php://input' );
 		$source_data = (object) json_decode( $data );
 
-		$nonce   = wp_create_nonce( 'data_sync_api' );
 		$request = new WP_REST_Request( 'GET', '/' . DATA_SYNC_API_BASE_URL . '/options/secret_key' );
-		$request->set_query_params( array( 'nonce' => $nonce ) );
+		$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
 		$response   = rest_do_request( $request );
 		$secret_key = $response->get_data();
 		$auth       = new Auth();
@@ -58,7 +57,7 @@ class Receiver {
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->_receiver_site_id;
 
-		PostTypes::add_new_cpts( $source_options );
+		PostTypes::create( $source_options );
 		if ( $source_options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}

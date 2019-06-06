@@ -12,19 +12,11 @@ class PostTypes {
 		add_action( 'init', [ $this, 'register' ] );
 	}
 
-	public static function add_new_cpts( object $source_options ) {
-		global $wp_post_types;
-		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
+	public function get() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . PostType::$table_name;
 
-		foreach ( $source_options->push_enabled_post_types as $post_type => $post_type_data ) :
-			if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
-				self::save( $post_type_data );
-			}
-		endforeach;
-	}
-
-	public static function get( int $id ) {
-
+		return $wpdb->get_results( 'SELECT * FROM ' . $table_name );
 	}
 
 	public static function get_id( string $slug ) {
@@ -36,11 +28,15 @@ class PostTypes {
 
 	}
 
-	private function get_all_cpts() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . PostType::$table_name;
+	public static function create( object $source_options ) {
+		global $wp_post_types;
+		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
 
-		return $wpdb->get_results( 'SELECT * FROM ' . $table_name );
+		foreach ( $source_options->push_enabled_post_types as $post_type => $post_type_data ) :
+			if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
+				self::save( $post_type_data );
+			}
+		endforeach;
 	}
 
 	private static function save( object $data ) {
@@ -74,7 +70,7 @@ class PostTypes {
 	public static function save_options() {
 		$data = (array) get_option( 'enabled_post_types' );
 
-		$synced_custom_post_types = self::get_all_cpts();
+		$synced_custom_post_types = self::get();
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$data[] = $post_type->name;
@@ -92,7 +88,7 @@ class PostTypes {
 
 	public function register() {
 
-		$synced_custom_post_types = $this->get_all_cpts();
+		$synced_custom_post_types = $this->get();
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );

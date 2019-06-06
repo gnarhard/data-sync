@@ -119,6 +119,7 @@ class Options {
 			$request->set_method( 'GET' );
 			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/options/' . $key );
 			$request->set_url_params( array( self::$option_key => $key ) );
+			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
 
 			$response        = rest_do_request( $request );
 			$options->$key = $response->get_data();
