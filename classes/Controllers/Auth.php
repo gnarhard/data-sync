@@ -97,9 +97,7 @@ class Auth {
 			unset( $data->sig );
 		}
 
-		$flat_data = serialize( $data );
-
-		return base64_encode( hash_hmac( 'sha1', $flat_data, $key, true ) );
+		return base64_encode( hash_hmac( 'sha1', serialize( $data ), $key, true ) );
 
 	}
 
@@ -117,7 +115,7 @@ class Auth {
 		$computed_signature = $this->create_signature( $temp, $key );
 
 		print_r($computed_signature);
-		print_r($data);
+		print_r($data->sig);
 
 		return $computed_signature === $data->sig;
 	}
