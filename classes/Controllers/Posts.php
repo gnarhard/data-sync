@@ -19,19 +19,30 @@ class Posts {
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
 		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
 	}
 
 	public function register_routes() {
+
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+))',
+			'/synced_posts/',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_sync_status' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_sync_status' ),
+				),
+			)
+		);
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+))',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_sync_status' ),
+					'args'     => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
 							'type'        => 'int',
@@ -304,35 +315,35 @@ class Posts {
 	}
 
 	public static function is_synced( object $post, int $receiver_site_id ) {
-		$url      = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/' . $receiver_site_id . '/' . $post->ID;
+		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $receiver_site_id . '/' . $post->ID;
 		echo $url;
 		$response = wp_remote_get( $url );
-		if (is_wp_error($response)) {
+		if ( is_wp_error( $response ) ) {
 			echo $response->get_error_message();
 			// TODO: HANDLE THIS MORE GRACEFULLY.
 		}
-		$body     = wp_remote_retrieve_body( $response );
-		$auth     = new Auth();
+		$body = wp_remote_retrieve_body( $response );
+		$auth = new Auth();
 //		$source_data->sig               = (string) $auth->create_signature( $json_decoded_data, $site->secret_key );
 //		$auth->verify_signature( $body, $key );
 		print_r( $body );
 		die();
 
 
-
-
 	}
 
 	public function get_sync_status( WP_REST_Request $request ) {
-		$data = $request->get_url_params();
-		$source_post_id = $data['source_post_id'];
+		$data             = $request->get_url_params();
+		$source_post_id   = $data['source_post_id'];
 		$receiver_site_id = $data['receiver_site_id'];
 
-		print_r($data);die();
+		print_r( $data );
+		die();
 		$return = Post::get( $source_post_id, $receiver_site_id );
 
-		$response = new WP_REST_Response(  );
+		$response = new WP_REST_Response();
 		$response->set_status( 201 );
+
 		// TODO: ADD SIG
 		return $response;
 
