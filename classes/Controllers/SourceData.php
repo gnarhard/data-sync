@@ -41,7 +41,7 @@ class SourceData {
 			$auth                           = new Auth();
 			$source_data->sig               = $auth->create_signature( $source_data, $site->secret_key );
 			$json                           = wp_json_encode( $source_data );
-			print_r($json);die();
+//			print_r($json);die();
 			$url                            = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$args                           = array(
 				'body'    => $json,

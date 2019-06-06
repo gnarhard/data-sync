@@ -6,6 +6,7 @@ namespace DataSync\Controllers;
 use Exception;
 use WP_Error;
 use WP_REST_Response;
+USE WP_REST_Request;
 
 class Auth {
 
@@ -18,25 +19,25 @@ class Auth {
 
 	public function __construct() {
 //		add_filter( 'rest_authentication_errors', [ $this, 'verify_user' ] );
-		add_action('init','add_cors_http_header');
-		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15);
+		add_action( 'init', 'add_cors_http_header' );
+		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15 );
 
 	}
 
 	public function allow_cors_headers_on_endpoints() {
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-		add_filter( 'rest_pre_serve_request', function( $value ) {
+		add_filter( 'rest_pre_serve_request', function ( $value ) {
 			header( 'Access-Control-Allow-Origin: *' );
 			header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
 			header( 'Access-Control-Allow-Credentials: true' );
 
 			return $value;
 
-		});
+		} );
 	}
 
-	public function add_cors_http_header(){
-		header("Access-Control-Allow-Origin: *");
+	public function add_cors_http_header() {
+		header( "Access-Control-Allow-Origin: *" );
 	}
 
 	public function verify_user( $result ) {
@@ -72,8 +73,14 @@ class Auth {
 	 *
 	 * @return bool
 	 */
-	public static function permissions() {
-		return current_user_can( 'manage_options' );
+	public static function permissions( WP_REST_Request $request ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		} else {
+			if ( $request->get_param( 'nonce' ) ) {
+				return wp_verify_nonce( $request->get_param( 'nonce' ), 'data_sync_api' );
+			}
+		}
 	}
 
 	/**
@@ -86,35 +93,33 @@ class Auth {
 	 */
 	public function create_signature( object $data, string $key ) {
 
-		$data_array = (array) $data;
-		if ( isset( $data_array['sig'] ) ) {
-			unset( $data_array['sig'] );
+		if ( isset( $data->sig ) ) {
+			unset( $data->sig );
 		}
 
-		$data_array = array_map( array( $this, 'sanitize_signature_data' ), $data_array );
-		ksort( $data_array );
-		$flat_data = serialize( $data_array );
-//		$flat_data = implode( '', $data_array );
+		$flat_data = serialize( $data );
 
 		return base64_encode( hash_hmac( 'sha1', $flat_data, $key, true ) );
 
 	}
 
 
-	public function verify_signature( $data, $key ) {
+	public function verify_signature( object $data, string $key ) {
 
-		$data_array = (array) $data;
-
-		if ( empty( $data_array['sig'] ) ) {
+		if ( empty( $data->sig ) ) {
 			return false;
 		}
-		if ( isset( $data_array['nonce'] ) ) {
-			unset( $data_array['nonce'] );
+		if ( isset( $data->nonce ) ) {
+			unset( $data->nonce );
 		}
-		$temp               = $data_array;
+
+		$temp               = $data;
 		$computed_signature = $this->create_signature( $temp, $key );
 
-		return $computed_signature === $data_array['sig'];
+		print_r($computed_signature);
+		print_r($data);
+
+		return $computed_signature === $data->sig;
 	}
 
 
