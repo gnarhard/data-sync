@@ -28,8 +28,7 @@ class Receiver {
 	}
 
 	public function authenticate() {
-
-		$data    = file_get_contents( 'php://input' );
+		$data        = file_get_contents( 'php://input' );
 		$source_data = (object) json_decode( $data );
 
 		$nonce   = wp_create_nonce( 'data_sync_api' );
@@ -38,9 +37,9 @@ class Receiver {
 		$response   = rest_do_request( $request );
 		$secret_key = $response->get_data();
 		$auth       = new Auth();
+		$verified   = $auth->verify_signature( $source_data, $secret_key );
 
-		var_dump($auth->verify_signature( $source_data, $secret_key )); die();
-
+		return $verified;
 	}
 
 	public function receive() {
@@ -53,8 +52,6 @@ class Receiver {
 	}
 
 	private function parse( object $source_data ) {
-
-		print_r( $source_data );die();
 
 		$source_options   = (object) $source_data->options;
 		$connected_sites  = (object) $source_data->connected_sites;

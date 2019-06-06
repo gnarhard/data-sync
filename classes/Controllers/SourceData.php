@@ -25,8 +25,7 @@ class SourceData {
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'push' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-				)
+				),
 			)
 		);
 	}
@@ -39,8 +38,9 @@ class SourceData {
 
 			$source_data->_receiver_site_id = (int) $site->id;
 			$auth                           = new Auth();
+			$json_decoded_data              = json_decode( wp_json_encode( $source_data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES
+			$source_data->sig               = (string) $auth->create_signature( $json_decoded_data, $site->secret_key );
 			$json                           = wp_json_encode( $source_data );
-			$source_data->sig               = (string) $auth->create_signature( $source_data, $site->secret_key );
 			$url                            = (string) trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                       = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                           = wp_remote_retrieve_body( $response );
@@ -62,6 +62,7 @@ class SourceData {
 		$source_data->nonce           = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts           = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->acf             = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+
 		return $this->validate( $source_data );
 
 

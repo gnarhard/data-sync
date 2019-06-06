@@ -93,9 +93,9 @@ class Auth {
 	 */
 	public function create_signature( $data, string $key ) {
 
-//		if ( isset( $data->sig ) ) {
-//			unset( $data->sig );
-//		}
+		if ( isset( $data->sig ) ) {
+			unset( $data->sig );
+		}
 
 		return base64_encode( hash_hmac( 'sha1', serialize( $data ), $key, true ) );
 
@@ -110,8 +110,6 @@ class Auth {
 
 		$signature_sent = $data->sig;
 		$signature_received = $this->create_signature( $data, $key );
-		echo $signature_sent . '    ' . $key;
-		echo "\n". $signature_received . '    ' . $key . "\n";
 
 		return $signature_received === $signature_sent;
 	}
