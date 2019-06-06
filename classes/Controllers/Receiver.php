@@ -29,8 +29,8 @@ class Receiver {
 
 	public function authenticate() {
 
-		$json_str    = file_get_contents( 'php://input' );
-		$source_data = (object) json_decode( $json_str );
+		$data    = file_get_contents( 'php://input' );
+		$source_data = (object) json_decode( $data );
 
 		$nonce   = wp_create_nonce( 'data_sync_api' );
 		$request = new WP_REST_Request( 'GET', '/' . DATA_SYNC_API_BASE_URL . '/options/secret_key' );
@@ -39,7 +39,7 @@ class Receiver {
 		$secret_key = $response->get_data();
 		$auth       = new Auth();
 
-		return $auth->verify_signature( $source_data, $secret_key );
+		var_dump($auth->verify_signature( $source_data, $secret_key )); die();
 
 	}
 
@@ -54,7 +54,7 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
-		print_r( $source_data );
+		print_r( $source_data );die();
 
 		$source_options   = (object) $source_data->options;
 		$connected_sites  = (object) $source_data->connected_sites;

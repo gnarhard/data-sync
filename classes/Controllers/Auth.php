@@ -91,33 +91,29 @@ class Auth {
 	 *
 	 * @return string
 	 */
-	public function create_signature( object $data, string $key ) {
+	public function create_signature( $data, string $key ) {
 
-		if ( isset( $data->sig ) ) {
-			unset( $data->sig );
-		}
+//		if ( isset( $data->sig ) ) {
+//			unset( $data->sig );
+//		}
 
 		return base64_encode( hash_hmac( 'sha1', serialize( $data ), $key, true ) );
 
 	}
 
 
-	public function verify_signature( object $data, string $key ) {
+	public function verify_signature( $data, string $key ) {
 
 		if ( empty( $data->sig ) ) {
 			return false;
 		}
-		if ( isset( $data->nonce ) ) {
-			unset( $data->nonce );
-		}
 
-		$temp               = $data;
-		$computed_signature = $this->create_signature( $temp, $key );
+		$signature_sent = $data->sig;
+		$signature_received = $this->create_signature( $data, $key );
+		echo $signature_sent . '    ' . $key;
+		echo "\n". $signature_received . '    ' . $key . "\n";
 
-		print_r($computed_signature);
-		print_r($data->sig);
-
-		return $computed_signature === $data->sig;
+		return $signature_received === $signature_sent;
 	}
 
 

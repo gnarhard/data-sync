@@ -39,19 +39,13 @@ class SourceData {
 
 			$source_data->_receiver_site_id = (int) $site->id;
 			$auth                           = new Auth();
-			$source_data->sig               = $auth->create_signature( $source_data, $site->secret_key );
 			$json                           = wp_json_encode( $source_data );
-//			print_r($json);die();
-			$url                            = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$args                           = array(
-				'body'    => $json,
-//				'headers' => array(
-//					'Authorization' => 'Bearer ' . $source_data->sig,
-//				),
-			);
-			$response                       = wp_remote_post( $url, $args );
+			$source_data->sig               = (string) $auth->create_signature( $source_data, $site->secret_key );
+			$url                            = (string) trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$response                       = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                           = wp_remote_retrieve_body( $response );
-			print_r( $body );die();
+			print_r( $body );
+			die();
 
 		}
 
@@ -68,13 +62,7 @@ class SourceData {
 		$source_data->nonce           = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts           = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->acf             = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
-
-		$validated_source_data = $this->validate( $source_data );
-//		$validated_source_data = (array) $this->validate( $source_data );
-//		ksort( $validated_source_data );
-//		$validated_source_data = (object) $validated_source_data;
-
-		return $validated_source_data;
+		return $this->validate( $source_data );
 
 
 	}
