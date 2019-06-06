@@ -35,6 +35,7 @@ class Posts {
 				),
 			)
 		);
+		// TODO: still getting rest_no_route.
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
 			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+))',
