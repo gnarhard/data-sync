@@ -60,7 +60,8 @@ class SyncedPost {
 //
 //	}
 //
-	public static function create_db_table() {
+	public function create_db_table() {
+
 		global $wpdb;
 		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
 
@@ -75,6 +76,14 @@ class SyncedPost {
 	        date_modified    DATETIME NOT NULL
 	    );'
 		);
+
+		$this->add_foreign_key_restraints();
+	}
+
+	private function add_foreign_key_restraints() {
+
+		global $wpdb;
+		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
 
 		$result = $wpdb->query(
 			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '

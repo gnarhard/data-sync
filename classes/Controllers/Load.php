@@ -27,8 +27,6 @@ class Load {
 
 		if ( get_option( 'source_site' ) ) {
 			new SyncedPosts();
-			ConnectedSite::create_db_table();
-			SyncedPost::create_db_table(); // Create post sync table.
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically

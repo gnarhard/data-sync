@@ -169,7 +169,7 @@ function display_notified_users() {
 	  foreach ( $users as $user ) {
 		  ?>
         <option
-            value="<?php echo $user->id; ?>" <?php selected( in_array( $user->id, get_option( 'notified_users' ) ) ); ?>><?php echo $user->user_nicename; ?></option>
+            value="<?php echo $user->ID; ?>" <?php selected( in_array( $user->id, get_option( 'notified_users' ) ) ); ?>><?php echo $user->user_nicename; ?></option>
 		  <?php
 	  }
 	  ?>

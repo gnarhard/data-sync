@@ -3,6 +3,8 @@
 namespace DataSync;
 
 use DataSync\Controllers\Load;
+use DataSync\Models\ConnectedSite;
+use DataSync\Models\SyncedPost;
 
 /**
  * Plugin Name: Data Sync
@@ -34,7 +36,11 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
+$connectedSite = new ConnectedSite();
+$syncedPost = new SyncedPost();
 register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+register_activation_hook( __FILE__, [ $connectedSite, 'create_db_table' ] );
+register_activation_hook( __FILE__, [ $syncedPost, 'create_db_table' ]  );
 
 /**
  * @param $links
