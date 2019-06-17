@@ -15,6 +15,8 @@ class Helpers {
 			$url = 'https://' . $url;
 		}
 
+		$url = preg_replace("/^http:/i", "https:", $url);
+
 		$exploded_url = explode( '.', $url );
 		if ( ! isset( $exploded_url[1] ) ) {
 			$error = new Error();

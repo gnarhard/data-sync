@@ -71,3 +71,8 @@
   display: block;
 }
 
+#wp_data_sync_status {
+  width: 100%;
+  text-align: left;
+}
+

@@ -11,7 +11,7 @@ use DataSync\Controllers\Receiver;
 use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
-use DataSync\Models\Post;
+use DataSync\Models\SyncedPost;
 
 
 class Load {
@@ -26,9 +26,9 @@ class Load {
 		$register_cpts = new PostTypes();
 
 		if ( get_option( 'source_site' ) ) {
-			new Posts();
+			new SyncedPosts();
 			ConnectedSite::create_db_table();
-			Post::create_db_table(); // Create post sync table.
+			SyncedPost::create_db_table(); // Create post sync table.
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically

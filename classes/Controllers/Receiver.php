@@ -64,9 +64,9 @@ class Receiver {
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 			foreach ( $source_data->posts->$post_type_slug as $post ) {
-				$filtered_post = Posts::filter( $post, $receiver_site_id );
+				$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
 				if ( false !== $filtered_post ) {
-					Posts::save( $filtered_post );
+					SyncedPosts::save( $filtered_post );
 				}
 //				if ( $post_type_slug === 'locations' ) {
 //				}

@@ -4,7 +4,7 @@
 namespace DataSync\Models;
 
 
-class Post {
+class SyncedPost {
 
 	public static $table_name = 'data_sync_posts';
 
