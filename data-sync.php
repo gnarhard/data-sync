@@ -36,16 +36,11 @@ if ( ! function_exists( 'add_filter' ) ) {
 	exit();
 }
 
-$connectedSite = new ConnectedSite();
-$syncedPost = new SyncedPost();
-register_activation_hook( __FILE__, 'flush_rewrite_rules' );
-register_activation_hook( __FILE__, [ $connectedSite, 'create_db_table' ] );
-register_activation_hook( __FILE__, [ $syncedPost, 'create_db_table' ]  );
-
 /**
  * @param $links
  *
  * Adds Settings link to the plugin on the plugin page
+ *
  * @return array
  */
 function add_settings_link( $links ) {
@@ -55,6 +50,7 @@ function add_settings_link( $links ) {
 
 	return array_merge( $links, $my_links );
 }
+
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), __NAMESPACE__ . '\add_settings_link' );
 
 if ( ! defined( 'DATA_SYNC_PATH' ) ) {
@@ -79,3 +75,7 @@ if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 }
 
 new Load();
+
+register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+register_activation_hook( __FILE__, [ 'ConnectedSite', 'create_db_table' ] );
+register_activation_hook( __FILE__, [ 'SyncedPost', 'create_db_table' ] );

@@ -12,6 +12,7 @@ use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
+use DataSync\Models\PostType;
 
 
 class Load {
@@ -23,6 +24,8 @@ class Load {
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
+		$post_type = new PostType();
+		$post_type->create_db_table();
 		$register_cpts = new PostTypes();
 
 		if ( get_option( 'source_site' ) ) {

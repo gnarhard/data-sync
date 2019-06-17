@@ -40,9 +40,9 @@ class PostTypes {
 	}
 
 	private static function save( object $data ) {
-		if ( ! self::table_exists() ) {
-			PostType::create_db_table();
-		}
+//		if ( ! self::table_exists() ) {
+//			PostType::create_db_table();
+//		}
 
 		$existing_post_types = (array) self::get_id( $data->name );
 

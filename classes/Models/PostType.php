@@ -66,7 +66,7 @@ class PostType {
 
 	}
 
-	public static function create_db_table() {
+	public function create_db_table() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$table_name;
 
