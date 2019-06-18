@@ -63,14 +63,23 @@ class Receiver {
 		}
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
-			foreach ( $source_data->posts->$post_type_slug as $post ) {
-				$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
-				if ( false !== $filtered_post ) {
-					SyncedPosts::save( $filtered_post );
-				}
+
+			$post_count = count( $source_data->posts->$post_type_slug );
+
+			if ( $post_count === 0 ) {
+				// TODO: ERROR MESSAGE ABOUT NO POSTS TO TRANSFER
+				echo 'no posts ';
+			} else {
+				foreach ( $source_data->posts->$post_type_slug as $post ) {
+					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
+					if ( false !== $filtered_post ) {
+						SyncedPosts::save( $filtered_post );
+					}
 //				if ( $post_type_slug === 'locations' ) {
 //				}
+				}
 			}
+
 		}
 
 	}

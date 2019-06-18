@@ -139,6 +139,7 @@ class SyncedPosts {
 	}
 
 	public static function is_synced( object $post, int $receiver_site_id ) {
+		print_r($post);
 		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $receiver_site_id . '/' . $post->ID;
 		$url = Helpers::format_url( $url );
 		echo $url;

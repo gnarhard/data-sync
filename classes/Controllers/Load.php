@@ -28,8 +28,10 @@ class Load {
 		$post_type->create_db_table();
 		$register_cpts = new PostTypes();
 
+		new SyncedPosts();
+
 		if ( get_option( 'source_site' ) ) {
-			new SyncedPosts();
+			new Posts();
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically
