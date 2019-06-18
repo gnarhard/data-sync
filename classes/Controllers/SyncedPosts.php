@@ -3,6 +3,7 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Models\SyncedPost;
 use DataSync\Helpers;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -140,10 +141,10 @@ class SyncedPosts {
 	}
 
 	public static function is_synced( object $post, int $receiver_site_id ) {
-		print_r($post);
+
 		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $receiver_site_id . '/' . $post->ID;
 		$url = Helpers::format_url( $url );
-		echo $url;
+
 		$response = wp_remote_get( $url );
 		if ( is_wp_error( $response ) ) {
 			echo $response->get_error_message();
@@ -151,9 +152,7 @@ class SyncedPosts {
 		}
 		$body = wp_remote_retrieve_body( $response );
 		$auth = new Auth();
-//		$source_data->sig               = (string) $auth->create_signature( $json_decoded_data, $site->secret_key );
-//		$auth->verify_signature( $body, $key );
-		print_r( $body );
+		var_dump( $body );
 		die();
 
 
@@ -161,17 +160,13 @@ class SyncedPosts {
 
 	public function get_sync_status( WP_REST_Request $request ) {
 		$data             = $request->get_url_params();
-		$source_post_id   = $data['source_post_id'];
-		$receiver_site_id = $data['receiver_site_id'];
+		$source_post_id   = (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT );
+		$receiver_site_id = (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT );
 
-		print_r( $data );
-		die();
-		$return = Post::get( $source_post_id, $receiver_site_id );
+		$return = SyncedPost::get( $source_post_id, $receiver_site_id );
 
 		$response = new WP_REST_Response();
 		$response->set_status( 201 );
-
-		// TODO: ADD SIG
 		return $response;
 
 	}

@@ -11,9 +11,7 @@ class SyncedPost {
 	public static function get( int $source_post_id, int $receiver_site_id ) {
 		global $wpdb;
 		$query = $wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE source_post_id = %d AND site_id = %d;', $source_post_id, $receiver_site_id );
-		$result = $wpdb->get_results( $query );
-		print_r($result);
-
+		return $wpdb->get_results( $query );
 	}
 
 //	public static function create( $data ) {
