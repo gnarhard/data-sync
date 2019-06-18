@@ -150,10 +150,9 @@ class SyncedPosts {
 			echo $response->get_error_message();
 			// TODO: HANDLE THIS MORE GRACEFULLY.
 		}
-		$body = wp_remote_retrieve_body( $response );
-		$auth = new Auth();
-		var_dump( $body );
-		die();
+		$body = (int) wp_remote_retrieve_body( $response );
+//		var_dump( $body );
+//		die();
 
 
 	}
@@ -164,10 +163,11 @@ class SyncedPosts {
 		$receiver_site_id = (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT );
 
 		$return = SyncedPost::get( $source_post_id, $receiver_site_id );
-
-		$response = new WP_REST_Response();
-		$response->set_status( 201 );
-		return $response;
+		if ( count( $return ) ) {
+			return 1;
+		} else {
+			return 0;
+		}
 
 	}
 
