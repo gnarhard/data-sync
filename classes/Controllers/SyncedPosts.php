@@ -25,7 +25,7 @@ class SyncedPosts {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'save_to_sync_table' ),
-					'permission_callback' => array(  __NAMESPACE__ . '\Auth', 'authorize' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 				),
 			)
 		);
@@ -62,7 +62,7 @@ class SyncedPosts {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_from_sync_table' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 					'args'                => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
@@ -160,8 +160,8 @@ class SyncedPosts {
 		$data->receiver_post_id = $receiver_post_id;
 		$data->receiver_site_id = $receiver_site_id;
 
-		$auth              = new Auth();
-		$json = $auth->prepare( $data );
+		$auth     = new Auth();
+		$json     = $auth->prepare( $data, $auth->get_secret_key() );
 		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 		$body     = wp_remote_retrieve_body( $response );
@@ -183,8 +183,8 @@ class SyncedPosts {
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
 		// TODO: send to source to save in wp_data_sync_posts
-		$json_str    = file_get_contents( 'php://input' );
-		$data = (object) json_decode( $json_str );
+		$json_str = file_get_contents( 'php://input' );
+		$data     = (object) json_decode( $json_str );
 		print_r( $data );
 		die();
 	}

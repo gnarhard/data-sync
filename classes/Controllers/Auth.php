@@ -53,9 +53,9 @@ class Auth {
 		return get_option( 'secret_key' );
 	}
 
-	public function prepare( $data ) {
+	public function prepare( $data, $secret_key ) {
 		$json_decoded_data = json_decode( wp_json_encode( $data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES.
-		$data->sig         = (string) $this->create_signature( $json_decoded_data, $this->get_secret_key() );
+		$data->sig         = (string) $this->create_signature( $json_decoded_data, $secret_key );
 
 		return wp_json_encode( $data );
 	}
