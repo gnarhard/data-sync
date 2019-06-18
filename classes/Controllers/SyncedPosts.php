@@ -161,10 +161,7 @@ class SyncedPosts {
 		$data->receiver_site_id = $receiver_site_id;
 
 		$auth              = new Auth();
-		$json_decoded_data = json_decode( wp_json_encode( $data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES
-		$data->sig         = (string) $auth->create_signature( $json_decoded_data, $auth->get_secret_key() );
-
-		$json     = wp_json_encode( $data );
+		$json = $auth->prepare( $data );
 		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 		$body     = wp_remote_retrieve_body( $response );
@@ -186,7 +183,8 @@ class SyncedPosts {
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
 		// TODO: send to source to save in wp_data_sync_posts
-		$data = $request->get_params();
+		$json_str    = file_get_contents( 'php://input' );
+		$data = (object) json_decode( $json_str );
 		print_r( $data );
 		die();
 	}

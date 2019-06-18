@@ -53,11 +53,19 @@ class Auth {
 		return get_option( 'secret_key' );
 	}
 
+	public function prepare( $data ) {
+		$json_decoded_data = json_decode( wp_json_encode( $data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES.
+		$data->sig         = (string) $this->create_signature( $json_decoded_data, $this->get_secret_key() );
+
+		return wp_json_encode( $data );
+	}
+
 	public static function authorize() {
 		$data        = file_get_contents( 'php://input' );
 		$source_data = (object) json_decode( $data );
-		$auth        = new Auth();
-		$verified    = $auth->verify_signature( $source_data, $auth->get_secret_key() );
+
+		$auth     = new Auth();
+		$verified = $auth->verify_signature( $source_data, $auth->get_secret_key() );
 
 		return $verified;
 	}

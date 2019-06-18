@@ -38,9 +38,7 @@ class SourceData {
 
 			$source_data->_receiver_site_id = (int) $site->id;
 			$auth                           = new Auth();
-			$json_decoded_data              = json_decode( wp_json_encode( $source_data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES
-			$source_data->sig               = (string) $auth->create_signature( $json_decoded_data, $site->secret_key );
-			$json                           = wp_json_encode( $source_data );
+			$json                           = $auth->prepare( $source_data );
 			$url                            = (string) trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                       = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                           = wp_remote_retrieve_body( $response );
