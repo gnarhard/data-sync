@@ -93,7 +93,7 @@ class SyncedPosts {
 	}
 
 	public static function save( object $post ) {
-		print_r( $post );
+//		print_r( $post );
 		$source_post_id = $post->ID;
 		$post_array     = (array) $post; // must convert to array to use wp_insert_post.
 

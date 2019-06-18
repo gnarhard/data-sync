@@ -21,7 +21,7 @@ class Receiver {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'receive' ),
-					'permission_callback' => array( 'Auth', 'authorize' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 				),
 			)
 		);
@@ -38,15 +38,11 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
-		$source_options   = (object) $source_data->options;
-		$connected_sites  = (object) $source_data->connected_sites;
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->_receiver_site_id;
 
-		print_r($source_data);die();
-
-		PostTypes::create( $source_options );
-		if ( $source_options->enable_new_cpts ) {
+		PostTypes::create( $source_data->options );
+		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
 

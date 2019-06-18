@@ -53,11 +53,11 @@ class Auth {
 		return get_option( 'secret_key' );
 	}
 
-	public function authorize() {
+	public static function authorize() {
 		$data        = file_get_contents( 'php://input' );
 		$source_data = (object) json_decode( $data );
-		$auth       = new Auth();
-		$verified   = $auth->verify_signature( $source_data, $auth->get_secret_key() );
+		$auth        = new Auth();
+		$verified    = $auth->verify_signature( $source_data, $auth->get_secret_key() );
 
 		return $verified;
 	}
