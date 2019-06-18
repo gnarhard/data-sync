@@ -24,6 +24,7 @@ class Load {
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
+
 		$post_type = new PostType();
 		$post_type->create_db_table();
 		$register_cpts = new PostTypes();

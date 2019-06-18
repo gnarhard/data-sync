@@ -76,8 +76,10 @@ if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 }
 
 new Load();
-$connected_site = new ConnectedSite();
-$synced_post = new SyncedPost();
+
 register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+
+$connected_site = new ConnectedSite();
+$synced_post    = new SyncedPost();
 register_activation_hook( __FILE__, [ $connected_site, 'create_db_table' ] );
 register_activation_hook( __FILE__, [ $synced_post, 'create_db_table' ] );
