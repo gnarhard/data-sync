@@ -39,7 +39,7 @@ class Receiver {
 	private function parse( object $source_data ) {
 
 		$receiver_options = (object) Options::receiver()->get_data();
-		$receiver_site_id = (int) $source_data->_receiver_site_id;
+		$receiver_site_id = (int) $source_data->receiver_site_id;
 
 		PostTypes::create( $source_data->options );
 		if ( $source_data->options->enable_new_cpts ) {

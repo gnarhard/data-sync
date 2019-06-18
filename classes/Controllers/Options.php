@@ -57,7 +57,7 @@ class Options {
 	 * @return array
 	 */
 	public static function get( WP_REST_Request $request ) {
-
+//TODO: MAKE SECRET KEY UNREACHABLE
 		$key = $request->get_url_params()[ self::$option_key ];
 
 		if ( ! isset( $key ) ) {

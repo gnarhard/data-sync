@@ -88,4 +88,10 @@ class ConnectedSite {
 		);
 	}
 
+	public static function get( int $id ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
+		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $table_name, $id ) );
+	}
+
 }

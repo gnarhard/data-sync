@@ -49,8 +49,20 @@ class Auth {
 		return $result;
 	}
 
-	public function get_secret_key() {
-		return get_option( 'secret_key' );
+	public function get_site_secret_key( $receiver_site_id ) {
+
+		if ( $receiver_site_id ) {
+			$request = new WP_REST_Request();
+			$request->set_method( 'GET' );
+			$request->set_route( trailingslashit( get_site_url() ) . DATA_SYNC_API_BASE_URL . '/connected_sites/' );
+			$request->set_url_params( array( 'id' => $receiver_site_id ) );
+			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
+
+			$response      = rest_do_request( $request );
+			$connected_site_data = $response->get_data();
+			print_r($connected_site_data);
+		}
+
 	}
 
 	public function prepare( $data, $secret_key ) {
@@ -65,7 +77,12 @@ class Auth {
 		$source_data = (object) json_decode( $data );
 
 		$auth     = new Auth();
-		$verified = $auth->verify_signature( $source_data, $auth->get_secret_key() );
+		$verified = $auth->verify_signature( $source_data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
+
+		if ( false === $verified ) {
+			// Get secret key of connected site if trying to authorize a request from a receiver.
+			$verified = $auth->verify_signature( $source_data, $auth->get_site_secret_key( $source_data->receiver_site_id ) );
+		}
 
 		return $verified;
 	}

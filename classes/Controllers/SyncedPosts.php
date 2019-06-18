@@ -161,10 +161,11 @@ class SyncedPosts {
 		$data->receiver_site_id = $receiver_site_id;
 
 		$auth     = new Auth();
-		$json     = $auth->prepare( $data, $auth->get_secret_key() );
+		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
 		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 		$body     = wp_remote_retrieve_body( $response );
+		print_r($body);
 	}
 
 	public function get_sync_status( WP_REST_Request $request ) {

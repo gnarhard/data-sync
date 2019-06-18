@@ -36,7 +36,7 @@ class SourceData {
 
 		foreach ( $connected_sites as $site ) {
 
-			$source_data->_receiver_site_id = (int) $site->id;
+			$source_data->receiver_site_id = (int) $site->id;
 			$auth                           = new Auth();
 			$json                           = $auth->prepare( $source_data, $site->secret_key );
 			$url                            = (string) trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';

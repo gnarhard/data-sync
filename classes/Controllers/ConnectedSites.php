@@ -82,10 +82,10 @@ class ConnectedSites {
 
 	public function get( WP_REST_Request $request ) {
 		print_r( $request );
-//		global $wpdb;
-//		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
-//		$id = $request;
-//		$wpdb->query( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $table_name, $id ) );
+		$connected_site_id = $request->get_param( 'id' );
+		echo $connected_site_id;
+		$connected_site_data = ConnectedSite::get( $connected_site_id );
+		print_r($connected_site_data);
 	}
 
 	public static function get_all() {
