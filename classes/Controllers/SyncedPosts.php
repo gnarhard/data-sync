@@ -8,6 +8,7 @@ use DataSync\Helpers;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use stdClass;
 
 class SyncedPosts {
 
@@ -16,6 +17,18 @@ class SyncedPosts {
 	}
 
 	public function register_routes() {
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/sync_post/',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save_to_sync_table' ),
+					'permission_callback' => array(  __NAMESPACE__ . '\Auth', 'authorize' ),
+				),
+			)
+		);
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -28,7 +41,6 @@ class SyncedPosts {
 			)
 		);
 
-		// TODO: still getting rest_no_route.
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
 			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
@@ -37,21 +49,6 @@ class SyncedPosts {
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_sync_status' ),
 					'args'     => array(
-						'source_post_id'   => array(
-							'description' => 'Source Post ID',
-							'type'        => 'int',
-						),
-						'receiver_site_id' => array(
-							'description' => 'Receiver Site ID',
-							'type'        => 'int',
-						),
-					),
-				),
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'save_to_sync_table' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-					'args'                => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
 							'type'        => 'int',
@@ -96,7 +93,7 @@ class SyncedPosts {
 	}
 
 	public static function save( object $post ) {
-
+		print_r( $post );
 		$source_post_id = $post->ID;
 		$post_array     = (array) $post; // must convert to array to use wp_insert_post.
 
@@ -119,11 +116,6 @@ class SyncedPosts {
 			}
 		}
 
-//		print_r($post->media);
-//		print_r( $post_array );
-//
-//		die();
-
 		$receiver_post_id = wp_insert_post( $post_array );
 
 		if ( $receiver_post_id ) {
@@ -136,12 +128,9 @@ class SyncedPosts {
 			new Taxonomies( $receiver_post_id, $post->taxonomies );
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
+			return $receiver_post_id;
 		}
 
-//		var_dump( $post_id );
-		die();
-
-//		Posts::save_to_sync_table( $post_id, $site_id );
 	}
 
 	public static function is_synced( object $post, int $receiver_site_id ) {
@@ -164,6 +153,23 @@ class SyncedPosts {
 
 	}
 
+	public static function sync( int $receiver_post_id, int $receiver_site_id, int $source_post_id, $source_url ) {
+
+		$data                   = new stdClass();
+		$data->source_post_id   = $source_post_id;
+		$data->receiver_post_id = $receiver_post_id;
+		$data->receiver_site_id = $receiver_site_id;
+
+		$auth              = new Auth();
+		$json_decoded_data = json_decode( wp_json_encode( $data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES
+		$data->sig         = (string) $auth->create_signature( $json_decoded_data, $auth->get_secret_key() );
+
+		$json     = wp_json_encode( $data );
+		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
+		$response = wp_remote_post( $url, [ 'body' => $json ] );
+		$body     = wp_remote_retrieve_body( $response );
+	}
+
 	public function get_sync_status( WP_REST_Request $request ) {
 		$data             = $request->get_url_params();
 		$source_post_id   = (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT );
@@ -180,6 +186,9 @@ class SyncedPosts {
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
 		// TODO: send to source to save in wp_data_sync_posts
+		$data = $request->get_params();
+		print_r( $data );
+		die();
 	}
 
 	public function delete_from_sync_table( WP_REST_Request $request ) {

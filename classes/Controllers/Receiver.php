@@ -21,24 +21,10 @@ class Receiver {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'receive' ),
-					'permission_callback' => array( $this, 'authenticate' ),
+					'permission_callback' => array( 'Auth', 'authorize' ),
 				),
 			)
 		);
-	}
-
-	public function authenticate() {
-		$data        = file_get_contents( 'php://input' );
-		$source_data = (object) json_decode( $data );
-
-		$request = new WP_REST_Request( 'GET', '/' . DATA_SYNC_API_BASE_URL . '/options/secret_key' );
-		$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
-		$response   = rest_do_request( $request );
-		$secret_key = $response->get_data();
-		$auth       = new Auth();
-		$verified   = $auth->verify_signature( $source_data, $secret_key );
-
-		return $verified;
 	}
 
 	public function receive() {
@@ -57,6 +43,8 @@ class Receiver {
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->_receiver_site_id;
 
+		print_r($source_data);die();
+
 		PostTypes::create( $source_options );
 		if ( $source_options->enable_new_cpts ) {
 			PostTypes::save_options();
@@ -73,10 +61,9 @@ class Receiver {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
 					if ( false !== $filtered_post ) {
-						SyncedPosts::save( $filtered_post );
+						$receiver_post_id = SyncedPosts::save( $filtered_post );
+						SyncedPosts::sync( $receiver_post_id, $receiver_site_id, $filtered_post->ID, $source_data->url );
 					}
-//				if ( $post_type_slug === 'locations' ) {
-//				}
 				}
 			}
 

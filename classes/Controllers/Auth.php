@@ -18,10 +18,8 @@ class Auth {
 	private $logins = array();
 
 	public function __construct() {
-//		add_filter( 'rest_authentication_errors', [ $this, 'verify_user' ] );
 		add_action( 'init', 'add_cors_http_header' );
 		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15 );
-
 	}
 
 	public function allow_cors_headers_on_endpoints() {
@@ -51,21 +49,17 @@ class Auth {
 		return $result;
 	}
 
-	public function verify_request( string $nonce ) {
-		$response = wp_verify_nonce( $nonce, 'data_push' );
-		if ( false === $response ) {
-			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Nonce invalid.', array( 'status' => 403 ) );
-			$response = new WP_REST_Response( $error );
-			$response->set_status( 501 );
+	public function get_secret_key() {
+		return get_option( 'secret_key' );
+	}
 
-			return $response;
-		} elseif ( 2 === $response ) {
-			$error    = new WP_Error( 'nonce_error', 'Nonce Error: Too long since nonce was created.', array( 'status' => 403 ) );
-			$response = new WP_REST_Response( $error );
-			$response->set_status( 501 );
+	public function authorize() {
+		$data        = file_get_contents( 'php://input' );
+		$source_data = (object) json_decode( $data );
+		$auth       = new Auth();
+		$verified   = $auth->verify_signature( $source_data, $auth->get_secret_key() );
 
-			return $response;
-		}
+		return $verified;
 	}
 
 	/**
@@ -108,7 +102,7 @@ class Auth {
 			return false;
 		}
 
-		$signature_sent = $data->sig;
+		$signature_sent     = $data->sig;
 		$signature_received = $this->create_signature( $data, $key );
 
 		return $signature_received === $signature_sent;
