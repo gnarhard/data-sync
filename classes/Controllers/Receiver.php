@@ -4,6 +4,7 @@
 namespace DataSync\Controllers;
 
 
+use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
 
@@ -36,6 +37,17 @@ class Receiver {
 
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->receiver_site_id;
+		update_option( 'receiver_site_id', $receiver_site_id );
+		update_option( 'source_site_url', $source_data->url );
+
+		$synced_post = SyncedPost::get_where(
+			array(
+				'receiver_post_id' => 213,
+				'receiver_site_id' => (int) get_option( 'receiver_site_id' ),
+			)
+		);
+
+		print_r($synced_post);die();
 
 		PostTypes::create( $source_data->options );
 		if ( $source_data->options->enable_new_cpts ) {

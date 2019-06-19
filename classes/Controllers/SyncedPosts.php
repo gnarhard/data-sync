@@ -14,6 +14,7 @@ class SyncedPosts {
 
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'delete_post', [ $this, 'delete' ], 10 );
 	}
 
 	public function register_routes() {
@@ -58,22 +59,7 @@ class SyncedPosts {
 							'type'        => 'int',
 						),
 					),
-				),
-				array(
-					'methods'  => WP_REST_Server::DELETABLE,
-					'callback' => array( $this, 'delete_from_sync_table' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-					'args'     => array(
-						'source_post_id'   => array(
-							'description' => 'Source Post ID',
-							'type'        => 'int',
-						),
-						'receiver_site_id' => array(
-							'description' => 'Receiver Site ID',
-							'type'        => 'int',
-						),
-					),
-				),
+				)
 			)
 		);
 	}
@@ -92,7 +78,6 @@ class SyncedPosts {
 			}
 		}
 	}
-
 
 
 	public static function is_synced( object $post ) {
@@ -123,11 +108,14 @@ class SyncedPosts {
 
 
 	public function get( WP_REST_Request $request ) {
-		$data             = $request->get_url_params();
-		$source_post_id   = (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT );
-		$receiver_site_id = (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT );
+		$data = $request->get_url_params();
 
-		$result   = SyncedPost::get( $source_post_id, $receiver_site_id );
+		$result = SyncedPost::get_where(
+			array(
+				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+			)
+		);
 		$response = new WP_REST_Response( $result );
 		$response->set_status( 201 );
 
@@ -156,8 +144,13 @@ class SyncedPosts {
 
 		// SOURCE SIDE.
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-
-		$existing_synced_post = SyncedPost::get( $data->source_post_id, $data->receiver_site_id );
+		print_r( $data );
+		$existing_synced_post = SyncedPost::get_where(
+			array(
+				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+			)
+		);
 
 		if ( count( $existing_synced_post ) ) {
 			$data->id = $existing_synced_post[0]->id;
@@ -168,7 +161,22 @@ class SyncedPosts {
 
 	}
 
-	public function delete_from_sync_table( WP_REST_Request $request ) {
+	public function delete( $pid ) {
+
+		if ( get_option( 'source_site' ) ) {
+			// todo: delete all receiver site post data with this command
+		} else {
+
+			$synced_post = SyncedPost::get_where(
+				array(
+					'receiver_post_id' => $pid,
+					'receiver_site_id' => (int) get_option( 'receiver_site_id' ),
+				)
+			);
+
+			print_r($synced_post);
+
+		}
 
 	}
 

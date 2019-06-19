@@ -194,7 +194,8 @@ class Posts {
 		unset( $post_array['ID'] );
 
 		if ( $post->synced ) {
-			$data             = SyncedPosts::get_synced_post_data( $post );
+			$receiver_post_id = 0; // todo: change this
+			$data             = SyncedPosts::get_synced_post_data( $post, $receiver_post_id );
 			$post_array['ID'] = $data->id;
 		}
 
@@ -223,7 +224,7 @@ class Posts {
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
 			//TODO: UPDATE SYNCED POST TABLE
-			SyncedPosts::save( $post );
+			SyncedPosts::save( $receiver_post_id, $post->receiver_site_id, $post, $post->source_url );
 
 			return $receiver_post_id;
 		}

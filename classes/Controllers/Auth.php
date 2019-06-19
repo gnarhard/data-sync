@@ -80,11 +80,14 @@ class Auth {
 
 		if ( get_option( 'secret_key' ) ) {
 			return $auth->verify_signature( $source_data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
-		} else {
+		} else if (( isset( $source_data->receiver_site_id ) ) && ( NULL !== $source_data->receiver_site_id ) ) {
 			// Get secret key of connected site if trying to authorize a request from a receiver.
 			$secret_key_of_receiver = $auth->get_site_secret_key( $source_data->receiver_site_id );
 
 			return $auth->verify_signature( $source_data, $secret_key_of_receiver );
+		} else {
+			echo 'auth error'; die();
+			//TODO: ERROR HANDLE
 		}
 	}
 

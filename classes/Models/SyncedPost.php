@@ -10,11 +10,33 @@ class SyncedPost {
 
 	public static $table_name = 'data_sync_posts';
 
-	public static function get( int $source_post_id, int $receiver_site_id ) {
+	public static function get( int $id ) {
 		global $wpdb;
-		$query = $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE source_post_id = %d AND site_id = %d;', $source_post_id, $receiver_site_id );
+		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
+	}
+
+	public static function get_where( array $args ) {
+		global $wpdb;
+
+		$query     = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE';
+		$arg_count = count( $args );
+		$i         = 0;
+
+		foreach ( $args as $key => $value ) {
+			if ( is_numeric( $value ) ) {
+				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
+			} else {
+				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
+			}
+			$query .= ' ' . $key . ' = ' . $filtered_value;
+			if ( $i < $arg_count ) {
+				$query .= ' AND';
+			}
+			$i ++;
+		}
 
 		return $wpdb->get_results( $query );
+
 	}
 
 	public static function create( object $data ) {
@@ -48,20 +70,26 @@ class SyncedPost {
 	}
 
 	public static function update( $data ) {
+		print_r( $data );
 		global $wpdb;
 		$db_data                     = array();
+		$db_data['id']               = $data->id;
 		$db_data['name']             = $data->name;
 		$db_data['source_post_id']   = $data->source_post_id;
 		$db_data['receiver_post_id'] = $data->receiver_post_id;
-		$db_data['receiver_site_id'] = $data->receiver_site_id;
-		$db_data['date_modified']    = current_time( 'mysql' );
-		$db_data['source_post_id']   = $data->source_post_id;
+		$db_data['site_id']          = $data->receiver_site_id;
+//		$db_data['date_modified']    = current_time( 'mysql' );
+
+		print_r( $db_data );
 
 		$updated = $wpdb->update( $wpdb->prefix . self::$table_name, $db_data, [ 'id' => $data->id ] );
+		var_dump( $updated );
 
 		if ( false === $updated ) {
 			// TODO: BETTER ERRORS
 			$error_message = $wpdb->print_error();
+			echo $error_message;
+
 			return new WP_Error( 503, __( $error_message, 'data-sync' ) );
 		} else {
 			return $updated;

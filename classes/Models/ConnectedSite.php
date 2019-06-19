@@ -17,6 +17,30 @@ class ConnectedSite {
 		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
 	}
 
+	public static function get_where( array $args ) {
+		global $wpdb;
+
+		$query     = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE';
+		$arg_count = count( $args );
+		$i         = 0;
+
+		foreach ( $args as $key => $value ) {
+			if ( is_numeric( $value ) ) {
+				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
+			} else {
+				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
+			}
+			$query .= ' ' . $key . ' = ' . $filtered_value;
+			if ( $i < $arg_count ) {
+				$query .= ' AND';
+			}
+			$i ++;
+		}
+
+		return $wpdb->get_results( $query );
+
+	}
+
 	public static function create( $data ) {
 		global $wpdb;
 
