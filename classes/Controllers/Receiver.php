@@ -28,12 +28,8 @@ class Receiver {
 	}
 
 	public function receive() {
-
-		$json_str    = file_get_contents( 'php://input' );
-		$source_data = (object) json_decode( $json_str );
-
+		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 		$this->parse( $source_data );
-
 	}
 
 	private function parse( object $source_data ) {

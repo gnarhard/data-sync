@@ -93,7 +93,7 @@ class SyncedPosts {
 	}
 
 	public static function save( object $post ) {
-//		print_r( $post );
+		print_r( $post );
 		$source_post_id = $post->ID;
 		$post_array     = (array) $post; // must convert to array to use wp_insert_post.
 
@@ -103,6 +103,7 @@ class SyncedPosts {
 		unset( $post_array['ID'] );
 		if ( $post->synced ) {
 			// TODO: get post ID from sync table
+			echo 'asdf';
 		}
 		unset( $post_array['post_meta'] );
 		unset( $post_array['taxonomies'] );
@@ -170,7 +171,7 @@ class SyncedPosts {
 
 	public static function sync( int $receiver_post_id, int $receiver_site_id, object $source_post, $source_url ) {
 
-		// RECEIVER SIDE
+		// RECEIVER SIDE.
 		$data                   = new stdClass();
 		$data->source_post_id   = $source_post->ID;
 		$data->name             = $source_post->post_title;
@@ -187,9 +188,8 @@ class SyncedPosts {
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
 
-		// SOURCE SIDE
-		$json_str = file_get_contents( 'php://input' );
-		$data     = (object) json_decode( $json_str );
+		// SOURCE SIDE.
+		$data = (object) json_decode( file_get_contents( 'php://input' ) );
 
 		$existing_synced_post = SyncedPost::get( $data->source_post_id, $data->receiver_site_id );
 
@@ -199,7 +199,6 @@ class SyncedPosts {
 		} else {
 			SyncedPost::create( $data );
 		}
-
 
 	}
 
