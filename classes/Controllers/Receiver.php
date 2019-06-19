@@ -21,7 +21,7 @@ class Receiver {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'receive' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 				),
 			)
 		);

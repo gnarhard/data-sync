@@ -81,19 +81,19 @@ class ConnectedSites {
 	}
 
 	public function get( WP_REST_Request $request ) {
-		print_r( $request );
-		$connected_site_id = $request->get_param( 'id' );
-		echo $connected_site_id;
+		$connected_site_id   = $request->get_param( 'id' );
 		$connected_site_data = ConnectedSite::get( $connected_site_id );
-		print_r($connected_site_data);
+
+		return $connected_site_data[0];
 	}
 
 	public static function get_all() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
-		$result = $wpdb->get_results( 'SELECT * FROM ' . $table_name );
-		$response = new WP_REST_Response( $result );
+		$result     = $wpdb->get_results( 'SELECT * FROM ' . $table_name );
+		$response   = new WP_REST_Response( $result );
 		$response->set_status( 201 );
+
 		return $response;
 	}
 
@@ -104,7 +104,7 @@ class ConnectedSites {
 
 		$new_data = array();
 
-		foreach ( $request->get_params() as $data) {
+		foreach ( $request->get_params() as $data ) {
 			if ( in_array( 'id', array_keys( $data ) ) ) {
 				ConnectedSite::update( $data );
 			} else {
@@ -128,11 +128,13 @@ class ConnectedSites {
 			} else {
 				$error = new Error();
 				( $error ) ? $error->log( 'Connected site was not deleted.' . "\n" ) : null;
+
 				return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted.', array( 'status' => 501 ) );
 			}
 		} else {
 			$error = new Error();
 			( $error ) ? $error->log( 'Connected site was not deleted. No ID present in URL.' . "\n" ) : null;
+
 			return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ) );
 		}
 	}
@@ -140,6 +142,7 @@ class ConnectedSites {
 	private function table_exists() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
+
 		return in_array( $table_name, $wpdb->tables );
 	}
 

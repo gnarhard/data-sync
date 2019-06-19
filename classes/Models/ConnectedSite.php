@@ -12,6 +12,11 @@ class ConnectedSite {
 
 	public static $table_name = 'data_sync_connected_sites';
 
+	public static function get( int $id ) {
+		global $wpdb;
+		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
+	}
+
 	public static function create( $data ) {
 		global $wpdb;
 
@@ -86,12 +91,6 @@ class ConnectedSite {
 			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
 			CONVERT TO ' . $charset_collate . ';'
 		);
-	}
-
-	public static function get( int $id ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
-		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %s WHERE id = %d', $table_name, $id ) );
 	}
 
 }

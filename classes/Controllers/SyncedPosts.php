@@ -153,20 +153,6 @@ class SyncedPosts {
 
 	}
 
-	public static function sync( int $receiver_post_id, int $receiver_site_id, int $source_post_id, $source_url ) {
-
-		$data                   = new stdClass();
-		$data->source_post_id   = $source_post_id;
-		$data->receiver_post_id = $receiver_post_id;
-		$data->receiver_site_id = $receiver_site_id;
-
-		$auth     = new Auth();
-		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
-		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
-		$response = wp_remote_post( $url, [ 'body' => $json ] );
-		$body     = wp_remote_retrieve_body( $response );
-		print_r($body);
-	}
 
 	public function get_sync_status( WP_REST_Request $request ) {
 		$data             = $request->get_url_params();
@@ -180,6 +166,21 @@ class SyncedPosts {
 			return 0;
 		}
 
+	}
+
+	public static function sync( int $receiver_post_id, int $receiver_site_id, int $source_post_id, $source_url ) {
+
+		$data                   = new stdClass();
+		$data->source_post_id   = $source_post_id;
+		$data->receiver_post_id = $receiver_post_id;
+		$data->receiver_site_id = $receiver_site_id;
+
+		$auth     = new Auth();
+		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
+		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
+		$response = wp_remote_post( $url, [ 'body' => $json ] );
+		$body     = wp_remote_retrieve_body( $response );
+		print_r($body);
 	}
 
 	public function save_to_sync_table( WP_REST_Request $request ) {

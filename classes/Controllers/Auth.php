@@ -49,18 +49,19 @@ class Auth {
 		return $result;
 	}
 
-	public function get_site_secret_key( $receiver_site_id ) {
+	public function get_site_secret_key( int $receiver_site_id ) {
 
 		if ( $receiver_site_id ) {
 			$request = new WP_REST_Request();
 			$request->set_method( 'GET' );
-			$request->set_route( trailingslashit( get_site_url() ) . DATA_SYNC_API_BASE_URL . '/connected_sites/' );
+			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/connected_sites/' . $receiver_site_id );
 			$request->set_url_params( array( 'id' => $receiver_site_id ) );
 			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
 
-			$response      = rest_do_request( $request );
+			$response            = rest_do_request( $request );
 			$connected_site_data = $response->get_data();
-			print_r($connected_site_data);
+
+			return $connected_site_data->secret_key;
 		}
 
 	}
@@ -81,7 +82,10 @@ class Auth {
 
 		if ( false === $verified ) {
 			// Get secret key of connected site if trying to authorize a request from a receiver.
-			$verified = $auth->verify_signature( $source_data, $auth->get_site_secret_key( $source_data->receiver_site_id ) );
+			$secret_key_of_receiver = $auth->get_site_secret_key( $source_data->receiver_site_id );
+			$verified = $auth->verify_signature( $source_data, $secret_key_of_receiver );
+			print_r($source_data);
+			var_dump($verified);
 		}
 
 		return $verified;
