@@ -10,30 +10,39 @@ class SyncedPost {
 
 	public static function get( int $source_post_id, int $receiver_site_id ) {
 		global $wpdb;
-		$query = $wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE source_post_id = %d AND site_id = %d;', $source_post_id, $receiver_site_id );
+		$query = $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE source_post_id = %d AND site_id = %d;', $source_post_id, $receiver_site_id );
+
 		return $wpdb->get_results( $query );
 	}
 
-//	public static function create( $data ) {
-//		global $wpdb;
-//		$table_name = $wpdb->prefix . self::$table_name;
-//
-//		$result = $wpdb->insert(
-//			$table_name,
-//			array(
-//				'name'           => $data['name'],
-//				'date_created' => current_time( 'mysql' ),
-//			),
-//			array(
-//				'%s',
-//				'%s',
-//			)
-//		);
-//
-//		if ( $result ) {
-//			return $wpdb->insert_id;
-//		}
-//	}
+	public static function create( $data ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$table_name;
+
+		$result = $wpdb->insert(
+			$table_name,
+			array(
+				'source_post_id'   => $data['source_post_id'],
+				'receiver_post_id' => $data['receiver_post_id'],
+				'site_id'          => $data['receiver_site_id'],
+				'name'             => $data['name'],
+				'date_modified'    => current_time( 'mysql' ),
+			),
+			array(
+				'%d',
+				'%d',
+				'%d',
+				'%s',
+			)
+		);
+
+		if ( $result ) {
+			return $wpdb->insert_id;
+		} else {
+			// TODO: ERROR HANDLING
+			return false;
+		}
+	}
 //
 //	public static function update() {
 //		global $wpdb;
