@@ -54,8 +54,8 @@ class Receiver {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
 
 					if ( false !== $filtered_post ) {
-						$receiver_post_id = SyncedPosts::save( $filtered_post );
-						SyncedPosts::sync( $receiver_post_id, $receiver_site_id, $filtered_post, $source_data->url );
+						$receiver_post_id = Posts::save( $filtered_post );
+						SyncedPosts::save( $receiver_post_id, $receiver_site_id, $filtered_post, $source_data->url );
 					}
 				}
 			}

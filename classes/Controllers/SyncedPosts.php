@@ -93,47 +93,7 @@ class SyncedPosts {
 		}
 	}
 
-	public static function save( object $post ) {
 
-		print_r( $post );
-		$post_array = (array) $post; // must convert to array to use wp_insert_post.
-
-		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
-		unset( $post_array['ID'] );
-
-		if ( $post->synced ) {
-			$data             = self::get_synced_post_data( $post );
-			$post_array['ID'] = $data->id;
-		}
-
-		unset( $post_array['post_meta'] );
-		unset( $post_array['taxonomies'] );
-		unset( $post_array['media'] );
-
-		// Don't change URLs of media that needs to be migrated.
-		if ( $post->post_type !== 'attachment' ) {
-			unset( $post_array['guid'] );
-			foreach ( $post_array as $key => $value ) {
-				$post_array[ $key ] = str_replace( $post_array['source_url'], get_site_url(), $value );
-			}
-		}
-
-		$receiver_post_id = wp_insert_post( $post_array );
-
-		if ( $receiver_post_id ) {
-
-			foreach ( $post->post_meta as $meta_key => $meta_value ) {
-				// Yoast and ACF data will be in here.
-				update_post_meta( $receiver_post_id, $meta_key, $meta_value );
-			}
-
-			new Taxonomies( $receiver_post_id, $post->taxonomies );
-			new Media( $receiver_post_id, $post->media, $post->source_url );
-
-			return $receiver_post_id;
-		}
-
-	}
 
 	public static function is_synced( object $post ) {
 		$data = self::get_synced_post_data( $post );
@@ -175,7 +135,7 @@ class SyncedPosts {
 
 	}
 
-	public static function sync( int $receiver_post_id, int $receiver_site_id, object $source_post, $source_url ) {
+	public static function save( int $receiver_post_id, int $receiver_site_id, object $source_post, $source_url ) {
 
 		// RECEIVER SIDE.
 		$data                   = new stdClass();
