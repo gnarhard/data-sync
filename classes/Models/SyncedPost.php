@@ -20,7 +20,7 @@ class SyncedPost {
 
 		$query     = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE';
 		$arg_count = count( $args );
-		$i         = 0;
+		$i         = 1;
 
 		foreach ( $args as $key => $value ) {
 			if ( is_numeric( $value ) ) {
