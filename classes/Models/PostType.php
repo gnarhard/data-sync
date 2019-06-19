@@ -42,6 +42,7 @@ class PostType {
 		$updated = $wpdb->update( $table_name, $db_data, [ 'id' => $data->id ] );
 
 		if ( false === $updated ) {
+			// TODO: BETTER ERROR
 			$error_message = $wpdb->print_error();
 			return new WP_Error( 503, __( $error_message, 'data-sync' ) );
 		} else {

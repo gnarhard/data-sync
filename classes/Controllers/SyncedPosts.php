@@ -192,10 +192,9 @@ class SyncedPosts {
 		$data     = (object) json_decode( $json_str );
 
 		$existing_synced_post = SyncedPost::get( $data->source_post_id, $data->receiver_site_id );
-		print_r( $existing_synced_post );
 
 		if ( count( $existing_synced_post ) ) {
-			$data->id = $existing_synced_post->id;
+			$data->id = $existing_synced_post[0]->id;
 			SyncedPost::update( $data );
 		} else {
 			SyncedPost::create( $data );

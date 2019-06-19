@@ -4,6 +4,8 @@
 namespace DataSync\Models;
 
 
+use WP_Error;
+
 class SyncedPost {
 
 	public static $table_name = 'data_sync_posts';
@@ -15,23 +17,24 @@ class SyncedPost {
 		return $wpdb->get_results( $query );
 	}
 
-	public static function create( $data ) {
+	public static function create( object $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$table_name;
 
 		$result = $wpdb->insert(
 			$table_name,
 			array(
-				'source_post_id'   => $data['source_post_id'],
-				'receiver_post_id' => $data['receiver_post_id'],
-				'site_id'          => $data['receiver_site_id'],
-				'name'             => $data['name'],
+				'source_post_id'   => $data->source_post_id,
+				'receiver_post_id' => $data->receiver_post_id,
+				'site_id'          => $data->receiver_site_id,
+				'name'             => $data->name,
 				'date_modified'    => current_time( 'mysql' ),
 			),
 			array(
 				'%d',
 				'%d',
 				'%d',
+				'%s',
 				'%s',
 			)
 		);
@@ -43,30 +46,46 @@ class SyncedPost {
 			return false;
 		}
 	}
-//
-//	public static function update() {
-//		global $wpdb;
-//
-////		$updated = $wpdb->update( $table, $data, $where );
-//	}
-//
-//	public static function delete( $id ) {
-//		global $wpdb;
-//		$table_name = $wpdb->prefix . self::$table_name;
-//		$result     = $wpdb->delete(
-//			$table_name,
-//			array(
-//				'id' => $id,
-//			),
-//			array(
-//				'%d',
-//			)
-//		);
-//
-//		return $result;
-//
-//	}
-//
+
+	public static function update( $data ) {
+		global $wpdb;
+		$db_data                     = array();
+		$db_data['name']             = $data->name;
+		$db_data['source_post_id']   = $data->source_post_id;
+		$db_data['receiver_post_id'] = $data->receiver_post_id;
+		$db_data['receiver_site_id'] = $data->receiver_site_id;
+		$db_data['date_modified']    = current_time( 'mysql' );
+		$db_data['source_post_id']   = $data->source_post_id;
+
+		$updated = $wpdb->update( $wpdb->prefix . self::$table_name, $db_data, [ 'id' => $data->id ] );
+
+		if ( false === $updated ) {
+			// TODO: BETTER ERRORS
+			$error_message = $wpdb->print_error();
+			return new WP_Error( 503, __( $error_message, 'data-sync' ) );
+		} else {
+			return $updated;
+		}
+	}
+
+	public static function delete( $id ) {
+		//TODO: PROCESS DELETED POSTS
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$table_name;
+		$result     = $wpdb->delete(
+			$table_name,
+			array(
+				'id' => $id,
+			),
+			array(
+				'%d',
+			)
+		);
+
+		return $result;
+
+	}
+
 	public function create_db_table() {
 
 		global $wpdb;
