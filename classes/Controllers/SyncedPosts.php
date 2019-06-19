@@ -170,6 +170,7 @@ class SyncedPosts {
 
 	public static function sync( int $receiver_post_id, int $receiver_site_id, int $source_post_id, $source_url ) {
 
+		// RECEIVER SIDE
 		$data                   = new stdClass();
 		$data->source_post_id   = $source_post_id;
 		$data->receiver_post_id = $receiver_post_id;
@@ -184,9 +185,11 @@ class SyncedPosts {
 	}
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
-		// TODO: send to source to save in wp_data_sync_posts
+
+		// SOURCE SIDE
 		$json_str = file_get_contents( 'php://input' );
 		$data     = (object) json_decode( $json_str );
+		echo "\n"; echo 'source'; echo "\n";
 		print_r( $data );
 		die();
 	}

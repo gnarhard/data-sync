@@ -75,20 +75,17 @@ class Auth {
 
 	public static function authorize() {
 		$data        = file_get_contents( 'php://input' );
-		$source_data = (object) json_decode( $data );
+		$source_data = json_decode( $data );
+		$auth        = new Auth();
 
-		$auth     = new Auth();
-		$verified = $auth->verify_signature( $source_data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
-
-		if ( false === $verified ) {
+		if ( get_option( 'secret_key' ) ) {
+			return $auth->verify_signature( $source_data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
+		} else {
 			// Get secret key of connected site if trying to authorize a request from a receiver.
 			$secret_key_of_receiver = $auth->get_site_secret_key( $source_data->receiver_site_id );
-			$verified = $auth->verify_signature( $source_data, $secret_key_of_receiver );
-			print_r($source_data);
-			var_dump($verified);
-		}
 
-		return $verified;
+			return $auth->verify_signature( $source_data, $secret_key_of_receiver );
+		}
 	}
 
 	/**
