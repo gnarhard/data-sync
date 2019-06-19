@@ -60,10 +60,10 @@ class SyncedPosts {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_from_sync_table' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::DELETABLE,
+					'callback' => array( $this, 'delete_from_sync_table' ),
+//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+					'args'     => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
 							'type'        => 'int',
@@ -80,8 +80,9 @@ class SyncedPosts {
 
 	public static function filter( object $post, int $receiver_site_id ) {
 
-		$post->synced   = self::is_synced( $post, $receiver_site_id );
-		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
+		$post->receiver_site_id = $receiver_site_id;
+		$post->synced           = self::is_synced( $post );
+		$excluded_sites         = unserialize( $post->post_meta->_excluded_sites[0] );
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
 			if ( (int) $excluded_site_id === (int) $receiver_site_id ) {
@@ -93,18 +94,18 @@ class SyncedPosts {
 	}
 
 	public static function save( object $post ) {
-//		print_r( $post );
-		$source_post_id = $post->ID;
-		$post_array     = (array) $post; // must convert to array to use wp_insert_post.
 
+		print_r( $post );
+		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
-
 		unset( $post_array['ID'] );
+
 		if ( $post->synced ) {
-			// TODO: get post ID from sync table
-			echo 'asdf';
+			$data             = self::get_synced_post_data( $post );
+			$post_array['ID'] = $data->id;
 		}
+
 		unset( $post_array['post_meta'] );
 		unset( $post_array['taxonomies'] );
 		unset( $post_array['media'] );
@@ -134,11 +135,17 @@ class SyncedPosts {
 
 	}
 
-	public static function is_synced( object $post, int $receiver_site_id ) {
+	public static function is_synced( object $post ) {
+		$data = self::get_synced_post_data( $post );
 
-		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $receiver_site_id . '/' . $post->ID;
+		return isset( $data->id );
+	}
+
+
+	public static function get_synced_post_data( object $post ) {
+
+		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $post->receiver_site_id . '/' . $post->ID;
 		$url = Helpers::format_url( $url );
-
 
 		$response = wp_remote_get( $url );
 
@@ -148,7 +155,8 @@ class SyncedPosts {
 		} else {
 			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body )[0];
-			return isset( $data->id );
+
+			return $data;
 		}
 
 	}
@@ -159,7 +167,7 @@ class SyncedPosts {
 		$source_post_id   = (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT );
 		$receiver_site_id = (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT );
 
-		$result = SyncedPost::get( $source_post_id, $receiver_site_id );
+		$result   = SyncedPost::get( $source_post_id, $receiver_site_id );
 		$response = new WP_REST_Response( $result );
 		$response->set_status( 201 );
 
