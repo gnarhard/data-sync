@@ -52,18 +52,6 @@ class ConnectedSites {
 						),
 					),
 				),
-//				array(
-//					'methods'             => WP_REST_Server::EDITABLE,
-//					'callback'            => array( $this, 'save' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-//					'args'                => array(
-//						'id' => array(
-//							'description'       => 'ID of connected_site',
-//							'type'              => 'int',
-//							'validate_callback' => 'is_numeric',
-//						),
-//					),
-//				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete' ),
