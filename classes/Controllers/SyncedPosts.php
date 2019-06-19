@@ -36,7 +36,7 @@ class SyncedPosts {
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_sync_status' ),
+					'callback' => array( $this, 'get' ),
 				),
 			)
 		);
@@ -47,7 +47,7 @@ class SyncedPosts {
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_sync_status' ),
+					'callback' => array( $this, 'get' ),
 					'args'     => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
@@ -93,7 +93,7 @@ class SyncedPosts {
 	}
 
 	public static function save( object $post ) {
-		print_r( $post );
+//		print_r( $post );
 		$source_post_id = $post->ID;
 		$post_array     = (array) $post; // must convert to array to use wp_insert_post.
 
@@ -139,33 +139,31 @@ class SyncedPosts {
 		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $receiver_site_id . '/' . $post->ID;
 		$url = Helpers::format_url( $url );
 
+
 		$response = wp_remote_get( $url );
+
 		if ( is_wp_error( $response ) ) {
 			echo $response->get_error_message();
 			// TODO: HANDLE THIS MORE GRACEFULLY.
 		} else {
-			$body = (int) wp_remote_retrieve_body( $response );
-			if ( $body ) {
-				return true;
-			} else {
-				return false;
-			}
+			$body = wp_remote_retrieve_body( $response );
+			$data = json_decode( $body )[0];
+			return isset( $data->id );
 		}
 
 	}
 
 
-	public function get_sync_status( WP_REST_Request $request ) {
+	public function get( WP_REST_Request $request ) {
 		$data             = $request->get_url_params();
 		$source_post_id   = (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT );
 		$receiver_site_id = (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT );
 
-		$return = SyncedPost::get( $source_post_id, $receiver_site_id );
-		if ( count( $return ) ) {
-			return 1;
-		} else {
-			return 0;
-		}
+		$result = SyncedPost::get( $source_post_id, $receiver_site_id );
+		$response = new WP_REST_Response( $result );
+		$response->set_status( 201 );
+
+		return $response;
 
 	}
 
