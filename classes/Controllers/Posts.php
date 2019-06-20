@@ -8,18 +8,24 @@ use stdClass;
 
 class Posts {
 
-	public $table_name = 'data_sync_post_types';
-
 	public $view_namespace = 'DataSync';
 
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
 		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
 		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
+		add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
+	}
+
+	public function add_meta_boxes_into_cpts( $args ) {
+		$args['register_meta_box_cb'] = [ $this, 'add_meta_boxes' ];
+
+		return $args;
 	}
 
 	public function add_meta_boxes() {
-		$push_enabled_post_types = get_option( 'push_enabled_post_types' );
+
+		$registered_post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
 
 		add_meta_box(
 			'canonical_site',
@@ -28,8 +34,9 @@ class Posts {
 				'textdomain'
 			),
 			$this->view_namespace . '\add_canonical_radio_inputs',
-			$push_enabled_post_types
-		);
+			$registered_post_types,
+			'side',
+			);
 
 		add_meta_box(
 			'excluded_sites',
@@ -38,8 +45,9 @@ class Posts {
 				'textdomain'
 			),
 			$this->view_namespace . '\add_excluded_sites_select_field',
-			$push_enabled_post_types
-		);
+			$registered_post_types,
+			'side',
+			);
 	}
 
 	public function save_meta_boxes( int $post_id ) {
@@ -212,7 +220,7 @@ class Posts {
 
 		$receiver_post_id = wp_insert_post( $post_array );
 		echo 'POSTS';
-		var_dump($receiver_post_id);
+		var_dump( $receiver_post_id );
 		if ( $receiver_post_id ) {
 
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {

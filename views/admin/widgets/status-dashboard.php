@@ -10,7 +10,7 @@ use DataSync\Models\SyncedPost;
  * Dashboard widget that displays status of posts that haven't been synced
  */
 function status_widget() {
-	// TODO: add update failed section
+	// TODO: add pagination
 	?>
 	<table id="wp_data_sync_status">
 		<thead>

@@ -40,9 +40,6 @@ class PostTypes {
 	}
 
 	private static function save( object $data ) {
-//		if ( ! self::table_exists() ) {
-//			PostType::create_db_table();
-//		}
 
 		$existing_post_types = (array) self::get_id( $data->name );
 
@@ -77,13 +74,6 @@ class PostTypes {
 		}
 
 		update_option( 'enabled_post_types', $data );
-	}
-
-	private static function table_exists() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . PostType::$table_name;
-
-		return in_array( $table_name, $wpdb->tables );
 	}
 
 	public function register() {
