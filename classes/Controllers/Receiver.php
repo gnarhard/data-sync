@@ -37,13 +37,13 @@ class Receiver {
 
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->receiver_site_id;
-		update_option( 'receiver_site_id', $receiver_site_id );
-		update_option( 'source_site_url', $source_data->url );
+		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
+		update_option( 'data_sync_source_site_url', $source_data->url );
 
 		$synced_post = SyncedPost::get_where(
 			array(
 				'receiver_post_id' => 213,
-				'receiver_site_id' => (int) get_option( 'receiver_site_id' ),
+				'site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 			)
 		);
 

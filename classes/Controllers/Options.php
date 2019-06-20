@@ -222,8 +222,8 @@ class Options {
 		add_settings_field( 'source_site', 'Source or Receiver?', $this->view_namespace . '\display_source_input', 'data-sync-options', 'data_sync_options' );
 		register_setting( 'data_sync_options', 'source_site' );
 
-		register_setting( 'data_sync_options', 'source_site_url' );
-		register_setting( 'data_sync_options', 'receiver_site_id' );
+		register_setting( 'data_sync_options', 'data_sync_source_site_url' );
+		register_setting( 'data_sync_options', 'data_sync_receiver_site_id' );
 
 		$source = get_option( 'source_site' );
 

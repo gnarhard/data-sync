@@ -170,7 +170,7 @@ class SyncedPosts {
 			$synced_post = SyncedPost::get_where(
 				array(
 					'receiver_post_id' => $pid,
-					'receiver_site_id' => (int) get_option( 'receiver_site_id' ),
+					'site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 				)
 			);
 
