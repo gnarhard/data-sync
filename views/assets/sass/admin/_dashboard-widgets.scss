@@ -13,7 +13,7 @@
       width: 100%;
       display:block;
       margin-top: 20px;
-
+      overflow: hidden;
 
       button {
         padding: 10px;
@@ -28,6 +28,16 @@
 
       button:hover {
         background: grey;
+      }
+    }
+
+    #error_log_wrap {
+      margin-top: 20px;
+
+      a {
+        width: 100%;
+        text-align: center;
+        display: block;
       }
     }
   }
