@@ -40,15 +40,6 @@ class Receiver {
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 
-//		$synced_post = SyncedPost::get_where(
-//			array(
-//				'receiver_post_id' => 213,
-//				'site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-//			)
-//		);
-//
-//		print_r($synced_post);die();
-
 		PostTypes::create( $source_data->options );
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();

@@ -173,8 +173,7 @@ class SyncedPosts {
 					'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 				)
 			);
-
-			print_r($synced_post);
+			// TODO: delete synced_post on source
 
 		}
 
