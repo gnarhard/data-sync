@@ -48,7 +48,7 @@ class SyncedPost {
 			array(
 				'source_post_id'   => $data->source_post_id,
 				'receiver_post_id' => $data->receiver_post_id,
-				'site_id'          => $data->receiver_site_id,
+				'receiver_site_id'          => $data->receiver_receiver_site_id,
 				'name'             => $data->name,
 				'date_modified'    => current_time( 'mysql' ),
 			),
@@ -77,7 +77,7 @@ class SyncedPost {
 		$db_data['name']             = $data->name;
 		$db_data['source_post_id']   = $data->source_post_id;
 		$db_data['receiver_post_id'] = $data->receiver_post_id;
-		$db_data['site_id']          = $data->receiver_site_id;
+		$db_data['receiver_site_id']          = $data->receiver_site_id;
 //		$db_data['date_modified']    = current_time( 'mysql' );
 
 		print_r( $db_data );
@@ -125,7 +125,7 @@ class SyncedPost {
 	        PRIMARY KEY(id),
 	        source_post_id     INT NOT NULL,
 	        receiver_post_id   INT NOT NULL,
-	        site_id            INT NOT NULL,
+	        receiver_site_id            INT NOT NULL,
 	        name              VARCHAR(255) NOT NULL,
 	        date_modified    DATETIME NOT NULL
 	    );'
@@ -146,7 +146,7 @@ class SyncedPost {
 
 		$result = $wpdb->query(
 			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . ' 
-			ADD CONSTRAINT fk_site_id FOREIGN KEY (site_id) 
+			ADD CONSTRAINT fk_receiver_site_id FOREIGN KEY (receiver_site_id) 
 			REFERENCES ' . $wpdb->prefix . ConnectedSite::$table_name . '(id)
 			ON DELETE CASCADE
 			ON UPDATE CASCADE

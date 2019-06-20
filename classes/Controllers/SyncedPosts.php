@@ -113,7 +113,7 @@ class SyncedPosts {
 		$result = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
-				'receiver_site_id' => (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data['receiver_receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
 		$response = new WP_REST_Response( $result );
@@ -170,7 +170,7 @@ class SyncedPosts {
 			$synced_post = SyncedPost::get_where(
 				array(
 					'receiver_post_id' => $pid,
-					'site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+					'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 				)
 			);
 
