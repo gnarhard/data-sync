@@ -3,7 +3,7 @@ import ConnectedSites from './ConnectedSites.es6.js';
 
 jQuery( function ( $ ) {
 
-    $('bulk_data_push').unbind().click( function( e ) {
+    $('#bulk_data_push').unbind().click( function( e ) {
         e.preventDefault();
         AJAX.get(DataSync.api.url + '/source_data/push' );
     }, false);

@@ -26,15 +26,14 @@ function status_widget() {
 		$connected_sites_obj       = new ConnectedSites();
 		$connected_sites           = $connected_sites_obj->get_all()->data;
 		$number_of_sites_connected = count( $connected_sites );
-
-		$receiver_options = (object) Options::receiver()->get_data();
-		$posts            = Posts::get( $receiver_options->enabled_post_types );
+		$source_options            = Options::source()->get_data();
+		$posts                     = Posts::get( array_keys( $source_options->push_enabled_post_types ) );
 		foreach ( $posts as $post ) {
-			$post        = $post[0];
+			$post = $post[0];
 
-			$time = strtotime($post->post_date);
+			$time = strtotime( $post->post_date );
 
-			$result      = SyncedPost::get_where(
+			$result = SyncedPost::get_where(
 				array(
 					'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
 				)
@@ -52,7 +51,7 @@ function status_widget() {
 				<td><?php echo $post->ID ?></td>
 				<td><?php echo $post->post_title ?></td>
 				<td><?php echo ucfirst( $post->post_type ); ?></td>
-				<td><?php echo date('g:i a - F j, Y',$time); ?></td>
+				<td><?php echo date( 'g:i a - F j, Y', $time ); ?></td>
 				<td><?php echo $post_status; ?></td>
 			</tr>
 			<?php
