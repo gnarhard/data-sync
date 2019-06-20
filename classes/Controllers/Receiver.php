@@ -63,6 +63,8 @@ class Receiver {
 				}
 			}
 
+			$email = new Email();
+
 		}
 
 	}

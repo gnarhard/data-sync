@@ -39,11 +39,13 @@ function status_widget() {
 					'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
 				)
 			);
-			$post_status = '<i class="dashicons dashicons-warning" title="Not synced."></i>';
+
 			if ( count( $result ) === $number_of_sites_connected ) {
 				$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-			} else {
+			} else if ( count( $result ) < $number_of_sites_connected ) {
 				$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site due to an error."></i>';
+			} else {
+				$post_status = '<i class="dashicons dashicons-warning" title="Not synced."></i>';
 			}
 			?>
 			<tr>
