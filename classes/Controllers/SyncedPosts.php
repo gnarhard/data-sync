@@ -81,7 +81,6 @@ class SyncedPosts {
 
 	public static function is_synced( object $post ) {
 		$data = self::get_synced_post_data( $post );
-
 		return isset( $data->id );
 	}
 
@@ -107,12 +106,12 @@ class SyncedPosts {
 
 
 	public function get( WP_REST_Request $request ) {
-		$data = $request->get_url_params();
+		$data = (object) $request->get_url_params();
 
 		$result   = SyncedPost::get_where(
 			array(
-				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
-				'receiver_site_id' => (int) filter_var( $data['data_sync_receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data->receiver_site_id, FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
 		$response = new WP_REST_Response( $result );
@@ -145,11 +144,11 @@ class SyncedPosts {
 		$data                 = (object) json_decode( file_get_contents( 'php://input' ) );
 		$existing_synced_post = SyncedPost::get_where(
 			array(
-				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
-				'receiver_site_id' => (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data->receiver_site_id, FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
-print_r($data);
+
 		if ( count( $existing_synced_post ) ) {
 			$data->id = $existing_synced_post[0]->id;
 			SyncedPost::update( $data );

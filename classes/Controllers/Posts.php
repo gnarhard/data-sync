@@ -194,9 +194,8 @@ class Posts {
 		unset( $post_array['ID'] );
 
 		if ( $post->synced ) {
-			$receiver_post_id = 0; // todo: change this
-			$data             = SyncedPosts::get_synced_post_data( $post, $receiver_post_id );
-			$post_array['ID'] = $data->id;
+			$data             = SyncedPosts::get_synced_post_data( $post );
+			$post_array['ID'] = $data->receiver_post_id;
 		}
 
 		unset( $post_array['post_meta'] );
@@ -212,7 +211,8 @@ class Posts {
 		}
 
 		$receiver_post_id = wp_insert_post( $post_array );
-
+		echo 'POSTS';
+		var_dump($receiver_post_id);
 		if ( $receiver_post_id ) {
 
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {
@@ -223,7 +223,7 @@ class Posts {
 			new Taxonomies( $receiver_post_id, $post->taxonomies );
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
-			//TODO: UPDATE SYNCED POST TABLE
+
 			SyncedPosts::save( $receiver_post_id, $post );
 
 			return $receiver_post_id;

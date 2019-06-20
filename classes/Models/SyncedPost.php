@@ -12,6 +12,7 @@ class SyncedPost {
 
 	public static function get( int $id ) {
 		global $wpdb;
+
 		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
 	}
 
@@ -48,7 +49,7 @@ class SyncedPost {
 			array(
 				'source_post_id'   => $data->source_post_id,
 				'receiver_post_id' => $data->receiver_post_id,
-				'receiver_site_id'          => $data->receiver_site_id,
+				'receiver_site_id' => $data->receiver_site_id,
 				'name'             => $data->name,
 				'date_modified'    => current_time( 'mysql' ),
 			),
@@ -70,17 +71,17 @@ class SyncedPost {
 	}
 
 	public static function update( $data ) {
-		print_r( $data );
+//		print_r( $data );
 		global $wpdb;
 		$db_data                     = array();
 		$db_data['id']               = $data->id;
 		$db_data['name']             = $data->name;
 		$db_data['source_post_id']   = $data->source_post_id;
 		$db_data['receiver_post_id'] = $data->receiver_post_id;
-		$db_data['receiver_site_id']          = $data->receiver_site_id;
-//		$db_data['date_modified']    = current_time( 'mysql' );
+		$db_data['receiver_site_id'] = $data->receiver_site_id;
+		$db_data['date_modified']    = current_time( 'mysql' );
 
-		print_r( $db_data );
+//		print_r( $db_data );
 
 		$updated = $wpdb->update( $wpdb->prefix . self::$table_name, $db_data, [ 'id' => $data->id ] );
 		var_dump( $updated );
