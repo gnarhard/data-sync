@@ -17,7 +17,7 @@ function status_widget() {
 		</thead>
 		<tr>
 			<th><?php _e( 'ID', 'data_sync' ); ?></th>
-			<th><?php _e( 'Post', 'data_sync' ); ?></th>
+			<th><?php _e( 'Title', 'data_sync' ); ?></th>
 			<th><?php _e( 'Type', 'data_sync' ); ?></th>
 			<th><?php _e( 'Created', 'data_sync' ); ?></th>
 			<th><?php _e( 'Synced', 'data_sync' ); ?></th>
@@ -31,6 +31,9 @@ function status_widget() {
 		$posts            = Posts::get( $receiver_options->enabled_post_types );
 		foreach ( $posts as $post ) {
 			$post        = $post[0];
+
+			$time = strtotime($post->post_date);
+
 			$result      = SyncedPost::get_where(
 				array(
 					'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
@@ -47,7 +50,7 @@ function status_widget() {
 				<td><?php echo $post->ID ?></td>
 				<td><?php echo $post->post_title ?></td>
 				<td><?php echo ucfirst( $post->post_type ); ?></td>
-				<td><?php echo $post->post_date ?></td>
+				<td><?php echo date('g:i a - F j, Y',$time); ?></td>
 				<td><?php echo $post_status; ?></td>
 			</tr>
 			<?php
@@ -55,8 +58,7 @@ function status_widget() {
 		?>
 	</table>
 	<div id="status_dashboard_button_wrap">
-		<button id="bulk_data_push"><?php _e( 'Push All', 'data_sync' ); ?></button>
-		<button id="recent_data_push"><?php _e( 'Push Unsynced', 'data_sync' ); ?></button>
+		<button id="bulk_data_push"><?php _e( 'Sync', 'data_sync' ); ?></button>
 		<button id="template_push"><?php _e( 'Push Template', 'data_sync' ); ?></button>
 	</div>
 	<?php
