@@ -66,8 +66,8 @@ class SyncedPosts {
 
 	public static function filter( object $post ) {
 
-		$post->synced           = self::is_synced( $post );
-		$excluded_sites         = unserialize( $post->post_meta->_excluded_sites[0] );
+		$post->synced   = self::is_synced( $post );
+		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
 			if ( (int) $excluded_site_id === (int) get_option( 'data_sync_receiver_site_id' ) ) {
@@ -109,10 +109,10 @@ class SyncedPosts {
 	public function get( WP_REST_Request $request ) {
 		$data = $request->get_url_params();
 
-		$result = SyncedPost::get_where(
+		$result   = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
-				'receiver_site_id' => (int) filter_var( $data['receiver_receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
+				'receiver_site_id' => (int) filter_var( $data['data_sync_receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
 		$response = new WP_REST_Response( $result );
@@ -122,7 +122,7 @@ class SyncedPosts {
 
 	}
 
-	public static function save( int $receiver_post_id, object $source_post, $source_url ) {
+	public static function save( int $receiver_post_id, object $source_post ) {
 
 		// RECEIVER SIDE.
 		$data                   = new stdClass();
@@ -133,7 +133,7 @@ class SyncedPosts {
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
-		$url      = Helpers::format_url( trailingslashit( $source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
+		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 		$body     = wp_remote_retrieve_body( $response );
 		print_r( $body );
@@ -142,15 +142,14 @@ class SyncedPosts {
 	public function save_to_sync_table( WP_REST_Request $request ) {
 
 		// SOURCE SIDE.
-		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		print_r( $data );
+		$data                 = (object) json_decode( file_get_contents( 'php://input' ) );
 		$existing_synced_post = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $data['source_post_id'], FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $data['receiver_site_id'], FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
-
+print_r($data);
 		if ( count( $existing_synced_post ) ) {
 			$data->id = $existing_synced_post[0]->id;
 			SyncedPost::update( $data );

@@ -48,7 +48,7 @@ class SyncedPost {
 			array(
 				'source_post_id'   => $data->source_post_id,
 				'receiver_post_id' => $data->receiver_post_id,
-				'receiver_site_id'          => $data->receiver_receiver_site_id,
+				'receiver_site_id'          => $data->receiver_site_id,
 				'name'             => $data->name,
 				'date_modified'    => current_time( 'mysql' ),
 			),

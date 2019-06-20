@@ -224,7 +224,7 @@ class Posts {
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
 			//TODO: UPDATE SYNCED POST TABLE
-			SyncedPosts::save( $receiver_post_id, $post, $post->source_url );
+			SyncedPosts::save( $receiver_post_id, $post );
 
 			return $receiver_post_id;
 		}
