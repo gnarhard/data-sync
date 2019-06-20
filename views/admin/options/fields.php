@@ -31,7 +31,7 @@ function display_push_enabled_post_types() {
 
 	$registered_post_types = get_post_types( $args, $output, $operator );
 	?>
-  <select name="push_enabled_post_types[]" multiple style="width: 200px;" id="push_enabled_post_types">
+  <select name="push_enabled_post_types[]" multiple id="push_enabled_post_types">
 	  <?php
 	  foreach ( $registered_post_types as $key => $post_type ) {
 		  if ( ( 'page' === $post_type ) || ( 'attachment' === $post_type ) ) {
@@ -201,7 +201,7 @@ function display_post_types_to_accept() {
 		  $post_type_object = get_post_type_object( $post_type );
 		  ?>
         <option
-            value="<?php echo $post_type_object->name; ?>" <?php selected( in_array( $post_type_object->name, get_option( 'enabled_post_types' ) ) ); ?>><?php echo $post_type_object->label; ?></option>
+            value="<?php echo $post_type_object->name; ?>" <?php selected( in_array( $post_type_object->name, get_option( 'enabled_post_types' ) ) ); ?>><?php echo $post_type_object->name; ?></option>
 		  <?php
 	  }
 	  ?>

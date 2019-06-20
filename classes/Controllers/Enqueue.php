@@ -13,14 +13,14 @@ class Enqueue {
 	 * Enqueues scripts and styles
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'styles' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_styles' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
 	}
 
 	/**
 	 * Enqueues scripts
 	 */
-	public function scripts() {
+	public function admin_scripts() {
 
 		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', false, 1, true );
 
@@ -48,7 +48,7 @@ class Enqueue {
 	/**
 	 * Enqueues styles
 	 */
-	public function styles() {
+	public function admin_styles() {
 		wp_register_style( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1 );
 		wp_enqueue_style( 'data-sync-admin' );
 	}

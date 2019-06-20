@@ -57,8 +57,15 @@ class Options {
 	 * @return array
 	 */
 	public static function get( WP_REST_Request $request ) {
-//TODO: MAKE SECRET KEY UNREACHABLE
+
 		$key = $request->get_url_params()[ self::$option_key ];
+
+		if ( 'secret_key' === $key ) {
+			$response = new WP_REST_Response();
+			$response->set_status( 401 );
+
+			return $response;
+		}
 
 		if ( ! isset( $key ) ) {
 			return rest_ensure_response( $key );
