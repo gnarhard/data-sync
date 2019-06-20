@@ -64,14 +64,13 @@ class SyncedPosts {
 		);
 	}
 
-	public static function filter( object $post, int $receiver_site_id ) {
+	public static function filter( object $post ) {
 
-		$post->receiver_site_id = $receiver_site_id;
 		$post->synced           = self::is_synced( $post );
 		$excluded_sites         = unserialize( $post->post_meta->_excluded_sites[0] );
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
-			if ( (int) $excluded_site_id === (int) $receiver_site_id ) {
+			if ( (int) $excluded_site_id === (int) get_option( 'data_sync_receiver_site_id' ) ) {
 				return false;
 			} else {
 				return $post;
@@ -89,7 +88,7 @@ class SyncedPosts {
 
 	public static function get_synced_post_data( object $post ) {
 
-		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . $post->receiver_site_id . '/' . $post->ID;
+		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $post->ID;
 		$url = Helpers::format_url( $url );
 
 		$response = wp_remote_get( $url );
@@ -123,14 +122,14 @@ class SyncedPosts {
 
 	}
 
-	public static function save( int $receiver_post_id, int $receiver_site_id, object $source_post, $source_url ) {
+	public static function save( int $receiver_post_id, object $source_post, $source_url ) {
 
 		// RECEIVER SIDE.
 		$data                   = new stdClass();
 		$data->source_post_id   = $source_post->ID;
 		$data->name             = $source_post->post_title;
 		$data->receiver_post_id = $receiver_post_id;
-		$data->receiver_site_id = $receiver_site_id;
+		$data->receiver_site_id = get_option( 'data_sync_receiver_site_id' );
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
