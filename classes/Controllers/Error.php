@@ -3,7 +3,7 @@
 
 namespace DataSync\Controllers;
 
-
+use WP_REST_Server;
 use DataSync\Helpers;
 use stdClass;
 
@@ -14,15 +14,20 @@ use stdClass;
 class Error {
 
 
-	public function __construct( $error ) {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-		$log_entry = $this->create_log_entry( $error );
+	public function __construct( $error = false ) {
 
-		if ( get_option( 'source_site' ) ) {
-			$this->log( $log_entry );
+		if ( false === $error ) {
+			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
-			$this->send_to_source( $log_entry );
+			$log_entry = $this->create_log_entry( $error );
+
+			if ( get_option( 'source_site' ) ) {
+				$this->log( $log_entry );
+			} else {
+				$this->send_to_source( $log_entry );
+			}
 		}
+
 	}
 
 	public function create_log_entry( string $error ) {
@@ -46,14 +51,14 @@ class Error {
 	 * Makes sure WP_Filesystem allows writing to error.log before firing log()
 	 */
 	public function check_filesystem() {
-		$url   = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-settings', 'error_log' );
-		$creds = request_filesystem_credentials( $url, '', false, false, null );
+		$url   = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-options', 'error_log' );
+		$creds = \request_filesystem_credentials( $url, '', false, false, null );
 		if ( false === $creds ) {
 			return false;
 		}
 
 		if ( ! WP_Filesystem( $creds ) ) {
-			request_filesystem_credentials( $url, '', true, false, null );
+			\request_filesystem_credentials( $url, '', true, false, null );
 
 			return false;
 		}
@@ -89,16 +94,22 @@ class Error {
 	 */
 	public function log( $log_entry ) {
 
-		$this->check_filesystem();
+//		$this->check_filesystem();
 
 		$file_text = $log_entry . self::get_log();
 
-		global $wp_filesystem;
+//		global $wp_filesystem;
 
-		$wp_filesystem->put_contents(
+//		$wp_filesystem->put_contents(
+//			DATA_SYNC_PATH . 'error.log',
+//			$file_text,
+//			FS_CHMOD_FILE // predefined mode settings for WP files.
+//		);
+
+		file_put_contents(
 			DATA_SYNC_PATH . 'error.log',
 			$file_text,
-			FS_CHMOD_FILE // predefined mode settings for WP files.
+//			FS_CHMOD_FILE // predefined mode settings for WP files.
 		);
 	}
 
@@ -108,11 +119,13 @@ class Error {
 	 * Gets contents from ../error.log
 	 */
 	public static function get_log() {
-		global $wp_filesystem;
+//		global $wp_filesystem;
+//
+//		return $wp_filesystem->get_contents(
+//			DATA_SYNC_PATH . 'error.log'
+//		);
 
-		return $wp_filesystem->get_contents(
-			DATA_SYNC_PATH . 'error.log'
-		);
+		return file_get_contents( DATA_SYNC_PATH . 'error.log' );
 	}
 
 }

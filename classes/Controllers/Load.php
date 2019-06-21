@@ -18,6 +18,8 @@ use DataSync\Models\PostType;
 class Load {
 
 	public function __construct() {
+
+		new Error();
 		new Enqueue();
 		new Options();
 		new Widgets();
