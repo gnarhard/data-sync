@@ -74,14 +74,12 @@ class SourceData {
 
 				if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-//					$error = new Error();
-//					( $error ) ? $error->log( 'Canonical site not set in post: ' . $post->post_title . "\n" ) : null;
+					new Error( 'Canonical site not set in post: ' . $post->post_title );
 				}
 
 				if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-//					$error = new Error();
-//					( $error ) ? $error->log( 'Excluded sites not set in post: ' . $post->post_title . "\n" ) : null;
+					new Error( 'Excluded sites not set in post: ' . $post->post_title );
 				}
 			}
 		}

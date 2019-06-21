@@ -15,12 +15,12 @@ class Helpers {
 			$url = 'https://' . $url;
 		}
 
-		$url = preg_replace("/^http:/i", "https:", $url);
+		$url = preg_replace( "/^http:/i", "https:", $url );
 
 		$exploded_url = explode( '.', $url );
 		if ( ! isset( $exploded_url[1] ) ) {
-			$error = new Error();
-			( $error ) ? $error->log( 'Connected site was not saved.' . "\n" ) : null;
+			new Error( 'Connected site was not saved.' );
+
 			return new WP_Error( 'database_error', 'DB Error: Connected site was not saved.', array( 'status' => 501 ) );
 		}
 

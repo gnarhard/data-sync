@@ -48,8 +48,8 @@ class PostTypes {
 				$data->id = $post_type->id;
 				$return   = PostType::update( $data );
 				if ( is_wp_error( $return ) ) {
-					$error = new Error();
-					( $error ) ? $error->log( 'Connected site was not updated.' . "\n" . $return->get_error_message() ) : null;
+					// todo: error handle
+					new Error( 'Connected site was not updated.' . "\n" . $return->get_error_message() );
 				}
 			}
 		} else {
@@ -82,7 +82,7 @@ class PostTypes {
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );
-			register_post_type( $post_type->name, $args );
+			$result = register_post_type( $post_type->name, $args );
 		}
 
 	}

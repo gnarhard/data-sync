@@ -46,7 +46,7 @@ function status_widget() {
 				if ( count( $result ) === $number_of_sites_connected ) {
 					$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
 				} else if ( count( $result ) === 0 ) {
-					$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site due to an error."></i>';
+					$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
 				} else {
 					$post_status = '<i class="dashicons dashicons-warning" title="Not synced."></i>';
 				}
@@ -69,7 +69,7 @@ function status_widget() {
 		<button id="template_push"><?php _e( 'Push Template', 'data_sync' ); ?></button>
 	</div>
 	<div id="error_log_wrap">
-		<a href="<?php echo admin_url( 'options-general.php?page=data-sync-settings' ); ?>">Go to error log</a>
+		<a href="<?php echo admin_url( 'options-general.php?page=data-sync-options' ); ?>">Go to error log</a>
 	</div>
 	<?php
 }

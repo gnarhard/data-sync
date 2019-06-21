@@ -4,19 +4,48 @@
 namespace DataSync\Controllers;
 
 
+use DataSync\Helpers;
+use stdClass;
+
 /**
  * Class Error
  * @package DataSync
  */
 class Error {
 
+
+	public function __construct( $error ) {
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		$log_entry = $this->create_log_entry( $error );
+
+		if ( get_option( 'source_site' ) ) {
+			$this->log( $log_entry );
+		} else {
+			$this->send_to_source( $log_entry );
+		}
+	}
+
+	public function create_log_entry( string $error ) {
+		return current_time( 'g:i a - F j, Y' ) . ' ' . get_site_url() . ' error: ' . $error . "\n";
+	}
+
+	public function send_to_source( string $log_entry ) {
+		// RECEIVER SIDE.
+		$data            = new stdClass();
+		$data->log_entry = $log_entry;
+
+		$auth     = new Auth();
+		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
+		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log_error' );
+		$response = wp_remote_post( $url, [ 'body' => $json ] );
+//		$body     = wp_remote_retrieve_body( $response );
+//		print_r( $body );
+	}
+
 	/**
-	 * Error constructor.
-	 *
 	 * Makes sure WP_Filesystem allows writing to error.log before firing log()
 	 */
-	public function __construct() {
-
+	public function check_filesystem() {
 		$url   = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-settings', 'error_log' );
 		$creds = request_filesystem_credentials( $url, '', false, false, null );
 		if ( false === $creds ) {
@@ -30,7 +59,27 @@ class Error {
 		}
 
 		return true;
+	}
 
+	public function register_routes() {
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/log_error',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+				),
+			)
+		);
+
+	}
+
+	public function save( WP_REST_Request $request ) {
+		$data = (object) json_decode( file_get_contents( 'php://input' ) );
+		$this->log( $data->log_entry );
 	}
 
 	/**
@@ -38,11 +87,11 @@ class Error {
 	 *
 	 * Prepends errors to ../error.log
 	 */
-	public function log( $error ) {
+	public function log( $log_entry ) {
 
-		$new_line = $this->get_timestamp() . ': ' . $error;
+		$this->check_filesystem();
 
-		$file_text = $new_line . $this->get_log();
+		$file_text = $log_entry . self::get_log();
 
 		global $wp_filesystem;
 
@@ -58,21 +107,12 @@ class Error {
 	 *
 	 * Gets contents from ../error.log
 	 */
-	public function get_log() {
+	public static function get_log() {
 		global $wp_filesystem;
 
 		return $wp_filesystem->get_contents(
 			DATA_SYNC_PATH . 'error.log'
 		);
-	}
-
-	/**
-	 * @return false|string
-	 *
-	 * Gets current timestamp
-	 */
-	private function get_timestamp() {
-		return current_time( 'm/d/Y h:i:s' );
 	}
 
 }

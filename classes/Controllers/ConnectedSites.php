@@ -114,14 +114,12 @@ class ConnectedSites {
 			if ( $response ) {
 				return wp_send_json_success();
 			} else {
-				$error = new Error();
-				( $error ) ? $error->log( 'Connected site was not deleted.' . "\n" ) : null;
+				new Error( 'Connected site was not deleted.' );
 
 				return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted.', array( 'status' => 501 ) );
 			}
 		} else {
-			$error = new Error();
-			( $error ) ? $error->log( 'Connected site was not deleted. No ID present in URL.' . "\n" ) : null;
+			new Error( 'Connected site was not deleted. No ID present in URL.' );
 
 			return new WP_Error( 'database_error', 'DB Error: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ) );
 		}

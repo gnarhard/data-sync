@@ -46,7 +46,7 @@ if ( ! function_exists( 'add_filter' ) ) {
  */
 function add_settings_link( $links ) {
 	$my_links = array(
-		'<a href="' . admin_url( 'options-general.php?page=data-sync-settings' ) . '">Settings</a>',
+		'<a href="' . admin_url( 'options-general.php?page=data-sync-options' ) . '">Settings</a>',
 	);
 
 	return array_merge( $links, $my_links );

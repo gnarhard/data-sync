@@ -59,6 +59,20 @@ class SyncedPosts {
 							'type'        => 'int',
 						),
 					),
+				),
+				array(
+					'methods'  => WP_REST_Server::DELETABLE,
+					'callback' => array( $this, 'delete_from_sync_table' ),
+					'args'     => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
 				)
 			)
 		);
@@ -164,16 +178,33 @@ class SyncedPosts {
 			// todo: delete all receiver site post data with this command
 		} else {
 
-			$synced_post = SyncedPost::get_where(
-				array(
-					'receiver_post_id' => $pid,
-					'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-				)
-			);
-			// TODO: delete synced_post on source
+			$url = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $pid;
+			$url = Helpers::format_url( $url );
+
+//			$response = wp_remote_get( $url );
+//
+//			if ( is_wp_error( $response ) ) {
+//				echo $response->get_error_message();
+//				// TODO: HANDLE THIS MORE GRACEFULLY.
+//			} else {
+//				$body = wp_remote_retrieve_body( $response );
+//				$data = json_decode( $body )[0];
+//
+//				return $data;
+//			}
 
 		}
 
+	}
+
+	public function delete_from_sync_table() {
+		$synced_post = SyncedPost::get_where(
+			array(
+//				'receiver_post_id' => $pid,
+				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+			)
+		);
+		// TODO: delete synced_post on source
 	}
 
 }
