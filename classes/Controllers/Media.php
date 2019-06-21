@@ -53,9 +53,7 @@ class Media {
 
 		/* Add notice for success/failure */
 		if ( ! $copy ) {
-			//TODO: ERROR HANDLE
-//			echo "Failed to copy $remote_file_url \n";
-
+			new Error( 'Failed to copy $remote_file_url' );
 			return false;
 		}
 

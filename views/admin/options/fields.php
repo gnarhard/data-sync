@@ -92,14 +92,15 @@ function display_connected_sites() {
 	<?php
 	if ( is_array( $connected_sites ) ) {
 		foreach ( $connected_sites as $site ) {
+			$time = strtotime( $site->date_connected );
+
 			?>
           <tr id="site-<?php echo esc_html( $site->id ); ?>">
             <td id="id"><?php echo esc_html( $site->id ); ?></td>
             <td id="name"><?php echo esc_html( $site->name ); ?></td>
             <td id="url"><?php echo esc_url( $site->url ); ?></td>
-            <td id="date_connected"><?php echo esc_html( $site->date_connected ); ?></td>
-            <td id="site-<?php echo esc_html( $site->id ); ?>"><span
-                  class="dashicons dashicons-trash remove_site"></span></td>
+            <td id="date_connected"><?php echo esc_html( date( 'g:i a - F j, Y', $time ) ); ?></td>
+            <td id="site-<?php echo esc_html( $site->id ); ?>"><span class="dashicons dashicons-trash remove_site"></span></td>
           </tr>
 			<?php
 		}

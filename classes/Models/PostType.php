@@ -3,6 +3,7 @@
 
 namespace DataSync\Models;
 
+use DataSync\Controllers\Error;
 use WP_Error;
 
 class PostType {
@@ -42,9 +43,10 @@ class PostType {
 		$updated = $wpdb->update( $table_name, $db_data, [ 'id' => $data->id ] );
 
 		if ( false === $updated ) {
-			// TODO: BETTER ERROR
-			$error_message = $wpdb->print_error();
-			return new WP_Error( 503, __( $error_message, 'data-sync' ) );
+			$error_msg = 'PostType failed to update: ' . $wpdb->print_error();
+			new Error( $error_msg );
+
+			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
 			return $updated;
 		}

@@ -49,9 +49,8 @@ class Receiver {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
-			if ( $post_count === 0 ) {
-				// TODO: ERROR MESSAGE ABOUT NO POSTS TO TRANSFER
-				echo 'no posts ';
+			if ( 0 === $post_count ) {
+				new Error( 'No posts in data package' );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );

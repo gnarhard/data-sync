@@ -48,7 +48,6 @@ class PostTypes {
 				$data->id = $post_type->id;
 				$return   = PostType::update( $data );
 				if ( is_wp_error( $return ) ) {
-					// todo: error handle
 					new Error( 'Connected site was not updated.' . "\n" . $return->get_error_message() );
 				}
 			}

@@ -4,6 +4,7 @@
 namespace DataSync\Models;
 
 
+use DataSync\Controllers\Error;
 use WP_Error;
 
 class SyncedPost {
@@ -65,8 +66,10 @@ class SyncedPost {
 		if ( $result ) {
 			return $wpdb->insert_id;
 		} else {
-			// TODO: ERROR HANDLING
-			return false;
+			$error_msg = 'SyncedPost failed to create: ' . $wpdb->print_error();
+			new Error( $error_msg );
+
+			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		}
 	}
 
@@ -84,14 +87,13 @@ class SyncedPost {
 //		print_r( $db_data );
 
 		$updated = $wpdb->update( $wpdb->prefix . self::$table_name, $db_data, [ 'id' => $data->id ] );
-		var_dump( $updated );
+//		var_dump( $updated );
 
 		if ( false === $updated ) {
-			// TODO: BETTER ERRORS
-			$error_message = $wpdb->print_error();
-			echo $error_message;
+			$error_msg = 'SyncedPost failed to update: ' . $wpdb->print_error();
+			new Error( $error_msg );
 
-			return new WP_Error( 503, __( $error_message, 'data-sync' ) );
+			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
 			return $updated;
 		}

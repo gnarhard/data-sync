@@ -86,8 +86,8 @@ class Auth {
 
 			return $auth->verify_signature( $source_data, $secret_key_of_receiver );
 		} else {
-			echo 'auth error'; die();
-			//TODO: ERROR HANDLE
+			new Error( 'Failed to authorize cross-site connection.');
+			return false;
 		}
 	}
 

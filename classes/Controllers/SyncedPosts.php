@@ -107,8 +107,7 @@ class SyncedPosts {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
-			// TODO: HANDLE THIS MORE GRACEFULLY.
+			new Error( 'SyncedPosts: ' . $response->get_error_message() );
 		} else {
 			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body )[0];
@@ -149,7 +148,7 @@ class SyncedPosts {
 		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 		$body     = wp_remote_retrieve_body( $response );
-		print_r( $body );
+//		print_r( $body );
 	}
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
@@ -184,8 +183,7 @@ class SyncedPosts {
 //			$response = wp_remote_get( $url );
 //
 //			if ( is_wp_error( $response ) ) {
-//				echo $response->get_error_message();
-//				// TODO: HANDLE THIS MORE GRACEFULLY.
+//			new Error( 'SyncedPosts: ' . $response->get_error_message() );
 //			} else {
 //				$body = wp_remote_retrieve_body( $response );
 //				$data = json_decode( $body )[0];
