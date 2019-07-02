@@ -19,22 +19,23 @@ class Load {
 
 	public function __construct() {
 
-		new Error();
+		new Log();
 		new Enqueue();
 		new Options();
 		new Widgets();
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
-
-		$post_type = new PostType();
-		$post_type->create_db_table();
-		$register_cpts = new PostTypes();
-
 		new SyncedPosts();
 
 		if ( get_option( 'source_site' ) ) {
 			new Posts();
+		} else {
+			$post_type = new PostType();
+			$post_type->create_db_table();
+			$register_cpts = new PostTypes();
+
+			new Taxonomies();
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically

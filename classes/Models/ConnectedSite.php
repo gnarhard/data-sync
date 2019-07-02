@@ -3,7 +3,7 @@
 
 namespace DataSync\Models;
 
-use DataSync\Controllers\Error;
+use DataSync\Controllers\Log;
 use DataSync\Helpers;
 use WP_Error;
 use WP_Query;

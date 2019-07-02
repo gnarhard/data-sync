@@ -86,7 +86,11 @@ class Options {
 			$cpt_data = cptui_get_post_type_data();
 
 			foreach ( get_option( 'push_enabled_post_types' ) as $post_type ) {
-				$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
+				if ( 'post' === $post_type ) {
+					$options->push_enabled_post_types['post'] = array( 'post' => array() );
+				} else {
+					$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
+				}
 			}
 		}
 
@@ -154,7 +158,8 @@ class Options {
 		if ( $success ) {
 			return wp_send_json_success();
 		} else {
-			new Error( 'Options NOT saved.' );
+			new Log( 'ERROR: Options NOT saved.' );
+
 			return wp_send_json_error();
 		}
 	}

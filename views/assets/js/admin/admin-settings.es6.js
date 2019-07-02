@@ -29,5 +29,26 @@ jQuery( function ( $ ) {
         ConnectedSites.delete( site_id );
     });
 
+    if ( document.getElementById( 'refresh_error_log' ) ) {
+        document.getElementById( 'refresh_error_log' ).onclick = function ( e ) {
+            e.preventDefault();
+            AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
+                if ( document.getElementById( 'error_log' ) ) {
+                    document.getElementById( 'error_log' ).innerHTML = result;
+                }
+            });
+
+        }
+
+        setInterval( function() {
+            AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
+                if ( document.getElementById( 'error_log' ) ) {
+                    document.getElementById( 'error_log' ).innerHTML = result;
+                }
+            });
+        }, 3000 );
+
+    }
+
 } );
 

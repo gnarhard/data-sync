@@ -2,7 +2,7 @@
 
 use DataSync\Controllers\Auth;use DataSync\Controllers\ConnectedSites;
 use WP_User_Query;
-use DataSync\Controllers\Error as Error;
+use DataSync\Controllers\Log;
 
 /**
  *

@@ -4,7 +4,7 @@
 namespace DataSync\Controllers;
 
 use DataSync\Models\PostType;
-use DataSync\Controllers\Error;
+use DataSync\Controllers\Log;
 
 class PostTypes {
 
@@ -28,18 +28,22 @@ class PostTypes {
 
 	}
 
-	public static function create( object $source_options ) {
+	public static function process( object $post_types ) {
 		global $wp_post_types;
-		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
+//		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
 
-		foreach ( $source_options->push_enabled_post_types as $post_type => $post_type_data ) :
-			if ( ! in_array( $post_type, $registered_receiver_cpts ) ) {
-				self::save( $post_type_data );
+		foreach ( $post_types as $post_type => $post_type_data ) :
+
+			if ( 'post' === $post_type ) {
+				continue;
 			}
+
+			self::save( $post_type_data );
+
 		endforeach;
 	}
 
-	private static function save( object $data ) {
+	static function save( object $data ) {
 
 		$existing_post_types = (array) self::get_id( $data->name );
 
@@ -48,7 +52,7 @@ class PostTypes {
 				$data->id = $post_type->id;
 				$return   = PostType::update( $data );
 				if ( is_wp_error( $return ) ) {
-					new Error( 'Connected site was not updated.' . "\n" . $return->get_error_message() );
+					new Log( 'ERROR: Post type was not updated.' . "\n" . $return->get_error_message() );
 				}
 			}
 		} else {
@@ -81,6 +85,16 @@ class PostTypes {
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );
+
+			foreach ( $args as $key => $value ) {
+				if ( ( 'true' === $value ) || ( 'false' === $value ) ) {
+					$args[ $key ] = ( 'true' === $value );
+				}
+			}
+
+			$args['labels'] = array( 'menu_name' => $args['label'] );
+			$args['menu_icon'] = ( '' === $args['menu_icon'] ) ? 'dashicons-admin-post' : $args['menu_icon'];
+
 			$result = register_post_type( $post_type->name, $args );
 		}
 

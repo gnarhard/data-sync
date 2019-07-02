@@ -11,21 +11,23 @@
 
     #status_dashboard_button_wrap {
       width: 100%;
-      display:block;
+      display: flex;
+      justify-content: center;
       margin-top: 20px;
       overflow: hidden;
 
-      button {
+      button,
+      a {
         padding: 10px;
-        width: 50%;
-        float: left;
         background: #0073aa;
         color: white;
         border-radius: 4px;
         text-transform: uppercase;
         cursor: pointer;
+        margin: 10px;
       }
 
+      a:hover,
       button:hover {
         background: grey;
       }

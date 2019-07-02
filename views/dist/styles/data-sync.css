@@ -71,6 +71,11 @@
   display: block;
 }
 
+.settings_page_data-sync-options #refresh_error_log {
+  cursor: pointer;
+  float: right;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status {
   width: 100%;
   text-align: left;
@@ -82,22 +87,28 @@
 
 #wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap {
   width: 100%;
-  display: block;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   margin-top: 20px;
   overflow: hidden;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button {
+#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button,
+#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap a {
   padding: 10px;
-  width: 50%;
-  float: left;
   background: #0073aa;
   color: white;
   border-radius: 4px;
   text-transform: uppercase;
   cursor: pointer;
+  margin: 10px;
 }
 
+#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap a:hover,
 #wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button:hover {
   background: grey;
 }

@@ -3,7 +3,7 @@
 
 namespace DataSync\Models;
 
-use DataSync\Controllers\Error;
+use DataSync\Controllers\Log;
 use WP_Error;
 
 class PostType {
@@ -44,7 +44,7 @@ class PostType {
 
 		if ( false === $updated ) {
 			$error_msg = 'PostType failed to update: ' . $wpdb->print_error();
-			new Error( $error_msg );
+			new Log( 'ERROR: ' . $error_msg );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
@@ -71,10 +71,8 @@ class PostType {
 
 	public function create_db_table() {
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
-
 		$result = $wpdb->query(
-			'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (
+			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
@@ -83,5 +81,4 @@ class PostType {
 	    );'
 		);
 	}
-
 }

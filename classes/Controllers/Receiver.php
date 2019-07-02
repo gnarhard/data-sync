@@ -35,22 +35,30 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
+		new Log( 'STATUS: Beginning receiver parse.' );
+
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->receiver_site_id;
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 
-		PostTypes::create( $source_data->options );
+		echo 'Site: ' . receiver_site_id; echo "\n";
+//		print_r($source_data);
+
+		PostTypes::process( $source_data->options->push_enabled_post_types );
+
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
+
+
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				new Error( 'No posts in data package' );
+				new Log( 'ERROR: No posts in data package' );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );

@@ -189,7 +189,12 @@ class Posts {
 
 		}
 
-		return $json;
+		if ( isset( $json ) ) {
+			return $json;
+		} else {
+			return array();
+		}
+
 
 	}
 
@@ -228,7 +233,7 @@ class Posts {
 				update_post_meta( $receiver_post_id, $meta_key, $meta_value );
 			}
 
-			new Taxonomies( $receiver_post_id, $post->taxonomies );
+			Taxonomies::save( $receiver_post_id, $post->taxonomies );
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
 

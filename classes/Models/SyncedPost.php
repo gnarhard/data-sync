@@ -4,7 +4,7 @@
 namespace DataSync\Models;
 
 
-use DataSync\Controllers\Error;
+use DataSync\Controllers\Log;
 use WP_Error;
 
 class SyncedPost {
@@ -66,8 +66,8 @@ class SyncedPost {
 		if ( $result ) {
 			return $wpdb->insert_id;
 		} else {
-			$error_msg = 'SyncedPost failed to create: ' . $wpdb->print_error();
-			new Error( $error_msg );
+			$error_msg = 'ERROR: SyncedPost failed to create: ' . $wpdb->print_error();
+			new Log( 'ERROR: ' . $error_msg );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		}
@@ -91,7 +91,7 @@ class SyncedPost {
 
 		if ( false === $updated ) {
 			$error_msg = 'SyncedPost failed to update: ' . $wpdb->print_error();
-			new Error( $error_msg );
+			new Log( 'ERROR: ' . $error_msg );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {

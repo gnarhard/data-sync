@@ -1,6 +1,6 @@
 <?php namespace DataSync;
 
-use DataSync\Controllers\Error as Error;
+use DataSync\Controllers\Log as Log;
 
 /**
  * Outputs HTML for settings page
@@ -18,8 +18,8 @@ function data_sync_options_page() {
 			if ( get_option( 'source_site' ) ) {
 				?>
 				<h2>Error Log</h2>
-				<textarea class="error_log"
-				          style="height: 500px; width: 100%;"><?php echo esc_html( Error::get_log() ); ?></textarea>
+				<a id="refresh_error_log">Refresh Log</a>
+				<textarea id="error_log" style="height: 500px; width: 100%;"><?php echo esc_html( Log::get_log() ); ?></textarea>
 				<?php
 			}
 			?>

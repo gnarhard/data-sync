@@ -8,10 +8,10 @@ use DataSync\Helpers;
 use stdClass;
 
 /**
- * Class Error
+ * Class Log
  * @package DataSync
  */
-class Error {
+class Log {
 
 
 	public function __construct( $error = false ) {
@@ -31,7 +31,7 @@ class Error {
 	}
 
 	public function create_log_entry( string $error ) {
-		return current_time( 'g:i a - F j, Y' ) . ' ' . get_site_url() . ' error: ' . $error . "\n";
+		return current_time( 'F j, Y g:i a' ) . "\n" . 'FROM: ' . get_site_url() . "\n" . $error . "\n\n";
 	}
 
 	public function send_to_source( string $log_entry ) {
@@ -41,7 +41,7 @@ class Error {
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
-		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log_error' );
+		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 //		$body     = wp_remote_retrieve_body( $response );
 //		print_r( $body );
@@ -67,15 +67,19 @@ class Error {
 	}
 
 	public function register_routes() {
-
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/log_error',
+			'/log',
 			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'save' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_log' ),
+//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 				),
 			)
 		);

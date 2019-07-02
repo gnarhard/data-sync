@@ -107,7 +107,7 @@ class SyncedPosts {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			new Error( 'SyncedPosts: ' . $response->get_error_message() );
+			new Log( 'ERROR: SyncedPosts: ' . $response->get_error_message() );
 		} else {
 			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body )[0];
@@ -183,7 +183,7 @@ class SyncedPosts {
 //			$response = wp_remote_get( $url );
 //
 //			if ( is_wp_error( $response ) ) {
-//			new Error( 'SyncedPosts: ' . $response->get_error_message() );
+//			new Log( 'SyncedPosts: ' . $response->get_error_message() );
 //			} else {
 //				$body = wp_remote_retrieve_body( $response );
 //				$data = json_decode( $body )[0];
