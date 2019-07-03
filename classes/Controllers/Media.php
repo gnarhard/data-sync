@@ -53,7 +53,7 @@ class Media {
 
 		/* Add notice for success/failure */
 		if ( ! $copy ) {
-			new Log( 'ERROR: Failed to copy $remote_file_url' );
+			new Log( 'ERROR: Failed to copy $remote_file_url.', true );
 			return false;
 		}
 

@@ -34,8 +34,8 @@ class Receiver {
 
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
-
-		new Log( 'STATUS: Beginning receiver parse.' );
+		echo 'first receiver';
+		new Log( 'Beginning receiver parse.' );
 		$this->parse( $source_data );
 		$response = new WP_REST_Response( wp_json_encode( $this->response ) );
 		$response->set_status( 201 );
@@ -57,19 +57,19 @@ class Receiver {
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
-		new Log( 'STATUS: Finished syncing post types.' );
+		new Log( 'Finished syncing post types.' );
 
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
-		new Log( 'STATUS: Finished syncing custom taxonomies.' );
+		new Log( 'Finished syncing custom taxonomies.' );
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				new Log( 'ERROR: No posts in data.' );
+				new Log( 'ERROR: No posts in data.', true );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
@@ -82,7 +82,7 @@ class Receiver {
 			}
 
 		}
-		new Log( 'STATUS: Finished syncing posts.' );
+		new Log( 'Finished syncing posts.' );
 
 	}
 

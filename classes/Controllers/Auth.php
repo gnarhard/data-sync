@@ -91,10 +91,10 @@ class Auth {
 			return $auth->verify_signature( $data, $secret_key_of_receiver );
 		} else {
 			$error_msg = 'ERROR: Failed to authorize cross-site connection.';
-			$error_msg .= "\n" . 'Secret Key: ' . get_option( 'secret_key' );
-			$error_msg .= "\n" . 'Receiver Site ID: ' . $data->receiver_site_id;
+			$error_msg .= '<br>' . 'Secret Key: ' . get_option( 'secret_key' );
+			$error_msg .= '<br>' . 'Receiver Site ID: ' . $data->receiver_site_id;
 //			echo $error_msg;die();
-			new Log( $error_msg );
+			new Log( $error_msg, true );
 
 			return false;
 		}

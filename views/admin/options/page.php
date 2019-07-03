@@ -18,8 +18,9 @@ function data_sync_options_page() {
 			if ( get_option( 'source_site' ) ) {
 				?>
 				<h2>Error Log</h2>
-				<a id="refresh_error_log">Refresh Log</a>
-				<textarea id="error_log" style="height: 500px; width: 100%;"><?php echo esc_html( Log::get_log() ); ?></textarea>
+				<div id="error_log">
+					<?php echo Log::get_log() ?>
+				</div>
 				<?php
 			}
 			?>

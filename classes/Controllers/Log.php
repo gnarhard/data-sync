@@ -13,55 +13,93 @@ use stdClass;
  */
 class Log {
 
+	public $log_entry;
+	public $error;
 
-	public function __construct( $error = false ) {
+	public function __construct( $message = false, $error = false ) {
 
-		if ( false === $error ) {
+		if ( false === $message ) {
 			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
-			$log_entry = $this->create_log_entry( $error );
+			$this->error = $message;
+			$this->create_log_entry( $error );
 
-			if ( get_option( 'source_site' ) ) {
-				$this->log( $log_entry );
+			if ( '1' === get_option( 'source_site' ) ) {
+				$this->log();
+			} elseif ( '0' === get_option( 'source_site' ) ) {
+				$this->send_to_source();
 			} else {
-				$this->send_to_source( $log_entry );
+				$this->error .= 'ERROR: Source or receiver option not set to allow proper logging.';
+				$this->log();
 			}
 		}
 
 	}
 
-	public function create_log_entry( string $error ) {
-		return current_time( 'F j, Y g:i a' ) . "\n" . 'FROM: ' . get_site_url() . "\n" . $error . "\n\n";
+	public function create_log_entry( $error ) {
+
+		$this->log_entry = current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url() . '<br>';
+
+		if ( $error ) {
+			$this->log_entry .= '<span style="color:red;">';
+		} else {
+			$this->log_entry .= '<span style="color:green;">';
+		}
+
+		$this->log_entry .= $this->error;
+
+		$this->log_entry .= '</span>' . '<br><br>' . "\n";
+//		echo $this->log_entry;
 	}
 
-	public function send_to_source( string $log_entry ) {
+	public function send_to_source() {
 		// RECEIVER SIDE.
 		$data            = new stdClass();
-		$data->log_entry = $log_entry;
+		$data->log_entry = $this->log_entry;
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
 		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
+		echo $response;
+	}
+
+	public function save() {
+		$data            = (object) json_decode( file_get_contents( 'php://input' ) );
+		$this->log_entry = $data->log_entry;
+
+		$this->log();
 	}
 
 	/**
-	 * Makes sure WP_Filesystem allows writing to error.log before firing log()
+	 *
+	 * Prepends errors to ../error.log
 	 */
-	public function check_filesystem() {
-		$url   = wp_nonce_url( '/wp-admin/options-general.php?page=data-sync-options', 'error_log' );
-		$creds = \request_filesystem_credentials( $url, '', false, false, null );
-		if ( false === $creds ) {
-			return false;
+	public function log() {
+
+		$file_text = $this->log_entry . self::get_log();
+
+		file_put_contents(
+			DATA_SYNC_PATH . 'error.log',
+			$file_text,
+			);
+	}
+
+	/**
+	 * @return mixed
+	 *
+	 * Gets contents from ../error.log
+	 */
+	public static function get_log() {
+		$file           = file_get_contents( DATA_SYNC_PATH . 'error.log' );
+		$exploded_file  = explode( "\n", $file );
+		$file_to_return = '';
+
+		for ( $i = 0; $i < 5000; $i++ ) {
+			$file_to_return .= $file[ $i ];
 		}
 
-		if ( ! WP_Filesystem( $creds ) ) {
-			\request_filesystem_credentials( $url, '', true, false, null );
-
-			return false;
-		}
-
-		return true;
+		return $file_to_return;
 	}
 
 	public function register_routes() {
@@ -70,10 +108,10 @@ class Log {
 			'/log',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'save' ),
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'save' ),
 //					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-				// TODO: GET AUTH TO WORK!
+					// TODO: GET AUTH TO WORK!
 				),
 				array(
 					'methods'  => WP_REST_Server::READABLE,
@@ -83,51 +121,4 @@ class Log {
 		);
 
 	}
-
-	public function save() {
-		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->log( $data->log_entry );
-	}
-
-	/**
-	 * @param $error
-	 *
-	 * Prepends errors to ../error.log
-	 */
-	public function log( $log_entry ) {
-
-//		$this->check_filesystem();
-
-		$file_text = $log_entry . self::get_log();
-
-//		global $wp_filesystem;
-
-//		$wp_filesystem->put_contents(
-//			DATA_SYNC_PATH . 'error.log',
-//			$file_text,
-//			FS_CHMOD_FILE // predefined mode settings for WP files.
-//		);
-
-		file_put_contents(
-			DATA_SYNC_PATH . 'error.log',
-			$file_text,
-//			FS_CHMOD_FILE // predefined mode settings for WP files.
-		);
-	}
-
-	/**
-	 * @return mixed
-	 *
-	 * Gets contents from ../error.log
-	 */
-	public static function get_log() {
-//		global $wp_filesystem;
-//
-//		return $wp_filesystem->get_contents(
-//			DATA_SYNC_PATH . 'error.log'
-//		);
-
-		return file_get_contents( DATA_SYNC_PATH . 'error.log' );
-	}
-
 }

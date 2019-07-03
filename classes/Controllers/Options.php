@@ -158,7 +158,7 @@ class Options {
 		if ( $success ) {
 			return wp_send_json_success();
 		} else {
-			new Log( 'ERROR: Options NOT saved.' );
+			new Log( 'ERROR: Options not saved.', true );
 
 			return wp_send_json_error();
 		}

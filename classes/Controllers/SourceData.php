@@ -46,8 +46,8 @@ class SourceData {
 			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                          = wp_remote_retrieve_body( $response );
-
-			new Log( 'STATUS: Finished push to ' . $site->url );
+			echo $body;
+			new Log( 'Finished push to ' . $site->url );
 		}
 
 		$email = new Email();
@@ -61,13 +61,13 @@ class SourceData {
 		$source_data                    = new stdClass();
 		$source_data->options           = (array) $options;
 		$source_data->acf               = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
-		$source_data->custom_taxonomies = cptui_get_taxonomy_data();
+		$source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$source_data->url               = (string) get_site_url();
 		$source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
 		$source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 
-		new Log( 'STATUS: Finished data consolidation.' );
+		new Log( 'Finished data consolidation.' );
 
 		return $this->validate( $source_data );
 
@@ -81,17 +81,17 @@ class SourceData {
 
 				if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-					new Log( 'SKIPPING: Canonical site not set in post: ' . $post->post_title );
+					new Log( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
 				}
 
 				if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-					new Log( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title );
+					new Log( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
 				}
 			}
 		}
 
-		new Log( 'STATUS: Finished post validation.' );
+		new Log( 'Finished post validation.' );
 
 		return $source_data;
 	}
