@@ -9,6 +9,7 @@ use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
 use DataSync\Controllers\Log;
+use DataSync\Controllers\Email;
 use stdClass;
 
 class SourceData {
@@ -39,24 +40,21 @@ class SourceData {
 
 		foreach ( $connected_sites as $site ) {
 
-			new Log( 'STATUS: Beginning push to ' . $site->url );
-
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
 			$json                          = $auth->prepare( $source_data, $site->secret_key );
 			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                          = wp_remote_retrieve_body( $response );
-			var_dump( $body );
 
 			new Log( 'STATUS: Finished push to ' . $site->url );
 		}
 
+		$email = new Email();
+
 	}
 
 	private function consolidate() {
-
-		new Log( 'STATUS: Beginning consolidation.' );
 
 		$options = Options::source()->get_data();
 
@@ -69,15 +67,13 @@ class SourceData {
 		$source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 
-		new Log( 'STATUS: Finished consolidation.' );
+		new Log( 'STATUS: Finished data consolidation.' );
 
 		return $this->validate( $source_data );
 
 	}
 
 	private function validate( object $source_data ) {
-
-		new Log( 'STATUS: Beginning post validation.' );
 
 		foreach ( $source_data->posts as $post_type => $post_data ) {
 

@@ -249,6 +249,8 @@ class Options {
 
 		elseif ( '0' === $source ) :
 
+			add_settings_field( 'awareness_messages', '', $this->view_namespace . '\display_awareness_messages', 'data-sync-options', 'data_sync_options' );
+
 			add_settings_field( 'secret_key', 'Secret Key', $this->view_namespace . '\display_secret_key', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'secret_key' );
 

@@ -84,7 +84,7 @@ class Auth {
 
 		if ( get_option( 'secret_key' ) ) {
 			return $auth->verify_signature( $data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
-		} else if ( ( isset( $data->receiver_site_id ) ) && ( null !== $data->receiver_site_id ) ) {
+		} else if ( ( property_exists($data, 'receiver_site_id' ) ) && ( null !== $data->receiver_site_id ) ) {
 			// Get secret key of connected site if source is trying to authorize a request from a receiver.
 			$secret_key_of_receiver = $auth->get_site_secret_key( $data->receiver_site_id );
 
@@ -93,6 +93,7 @@ class Auth {
 			$error_msg = 'ERROR: Failed to authorize cross-site connection.';
 			$error_msg .= "\n" . 'Secret Key: ' . get_option( 'secret_key' );
 			$error_msg .= "\n" . 'Receiver Site ID: ' . $data->receiver_site_id;
+//			echo $error_msg;die();
 			new Log( $error_msg );
 
 			return false;

@@ -7,8 +7,12 @@ namespace DataSync\Controllers;
 use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_REST_Response;
+use DataSync\Controllers\Email;
 
 class Receiver {
+
+	public $response = '';
 
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -30,43 +34,42 @@ class Receiver {
 
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
+
+		new Log( 'STATUS: Beginning receiver parse.' );
 		$this->parse( $source_data );
+		$response = new WP_REST_Response( wp_json_encode( $this->response ) );
+		$response->set_status( 201 );
+
+		return $response;
 	}
 
 	private function parse( object $source_data ) {
-
-		new Log( 'STATUS: Beginning receiver parse.' );
 
 		$receiver_options = (object) Options::receiver()->get_data();
 		$receiver_site_id = (int) $source_data->receiver_site_id;
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 
-		echo 'Site: ' . $receiver_site_id; echo "\n";
-//		print_r($source_data);
+		$this->response = 'Site: ' . $receiver_site_id;
 
-		new Log( 'STATUS: Beginning to sync post types.' );
 		PostTypes::process( $source_data->options->push_enabled_post_types );
 
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
-
 		new Log( 'STATUS: Finished syncing post types.' );
 
-		new Log( 'STATUS: Beginning to sync custom taxonomies.' );
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
 		new Log( 'STATUS: Finished syncing custom taxonomies.' );
 
-		new Log( 'STATUS: Beginning to sync posts.' );
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				new Log( 'ERROR: No posts in data package' );
+				new Log( 'ERROR: No posts in data.' );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
@@ -77,8 +80,6 @@ class Receiver {
 					}
 				}
 			}
-
-			$email = new Email();
 
 		}
 		new Log( 'STATUS: Finished syncing posts.' );

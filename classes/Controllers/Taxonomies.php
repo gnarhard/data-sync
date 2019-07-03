@@ -78,7 +78,11 @@ class Taxonomies {
 
 			$args['labels'] = array( 'menu_name' => $args['label'] );
 
-			$result = register_taxonomy( $taxonomy->name, $args );
+			$post_types = $args['object_types'];
+			unset( $args['object_types'] );
+			unset( $args['id'] );
+
+			$result = register_taxonomy( $taxonomy->name, $post_types, $args );
 		}
 
 	}

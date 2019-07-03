@@ -8,6 +8,7 @@ class Email {
 
 	public function __construct() {
 		// TODO: email users after sync is complete.
+		// TODO: LINK Log() TO EMAIL FOR EASIER STATUS UPDATES
 
 		$connected_sites_obj = new ConnectedSites();
 		$connected_sites     = $connected_sites_obj->get_all()->data;
@@ -16,8 +17,8 @@ class Email {
 
 			$user = get_user_by( 'ID', (int) $user_id );
 
-			$headers  = 'From: webmaster@example.com' . "\r\n";
-			$headers .= 'Reply-To: webmaster@example.com' . "\r\n";
+			$headers  = 'From: ' . get_option( 'admin_email' ) . "\r\n";
+			$headers .= 'Reply-To: ' . get_option( 'admin_email' ) . "\r\n";
 			$headers .= 'X-Mailer: PHP/' . phpversion();
 			$headers .= "MIME-Version: 1.0\r\n";
 			$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
@@ -51,7 +52,13 @@ class Email {
 			$message .= '</tbody>';
 			$message .= '</table>';
 
-			mail( $to, $subject, $message, $headers );
+			$sent = wp_mail( $to, $subject, $message, $headers );
+
+			if ( $sent ) {
+				new Log( 'STATUS: Finished emailing notified users.' );
+			} else {
+				new Log( 'ERROR: Email not sent.' );
+			}
 		}
 
 	}

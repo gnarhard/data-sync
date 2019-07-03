@@ -179,9 +179,21 @@ function display_notified_users() {
 }
 
 
-/**
- *
- */
+function display_awareness_messages() {
+
+	if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
+		?>
+		<span style="color: red">ACF needs to be installed or activated on this site.</span><br>
+		<?php
+	}
+
+	if ( ! is_plugin_active( 'custom-post-type-ui/custom-post-type-ui.php' ) ) {
+		?>
+		<span style="color: red">CPT UI needs to be installed or activated on this site.</span>
+		<?php
+	}
+}
+
 function display_post_types_to_accept() {
 	$args     = array(
 		'public' => true,
