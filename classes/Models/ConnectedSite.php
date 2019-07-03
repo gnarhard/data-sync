@@ -3,67 +3,44 @@
 
 namespace DataSync\Models;
 
-use DataSync\Controllers\Log;
+use DataSync\Models\DB;
 use DataSync\Helpers;
-use WP_Error;
-use WP_Query;
 
 class ConnectedSite {
 
 	public static $table_name = 'data_sync_connected_sites';
 
 	public static function get( int $id ) {
-		global $wpdb;
-		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
+		$db = new DB( self::$table_name );
+
+		return $db->get( $id );
 	}
 
 	public static function get_where( array $args ) {
-		global $wpdb;
+		$db = new DB( self::$table_name );
 
-		$query     = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE';
-		$arg_count = count( $args );
-		$i         = 1;
-
-		foreach ( $args as $key => $value ) {
-			if ( is_numeric( $value ) ) {
-				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
-			} else {
-				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
-			}
-			$query .= ' ' . $key . ' = ' . $filtered_value;
-			if ( $i < $arg_count ) {
-				$query .= ' AND';
-			}
-			$i ++;
-		}
-
-		return $wpdb->get_results( $query );
-
+		return $db->get_where( $args );
 	}
 
 	public static function create( $data ) {
-		global $wpdb;
-
 		$url = Helpers::format_url( $data['url'] );
 
-		$result = $wpdb->insert(
-			$wpdb->prefix . self::$table_name,
-			array(
-				'name'           => $data['name'],
-				'url'            => esc_url_raw( $url ),
-				'secret_key'     => sanitize_text_field( $data['secret_key'] ),
-				'date_connected' => current_time( 'mysql' ),
-			),
-			array(
-				'%s',
-				'%s',
-				'%s',
-			)
+		$args    = array(
+			'name'           => $data['name'],
+			'url'            => esc_url_raw( $url ),
+			'secret_key'     => sanitize_text_field( $data['secret_key'] ),
+			'date_connected' => current_time( 'mysql' ),
+		);
+		$sprintf = array(
+			'%s',
+			'%s',
+			'%s',
 		);
 
-		if ( $result ) {
-			return $wpdb->insert_id;
-		}
+		$db = new DB( self::$table_name );
+
+		return $db->create( $args, $sprintf );
+
 	}
 
 	public static function update() {
@@ -73,19 +50,9 @@ class ConnectedSite {
 	}
 
 	public static function delete( $id ) {
-		global $wpdb;
-		$result = $wpdb->delete(
-			$wpdb->prefix . self::$table_name,
-			array(
-				'id' => $id,
-			),
-			array(
-				'%d',
-			)
-		);
+		$db = new DB( self::$table_name );
 
-		return $result;
-
+		return $db->delete( $id );
 	}
 
 	public function create_db_table() {
@@ -111,7 +78,7 @@ class ConnectedSite {
 		global $wpdb;
 
 		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
-		$result = $wpdb->query(
+		$result          = $wpdb->query(
 			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
 			CONVERT TO ' . $charset_collate . ';'
 		);

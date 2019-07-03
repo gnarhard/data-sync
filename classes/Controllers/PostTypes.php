@@ -12,26 +12,12 @@ class PostTypes {
 		add_action( 'init', [ $this, 'register' ] );
 	}
 
-	public function get() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . PostType::$table_name;
-
-		return $wpdb->get_results( 'SELECT * FROM ' . $table_name );
-	}
-
-	public static function get_id( string $slug ) {
-
-		global $wpdb;
-		$table_name = $wpdb->prefix . PostType::$table_name;
-
-		return $wpdb->get_results( $wpdb->prepare( 'SELECT id FROM ' . $table_name . ' WHERE name = %s', $slug ) );
-
+	public static function get_id_from_slug( string $slug ) {
+		$args = [ 'name' => $slug ];
+		return PostType::get_where( $args );
 	}
 
 	public static function process( object $post_types ) {
-		global $wp_post_types;
-//		$registered_receiver_cpts = (array) array_keys( $wp_post_types );
-
 		foreach ( $post_types as $post_type => $post_type_data ) :
 
 			if ( 'post' === $post_type ) {
@@ -45,7 +31,7 @@ class PostTypes {
 
 	static function save( object $data ) {
 
-		$existing_post_types = (array) self::get_id( $data->name );
+		$existing_post_types = (array) self::get_id_from_slug( $data->name );
 
 		if ( count( $existing_post_types ) ) {
 			foreach ( $existing_post_types as $post_type ) {
@@ -81,7 +67,7 @@ class PostTypes {
 
 	public function register() {
 
-		$synced_custom_post_types = $this->get();
+		$synced_custom_post_types = PostType::get_all();
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );

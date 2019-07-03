@@ -4,6 +4,8 @@
 namespace DataSync\Controllers;
 
 
+use DataSync\Models\Taxonomy;
+
 /**
  * Class Taxonomies
  * @package DataSync\Controllers
@@ -22,7 +24,13 @@ class Taxonomies {
 		add_action( 'init', [ $this, 'register' ] );
 	}
 
-	public static function save( int $post_id, object $taxonomies ) {
+	public static function get_id_from_slug( string $slug ) {
+		$args = [ 'name' => $slug ];
+
+		return Taxonomy::get_where( $args );
+	}
+
+	public static function save_to_wp( int $post_id, object $taxonomies ) {
 		foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
 			if ( false !== $taxonomy_data ) {
 				foreach ( $taxonomy_data as $term ) {
@@ -32,35 +40,49 @@ class Taxonomies {
 		}
 	}
 
+
+	static function save( object $data ) {
+
+		$existing_taxonomies = (array) self::get_id_from_slug( $data->name );
+
+		if ( count( $existing_taxonomies ) ) {
+			foreach ( $existing_taxonomies as $taxonomy ) {
+				$data->id = $taxonomy->id;
+				$return   = Taxonomy::update( $data );
+				if ( is_wp_error( $return ) ) {
+					new Log( 'ERROR: Post type was not updated.' . "\n" . $return->get_error_message() );
+				}
+			}
+		} else {
+			$new_id = Taxonomy::create( $data );
+			if ( is_numeric( $new_id ) ) {
+				$data->id = $new_id;
+			}
+		}
+
+		$new_data[] = $data;
+
+		return wp_parse_args( $new_data );
+	}
+
+
 	public function register() {
 
-			/**
-			 * Taxonomy: States.
-			 */
+		$synced_taxonomies = Taxonomy::get_all();
 
-			$labels = array(
-				"name" => __( "States", "twentynineteen" ),
-				"singular_name" => __( "State", "twentynineteen" ),
-			);
+		foreach ( $synced_taxonomies as $taxonomy ) {
+			$args = (array) json_decode( $taxonomy->data );
 
-			$args = array(
-				"label" => __( "States", "twentynineteen" ),
-				"labels" => $labels,
-				"public" => true,
-				"publicly_queryable" => true,
-				"hierarchical" => false,
-				"show_ui" => true,
-				"show_in_menu" => true,
-				"show_in_nav_menus" => true,
-				"query_var" => true,
-				"rewrite" => array( 'slug' => 'state', 'with_front' => true, ),
-				"show_admin_column" => false,
-				"show_in_rest" => true,
-				"rest_base" => "state",
-				"rest_controller_class" => "WP_REST_Terms_Controller",
-				"show_in_quick_edit" => false,
-			);
-			register_taxonomy( "state", array( "locations", "events" ), $args );
+			foreach ( $args as $key => $value ) {
+				if ( ( 'true' === $value ) || ( 'false' === $value ) ) {
+					$args[ $key ] = ( 'true' === $value );
+				}
+			}
+
+			$args['labels'] = array( 'menu_name' => $args['label'] );
+
+			$result = register_taxonomy( $taxonomy->name, $args );
+		}
 
 	}
 }

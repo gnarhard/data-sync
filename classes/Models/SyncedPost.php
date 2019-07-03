@@ -4,116 +4,70 @@
 namespace DataSync\Models;
 
 
-use DataSync\Controllers\Log;
 use WP_Error;
+use DataSync\Models\DB;
 
 class SyncedPost {
 
 	public static $table_name = 'data_sync_posts';
 
 	public static function get( int $id ) {
-		global $wpdb;
+		$db = new DB( self::$table_name );
 
-		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . ConnectedSite::$table_name . ' WHERE id = %d', $id ) );
+		return $db->get( $id );
 	}
 
 	public static function get_where( array $args ) {
-		global $wpdb;
+		$db = new DB( self::$table_name );
 
-		$query     = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE';
-		$arg_count = count( $args );
-		$i         = 1;
-
-		foreach ( $args as $key => $value ) {
-			if ( is_numeric( $value ) ) {
-				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
-			} else {
-				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
-			}
-			$query .= ' ' . $key . ' = ' . $filtered_value;
-			if ( $i < $arg_count ) {
-				$query .= ' AND';
-			}
-			$i ++;
-		}
-
-		return $wpdb->get_results( $query );
+		return $db->get_where( $args );
 
 	}
 
 	public static function create( object $data ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
 
-		$result = $wpdb->insert(
-			$table_name,
-			array(
-				'source_post_id'   => $data->source_post_id,
-				'receiver_post_id' => $data->receiver_post_id,
-				'receiver_site_id' => $data->receiver_site_id,
-				'name'             => $data->name,
-				'date_modified'    => current_time( 'mysql' ),
-			),
-			array(
-				'%d',
-				'%d',
-				'%d',
-				'%s',
-				'%s',
-			)
+		$args    = array(
+			'source_post_id'   => $data->source_post_id,
+			'receiver_post_id' => $data->receiver_post_id,
+			'receiver_site_id' => $data->receiver_site_id,
+			'name'             => $data->name,
+			'date_modified'    => current_time( 'mysql' ),
+		);
+		$sprintf = array(
+			'%d',
+			'%d',
+			'%d',
+			'%s',
+			'%s',
 		);
 
-		if ( $result ) {
-			return $wpdb->insert_id;
-		} else {
-			$error_msg = 'ERROR: SyncedPost failed to create: ' . $wpdb->print_error();
-			new Log( 'ERROR: ' . $error_msg );
+		$db = new DB( self::$table_name );
 
-			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
-		}
+		return $db->create( $args, $sprintf );
 	}
 
 	public static function update( $data ) {
-//		print_r( $data );
-		global $wpdb;
-		$db_data                     = array();
-		$db_data['id']               = $data->id;
-		$db_data['name']             = $data->name;
-		$db_data['source_post_id']   = $data->source_post_id;
-		$db_data['receiver_post_id'] = $data->receiver_post_id;
-		$db_data['receiver_site_id'] = $data->receiver_site_id;
-		$db_data['date_modified']    = current_time( 'mysql' );
 
-//		print_r( $db_data );
+		$args = array(
+			'id'               => $data->id,
+			'name'             => $data->name,
+			'source_post_id'   => $data->source_post_id,
+			'receiver_post_id' => $data->receiver_post_id,
+			'receiver_site_id' => $data->receiver_site_id,
+			'date_modified'    => current_time( 'mysql' ),
+		);
 
-		$updated = $wpdb->update( $wpdb->prefix . self::$table_name, $db_data, [ 'id' => $data->id ] );
-//		var_dump( $updated );
+		$where = [ 'id' => $data->id ];
+		$db    = new DB( PostType::$table_name );
 
-		if ( false === $updated ) {
-			$error_msg = 'SyncedPost failed to update: ' . $wpdb->print_error();
-			new Log( 'ERROR: ' . $error_msg );
+		return $db->update( $args, $where );
 
-			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
-		} else {
-			return $updated;
-		}
 	}
 
 	public static function delete( $id ) {
-		//TODO: PROCESS DELETED POSTS
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
-		$result     = $wpdb->delete(
-			$table_name,
-			array(
-				'id' => $id,
-			),
-			array(
-				'%d',
-			)
-		);
+		$db = new DB( self::$table_name );
 
-		return $result;
+		return $db->delete( $id );
 
 	}
 

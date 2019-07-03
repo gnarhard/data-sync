@@ -3,70 +3,66 @@
 
 namespace DataSync\Models;
 
-use DataSync\Controllers\Log;
-use WP_Error;
+use DataSync\Models\DB;
 
 class PostType {
 
 	public static $table_name = 'data_sync_custom_post_types';
 
-	public static function create( object $data ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
+	public static function get( int $id ) {
+		$db = new DB( self::$table_name );
 
-		$result = $wpdb->insert(
-			$table_name,
-			array(
-				'name'         => $data->name,
-				'data'         => wp_json_encode( $data ),
-				'date_created' => current_time( 'mysql' ),
-			),
-			array(
-				'%s',
-				'%s',
-			)
+		return $db->get( $id );
+	}
+
+	public static function get_all() {
+		$db = new DB( self::$table_name );
+
+		return $db->get_all();
+	}
+
+	public static function get_where( array $args ) {
+		$db = new DB( self::$table_name );
+
+		return $db->get_where( $args );
+
+	}
+
+	public static function create( object $data ) {
+
+		$args    = array(
+			'name'         => $data->name,
+			'data'         => wp_json_encode( $data ),
+			'date_created' => current_time( 'mysql' ),
+		);
+		$sprintf = array(
+			'%s',
+			'%s',
 		);
 
-		if ( $result ) {
-			return $wpdb->insert_id;
-		}
+		$db = new DB( self::$table_name );
+
+		return $db->create( $args, $sprintf );
 	}
 
 	public static function update( object $data ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
 
-		$db_data         = array();
-		$db_data['name'] = $data->name;
-		$db_data['data'] = wp_json_encode( $data );
+		$args = array(
+			'name' => $data->name,
+			'data' => wp_json_encode( $data )
+		);
 
-		$updated = $wpdb->update( $table_name, $db_data, [ 'id' => $data->id ] );
+		$where = [ 'id' => $data->id ];
 
-		if ( false === $updated ) {
-			$error_msg = 'PostType failed to update: ' . $wpdb->print_error();
-			new Log( 'ERROR: ' . $error_msg );
+		$db = new DB( PostType::$table_name );
 
-			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
-		} else {
-			return $updated;
-		}
+		return $db->update( $args, $where );
 	}
 
 	public static function delete( int $id ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::$table_name;
-		$result     = $wpdb->delete(
-			$table_name,
-			array(
-				'id' => $id,
-			),
-			array(
-				'%d',
-			)
-		);
+		$db = new DB( self::$table_name );
 
-		return $result;
-
+		return $db->delete( $id );
 	}
 
 	public function create_db_table() {

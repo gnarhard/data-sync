@@ -233,7 +233,7 @@ class Posts {
 				update_post_meta( $receiver_post_id, $meta_key, $meta_value );
 			}
 
-			Taxonomies::save( $receiver_post_id, $post->taxonomies );
+			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );
 			new Media( $receiver_post_id, $post->media, $post->source_url );
 
 
