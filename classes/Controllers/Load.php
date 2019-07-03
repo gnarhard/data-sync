@@ -13,6 +13,7 @@ use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 use DataSync\Models\PostType;
+use DataSync\Models\Taxonomy;
 
 
 class Load {
@@ -35,7 +36,10 @@ class Load {
 			$post_type->create_db_table();
 			$register_cpts = new PostTypes();
 
+			$taxonomy = new Taxonomy();
+			$taxonomy->create_db_table();
 			new Taxonomies();
+
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically

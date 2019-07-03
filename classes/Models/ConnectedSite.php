@@ -43,10 +43,23 @@ class ConnectedSite {
 
 	}
 
-	public static function update() {
-		global $wpdb;
+	public static function update( object $data ) {
 
-//		$updated = $wpdb->update( $table, $data, $where );
+		$url = Helpers::format_url( $data['url'] );
+
+		$args = array(
+			'id'             => $data->id,
+			'name'           => $data->name,
+			'url'            => Helpers::format_url( $data->url ),
+			'secret_key'     => sanitize_text_field( $data->secret_key ),
+			'date_connected' => current_time( 'mysql' ),
+		);
+
+		$where = [ 'id' => $data->id ];
+
+		$db = new DB( self::$table_name );
+
+		return $db->update( $args, $where );
 	}
 
 	public static function delete( $id ) {

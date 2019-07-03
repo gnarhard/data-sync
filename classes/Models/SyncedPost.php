@@ -58,7 +58,7 @@ class SyncedPost {
 		);
 
 		$where = [ 'id' => $data->id ];
-		$db    = new DB( PostType::$table_name );
+		$db    = new DB( self::$table_name );
 
 		return $db->update( $args, $where );
 

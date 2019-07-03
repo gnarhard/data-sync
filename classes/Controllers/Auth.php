@@ -67,6 +67,11 @@ class Auth {
 	}
 
 	public function prepare( $data, $secret_key ) {
+
+		if ( ( ! property_exists($data, 'receiver_site_id' ) ) || ( null === $data->receiver_site_id ) ) {
+			$data->receiver_site_id = get_option( 'data_sync_receiver_site_id' );
+		}
+
 		$json_decoded_data = json_decode( wp_json_encode( $data ) ); // DO THIS TO MAKE SIGNATURE CONSISTENT. JSON DOESN'T RETAIN OBJECT CLASS TITLES.
 		$data->sig         = (string) $this->create_signature( $json_decoded_data, $secret_key );
 
@@ -74,19 +79,22 @@ class Auth {
 	}
 
 	public static function authorize() {
-		$data        = file_get_contents( 'php://input' );
-		$source_data = json_decode( $data );
-		$auth        = new Auth();
+		$data = (object) json_decode( file_get_contents( 'php://input' ) );
+		$auth = new Auth();
 
 		if ( get_option( 'secret_key' ) ) {
-			return $auth->verify_signature( $source_data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
-		} else if (( isset( $source_data->receiver_site_id ) ) && ( NULL !== $source_data->receiver_site_id ) ) {
-			// Get secret key of connected site if trying to authorize a request from a receiver.
-			$secret_key_of_receiver = $auth->get_site_secret_key( $source_data->receiver_site_id );
+			return $auth->verify_signature( $data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
+		} else if ( ( isset( $data->receiver_site_id ) ) && ( null !== $data->receiver_site_id ) ) {
+			// Get secret key of connected site if source is trying to authorize a request from a receiver.
+			$secret_key_of_receiver = $auth->get_site_secret_key( $data->receiver_site_id );
 
-			return $auth->verify_signature( $source_data, $secret_key_of_receiver );
+			return $auth->verify_signature( $data, $secret_key_of_receiver );
 		} else {
-			new Log( 'ERROR: Failed to authorize cross-site connection.');
+			$error_msg = 'ERROR: Failed to authorize cross-site connection.';
+			$error_msg .= "\n" . 'Secret Key: ' . get_option( 'secret_key' );
+			$error_msg .= "\n" . 'Receiver Site ID: ' . $data->receiver_site_id;
+			new Log( $error_msg );
+
 			return false;
 		}
 	}

@@ -48,10 +48,7 @@ class Taxonomies {
 		if ( count( $existing_taxonomies ) ) {
 			foreach ( $existing_taxonomies as $taxonomy ) {
 				$data->id = $taxonomy->id;
-				$return   = Taxonomy::update( $data );
-				if ( is_wp_error( $return ) ) {
-					new Log( 'ERROR: Post type was not updated.' . "\n" . $return->get_error_message() );
-				}
+				Taxonomy::update( $data );
 			}
 		} else {
 			$new_id = Taxonomy::create( $data );

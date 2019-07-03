@@ -64,7 +64,7 @@ class DB {
 			} else {
 				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
 			}
-			$query .= ' ' . $key . ' = ' . $filtered_value;
+			$query .= ' `' . $key . '` = \'' . $filtered_value . '\'';
 			if ( $i < $arg_count ) {
 				$query .= ' AND';
 			}
@@ -91,7 +91,8 @@ class DB {
 		);
 
 		if ( false === $created ) {
-			$error_msg = 'Database failed to create: ' . $wpdb->print_error();
+			$error_msg = 'Database failed to create: ' . $wpdb->last_error;
+			$error_msg .= "\n" . $wpdb->last_query;
 			new Log( 'ERROR: ' . $error_msg );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
@@ -112,7 +113,8 @@ class DB {
 		$updated = $wpdb->update( $this->table_name, $args, $where );
 
 		if ( false === $updated ) {
-			$error_msg = 'Database failed to update: ' . $wpdb->print_error();
+			$error_msg = 'Database failed to update: ' . $wpdb->last_error;
+			$error_msg .= "\n" . $wpdb->last_query;
 			new Log( 'ERROR: ' . $error_msg );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );

@@ -42,17 +42,25 @@ class Receiver {
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 
-		echo 'Site: ' . receiver_site_id; echo "\n";
+		echo 'Site: ' . $receiver_site_id; echo "\n";
 //		print_r($source_data);
 
+		new Log( 'STATUS: Beginning to sync post types.' );
 		PostTypes::process( $source_data->options->push_enabled_post_types );
 
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
 
+		new Log( 'STATUS: Finished syncing post types.' );
 
+		new Log( 'STATUS: Beginning to sync custom taxonomies.' );
+		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
+			Taxonomies::save( $taxonomy );
+		}
+		new Log( 'STATUS: Finished syncing custom taxonomies.' );
 
+		new Log( 'STATUS: Beginning to sync posts.' );
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
@@ -73,6 +81,7 @@ class Receiver {
 			$email = new Email();
 
 		}
+		new Log( 'STATUS: Finished syncing posts.' );
 
 	}
 

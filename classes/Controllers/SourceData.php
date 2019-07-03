@@ -44,13 +44,12 @@ class SourceData {
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
 			$json                          = $auth->prepare( $source_data, $site->secret_key );
-			$url                           = (string) trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 			$body                          = wp_remote_retrieve_body( $response );
-			print_r( $body );
+			var_dump( $body );
 
 			new Log( 'STATUS: Finished push to ' . $site->url );
-			die();
 		}
 
 	}

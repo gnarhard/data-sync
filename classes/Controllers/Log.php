@@ -72,14 +72,13 @@ class Log {
 			'/log',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'save' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'save' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_log' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_log' ),
 				),
 			)
 		);

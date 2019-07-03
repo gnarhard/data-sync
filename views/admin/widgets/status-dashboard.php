@@ -37,11 +37,7 @@ function status_widget() {
 
 				$time = strtotime( $post->post_date );
 
-				$result = SyncedPost::get_where(
-					array(
-						'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
-					)
-				);
+				$result = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 
 				if ( count( $result ) === $number_of_sites_connected ) {
 					$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
