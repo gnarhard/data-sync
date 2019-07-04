@@ -86,9 +86,6 @@ class ConnectedSites {
 	}
 
 	public function save( WP_REST_Request $request ) {
-//		if ( ! $this->table_exists() ) {
-//			ConnectedSite::create_db_table();
-//		}
 
 		$new_data = array();
 

@@ -41,9 +41,12 @@ jQuery( function ( $ ) {
 
         setInterval( function() {
             AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
-                if ( document.getElementById( 'error_log' ) ) {
+
+                // DON'T UPDATE IF YOU DON'T HAVE TO.
+                if ( result !== document.getElementById( 'error_log' ).innerHTML ) {
                     document.getElementById( 'error_log' ).innerHTML = result;
                 }
+
             });
         }, 2000 );
 

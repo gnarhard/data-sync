@@ -200,7 +200,6 @@ class Posts {
 
 	public static function save( object $post ) {
 
-//		print_r( $post );
 		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 
 		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
@@ -224,8 +223,7 @@ class Posts {
 		}
 
 		$receiver_post_id = wp_insert_post( $post_array );
-		echo 'POSTS';
-		var_dump( $receiver_post_id );
+
 		if ( $receiver_post_id ) {
 
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {

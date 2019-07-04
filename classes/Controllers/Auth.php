@@ -3,6 +3,7 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Models\ConnectedSite;
 use Exception;
 use WP_Error;
 use WP_REST_Response;
@@ -52,23 +53,20 @@ class Auth {
 	public function get_site_secret_key( int $receiver_site_id ) {
 
 		if ( $receiver_site_id ) {
-			$request = new WP_REST_Request();
-			$request->set_method( 'GET' );
-			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/connected_sites/' . $receiver_site_id );
-			$request->set_url_params( array( 'id' => $receiver_site_id ) );
-			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
-
-			$response            = rest_do_request( $request );
-			$connected_site_data = $response->get_data();
+			$connected_site_data = ConnectedSite::get( $receiver_site_id )[0];
 
 			return $connected_site_data->secret_key;
+		} else {
+			new Log( 'ERROR: $receiver_site_id not set trying to get site secret key.', true );
+
+			return false;
 		}
 
 	}
 
 	public function prepare( $data, $secret_key ) {
 
-		if ( ( ! property_exists($data, 'receiver_site_id' ) ) || ( null === $data->receiver_site_id ) ) {
+		if ( ( ! property_exists( $data, 'receiver_site_id' ) ) || ( null === $data->receiver_site_id ) ) {
 			$data->receiver_site_id = get_option( 'data_sync_receiver_site_id' );
 		}
 
@@ -83,21 +81,33 @@ class Auth {
 		$auth = new Auth();
 
 		if ( get_option( 'secret_key' ) ) {
-			return $auth->verify_signature( $data, get_option( 'secret_key' ) ); // Try getting option if receiver trying to authorize source.
-		} else if ( ( property_exists($data, 'receiver_site_id' ) ) && ( null !== $data->receiver_site_id ) ) {
+
+			// Get secret key option if receiver is trying to authorize source.
+			return $auth->verify_signature( $data, get_option( 'secret_key' ) );
+
+		} elseif ( ( property_exists( $data, 'receiver_site_id' ) ) && ( null !== $data->receiver_site_id ) ) {
+
 			// Get secret key of connected site if source is trying to authorize a request from a receiver.
 			$secret_key_of_receiver = $auth->get_site_secret_key( $data->receiver_site_id );
 
 			return $auth->verify_signature( $data, $secret_key_of_receiver );
-		} else {
-			$error_msg = 'ERROR: Failed to authorize cross-site connection.';
-			$error_msg .= '<br>' . 'Secret Key: ' . get_option( 'secret_key' );
-			$error_msg .= '<br>' . 'Receiver Site ID: ' . $data->receiver_site_id;
-//			echo $error_msg;die();
-			new Log( $error_msg, true );
-
-			return false;
 		}
+
+
+//		var_dump( $data );
+//		if ( isset( $data->log_entry ) ) {
+//echo 'here';
+//			if ( strpos( $data->log_entry, 'Finished syncing post types.' ) !== false ) {
+//				die();
+//			}
+//
+//		}
+		$error_msg = 'ERROR: Failed to authorize cross-site connection.';
+		$error_msg.= '<br>Data package: ' . wp_json_encode( $data );
+		$error_msg.= '<br>JSON: ' .  file_get_contents( 'php://input' );
+		new Log( $error_msg, true );
+
+		return false;
 	}
 
 	/**
@@ -147,7 +157,6 @@ class Auth {
 	}
 
 
-	// Generates our secret key
 	public function generate_key( $length = 40 ) {
 		$keyset = 'abcdefghijklmnopqrstuvqxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/';
 		$key    = '';

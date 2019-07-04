@@ -56,12 +56,15 @@ class Log {
 		// RECEIVER SIDE.
 		$data            = new stdClass();
 		$data->log_entry = $this->log_entry;
-
 		$auth     = new Auth();
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
+
+//		print_r($json);die();
 		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
-		echo $response;
+		echo 'send to source';
+		$body                          = wp_remote_retrieve_body( $response );
+//		var_dump ((object) json_decode( file_get_contents( 'php://input' ) ) );die();
 	}
 
 	public function save() {
@@ -91,15 +94,17 @@ class Log {
 	 * Gets contents from ../error.log
 	 */
 	public static function get_log() {
-		$file           = file_get_contents( DATA_SYNC_PATH . 'error.log' );
-		$exploded_file  = explode( "\n", $file );
-		$file_to_return = '';
+		$file             = file_get_contents( DATA_SYNC_PATH . 'error.log' );
+//		$exploded_file    = explode( "\n", $file );
+//		$length_to_return = 5000;
+//		$file_to_return   = '';
+//
+//		for ( $i = 0; $i < $length_to_return; $i ++ ) {
+//			$file_to_return .= $file[ $i ];
+//		}
 
-		for ( $i = 0; $i < 5000; $i++ ) {
-			$file_to_return .= $file[ $i ];
-		}
-
-		return $file_to_return;
+		return $file;
+//		return $file_to_return;
 	}
 
 	public function register_routes() {
@@ -108,8 +113,8 @@ class Log {
 			'/log',
 			array(
 				array(
-					'methods'  => WP_REST_Server::EDITABLE,
-					'callback' => array( $this, 'save' ),
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save' ),
 //					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 					// TODO: GET AUTH TO WORK!
 				),

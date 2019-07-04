@@ -11,6 +11,7 @@ use ACF_Admin_Tool_Export;
 use DataSync\Controllers\Log;
 use DataSync\Controllers\Email;
 use stdClass;
+use DOMDocument;
 
 class SourceData {
 
@@ -33,21 +34,26 @@ class SourceData {
 
 	public function push() {
 
-		new Log( '---------------------------------------------------------- STARTING NEW PUSH ----------------------------------------------------------' );
+		new Log( 'STARTING NEW PUSH<hr>' );
 
 		$source_data     = $this->consolidate();
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
 
+			$source_data->debug = true;
+
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
 			$json                          = $auth->prepare( $source_data, $site->secret_key );
 			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
-			$body                          = wp_remote_retrieve_body( $response );
-			echo $body;
-			new Log( 'Finished push to ' . $site->url );
+
+			if ( $source_data->debug ) {
+				print_r( wp_remote_retrieve_body( $response ) );
+			}
+
+//			new Log( 'Finished push to ' . $site->url );
 		}
 
 		$email = new Email();

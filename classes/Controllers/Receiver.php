@@ -34,13 +34,17 @@ class Receiver {
 
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
-		echo 'first receiver';
-		new Log( 'Beginning receiver parse.' );
-		$this->parse( $source_data );
-		$response = new WP_REST_Response( wp_json_encode( $this->response ) );
-		$response->set_status( 201 );
 
-		return $response;
+//		if ($source_data->debug) {
+//			var_dump( 'Beginning to receive' );
+//			print_r( $source_data );
+//		}
+
+		$this->parse( $source_data );
+
+//		if ($source_data->debug) {
+//			die();
+//		}
 	}
 
 	private function parse( object $source_data ) {
@@ -57,6 +61,8 @@ class Receiver {
 		if ( $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
+
+//		echo 'finished syncing post types';
 		new Log( 'Finished syncing post types.' );
 
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
