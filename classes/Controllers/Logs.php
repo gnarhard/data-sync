@@ -43,8 +43,6 @@ class Logs {
 	public function create_log_entry( $error ) {
 
 		$this->log_entry = '';
-//		$this->log_entry .= current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url();
-//		$this->log_entry .= '<br>';
 
 		if ( $error ) {
 			$this->log_entry .= '<span style="color:red;">';
@@ -80,25 +78,15 @@ class Logs {
 		$this->log_entry  = $data->log_entry;
 		$this->url_source = $data->url_source;
 
-		print_r($data);
+		print_r( $data );
 		$this->log();
 	}
 
 	public function log() {
-
 		$data             = new stdClass();
 		$data->log_entry  = $this->log_entry;
 		$data->url_source = $this->url_source;
-		print_r($data);
 		Log::create( $data );
-
-//
-//		$file_text = $this->log_entry . self::get_log();
-//
-//		file_put_contents(
-//			DATA_SYNC_PATH . 'error.log',
-//			$file_text,
-//			);
 	}
 
 	/**
@@ -107,28 +95,15 @@ class Logs {
 	 * Gets contents from ../error.log
 	 */
 	public static function get_log() {
-
 		return Log::get_all_and_sort( [ 'datetime' => 'DESC' ] );
-
-
-
-//		$file          = file_get_contents( DATA_SYNC_PATH . 'error.log' );
-//		$exploded_file = explode( "<br><br>", $file );
-//		print_r( $exploded_file );
-//		$length_to_return = 50;
-//		$file_to_return   = '';
-//
-//		for ( $i = 0; $i < $length_to_return; $i ++ ) {
-//			$file_to_return .= $exploded_file[ $i ];
-//		}
-//
-////		return $file;
-//		return $file_to_return;
 	}
 
 	public function refresh_log() {
 		include_once ABSPATH . 'wp-content/plugins/data-sync/views/admin/options/log.php';
-		\DataSync\display_log();
+		$data       = new stdClass();
+		$data->html = wp_json_encode( \DataSync\display_log() );
+
+		return $data;
 	}
 
 	public function register_routes() {

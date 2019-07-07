@@ -5,38 +5,37 @@ namespace DataSync;
 use DataSync\Controllers\Logs;
 
 function display_log() {
-	$logs = Logs::get_log();
+	$logs   = Logs::get_log();
+	$output = '';
 
 	if ( count( $logs ) ) {
 
-		?>
-		<table>
-			<thead>
-			<tr>
-				<td>TIME</td>
-				<td>LOG ENTRY</td>
-				<td>URL</td>
-			</tr>
-			</thead>
-			<tbody>
-			<?php
-			foreach( $logs as $log ) {
-				$time        = strtotime( $log->datetime );
-				$datetime      = date( 'g:i a F j, Y', $time );
-				?>
-				<tr>
-					<td><?php echo $datetime ?></td>
-					<td><?php echo $log->log_entry ?></td>
-					<td><?php echo $log->url_source ?></td>
-				</tr>
-				<?php
-			}
-			?>
-			</tbody>
-		</table>
-		<?php
-		
+		$output .= '<table>';
+		$output .= '<thead>';
+		$output .= '<tr>';
+		$output .= '<td>TIME</td>';
+		$output .= '<td>LOG ENTRY</td>';
+		$output .= '<td>URL</td>';
+		$output .= '</tr>';
+		$output .= '</thead>';
+		$output .= '<tbody>';
+
+		foreach ( $logs as $log ) {
+			$time     = strtotime( $log->datetime );
+			$datetime = date( 'g:i a F j, Y', $time );
+
+			$output .= '<tr>';
+			$output .= '<td>' . $datetime . '</td>';
+			$output .= '<td>' . $log->log_entry . '</td>';
+			$output .= '<td>' . $log->url_source . '</td>';
+			$output .= '</tr>';
+		}
+		$output .= '</tbody>';
+		$output .= '</table>';
+
 	} else {
-		echo 'No log entries.';
+		return 'No log entries.';
 	}
+
+	return $output;
 }

@@ -34,17 +34,7 @@ class Receiver {
 
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
-
-//		if ($source_data->debug) {
-//			var_dump( 'Beginning to receive' );
-//			print_r( $source_data );
-//		}
-
 		$this->parse( $source_data );
-
-//		if ($source_data->debug) {
-//			die();
-//		}
 	}
 
 	private function parse( object $source_data ) {
@@ -54,12 +44,6 @@ class Receiver {
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->debug );
-
-		if ($receiver_site_id === 2) {
-			echo 'hey';die();
-		}
-
-		$this->response = 'Site: ' . $receiver_site_id;
 
 		PostTypes::process( $source_data->options->push_enabled_post_types );
 
@@ -88,12 +72,13 @@ class Receiver {
 					if ( false !== $filtered_post ) {
 						$receiver_post_id = Posts::save( $filtered_post );
 						SyncedPosts::save( $receiver_post_id, $filtered_post );
+
+						new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
 					}
 				}
 			}
 
 		}
-		new Logs( 'Finished syncing posts.' );
 
 	}
 

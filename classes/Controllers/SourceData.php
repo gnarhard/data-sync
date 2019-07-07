@@ -43,8 +43,6 @@ class SourceData {
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
-echo 'site: '.$site->id;
-
 
 			$source_data->debug = get_option( 'debug' );
 			$source_data->receiver_site_id = (int) $site->id;
