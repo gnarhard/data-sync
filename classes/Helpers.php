@@ -18,6 +18,7 @@ class Helpers {
 		$url = preg_replace( "/^http:/i", "https:", $url );
 
 		$exploded_url = explode( '.', $url );
+
 		if ( ! isset( $exploded_url[1] ) ) {
 			new Logs( 'ERROR: Connected site url could not be processed.', true );
 

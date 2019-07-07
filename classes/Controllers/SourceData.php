@@ -44,7 +44,7 @@ class SourceData {
 
 		foreach ( $connected_sites as $site ) {
 
-			$source_data->debug = get_option( 'debug' );
+			$source_data->debug            = get_option( 'debug' );
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
 			$json                          = $auth->prepare( $source_data, $site->secret_key );
@@ -55,7 +55,7 @@ class SourceData {
 				echo $response->get_error_message();
 				new Logs( 'Couldn\'t send data to ' . $site->url . '. ' . $response->get_error_message(), true );
 			} else {
-				print_r( $response['body']);
+				print_r( $response['body'] );
 			}
 
 //			new Logs( 'Finished push to ' . $site->url );

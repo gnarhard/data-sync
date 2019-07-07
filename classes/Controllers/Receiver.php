@@ -60,9 +60,10 @@ class Receiver {
 		new Logs( 'Finished syncing custom taxonomies.' );
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
-
+			// TODO: GETTING PHP MEMORY ISSUES HERE
 			$post_count = count( $source_data->posts->$post_type_slug );
 
+			echo 'asdf';die();
 			if ( 0 === $post_count ) {
 				new Logs( 'ERROR: No posts in data.', true );
 			} else {
