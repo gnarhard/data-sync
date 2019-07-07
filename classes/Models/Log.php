@@ -32,7 +32,7 @@ class Log {
 		$column = array_key_first( $sortby );
 		$order  = $sortby[ $column ];
 
-		$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order;
+		$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT 50';
 		$db  = new DB( self::$table_name );
 
 		return $db->query( $sql );

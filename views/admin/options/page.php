@@ -21,7 +21,7 @@ function data_sync_options_page() {
 					<h2>Log</h2>
 					<div id="error_log">
 						<?php include_once 'log.php'; ?>
-						<?php display_log(); ?>
+						<?php echo display_log(); ?>
 					</div>
 					<?php
 				}

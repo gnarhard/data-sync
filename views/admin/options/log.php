@@ -13,9 +13,9 @@ function display_log() {
 		$output .= '<table>';
 		$output .= '<thead>';
 		$output .= '<tr>';
-		$output .= '<td>TIME</td>';
 		$output .= '<td>LOG ENTRY</td>';
 		$output .= '<td>URL</td>';
+		$output .= '<td>TIME</td>';
 		$output .= '</tr>';
 		$output .= '</thead>';
 		$output .= '<tbody>';
@@ -25,9 +25,9 @@ function display_log() {
 			$datetime = date( 'g:i a F j, Y', $time );
 
 			$output .= '<tr>';
-			$output .= '<td>' . $datetime . '</td>';
 			$output .= '<td>' . $log->log_entry . '</td>';
 			$output .= '<td>' . $log->url_source . '</td>';
+			$output .= '<td>' . $datetime . '</td>';
 			$output .= '</tr>';
 		}
 		$output .= '</tbody>';

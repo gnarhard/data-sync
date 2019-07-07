@@ -76,6 +76,11 @@
   float: right;
 }
 
+.settings_page_data-sync-options #error_log table tr td {
+  min-width: 150px;
+  padding: 5px;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status {
   width: 100%;
   text-align: left;

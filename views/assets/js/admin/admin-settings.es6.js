@@ -32,10 +32,11 @@ jQuery( function ( $ ) {
     if ( document.getElementById( 'error_log' ) ) {
         setInterval( function() {
             AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
-                document.getElementById( 'error_log' ).innerHTML = JSON.parse(result.html);
+                if ( JSON.parse(result.html) !== document.getElementById( 'error_log' ).innerHTML ) {
+                    document.getElementById( 'error_log' ).innerHTML = JSON.parse(result.html);
+                }
             });
         }, 2000 );
-
     }
 
 
