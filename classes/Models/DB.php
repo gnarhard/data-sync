@@ -81,7 +81,7 @@ class DB {
 	 *
 	 * @return WP_Error
 	 */
-	public function create( $args, $sprintf ) {
+	public function create( array $args, array $sprintf ) {
 		global $wpdb;
 
 		$created = $wpdb->insert(
@@ -107,7 +107,7 @@ class DB {
 	 *
 	 * @return WP_Error
 	 */
-	public function update( $args, $where ) {
+	public function update( array $args, $where ) {
 		global $wpdb;
 
 		$updated = $wpdb->update( $this->table_name, $args, $where );
@@ -128,7 +128,7 @@ class DB {
 	 *
 	 * @return mixed
 	 */
-	public function delete( $id ) {
+	public function delete( int $id ) {
 		global $wpdb;
 		$result = $wpdb->delete(
 			$this->table_name,
@@ -142,6 +142,13 @@ class DB {
 
 		return $result;
 
+	}
+
+	public function query( string $sql ) {
+		global $wpdb;
+
+		$result = $wpdb->get_results( $sql );
+		return $result;
 	}
 
 

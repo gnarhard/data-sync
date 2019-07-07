@@ -8,7 +8,7 @@ use DataSync\Helpers;
 
 class Log {
 
-	public static $table_name = 'data_sync_connected_sites';
+	public static $table_name = 'data_sync_log';
 
 	public function __construct() {
 		$this->create_db_table();
@@ -26,13 +26,24 @@ class Log {
 		return $db->get_where( $args );
 	}
 
-	public static function create( $data ) {
-		$url = Helpers::format_url( $data['url'] );
+	public static function get_all_and_sort( $sortby ) {
+
+		global $wpdb;
+		$column = array_key_first( $sortby );
+		$order  = $sortby[ $column ];
+
+		$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order;
+		$db  = new DB( self::$table_name );
+
+		return $db->query( $sql );
+	}
+
+	public static function create( object $data ) {
 
 		$args    = array(
-			'message'           => $data->message,
-			'url'            => Helpers::format_url( $data->url ),
-			'datetime' => current_time( 'mysql' ),
+			'log_entry'  => $data->log_entry,
+			'url_source' => Helpers::format_url( $data->url ),
+			'datetime'   => current_time( 'mysql' ),
 		);
 		$sprintf = array(
 			'%s',
@@ -48,13 +59,11 @@ class Log {
 
 	public static function update( object $data ) {
 
-		$url = Helpers::format_url( $data['url'] );
-
 		$args = array(
-			'id'             => $data->id,
-			'message'           => $data->message,
-			'url'            => Helpers::format_url( $data->url ),
-			'datetime' => current_time( 'mysql' ),
+			'id'         => $data->id,
+			'log_entry'  => $data->log_entry,
+			'url_source' => Helpers::format_url( $data->url ),
+			'datetime'   => current_time( 'mysql' ),
 		);
 
 		$where = [ 'id' => $data->id ];
@@ -79,8 +88,8 @@ class Log {
 			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
-	        message              longtext,
-	        url               VARCHAR(255) NOT NULL,
+	        log_entry              longtext,
+	        url_source               VARCHAR(255) NOT NULL,
 	        datetime    DATETIME NOT NULL 
 	    );'
 		);

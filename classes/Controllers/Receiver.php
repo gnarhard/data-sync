@@ -55,6 +55,10 @@ class Receiver {
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->debug );
 
+		if ($receiver_site_id === 2) {
+			echo 'hey';die();
+		}
+
 		$this->response = 'Site: ' . $receiver_site_id;
 
 		PostTypes::process( $source_data->options->push_enabled_post_types );

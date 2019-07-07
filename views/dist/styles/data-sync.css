@@ -1,12 +1,11 @@
-.settings_page_data-sync-options select,
-.settings_page_data-sync-options textarea,
 .settings_page_data-sync-options input[type=text] {
   width: 400px;
-  min-height: 200px;
 }
 
-.settings_page_data-sync-options textarea {
-  height: 300px;
+.settings_page_data-sync-options textarea,
+.settings_page_data-sync-options select {
+  min-height: 300px;
+  width: 400px;
 }
 
 .settings_page_data-sync-options .remove_site {

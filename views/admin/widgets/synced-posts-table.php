@@ -8,7 +8,31 @@ use DataSync\Controllers\Posts;
 use DataSync\Models\SyncedPost;
 
 function display_synced_posts_table() {
+
+
+	$connected_sites_obj       = new ConnectedSites();
+	$connected_sites           = $connected_sites_obj->get_all()->data;
+	$number_of_sites_connected = count( $connected_sites );
+	$connected_site_ids        = '';
+	$i                         = 0;
+
+	foreach ( $connected_sites as $site ) {
+		$i ++;
+		if ( $i === $number_of_sites_connected ) {
+			$connected_site_ids .= $site->id;
+		} else {
+			$connected_site_ids .= $site->id . ',';
+		}
+	}
+
+
+	$source_options = Options::source()->get_data();
+	$posts          = Posts::get( array_keys( $source_options->push_enabled_post_types ) );
+	$sorted_posts   = clone( (object) array_reverse( (array) $posts ) );
+	$array_of_posts = (array) $sorted_posts;
+
 	?>
+	<span id="sites_connected_info" data-ids="<?php echo $connected_site_ids?>">Sites connected: <?php echo $number_of_sites_connected ?></span>
 	<table id="wp_data_sync_status">
 		<thead>
 		<tr>
@@ -21,13 +45,6 @@ function display_synced_posts_table() {
 		</thead>
 		<tbody>
 		<?php
-		$connected_sites_obj       = new ConnectedSites();
-		$connected_sites           = $connected_sites_obj->get_all()->data;
-		$number_of_sites_connected = count( $connected_sites );
-		$source_options            = Options::source()->get_data();
-		$posts                     = Posts::get( array_keys( $source_options->push_enabled_post_types ) );
-		$sorted_posts              = clone( (object) array_reverse( (array) $posts ) );
-		$array_of_posts            = (array) $sorted_posts;
 
 		if ( count( $array_of_posts ) ) {
 			foreach ( $sorted_posts as $post ) {
@@ -38,8 +55,8 @@ function display_synced_posts_table() {
 
 					if ( count( $result ) ) {
 						$synced_post = (object) $result[0];
-						$time   = strtotime( $synced_post->date_modified );
-						$synced = date( 'g:i a - F j, Y', $time );
+						$time        = strtotime( $synced_post->date_modified );
+						$synced      = date( 'g:i a - F j, Y', $time );
 					} else {
 						$synced = 'Unsynced';
 					}

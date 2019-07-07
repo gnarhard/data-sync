@@ -1,6 +1,6 @@
 <?php namespace DataSync;
 
-use DataSync\Controllers\Logs as Log;
+use DataSync\Controllers\Logs;
 
 /**
  * Outputs HTML for settings page
@@ -20,7 +20,8 @@ function data_sync_options_page() {
 					?>
 					<h2>Log</h2>
 					<div id="error_log">
-						<?php echo Logs::get_log() ?>
+						<?php include_once 'log.php'; ?>
+						<?php display_log(); ?>
 					</div>
 					<?php
 				}

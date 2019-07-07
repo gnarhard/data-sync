@@ -1,11 +1,11 @@
 .settings_page_data-sync-options {
-  select, textarea, input[type=text] {
+  input[type=text] {
     width: 400px;
-    min-height: 200px;
   }
 
-  textarea {
-    height: 300px;
+  textarea, select {
+    min-height: 300px;
+    width: 400px;
   }
 
   .remove_site {

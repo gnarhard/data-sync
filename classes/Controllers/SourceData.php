@@ -49,8 +49,11 @@ class SourceData {
 			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 
-			if ( $source_data->debug ) {
-				new Logs( 'Response from ' . $site->url . ': <br>' . wp_remote_retrieve_body( $response ) );
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				new Logs( 'ERROR: Couldn\'t send data to receiver: ' . $site->url . '. ' . $response->get_error_message(), true );
+			} else {
+				print_r( $response['body']);
 			}
 
 //			new Logs( 'Finished push to ' . $site->url );
