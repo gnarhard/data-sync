@@ -4,7 +4,7 @@
 namespace DataSync\Models;
 
 
-use DataSync\Controllers\Log;
+use DataSync\Controllers\Logs;
 use DataSync\Helpers;
 
 /**
@@ -93,7 +93,7 @@ class DB {
 		if ( false === $created ) {
 			$error_msg = 'Database failed to create: ' . $wpdb->last_error;
 			$error_msg .= '<br>' . $wpdb->last_query;
-			new Log( 'ERROR: ' . $error_msg, true );
+			new Logs( 'ERROR: ' . $error_msg, true );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
@@ -115,7 +115,7 @@ class DB {
 		if ( false === $updated ) {
 			$error_msg = 'Database failed to update: ' . $wpdb->last_error;
 			$error_msg .= '<br>' . $wpdb->last_query;
-			new Log( 'ERROR: ' . $error_msg, true );
+			new Logs( 'ERROR: ' . $error_msg, true );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {

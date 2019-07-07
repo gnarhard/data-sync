@@ -57,7 +57,7 @@ class Auth {
 
 			return $connected_site_data->secret_key;
 		} else {
-			new Log( 'ERROR: $receiver_site_id not set trying to get site secret key.', true );
+			new Logs( 'ERROR: $receiver_site_id not set trying to get site secret key.', true );
 
 			return false;
 		}
@@ -105,7 +105,7 @@ class Auth {
 		$error_msg = 'ERROR: Failed to authorize cross-site connection.';
 		$error_msg.= '<br>Data package: ' . wp_json_encode( $data );
 		$error_msg.= '<br>JSON: ' .  file_get_contents( 'php://input' );
-		new Log( $error_msg, true );
+		new Logs( $error_msg, true );
 
 		return false;
 	}

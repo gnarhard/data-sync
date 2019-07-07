@@ -5,7 +5,7 @@ namespace DataSync\Controllers;
 
 use WP_REST_Request;
 use DataSync\Models\ConnectedSite;
-use DataSync\Controllers\Log;
+use DataSync\Controllers\Logs;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
@@ -111,14 +111,14 @@ class ConnectedSites {
 			if ( $response ) {
 				return wp_send_json_success();
 			} else {
-				new Log( 'ERROR: Connected site was not deleted.', true );
+				new Logs( 'ERROR: Connected site was not deleted.', true );
 
-				return new WP_Error( 'database_error', 'DB Log: Connected site was not deleted.', array( 'status' => 501 ) );
+				return new WP_Error( 'database_error', 'DB Logs: Connected site was not deleted.', array( 'status' => 501 ) );
 			}
 		} else {
-			new Log( 'ERROR: Connected site was not deleted. No ID present in URL.', true );
+			new Logs( 'ERROR: Connected site was not deleted. No ID present in URL.', true );
 
-			return new WP_Error( 'database_error', 'DB Log: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ) );
+			return new WP_Error( 'database_error', 'DB Logs: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ) );
 		}
 	}
 

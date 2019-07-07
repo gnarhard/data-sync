@@ -17,6 +17,12 @@ class SyncedPost {
 		return $db->get( $id );
 	}
 
+	public static function get_all() {
+		$db = new DB( self::$table_name );
+
+		return $db->get_all();
+	}
+
 	public static function get_where( array $args ) {
 		$db = new DB( self::$table_name );
 

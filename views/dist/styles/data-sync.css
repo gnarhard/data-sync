@@ -82,6 +82,21 @@
   text-align: left;
 }
 
+#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons {
+  text-align: center;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-update {
+  -webkit-animation-name: spin;
+          animation-name: spin;
+  -webkit-animation-duration: 4000ms;
+          animation-duration: 4000ms;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+          animation-timing-function: linear;
+}
+
 #wp_data_sync_status_dashboard .inside {
   overflow: hidden;
 }
@@ -122,6 +137,30 @@
   width: 100%;
   text-align: center;
   display: block;
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
 }
 
 #wp_data_sync_enabled_post_types_dashboard select {

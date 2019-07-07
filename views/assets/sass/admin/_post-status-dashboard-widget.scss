@@ -4,6 +4,16 @@
     width: 100%;
     text-align: left;
 
+    .wp_data_synced_post_status_icons {
+      text-align: center;
+
+      .dashicons-update {
+        animation-name: spin;
+        animation-duration: 4000ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+      }
+    }
   }
 
   .inside {
@@ -44,27 +54,13 @@
     }
   }
 
-
-
 }
 
-#wp_data_sync_enabled_post_types_dashboard {
-  select {
-    width: 100%;
+@keyframes spin {
+  from {
+    transform:rotate(0deg);
   }
-
-  #save_push_enabled_post_types {
-    padding: 10px;
-    width: 100%;
-    margin-top: 20px;
-    background: #0073aa;
-    color: white;
-    border-radius: 4px;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  #save_push_enabled_post_types:hover {
-    background: grey;
+  to {
+    transform:rotate(360deg);
   }
 }

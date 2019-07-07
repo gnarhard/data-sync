@@ -1,4 +1,4 @@
-import AJAX from './AJAX.es6.js';
+import AJAX from '../AJAX.es6.js';
 
 document.addEventListener( "DOMContentLoaded", function () {
     if ( document.getElementById( 'save_push_enabled_post_types' ) ) {
@@ -13,12 +13,6 @@ document.addEventListener( "DOMContentLoaded", function () {
                 window.location.reload();
             });
 
-        }
-    }
-    if ( document.getElementById( 'bulk_data_push' ) ) {
-        document.getElementById( 'bulk_data_push' ).onclick = function ( e ) {
-            e.preventDefault();
-            AJAX.get(DataSync.api.url + '/source_data/push' );
         }
     }
 

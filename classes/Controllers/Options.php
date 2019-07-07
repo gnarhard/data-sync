@@ -158,7 +158,7 @@ class Options {
 		if ( $success ) {
 			return wp_send_json_success();
 		} else {
-			new Log( 'ERROR: Options not saved.', true );
+			new Logs( 'ERROR: Options not saved.', true );
 
 			return wp_send_json_error();
 		}
@@ -235,6 +235,8 @@ class Options {
 		register_setting( 'data_sync_options', 'data_sync_source_site_url' );
 		register_setting( 'data_sync_options', 'data_sync_receiver_site_id' );
 
+		register_setting( 'data_sync_options', 'debug' );
+
 		$source = get_option( 'source_site' );
 
 		if ( '1' === $source ) :
@@ -246,6 +248,8 @@ class Options {
 
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'push_enabled_post_types' );
+
+			add_settings_field( 'debug', 'Debug', $this->view_namespace . '\display_debug_checkbox', 'data-sync-options', 'data_sync_options' );
 
 		elseif ( '0' === $source ) :
 

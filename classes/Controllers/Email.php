@@ -8,7 +8,7 @@ class Email {
 
 	public function __construct() {
 		// TODO: email users after sync is complete.
-		// TODO: LINK Log() TO EMAIL FOR EASIER STATUS UPDATES
+		// TODO: LINK Logs() TO EMAIL FOR EASIER STATUS UPDATES
 
 		$connected_sites_obj = new ConnectedSites();
 		$connected_sites     = $connected_sites_obj->get_all()->data;
@@ -55,9 +55,9 @@ class Email {
 			$sent = wp_mail( $to, $subject, $message, $headers );
 
 			if ( $sent ) {
-				new Log( 'Finished emailing notified users.' );
+				new Logs( 'Finished emailing notified users.' );
 			} else {
-				new Log( 'Email not sent.', true );
+				new Logs( 'Email not sent.', true );
 			}
 		}
 

@@ -1,8 +1,9 @@
 <?php namespace DataSync;
 
-use DataSync\Controllers\Auth;use DataSync\Controllers\ConnectedSites;
+use DataSync\Controllers\Auth;
+use DataSync\Controllers\ConnectedSites;
 use WP_User_Query;
-use DataSync\Controllers\Log;
+use DataSync\Controllers\Logs;
 
 /**
  *
@@ -192,6 +193,15 @@ function display_awareness_messages() {
 		<span style="color: red">CPT UI needs to be installed or activated on this site.</span>
 		<?php
 	}
+}
+
+function display_debug_checkbox() {
+
+	?>
+
+	<input type="checkbox" value="1" name="debug" <?php checked( '1', get_option( 'debug' ) ); ?>/>
+	<?php
+
 }
 
 function display_post_types_to_accept() {

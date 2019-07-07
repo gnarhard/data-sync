@@ -11,6 +11,7 @@ use DataSync\Controllers\Receiver;
 use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
+use DataSync\Models\Log;
 use DataSync\Models\SyncedPost;
 use DataSync\Models\PostType;
 use DataSync\Models\Taxonomy;
@@ -20,7 +21,7 @@ class Load {
 
 	public function __construct() {
 
-		new Log();
+		new Logs();
 		new Enqueue();
 		new Options();
 		new Widgets();
@@ -31,6 +32,7 @@ class Load {
 
 		if ( get_option( 'source_site' ) ) {
 			new Posts();
+			new Log();
 		} else {
 			$post_type = new PostType();
 			$post_type->create_db_table();

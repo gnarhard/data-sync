@@ -4,7 +4,7 @@
 namespace DataSync\Controllers;
 
 use DataSync\Models\PostType;
-use DataSync\Controllers\Log;
+use DataSync\Controllers\Logs;
 
 class PostTypes {
 
@@ -38,7 +38,7 @@ class PostTypes {
 				$data->id = $post_type->id;
 				$return   = PostType::update( $data );
 				if ( is_wp_error( $return ) ) {
-					new Log( 'ERROR: Post type was not updated.' . '<br>' . $return->get_error_message(), true );
+					new Logs( 'ERROR: Post type was not updated.' . '<br>' . $return->get_error_message(), true );
 				}
 			}
 		} else {

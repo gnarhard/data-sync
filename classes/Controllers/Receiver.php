@@ -53,6 +53,7 @@ class Receiver {
 		$receiver_site_id = (int) $source_data->receiver_site_id;
 		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
+		update_option( 'debug', $source_data->debug );
 
 		$this->response = 'Site: ' . $receiver_site_id;
 
@@ -63,19 +64,19 @@ class Receiver {
 		}
 
 //		echo 'finished syncing post types';
-		new Log( 'Finished syncing post types.' );
+		new Logs( 'Finished syncing post types.' );
 
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
-		new Log( 'Finished syncing custom taxonomies.' );
+		new Logs( 'Finished syncing custom taxonomies.' );
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				new Log( 'ERROR: No posts in data.', true );
+				new Logs( 'ERROR: No posts in data.', true );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
 					$filtered_post = SyncedPosts::filter( $post, $receiver_site_id );
@@ -88,7 +89,7 @@ class Receiver {
 			}
 
 		}
-		new Log( 'Finished syncing posts.' );
+		new Logs( 'Finished syncing posts.' );
 
 	}
 

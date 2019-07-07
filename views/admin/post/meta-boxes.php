@@ -28,12 +28,16 @@ function add_canonical_radio_inputs( $post ) {
 
 function add_excluded_sites_select_field( $post ) {
 	wp_nonce_field( 'data_sync_post_meta_box', 'data_sync_post_meta_box_nonce' );
-	$value = get_post_meta( $post->ID, '_excluded_sites' )[0];
+	$value = get_post_meta( $post->ID, '_excluded_sites' );
+
+	if ( count( $value ) ) {
+		$value = $value[0];
+	}
 
 	$connected_sites_obj = new ConnectedSites();
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	?>
-	<select name="excluded_sites[]" multiple id="excluded_sites" style="width: 100%; min-width: 400px; min-height: 200px;">
+	<select name="excluded_sites[]" multiple id="excluded_sites" style="width: 100%; min-height: 200px;">
 		<option value="0" <?php selected( in_array( 0, $value ) ); ?>>None</option>
 		<?php
 		if ( is_array( $connected_sites ) ) {

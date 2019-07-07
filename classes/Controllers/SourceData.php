@@ -8,7 +8,7 @@ use DataSync\Controllers\ConnectedSites;
 use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
-use DataSync\Controllers\Log;
+use DataSync\Controllers\Logs;
 use DataSync\Controllers\Email;
 use stdClass;
 use DOMDocument;
@@ -34,14 +34,14 @@ class SourceData {
 
 	public function push() {
 
-		new Log( 'STARTING NEW PUSH<hr>' );
+		new Logs( 'STARTING NEW PUSH<hr>' );
 
 		$source_data     = $this->consolidate();
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
 
-			$source_data->debug = true;
+			$source_data->debug = get_option( 'debug' );
 
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
@@ -50,10 +50,10 @@ class SourceData {
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 
 			if ( $source_data->debug ) {
-				print_r( wp_remote_retrieve_body( $response ) );
+				new Logs( 'Response from ' . $site->url . ': <br>' . wp_remote_retrieve_body( $response ) );
 			}
 
-//			new Log( 'Finished push to ' . $site->url );
+//			new Logs( 'Finished push to ' . $site->url );
 		}
 
 		$email = new Email();
@@ -73,7 +73,7 @@ class SourceData {
 		$source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 
-		new Log( 'Finished data consolidation.' );
+		new Logs( 'Finished data consolidation.' );
 
 		return $this->validate( $source_data );
 
@@ -87,17 +87,17 @@ class SourceData {
 
 				if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-					new Log( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
+					new Logs( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
 				}
 
 				if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
 					unset( $source_data->posts->$post_type[ $key ] );
-					new Log( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
+					new Logs( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
 				}
 			}
 		}
 
-		new Log( 'Finished post validation.' );
+		new Logs( 'Finished post validation.' );
 
 		return $source_data;
 	}

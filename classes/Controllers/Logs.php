@@ -8,10 +8,10 @@ use DataSync\Helpers;
 use stdClass;
 
 /**
- * Class Log
+ * Class Logs
  * @package DataSync
  */
-class Log {
+class Logs {
 
 	public $log_entry;
 	public $error;
@@ -38,7 +38,7 @@ class Log {
 
 	public function create_log_entry( $error ) {
 
-		$this->log_entry = current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url() . '<br>';
+		$this->log_entry = '';
 
 		if ( $error ) {
 			$this->log_entry .= '<span style="color:red;">';
@@ -48,7 +48,13 @@ class Log {
 
 		$this->log_entry .= $this->error;
 
-		$this->log_entry .= '</span>' . '<br><br>' . "\n";
+		$this->log_entry .= '</span>';
+		$this->log_entry .= ' ';
+//		$this->log_entry .= '<br>';
+		$this->log_entry .= current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url();
+		$this->log_entry .= '<br><br>';
+		$this->log_entry .= "\n";
+
 //		echo $this->log_entry;
 	}
 
@@ -95,16 +101,17 @@ class Log {
 	 */
 	public static function get_log() {
 		$file             = file_get_contents( DATA_SYNC_PATH . 'error.log' );
-//		$exploded_file    = explode( "\n", $file );
-//		$length_to_return = 5000;
-//		$file_to_return   = '';
-//
-//		for ( $i = 0; $i < $length_to_return; $i ++ ) {
-//			$file_to_return .= $file[ $i ];
-//		}
+		$exploded_file    = explode( "<br><br>", $file );
+		print_r($exploded_file);
+		$length_to_return = 50;
+		$file_to_return   = '';
 
-		return $file;
-//		return $file_to_return;
+		for ( $i = 0; $i < $length_to_return; $i ++ ) {
+			$file_to_return .= $exploded_file[ $i ];
+		}
+
+//		return $file;
+		return $file_to_return;
 	}
 
 	public function register_routes() {

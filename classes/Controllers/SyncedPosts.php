@@ -17,67 +17,6 @@ class SyncedPosts {
 		add_action( 'delete_post', [ $this, 'delete' ], 10 );
 	}
 
-	public function register_routes() {
-
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/sync_post/',
-			array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'save_to_sync_table' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-				),
-			)
-		);
-
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/synced_posts/',
-			array(
-				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get' ),
-				),
-			)
-		);
-
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
-			array(
-				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get' ),
-					'args'     => array(
-						'source_post_id'   => array(
-							'description' => 'Source Post ID',
-							'type'        => 'int',
-						),
-						'receiver_site_id' => array(
-							'description' => 'Receiver Site ID',
-							'type'        => 'int',
-						),
-					),
-				),
-				array(
-					'methods'  => WP_REST_Server::DELETABLE,
-					'callback' => array( $this, 'delete_from_sync_table' ),
-					'args'     => array(
-						'source_post_id'   => array(
-							'description' => 'Source Post ID',
-							'type'        => 'int',
-						),
-						'receiver_site_id' => array(
-							'description' => 'Receiver Site ID',
-							'type'        => 'int',
-						),
-					),
-				)
-			)
-		);
-	}
-
 	public static function filter( object $post ) {
 
 		$post->synced   = self::is_synced( $post );
@@ -107,7 +46,7 @@ class SyncedPosts {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			new Log( 'ERROR: SyncedPosts: ' . $response->get_error_message(), true );
+			new Logs( 'ERROR: SyncedPosts: ' . $response->get_error_message(), true );
 		} else {
 			$body = wp_remote_retrieve_body( $response );
 			$data = json_decode( $body )[0];
@@ -132,6 +71,13 @@ class SyncedPosts {
 
 		return $response;
 
+	}
+
+	public function get_all() {
+		$response = new WP_REST_Response( SyncedPost::get_all() );
+		$response->set_status( 201 );
+
+		return $response;
 	}
 
 	public static function save( int $receiver_post_id, object $source_post ) {
@@ -183,7 +129,7 @@ class SyncedPosts {
 //			$response = wp_remote_get( $url );
 //
 //			if ( is_wp_error( $response ) ) {
-//			new Log( 'SyncedPosts: ' . $response->get_error_message() );
+//			new Logs( 'SyncedPosts: ' . $response->get_error_message() );
 //			} else {
 //				$body = wp_remote_retrieve_body( $response );
 //				$data = json_decode( $body )[0];
@@ -203,6 +149,79 @@ class SyncedPosts {
 			)
 		);
 		// TODO: delete synced_post on source
+	}
+
+
+	public function register_routes() {
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/sync_post/',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'save_to_sync_table' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/all',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_all' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get' ),
+					'args'     => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				),
+				array(
+					'methods'  => WP_REST_Server::DELETABLE,
+					'callback' => array( $this, 'delete_from_sync_table' ),
+					'args'     => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				)
+			)
+		);
 	}
 
 }
