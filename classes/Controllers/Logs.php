@@ -20,7 +20,7 @@ class Logs {
 	public $error;
 
 	public function __construct( $message = false, $error = false ) {
-// TODO: LOG TO DB INSTEAD AND PULL RESULTS SORTED BY TIMESTAMP
+
 		if ( false === $message ) {
 			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
@@ -43,8 +43,8 @@ class Logs {
 	public function create_log_entry( $error ) {
 
 		$this->log_entry = '';
-		$this->log_entry .= current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url();
-		$this->log_entry .= '<br>';
+//		$this->log_entry .= current_time( 'g:i a F j, Y' ) . ' from ' . get_site_url();
+//		$this->log_entry .= '<br>';
 
 		if ( $error ) {
 			$this->log_entry .= '<span style="color:red;">';
@@ -89,8 +89,8 @@ class Logs {
 		$data             = new stdClass();
 		$data->log_entry  = $this->log_entry;
 		$data->url_source = $this->url_source;
-//		print_r($data);
-//		Log::create( $data );
+		print_r($data);
+		Log::create( $data );
 
 //
 //		$file_text = $this->log_entry . self::get_log();
@@ -108,7 +108,7 @@ class Logs {
 	 */
 	public static function get_log() {
 
-		return Log::get_all_and_sort( [ 'datetime' => 'ASC' ] );
+		return Log::get_all_and_sort( [ 'datetime' => 'DESC' ] );
 
 
 

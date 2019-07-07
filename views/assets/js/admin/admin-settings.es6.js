@@ -30,23 +30,9 @@ jQuery( function ( $ ) {
     });
 
     if ( document.getElementById( 'error_log' ) ) {
-        // document.getElementById( 'refresh_error_log' ).onclick = function ( e ) {
-        //     e.preventDefault();
-        //     AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
-        //         if ( document.getElementById( 'error_log' ) ) {
-        //             document.getElementById( 'error_log' ).innerHTML = result;
-        //         }
-        //     });
-        // }
-
         setInterval( function() {
             AJAX.get(DataSync.api.url + '/log' ).then( function( result ) {
-
-                // DON'T UPDATE IF YOU DON'T HAVE TO.
-                if ( result !== document.getElementById( 'error_log' ).innerHTML ) {
-                    document.getElementById( 'error_log' ).innerHTML = result;
-                }
-
+                document.getElementById( 'error_log' ).innerHTML = result;
             });
         }, 2000 );
 

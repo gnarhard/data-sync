@@ -42,7 +42,7 @@ class Log {
 
 		$args    = array(
 			'log_entry'  => $data->log_entry,
-			'url_source' => Helpers::format_url( $data->url ),
+			'url_source' => Helpers::format_url( $data->url_source ),
 			'datetime'   => current_time( 'mysql' ),
 		);
 		$sprintf = array(
@@ -62,7 +62,7 @@ class Log {
 		$args = array(
 			'id'         => $data->id,
 			'log_entry'  => $data->log_entry,
-			'url_source' => Helpers::format_url( $data->url ),
+			'url_source' => Helpers::format_url( $data->url_source ),
 			'datetime'   => current_time( 'mysql' ),
 		);
 

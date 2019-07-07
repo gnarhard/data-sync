@@ -34,15 +34,19 @@ class SourceData {
 
 	public function push() {
 
-		new Logs( 'STARTING NEW PUSH<hr>' );
+//		\curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+//		\curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+		new Logs( 'STARTING NEW PUSH' );
 
 		$source_data     = $this->consolidate();
 		$connected_sites = $source_data->connected_sites;
 
 		foreach ( $connected_sites as $site ) {
+echo 'site: '.$site->id;
+
 
 			$source_data->debug = get_option( 'debug' );
-
 			$source_data->receiver_site_id = (int) $site->id;
 			$auth                          = new Auth();
 			$json                          = $auth->prepare( $source_data, $site->secret_key );
@@ -51,7 +55,7 @@ class SourceData {
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
-				new Logs( 'ERROR: Couldn\'t send data to receiver: ' . $site->url . '. ' . $response->get_error_message(), true );
+				new Logs( 'Couldn\'t send data to ' . $site->url . '. ' . $response->get_error_message(), true );
 			} else {
 				print_r( $response['body']);
 			}
