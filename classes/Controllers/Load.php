@@ -11,6 +11,7 @@ use DataSync\Controllers\Receiver;
 use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\Posts;
 use DataSync\Models\ConnectedSite;
+use DataSync\Controllers\Logs;
 use DataSync\Models\Log;
 use DataSync\Models\SyncedPost;
 use DataSync\Models\PostType;

@@ -61,15 +61,18 @@ class DB {
 		foreach ( $args as $key => $value ) {
 			if ( is_numeric( $value ) ) {
 				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
+				$query .= ' `' . $key . '` = ' . $filtered_value;
 			} else {
 				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
+				$query .= ' `' . $key . '` = \'' . $filtered_value . '\'';
 			}
-			$query .= ' `' . $key . '` = \'' . $filtered_value . '\'';
+
 			if ( $i < $arg_count ) {
 				$query .= ' AND';
 			}
 			$i ++;
 		}
+//		print_r($query);die();
 
 		return $wpdb->get_results( $query );
 

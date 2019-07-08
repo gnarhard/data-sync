@@ -75,6 +75,8 @@ if ( file_exists( DATA_SYNC_PATH . 'vendor/autoload.php' ) ) {
 	require_once DATA_SYNC_PATH . 'vendor/autoload.php';
 }
 
+add_filter( 'https_local_ssl_verify', '__return_true' );
+
 new Load();
 
 register_activation_hook( __FILE__, 'flush_rewrite_rules' );

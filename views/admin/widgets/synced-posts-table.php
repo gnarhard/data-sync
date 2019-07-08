@@ -74,7 +74,7 @@ function display_synced_posts_table() {
 						<td><?php echo $post->ID ?></td>
 						<td><?php echo $post->post_title ?></td>
 						<td><?php echo ucfirst( $post->post_type ); ?></td>
-						<td><?php echo $synced ?></td>
+						<td class="wp_data_synced_post_status_synced_time"><?php echo $synced ?></td>
 						<td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
 					</tr>
 					<?php

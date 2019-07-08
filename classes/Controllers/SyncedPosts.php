@@ -34,6 +34,7 @@ class SyncedPosts {
 
 	public static function is_synced( object $post ) {
 		$data = self::get_synced_post_data( $post );
+
 		return isset( $data->id );
 	}
 
@@ -117,13 +118,56 @@ class SyncedPosts {
 
 	}
 
-	public function delete( $pid ) {
+	public function delete( $source_post_id ) {
 
 		if ( get_option( 'source_site' ) ) {
-			// todo: delete all receiver site post data with this command
+
+			$source_data                 = new stdClass();
+			$source_data->source_post_id = $source_post_id;
+			$connected_sites             = (array) ConnectedSites::get_all()->get_data();
+
+			$post = get_post( $source_post_id );
+
+			foreach ( $connected_sites as $site ) {
+
+				new Logs( 'STARTING BULK DELETE FOR ' . $site->url );
+
+				$args        = array(
+					'receiver_site_id' => (int) $site->id,
+					'source_post_id'   => $source_post_id,
+				);
+				$synced_post = SyncedPost::get_where( $args );
+
+				// WordPress TRIES TO DELETE ALL DATA ASSOCIATED WITH THE POST ID, INCLUDING REVISIONS.
+				// WE DON'T SYNC REVISIONS SO WE CAN SKIP IF IT ISN'T IN THE SYNCED POST TABLE.
+				if ( isset( $synced_post ) ) {
+					$synced_post = $synced_post[0];
+
+					$source_data->receiver_post_id = $synced_post->receiver_post_id;
+					$source_data->debug            = get_option( 'debug' );
+					$source_data->receiver_site_id = (int) $site->id;
+					$auth                          = new Auth();
+					$json                          = $auth->prepare( $source_data, $site->secret_key );
+					$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete/';
+					$response                      = wp_remote_post( $url, [ 'body' => $json ] );
+
+					if ( is_wp_error( $response ) ) {
+						echo $response->get_error_message();
+						new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+					} else {
+						print_r( $response['body'] );
+
+						SyncedPost::delete( $synced_post->id );
+					}
+
+					new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . $site->url );
+
+				}
+			}
+
 		} else {
 
-			$url = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $pid;
+			$url = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $source_post_id;
 			$url = Helpers::format_url( $url );
 
 //			$response = wp_remote_get( $url );
@@ -141,14 +185,11 @@ class SyncedPosts {
 
 	}
 
-	public function delete_from_sync_table() {
-		$synced_post = SyncedPost::get_where(
-			array(
-//				'receiver_post_id' => $pid,
-				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-			)
-		);
-		// TODO: delete synced_post on source
+	public function delete_receiver_post() {
+		$data = (object) json_decode( file_get_contents( 'php://input' ) );
+		new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+
+		return wp_delete_post( $data->receiver_post_id );
 	}
 
 
@@ -190,6 +231,19 @@ class SyncedPosts {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/delete/',
+			array(
+				array(
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'delete_receiver_post' ),
+					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+				),
+			)
+		);
+
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
 			'/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
 			array(
 				array(
@@ -206,20 +260,6 @@ class SyncedPosts {
 						),
 					),
 				),
-				array(
-					'methods'  => WP_REST_Server::DELETABLE,
-					'callback' => array( $this, 'delete_from_sync_table' ),
-					'args'     => array(
-						'source_post_id'   => array(
-							'description' => 'Source Post ID',
-							'type'        => 'int',
-						),
-						'receiver_site_id' => array(
-							'description' => 'Receiver Site ID',
-							'type'        => 'int',
-						),
-					),
-				)
 			)
 		);
 	}

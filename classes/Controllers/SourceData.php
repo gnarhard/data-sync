@@ -34,9 +34,6 @@ class SourceData {
 
 	public function push() {
 
-//		\curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-//		\curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
 		new Logs( 'STARTING NEW PUSH' );
 
 		$source_data     = $this->consolidate();
@@ -58,7 +55,7 @@ class SourceData {
 				print_r( $response['body'] );
 			}
 
-//			new Logs( 'Finished push to ' . $site->url );
+			new Logs( 'Finished push to ' . $site->url );
 		}
 
 		$email = new Email();

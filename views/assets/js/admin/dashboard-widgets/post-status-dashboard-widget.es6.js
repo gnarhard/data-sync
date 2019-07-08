@@ -40,11 +40,15 @@ document.addEventListener( "DOMContentLoaded", function () {
 
                   if ( -1 !== connected_site_ids.indexOf( receiver_site_id ) ) {
                     receivers_to_check--;
-
+// TODO: DOESN'T WORK YET
                     document.getElementById('synced_post-' + synced_post_id ).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
 
+                    document.getElementById('synced_post-' + synced_post_id ).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = synced_post.date_modified;
+
+// TODO: UPDATE SYNCED TEXT IN TABLE
                     if ( 0 === receivers_to_check ) {
                       document.getElementById('synced_post-' + synced_post_id ).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+                      document.getElementById('synced_post-' + synced_post_id ).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = synced_post.date_modified;
 
                       syncs_to_complete--;
                       if ( 0 === syncs_to_complete ) {

@@ -164,6 +164,13 @@ function display_notified_users() {
 	);  // query to get admin users
 
 	$users = $users_query->get_results();
+
+	$notified_users = get_option( 'notified_users' );
+
+	if ( '' === $notified_users ) {
+		$notified_users = array();
+	}
+
 	?>
   <select name="notified_users[]" multiple>
 	  <?php
@@ -171,7 +178,7 @@ function display_notified_users() {
 	  foreach ( $users as $user ) {
 		  ?>
         <option
-            value="<?php echo $user->ID; ?>" <?php selected( in_array( $user->ID, get_option( 'notified_users' ) ) ); ?>><?php echo $user->user_nicename; ?></option>
+            value="<?php echo $user->ID; ?>" <?php selected( in_array( $user->ID, $notified_users ) ); ?>><?php echo $user->user_nicename; ?></option>
 		  <?php
 	  }
 	  ?>
