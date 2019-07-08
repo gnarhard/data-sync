@@ -203,12 +203,15 @@ function display_awareness_messages() {
 }
 
 function display_debug_checkbox() {
-
 	?>
-
 	<input type="checkbox" value="1" name="debug" <?php checked( '1', get_option( 'debug' ) ); ?>/>
 	<?php
+}
 
+function display_overwrite_yoast_checkbox() {
+	?>
+	<input type="checkbox" value="1" name="overwrite_yoast" <?php checked( '1', get_option( 'overwrite_yoast' ) ); ?>/>
+	<?php
 }
 
 function display_post_types_to_accept() {

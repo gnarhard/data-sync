@@ -39,15 +39,15 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
+		// TODO: FIGURE OUT WHAT IS CAUSING THE CURL ERROR 28
 		$receiver_options = (object) Options::receiver()->get_data();
-		$receiver_site_id = (int) $source_data->receiver_site_id;
 
-		update_option( 'data_sync_receiver_site_id', $receiver_site_id );
+		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->debug );
 
 		PostTypes::process( $source_data->options->push_enabled_post_types );
-		if ( $source_data->options->enable_new_cpts ) {
+		if ( true === $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
 		new Logs( 'Finished syncing post types.' );
@@ -65,7 +65,7 @@ class Receiver {
 				new Logs( 'No posts in data.', true );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
-					$filtered_post = SyncedPosts::filter( $post );
+					$filtered_post = SyncedPosts::filter( $post, $source_data->options );
 
 					if ( false !== $filtered_post ) {
 						$receiver_post_id = Posts::save( $filtered_post );
@@ -75,7 +75,6 @@ class Receiver {
 					}
 				}
 			}
-
 		}
 
 	}

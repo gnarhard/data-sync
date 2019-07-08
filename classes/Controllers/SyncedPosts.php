@@ -17,7 +17,7 @@ class SyncedPosts {
 		add_action( 'delete_post', [ $this, 'delete' ], 10 );
 	}
 
-	public static function filter( object $post ) {
+	public static function filter( object $post, $source_options ) {
 
 		$post->synced   = self::is_synced( $post );
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
@@ -26,6 +26,32 @@ class SyncedPosts {
 			if ( (int) $excluded_site_id === (int) get_option( 'data_sync_receiver_site_id' ) ) {
 				return false;
 			} else {
+
+				if ( true !== $source_options->overwrite_yoast ) {
+
+					// TODO: still doesn't work yet.
+
+					if ( self::is_synced( $post ) ) {
+						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
+						// AND THE POST IS ALREADY SYNCED,
+						// THEN DELETE ALL YOAST POST META DATA.
+						$post_meta = (array) $post->post_meta;
+
+						foreach ( $post_meta as $key => $value ) {
+							if ( strpos( $key, 'yoast' ) ) {
+								unset( $post_meta[ $key ] );
+							}
+						}
+
+						$post->post_meta = (object) $post_meta;
+
+					}
+
+					// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
+					// AND THE POST ISN'T SYNCED,
+					// THEN INCLUDE ALL YOAST POST META DATA.
+				}
+
 				return $post;
 			}
 		}

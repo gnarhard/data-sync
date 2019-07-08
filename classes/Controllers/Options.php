@@ -95,6 +95,7 @@ class Options {
 		}
 
 		$options->enable_new_cpts = get_option( 'enable_new_cpts' );
+		$options->overwrite_yoast = get_option( 'overwrite_yoast' );
 
 		$response = new WP_REST_Response( $options );
 		$response->set_status( 201 );
@@ -245,6 +246,9 @@ class Options {
 
 			add_settings_field( 'enable_new_cpts', 'Automatically Enable New Custom Post Types On Receiver', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'enable_new_cpts' );
+
+			add_settings_field( 'overwrite_yoast', 'Overwrite Receiver Yoast Settings', $this->view_namespace . '\display_overwrite_yoast_checkbox', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'overwrite_yoast' );
 
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'push_enabled_post_types' );
