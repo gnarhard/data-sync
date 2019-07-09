@@ -38,6 +38,9 @@ class Receiver {
 //		$email = new Email();
 //		unset( $email );
 
+		$log = new Logs( 'Finished push to ' . get_site_url() );
+		unset( $log );
+
 		wp_send_json_success();
 	}
 

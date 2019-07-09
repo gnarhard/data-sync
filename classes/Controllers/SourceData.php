@@ -55,9 +55,6 @@ class SourceData {
 			} else {
 				print_r(  wp_remote_retrieve_body( $response ) );
 			}
-
-			$log = new Logs( 'Finished push to ' . $site->url );
-			unset( $log );
 		}
 
 	}
@@ -78,8 +75,8 @@ class SourceData {
 		$source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
 
-		$log = new Logs( 'Finished data consolidation.' );
-		unset( $log );
+//		$log = new Logs( 'Finished data consolidation.' );
+//		unset( $log );
 		return $this->validate( $source_data );
 
 	}
@@ -104,8 +101,8 @@ class SourceData {
 			}
 		}
 
-		$log = new Logs( 'Finished post validation.' );
-		unset( $log );
+//		$log = new Logs( 'Finished post validation.' );
+//		unset( $log );
 
 		return $source_data;
 	}
