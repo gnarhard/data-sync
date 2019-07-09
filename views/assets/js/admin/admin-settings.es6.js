@@ -38,16 +38,14 @@ jQuery(function ($) {
 		}, timeout);
 		
 		$(window).on('blur focus', function (e) {
+			
 			var prevType = $(this).data('prevType');
+			
+			clearInterval(log_refresher);
 			
 			if (prevType != e.type) {   //  reduce double fire issues
 				// console.log( e.type );
-				if ('blur' === e.type) {
-					clearInterval(log_refresher);
-				} else if ('focus' === e.type) {
-					if (typeof log_refresher !== 'undefined') {
-						clearInterval(log_refresher);
-					}
+				if ('focus' === e.type) {
 					let log_refresher = setInterval(function () {
 						refresh_log();
 					}, timeout);
@@ -59,6 +57,7 @@ jQuery(function ($) {
 
 
 function refresh_log () {
+	// console.log('refreshing');
 	AJAX.get(DataSync.api.url + '/log/get').then(function (result) {
 		if (JSON.parse(result.html) !== document.getElementById('error_log').innerHTML) {
 			document.getElementById('error_log').innerHTML = JSON.parse(result.html)
