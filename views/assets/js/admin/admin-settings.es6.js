@@ -30,34 +30,14 @@ jQuery(function ($) {
 	})
 	
 	if (document.getElementById('error_log')) {
-		
-		let timeout = 3000;
-		
-		let log_refresher = setInterval(function () {
+		document.getElementById( 'refresh_error_log' ).onclick = function ( e ) {
 			refresh_log();
-		}, timeout);
-		
-		$(window).on('blur focus', function (e) {
-			
-			var prevType = $(this).data('prevType');
-			
-			clearInterval(log_refresher);
-			
-			if (prevType != e.type) {   //  reduce double fire issues
-				// console.log( e.type );
-				if ('focus' === e.type) {
-					let log_refresher = setInterval(function () {
-						refresh_log();
-					}, timeout);
-				}
-			}
-		});
+		}
 	}
 } );
 
 
 function refresh_log () {
-	// console.log('refreshing');
 	AJAX.get(DataSync.api.url + '/log/get').then(function (result) {
 		if (JSON.parse(result.html) !== document.getElementById('error_log').innerHTML) {
 			document.getElementById('error_log').innerHTML = JSON.parse(result.html)

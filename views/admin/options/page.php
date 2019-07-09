@@ -19,6 +19,7 @@ function data_sync_options_page() {
 				if ( get_option ( 'debug' ) ) {
 					?>
 					<h2>Log</h2>
+					<span id="refresh_error_log">Refresh log</span>
 					<div id="error_log">
 						<?php include_once 'log.php'; ?>
 						<?php echo display_log(); ?>
