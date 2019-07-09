@@ -16,13 +16,14 @@ use DataSync\Models\Log;
 use DataSync\Models\SyncedPost;
 use DataSync\Models\PostType;
 use DataSync\Models\Taxonomy;
+use DataSync\Controllers\TemplateSync;
 
 
 class Load {
 
 	public function __construct() {
 
-		new Logs();
+		$log = new Logs();
 		new Enqueue();
 		new Options();
 		new Widgets();
@@ -30,6 +31,7 @@ class Load {
 		new SourceData();
 		new Receiver();
 		new SyncedPosts();
+		new TemplateSync();
 
 		if ( get_option( 'source_site' ) ) {
 			new Posts();
@@ -42,7 +44,6 @@ class Load {
 			$taxonomy = new Taxonomy();
 			$taxonomy->create_db_table();
 			new Taxonomies();
-
 		}
 
 		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically

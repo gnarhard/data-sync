@@ -61,10 +61,10 @@ class DB {
 		foreach ( $args as $key => $value ) {
 			if ( is_numeric( $value ) ) {
 				$filtered_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT );
-				$query .= ' `' . $key . '` = ' . $filtered_value;
+				$query          .= ' `' . $key . '` = ' . $filtered_value;
 			} else {
 				$filtered_value = filter_var( $value, FILTER_SANITIZE_STRING );
-				$query .= ' `' . $key . '` = \'' . $filtered_value . '\'';
+				$query          .= ' `' . $key . '` = \'' . $filtered_value . '\'';
 			}
 
 			if ( $i < $arg_count ) {
@@ -72,6 +72,7 @@ class DB {
 			}
 			$i ++;
 		}
+
 //		print_r($query);die();
 
 		return $wpdb->get_results( $query );
@@ -94,12 +95,13 @@ class DB {
 		);
 
 		if ( false === $created ) {
-			$error_msg = 'Database failed to create: ' . $wpdb->last_error;
-			$error_msg .= '<br>' . $wpdb->last_query;
-			new Logs( 'ERROR: ' . $error_msg, true );
+			$error_msg = 'DB insert failed: ' . $wpdb->last_error;
+			$log       = new Logs( $error_msg, true );
+			unset( $log );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
+
 			return $created;
 		}
 	}
@@ -117,8 +119,8 @@ class DB {
 
 		if ( false === $updated ) {
 			$error_msg = 'Database failed to update: ' . $wpdb->last_error;
-			$error_msg .= '<br>' . $wpdb->last_query;
-			new Logs( 'ERROR: ' . $error_msg, true );
+			$log       = new Logs( $error_msg, true );
+			unset( $log );
 
 			return new WP_Error( 503, __( $error_msg, 'data-sync' ) );
 		} else {
@@ -151,6 +153,7 @@ class DB {
 		global $wpdb;
 
 		$result = $wpdb->get_results( $sql );
+
 		return $result;
 	}
 

@@ -4,11 +4,11 @@
 namespace DataSync\Controllers;
 
 
+use DataSync\Controllers\Email;
 use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_REST_Response;
-use DataSync\Controllers\Email;
 
 class Receiver {
 
@@ -35,10 +35,13 @@ class Receiver {
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 		$this->parse( $source_data );
+//		$email = new Email();
+//		unset( $email );
+
+		wp_send_json_success();
 	}
 
 	private function parse( object $source_data ) {
-
 		// TODO: FIGURE OUT WHAT IS CAUSING THE CURL ERROR 28
 		$receiver_options = (object) Options::receiver()->get_data();
 
@@ -50,28 +53,32 @@ class Receiver {
 		if ( true === $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
-		new Logs( 'Finished syncing post types.' );
+		$log = new Logs( 'Finished syncing post types.' );
+		unset( $log );
 
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
-		new Logs( 'Finished syncing custom taxonomies.' );
+
+		$log = new Logs( 'Finished syncing custom taxonomies.' );
+		unset( $log );
 
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				new Logs( 'No posts in data.', true );
+				$log = new Logs( 'No posts in data.', true );
 			} else {
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
-					$filtered_post = SyncedPosts::filter( $post, $source_data->options );
+					$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
 
 					if ( false !== $filtered_post ) {
 						$receiver_post_id = Posts::save( $filtered_post );
 						SyncedPosts::save( $receiver_post_id, $filtered_post );
 
-						new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+						unset( $log );
 					}
 				}
 			}

@@ -17,9 +17,9 @@ class SyncedPosts {
 		add_action( 'delete_post', [ $this, 'delete' ], 10 );
 	}
 
-	public static function filter( object $post, $source_options ) {
+	public static function filter( object $post, $source_options, $synced_posts ) {
 
-		$post->synced   = self::is_synced( $post );
+		$post->synced   = self::is_synced( $post, $synced_posts );
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
@@ -31,7 +31,7 @@ class SyncedPosts {
 
 					// TODO: still doesn't work yet.
 
-					if ( self::is_synced( $post ) ) {
+					if ( $post->synced ) {
 						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
 						// AND THE POST IS ALREADY SYNCED,
 						// THEN DELETE ALL YOAST POST META DATA.
@@ -58,10 +58,19 @@ class SyncedPosts {
 	}
 
 
-	public static function is_synced( object $post ) {
-		$data = self::get_synced_post_data( $post );
+	public static function is_synced( object $post, array $synced_posts ) {
 
-		return isset( $data->id );
+		foreach ($synced_posts as $synced_post ) {
+			if ( $post->ID === $synced_post->source_post_id ) {
+				return true;
+			}
+		}
+
+		return false;
+
+//		$data = self::get_synced_post_data( $post );
+//
+//		return isset( $data->id );
 	}
 
 
@@ -73,13 +82,12 @@ class SyncedPosts {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			new Logs( 'ERROR: SyncedPosts: ' . $response->get_error_message(), true );
-		} else {
-			$body = wp_remote_retrieve_body( $response );
-			$data = json_decode( $body )[0];
-
-			return $data;
+			$log = new Logs( 'SyncedPosts: ' . $response->get_error_message(), true );
+			unset( $log );
+			return false;
 		}
+
+		return json_decode( wp_remote_retrieve_body( $response ) )->data;
 
 	}
 
@@ -87,17 +95,14 @@ class SyncedPosts {
 	public function get( WP_REST_Request $request ) {
 		$data = (object) $request->get_url_params();
 
-		$result   = SyncedPost::get_where(
+		$result = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $data->receiver_site_id, FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
-		$response = new WP_REST_Response( $result );
-		$response->set_status( 201 );
 
-		return $response;
-
+		wp_send_json_success( $result );
 	}
 
 	public function get_all() {
@@ -120,8 +125,14 @@ class SyncedPosts {
 		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
 		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
-		$body     = wp_remote_retrieve_body( $response );
-//		print_r( $body );
+
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Error in SyncedPosts->save() received from ' . get_option( 'data_sync_source_site_url' ) . '. ' . $response->get_error_message(), true );
+			unset( $log );
+		} else {
+			print_r( wp_remote_retrieve_body( $response ) );
+		}
 	}
 
 	public function save_to_sync_table( WP_REST_Request $request ) {
@@ -142,6 +153,11 @@ class SyncedPosts {
 			SyncedPost::create( $data );
 		}
 
+		$response = new WP_REST_Response( $data );
+		$response->set_status( 201 );
+
+		return $response;
+
 	}
 
 	public function delete( $post_id ) {
@@ -156,7 +172,8 @@ class SyncedPosts {
 
 			foreach ( $connected_sites as $site ) {
 
-				new Logs( 'STARTING BULK DELETE FOR ' . $site->url );
+				$log = new Logs( 'STARTING BULK DELETE FOR ' . $site->url );
+				unset( $log );
 
 				$args        = array(
 					'receiver_site_id' => (int) $site->id,
@@ -179,14 +196,16 @@ class SyncedPosts {
 
 					if ( is_wp_error( $response ) ) {
 						echo $response->get_error_message();
-						new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+						$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+						unset( $log );
 					} else {
 						print_r( $response['body'] );
 
 						SyncedPost::delete( $synced_post->id );
 					}
 
-					new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . $site->url );
+					$log = new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . $site->url );
+					unset( $log );
 
 				}
 			}
@@ -206,10 +225,12 @@ class SyncedPosts {
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
-				new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+				$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+				unset( $log );
 			} else {
 				print_r( $response['body'] );
-				new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url() );
+				$log = new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url() );
+				unset( $log );
 			}
 		}
 
@@ -217,14 +238,16 @@ class SyncedPosts {
 
 	public function delete_post() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		$log = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		unset( $log );
 
 		return wp_delete_post( $data->receiver_post_id );
 	}
 
 	public function delete_synced_post() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		$log = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		unset( $log );
 
 		$args        = array(
 			'receiver_site_id' => (int) $data->receiver_site_id,

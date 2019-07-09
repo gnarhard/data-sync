@@ -7,7 +7,7 @@ use DataSync\Models\Log;
 use WP_REST_Server;
 use DataSync\Helpers;
 use stdClass;
-use DataSync\display_log as display_log;
+use WP_REST_Response;
 
 /**
  * Class Logs
@@ -18,14 +18,17 @@ class Logs {
 	public $log_entry;
 	public $url_source;
 	public $error;
+	public $log;
 
 	public function __construct( $message = false, $error = false ) {
 
 		if ( false === $message ) {
 			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
-			$this->url_source = get_site_url();
-			$this->error      = $message;
+
+			$this->log             = new stdClass();
+			$this->log->url_source = get_site_url();
+			$this->error           = $message;
 			$this->create_log_entry( $error );
 
 			if ( '1' === get_option( 'source_site' ) ) {
@@ -42,51 +45,50 @@ class Logs {
 
 	public function create_log_entry( $error ) {
 
-		$this->log_entry = '';
+		$this->log->log_entry = '';
 
 		if ( $error ) {
-			$this->log_entry .= '<span style="color:red;">';
+			$this->log->log_entry .= '<span style="color:red;">';
 		} else {
-			$this->log_entry .= '<span style="color:green;">';
+			$this->log->log_entry .= '<span style="color:green;">';
 		}
 
-		$this->log_entry .= $this->error;
+		$this->log->log_entry .= $this->error;
 
-		$this->log_entry .= '</span>';
-
-//		echo $this->log_entry;
+		$this->log->log_entry .= '</span>';
 	}
 
 	public function send_to_source() {
 		// RECEIVER SIDE.
-		$data             = new stdClass();
-		$data->log_entry  = $this->log_entry;
-		$data->url_source = $this->url_source;
 		$auth             = new Auth();
-		$json             = $auth->prepare( $data, get_option( 'secret_key' ) );
+		$json             = $auth->prepare( $this->log, get_option( 'secret_key' ) );
 
-//		print_r($json);die();
 		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log' );
-		$response = wp_remote_post( $url, [ 'body' => $json ] );
-//		echo 'send to source';
-		$body = wp_remote_retrieve_body( $response );
-//		var_dump ((object) json_decode( file_get_contents( 'php://input' ) ) );die();
+		$response = wp_remote_post( $url, [ 'body' => $json ] ); // TODO: THIS IS THE REASON FOR CURL ERROR 28 (and anywhere else where we're sending something back to the source) because it is conflicting with the ongoing source curl? Even if I set the response from the server to be immediate, it still gives this error. . .
+
+
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Error in Logs()->send_to_source received from ' . get_option( 'data_sync_source_site_url' ) . '. ' . $response->get_error_message(), true );
+			unset( $log );
+		} else {
+			print_r( wp_remote_retrieve_body( $response ) );
+		}
+
 	}
 
 	public function save() {
-		$data             = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->log_entry  = $data->log_entry;
-		$this->url_source = $data->url_source;
-
-		print_r( $data );
+		$data                  = (object) json_decode( file_get_contents( 'php://input' ) );
+		$this->log             = new stdClass();
+		$this->log->log_entry  = $data->log_entry;
+		$this->log->url_source = $data->url_source;
 		$this->log();
+
+		wp_send_json_success();
 	}
 
 	public function log() {
-		$data             = new stdClass();
-		$data->log_entry  = $this->log_entry;
-		$data->url_source = $this->url_source;
-		Log::create( $data );
+		Log::create( $this->log );
 	}
 
 	/**
@@ -117,6 +119,13 @@ class Logs {
 //					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
 					// TODO: GET AUTH TO WORK!
 				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/log/get',
+			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'refresh_log' ),

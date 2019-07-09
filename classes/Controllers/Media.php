@@ -3,6 +3,7 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Controllers\File;
 
 class Media {
 
@@ -28,37 +29,15 @@ class Media {
 	public function insert_into_wp( int $receiver_post_id, string $source_url, object $post ) {
 
 		$post_array = (array) $post;
+		$receiver_url = $post_array['guid'];
 
-		$result = $this->copy_file( $source_url, $post_array['guid'] );
+		$result = File::copy( $source_url, $receiver_url );
 
 		if ( $result ) {
 			$image['post_parent'] = $receiver_post_id;
 			$image['guid']        = str_replace( $source_url, get_site_url(), $post_array['guid'] );
 			$new_media_id         = wp_insert_post( $post_array );
 		}
-	}
-
-
-	/**
-	 * Transfer Files Server to Server using PHP Copy
-	 *
-	 */
-	public function copy_file( string $source_url, string $remote_file_url ) {
-
-		/* New file name and path for this file */
-		$local_file = str_replace( $source_url, ABSPATH, $remote_file_url );
-
-		/* Copy the file from source url to server */
-		$copy = copy( $remote_file_url, $local_file );
-
-		/* Add notice for success/failure */
-		if ( ! $copy ) {
-			new Logs( 'ERROR: Failed to copy $remote_file_url.', true );
-			return false;
-		}
-
-		return true;
-
 	}
 
 }

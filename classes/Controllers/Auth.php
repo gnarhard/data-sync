@@ -19,25 +19,25 @@ class Auth {
 	private $logins = array();
 
 	public function __construct() {
-		add_action( 'init', 'add_cors_http_header' );
-		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15 );
+//		add_action( 'init', 'add_cors_http_header' );
+//		add_action( 'rest_api_init', [ $this, 'allow_cors_headers_on_endpoints' ], 15 );
 	}
 
-	public function allow_cors_headers_on_endpoints() {
-		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-		add_filter( 'rest_pre_serve_request', function ( $value ) {
-			header( 'Access-Control-Allow-Origin: *' );
-			header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
-			header( 'Access-Control-Allow-Credentials: true' );
-
-			return $value;
-
-		} );
-	}
-
-	public function add_cors_http_header() {
-		header( "Access-Control-Allow-Origin: *" );
-	}
+//	public function allow_cors_headers_on_endpoints() {
+//		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+//		add_filter( 'rest_pre_serve_request', function ( $value ) {
+//			header( 'Access-Control-Allow-Origin: *' );
+//			header( 'Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE' );
+//			header( 'Access-Control-Allow-Credentials: true' );
+//
+//			return $value;
+//
+//		} );
+//	}
+//
+//	public function add_cors_http_header() {
+//		header( "Access-Control-Allow-Origin: *" );
+//	}
 
 	public function verify_user( $result ) {
 		if ( ! empty( $result ) ) {
@@ -57,8 +57,8 @@ class Auth {
 
 			return $connected_site_data->secret_key;
 		} else {
-			new Logs( 'ERROR: $receiver_site_id not set trying to get site secret key.', true );
-
+			$log = new Logs( '$receiver_site_id not set trying to get site secret key.', true );
+			unset( $log );
 			return false;
 		}
 
@@ -102,10 +102,11 @@ class Auth {
 //			}
 //
 //		}
-		$error_msg = 'ERROR: Failed to authorize cross-site connection.';
+		$error_msg = 'Failed to authorize cross-site connection.';
 		$error_msg.= '<br>Data package: ' . wp_json_encode( $data );
 		$error_msg.= '<br>JSON: ' .  file_get_contents( 'php://input' );
-		new Logs( $error_msg, true );
+		$log = new Logs( $error_msg, true );
+		unset( $log );
 
 		return false;
 	}

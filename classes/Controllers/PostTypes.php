@@ -38,7 +38,8 @@ class PostTypes {
 				$data->id = $post_type->id;
 				$return   = PostType::update( $data );
 				if ( is_wp_error( $return ) ) {
-					new Logs( 'ERROR: Post type was not updated.' . '<br>' . $return->get_error_message(), true );
+					$log = new Logs( 'Post type was not updated.' . '<br>' . $return->get_error_message(), true );
+					unset( $log );
 				}
 			}
 		} else {

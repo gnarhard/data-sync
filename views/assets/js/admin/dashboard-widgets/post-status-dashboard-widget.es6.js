@@ -22,7 +22,7 @@ document.addEventListener( "DOMContentLoaded", function () {
       }
 
       let post_status_interval = setInterval( function() {
-        AJAX.get(DataSync.api.url + '/synced_posts/all' ).then( function( result ) {
+        AJAX.get( DataSync.api.url + '/synced_posts/all' ).then( function( result ) {
           result.forEach( function( synced_post ) {
 
             let last_updated_time = new Date( synced_post.date_modified ).getTime();
@@ -64,6 +64,16 @@ document.addEventListener( "DOMContentLoaded", function () {
         });
       }, 5000 );
 
+    }
+  }
+
+
+  if ( document.getElementById( 'template_push' ) ) {
+    document.getElementById('template_push').onclick = function (e) {
+      e.preventDefault();
+      AJAX.post( DataSync.api.url + '/templates/sync' ).then( function( result ) {
+        console.log( result );
+      });
     }
   }
 

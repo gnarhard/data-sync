@@ -157,11 +157,11 @@ class Options {
 		$success = update_option( $key, $data );
 
 		if ( $success ) {
-			return wp_send_json_success();
+			wp_send_json_success();
 		} else {
-			new Logs( 'ERROR: Options not saved.', true );
-
-			return wp_send_json_error();
+			$log = new Logs( 'ERROR: Options not saved.', true );
+			unset( $log );
+			wp_send_json_error();
 		}
 	}
 

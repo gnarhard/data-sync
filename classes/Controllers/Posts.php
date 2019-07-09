@@ -228,7 +228,8 @@ class Posts {
 
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {
 				// Yoast and ACF data will be in here.
-				update_post_meta( $receiver_post_id, $meta_key, $meta_value );
+				$updated = update_post_meta( $receiver_post_id, $meta_key, $meta_value );
+				var_dump($updated);
 			}
 
 			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );
