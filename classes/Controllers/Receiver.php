@@ -51,6 +51,7 @@ class Receiver {
 		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->debug );
+		update_option( 'show_body_responses', $source_data->show_body_responses );
 
 		PostTypes::process( $source_data->options->push_enabled_post_types );
 		if ( true === $source_data->options->enable_new_cpts ) {

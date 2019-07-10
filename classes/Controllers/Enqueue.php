@@ -22,7 +22,7 @@ class Enqueue {
 	 */
 	public function admin_scripts() {
 
-		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', false, 1, true );
+		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true );
 
 		if ( get_option( 'source_site' ) ) {
 
@@ -41,6 +41,7 @@ class Enqueue {
 				)
 			);
 
+			wp_enqueue_script( 'jquery-ui-tabs' );
 			wp_enqueue_script( 'data-sync-admin' );
 		}
 	}
@@ -49,6 +50,8 @@ class Enqueue {
 	 * Enqueues styles
 	 */
 	public function admin_styles() {
+		wp_enqueue_style( 'jquery-ui' );
+
 		wp_register_style( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1 );
 		wp_enqueue_style( 'data-sync-admin' );
 	}

@@ -52,7 +52,11 @@ class SourceData {
 				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				print_r( wp_remote_retrieve_body( $response ) );
+				if ( get_option( 'show_body_responses' ) ) {
+					if ( get_option( 'show_body_responses' ) ) {
+						print_r( wp_remote_retrieve_body( $response ) );
+					}
+				}
 			}
 
 		}
@@ -65,7 +69,7 @@ class SourceData {
 	}
 
 	private function get_receiver_data() {
-		$this->receiver_logs = Logs::retrieve_receiver_logs( $this->source_data->start_time );
+		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
 		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
 	}
 
@@ -80,18 +84,21 @@ class SourceData {
 
 		$options = Options::source()->get_data();
 
-		$this->source_data                    = new stdClass();
-		$this->source_data->debug             = (bool) get_option( 'debug' );
-		$this->source_data->start_time        = (string) current_time( 'mysql' );
-		$this->source_data->start_microtime   = (float) microtime( true );
-		$this->source_data->options           = (array) $options;
-		$this->source_data->acf               = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
-		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
-		$this->source_data->url               = (string) get_site_url();
-		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
-		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
-		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
+		update_option( 'show_body_responses', false );
+
+		$this->source_data                      = new stdClass();
+		$this->source_data->debug               = (bool) get_option( 'debug' );
+		$this->source_data->show_body_responses = get_option( 'show_body_response' );
+		$this->source_data->start_time          = (string) current_time( 'mysql' );
+		$this->source_data->start_microtime     = (float) microtime( true );
+		$this->source_data->options             = (array) $options;
+		$this->source_data->acf                 = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+		$this->source_data->custom_taxonomies   = (array) cptui_get_taxonomy_data();
+		$this->source_data->url                 = (string) get_site_url();
+		$this->source_data->connected_sites     = (array) ConnectedSites::get_all()->get_data();
+		$this->source_data->nonce               = (string) wp_create_nonce( 'data_push' );
+		$this->source_data->posts               = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
+		$this->source_data->synced_posts        = (array) $synced_posts->get_all()->get_data();
 
 	}
 

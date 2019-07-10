@@ -19,15 +19,19 @@ class SyncedPosts {
 
 	public static function filter( object $post, $source_options, $synced_posts ) {
 
-		// TODO: SEND FLAG TO SOURCE IF RECEIVER POST WAS UPDATED MORE RECENTLY THAN THE LAST SOURCE POST WAS UPDATED.
 
-		$post->synced   = self::is_synced( $post, $synced_posts );
+		$post->synced   = (bool) self::is_synced( $post, $synced_posts );
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
 			if ( (int) $excluded_site_id === (int) get_option( 'data_sync_receiver_site_id' ) ) {
 				return false;
 			} else {
+
+
+				// TODO: SEND FLAG TO SOURCE IF RECEIVER POST WAS UPDATED MORE RECENTLY THAN THE LAST SOURCE POST WAS UPDATED.
+				$receiver_post_more_recent = self::check_date_modified();
+
 
 				if ( true !== (bool) $source_options->overwrite_yoast ) {
 
@@ -58,6 +62,13 @@ class SyncedPosts {
 	}
 
 
+	public static function check_date_modified( object $post, array $synced_posts ) {
+
+
+
+	}
+
+
 	public static function is_synced( object $post, array $synced_posts ) {
 
 		if ( self::get_receiver_post_id( $post, $synced_posts ) ) {
@@ -73,14 +84,12 @@ class SyncedPosts {
 
 	public static function retrieve_from_receiver( $data_sync_start_time ) {
 
-		// TODO: ALL ENTRIES AFTER $data_sync_start_time
-
 		$connected_sites = (array) ConnectedSites::get_all()->get_data();
 		$all_data        = array();
 
 		foreach ( $connected_sites as $site ) {
-			$url = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/all' );
-			$args       = array(
+			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/all' );
+			$args     = array(
 				'body' => [ 'datetime' => $data_sync_start_time ],
 			);
 			$response = wp_remote_get( $url, $args );
@@ -90,7 +99,9 @@ class SyncedPosts {
 				$log = new Logs( 'Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				print_r( wp_remote_retrieve_body( $response ) );
+				if ( get_option( 'show_body_responses' ) ) {
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
 			}
 
 			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );
@@ -102,7 +113,8 @@ class SyncedPosts {
 
 	public static function get_receiver_post_id( $post, $synced_posts ) {
 		foreach ( $synced_posts as $synced_post ) {
-			if ( (int) $post->ID === (int) $synced_post->source_post_id ) {
+			// RECEIVER SITE ID AND SOURCE POST ID MUST MATCH TO BE A SUCCESSFUL SYNCED POST.
+			if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) get_option( 'data_sync_receiver_site_id' ) === (int) $synced_post->receiver_site_id ) ) {
 				return $synced_post->receiver_post_id;
 			}
 		}
@@ -180,7 +192,9 @@ class SyncedPosts {
 			$log = new Logs( 'Error in SyncedPosts->save() received from ' . get_option( 'data_sync_source_site_url' ) . '. ' . $response->get_error_message(), true );
 			unset( $log );
 		} else {
-			print_r( wp_remote_retrieve_body( $response ) );
+			if ( get_option( 'show_body_responses' ) ) {
+				print_r( wp_remote_retrieve_body( $response ) );
+			}
 		}
 	}
 

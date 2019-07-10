@@ -23,7 +23,11 @@ class Load {
 
 	public function __construct() {
 
+		// TODO: CREATE DOCBLOCKS FOR EVERYTHING
+
 		register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', 'flush_rewrite_rules' );
+
+		update_option( 'permalink_structure', '/%postname%/' );
 
 		new Logs();
 		new Enqueue();
@@ -41,11 +45,11 @@ class Load {
 		if ( '1' === get_option( 'source_site' ) ) {
 			new Posts();
 
+			$connected_site = new ConnectedSite();
+			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $connected_site, 'create_db_table' ] );
 			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_post, 'create_db_table_source' ] );
 		} elseif ( '0' === get_option( 'source_site' ) ) {
 
-			$connected_site = new ConnectedSite();
-			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $connected_site, 'create_db_table' ] );
 			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_post, 'create_db_table_receiver' ] );
 
 			$post_type = new PostType();

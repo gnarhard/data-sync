@@ -66,7 +66,9 @@ class Logs {
 			$log = new Logs( 'Error in Logs()->send_to_source received from ' . get_option( 'data_sync_source_site_url' ) . '. ' . $response->get_error_message(), true );
 			unset( $log );
 		} else {
-			print_r( wp_remote_retrieve_body( $response ) );
+			if ( get_option( 'show_body_responses' ) ) {
+				print_r( wp_remote_retrieve_body( $response ) );
+			}
 		}
 
 	}
@@ -103,7 +105,9 @@ class Logs {
 				$log = new Logs( 'Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-//				print_r( wp_remote_retrieve_body( $response ) );
+				if ( get_option( 'show_body_responses' ) ) {
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
 			}
 
 			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );

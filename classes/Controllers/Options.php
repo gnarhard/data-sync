@@ -274,18 +274,19 @@ class Options {
 				'data_sync_options'
 			);
 
-			// TODO: Which user permission out of all permissions can edit content
-			$enabled_post_types = get_option( 'enabled_post_types' );
-			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-				if ( count( $enabled_post_types ) ) {
-					foreach ( $enabled_post_types as $post_type ) {
-						$post_type_object = get_post_type_object( $post_type );
-
+//			 TODO: Which user permission out of all permissions can edit content
+//
+//			$enabled_post_types = get_option( 'enabled_post_types' );
+//			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
+//				if ( count( $enabled_post_types ) ) {
+//					foreach ( $enabled_post_types as $post_type ) {
+//						$post_type_object = get_post_type_object( $post_type );
+//
 //						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
 //						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
-					}
-				}
-			}
+//					}
+//				}
+//			}
 
 		endif;
 	}
