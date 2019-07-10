@@ -77,8 +77,8 @@ class Receiver {
 					$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
 
 					if ( false !== $filtered_post ) {
-						$receiver_post_id = Posts::save( $filtered_post );
-						SyncedPosts::save( $receiver_post_id, $filtered_post );
+						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+//						SyncedPosts::save( $receiver_post_id, $filtered_post );
 
 						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
 						unset( $log );

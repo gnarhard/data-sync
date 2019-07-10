@@ -48,6 +48,10 @@ class SourceData {
 			$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 
+			// TODO: GET RESPONSE IMMEDIATELY
+			// -> RETRIEVE LOGS
+			// -> RETRIEVE SYNCED POSTS
+
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
@@ -75,8 +79,8 @@ class SourceData {
 		$source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
 
-//		$log = new Logs( 'Finished data consolidation.' );
-//		unset( $log );
+//		print_r( $source_data->posts );die();
+
 		return $this->validate( $source_data );
 
 	}

@@ -198,16 +198,15 @@ class Posts {
 
 	}
 
-	public static function save( object $post ) {
+	public static function save( object $post, array $synced_posts ) {
 
 		$post_array = (array) $post; // must convert to array to use wp_insert_post.
 
-		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE
+		// MUST UNSET ID TO INSERT. PROVIDE ID TO UPDATE.
 		unset( $post_array['ID'] );
 
 		if ( $post->synced ) {
-			$data             = SyncedPosts::get_synced_post_data( $post );
-			$post_array['ID'] = $data->receiver_post_id;
+			$post_array['ID'] = SyncedPosts::get_receiver_post_id( $post, $synced_posts );
 		}
 
 		unset( $post_array['post_meta'] );
@@ -215,7 +214,7 @@ class Posts {
 		unset( $post_array['media'] );
 
 		// Don't change URLs of media that needs to be migrated.
-		if ( $post->post_type !== 'attachment' ) {
+		if ( 'attachment' !== $post->post_type ) {
 			unset( $post_array['guid'] );
 			foreach ( $post_array as $key => $value ) {
 				$post_array[ $key ] = str_replace( $post_array['source_url'], get_site_url(), $value );
@@ -224,12 +223,22 @@ class Posts {
 
 		$receiver_post_id = wp_insert_post( $post_array );
 
-		if ( $receiver_post_id ) {
+		if ( is_wp_error( $receiver_post_id ) ) {
+			$log = new Logs( $receiver_post_id->get_error_message(), true );
+			unset( $log );
+
+			return false;
+		} elseif ( $receiver_post_id ) {
+
+			$receiver_post_id = (int) $receiver_post_id;
 
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {
+
 				// Yoast and ACF data will be in here.
-				$updated = update_post_meta( $receiver_post_id, $meta_key, $meta_value );
-				var_dump($updated);
+
+				foreach( $meta_value as $value ) {
+					$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
+				}
 			}
 
 			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );

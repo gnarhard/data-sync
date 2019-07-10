@@ -25,7 +25,7 @@ class Logs {
 		if ( false === $message ) {
 			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
-
+return;
 			$this->log             = new stdClass();
 			$this->log->url_source = get_site_url();
 			$this->error           = $message;

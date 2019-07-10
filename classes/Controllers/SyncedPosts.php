@@ -27,7 +27,7 @@ class SyncedPosts {
 				return false;
 			} else {
 
-				if ( true !== $source_options->overwrite_yoast ) {
+				if ( true !== (bool) $source_options->overwrite_yoast ) {
 
 					// TODO: still doesn't work yet.
 
@@ -60,10 +60,8 @@ class SyncedPosts {
 
 	public static function is_synced( object $post, array $synced_posts ) {
 
-		foreach ($synced_posts as $synced_post ) {
-			if ( $post->ID === $synced_post->source_post_id ) {
-				return true;
-			}
+		if ( self::get_receiver_post_id( $post, $synced_posts ) ) {
+			return true;
 		}
 
 		return false;
@@ -71,6 +69,16 @@ class SyncedPosts {
 //		$data = self::get_synced_post_data( $post );
 //
 //		return isset( $data->id );
+	}
+
+	public static function get_receiver_post_id( $post, $synced_posts ) {
+		foreach ( $synced_posts as $synced_post ) {
+			if ( (int) $post->ID === (int) $synced_post->source_post_id ) {
+				return $synced_post->receiver_post_id;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -84,6 +92,7 @@ class SyncedPosts {
 		if ( is_wp_error( $response ) ) {
 			$log = new Logs( 'SyncedPosts: ' . $response->get_error_message(), true );
 			unset( $log );
+
 			return false;
 		}
 
@@ -238,7 +247,7 @@ class SyncedPosts {
 
 	public function delete_post() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$log = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		$log  = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
 		unset( $log );
 
 		return wp_delete_post( $data->receiver_post_id );
@@ -246,7 +255,7 @@ class SyncedPosts {
 
 	public function delete_synced_post() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$log = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
+		$log  = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
 		unset( $log );
 
 		$args        = array(
