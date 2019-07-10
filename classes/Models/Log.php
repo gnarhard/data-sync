@@ -26,13 +26,18 @@ class Log {
 		return $db->get_where( $args );
 	}
 
-	public static function get_all_and_sort( $sortby ) {
+	public static function get_all_and_sort( $sortby, $data_sync_start_time = false ) {
 
 		global $wpdb;
 		$column = array_key_first( $sortby );
 		$order  = $sortby[ $column ];
 
-		$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT 50';
+		if ( $data_sync_start_time ) {
+			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE datetime > "' . $data_sync_start_time . '" ORDER BY ' . $column . ' ' . $order;
+		} else {
+			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT 50';
+		}
+
 		$db  = new DB( self::$table_name );
 
 		return $db->query( $sql );
@@ -43,7 +48,7 @@ class Log {
 		$args    = array(
 			'log_entry'  => $data->log_entry,
 			'url_source' => $data->url_source,
-			'datetime'   => current_time( 'mysql' ),
+			'datetime'   => $data->datetime,
 		);
 		$sprintf = array(
 			'%s',
@@ -90,7 +95,7 @@ class Log {
 	        PRIMARY KEY(id),
 	        log_entry              longtext,
 	        url_source               VARCHAR(255) NOT NULL,
-	        datetime    DATETIME NOT NULL 
+	        datetime    datetime NOT NULL 
 	    );'
 		);
 	}

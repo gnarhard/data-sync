@@ -27,7 +27,18 @@ class SyncedPost {
 		$db = new DB( self::$table_name );
 
 		return $db->get_where( $args );
+	}
 
+	public static function get_all_and_sort( $sortby, $data_sync_start_time = false ) {
+
+		global $wpdb;
+		$column = array_key_first( $sortby );
+		$order  = $sortby[ $column ];
+		$sql    = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE date_modified > "' . $data_sync_start_time . '" ORDER BY ' . $column . ' ' . $order;
+
+		$db = new DB( self::$table_name );
+
+		return $db->query( $sql );
 	}
 
 	public static function create( object $data ) {
@@ -77,7 +88,7 @@ class SyncedPost {
 
 	}
 
-	public function create_db_table() {
+	public function create_db_table_source() {
 
 		global $wpdb;
 		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
@@ -95,6 +106,24 @@ class SyncedPost {
 		);
 
 		$this->add_foreign_key_restraints();
+	}
+
+	public function create_db_table_receiver() {
+
+		global $wpdb;
+
+		$result = $wpdb->query(
+			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
+	        id INT NOT NULL AUTO_INCREMENT,
+	        PRIMARY KEY(id),
+	        source_post_id     INT NOT NULL,
+	        receiver_post_id   INT NOT NULL,
+	        receiver_site_id            INT NOT NULL,
+	        name              VARCHAR(255) NOT NULL,
+	        date_modified    DATETIME NOT NULL
+	    );'
+		);
+
 	}
 
 	private function add_foreign_key_restraints() {

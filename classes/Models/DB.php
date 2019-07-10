@@ -6,6 +6,7 @@ namespace DataSync\Models;
 
 use DataSync\Controllers\Logs;
 use DataSync\Helpers;
+use WP_Error;
 
 /**
  * Class DB

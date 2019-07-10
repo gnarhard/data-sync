@@ -23,7 +23,9 @@ class Load {
 
 	public function __construct() {
 
-		$log = new Logs();
+		register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', 'flush_rewrite_rules' );
+
+		new Logs();
 		new Enqueue();
 		new Options();
 		new Widgets();
@@ -32,21 +34,29 @@ class Load {
 		new Receiver();
 		new SyncedPosts();
 		new TemplateSync();
+		new Log();
 
-		if ( get_option( 'source_site' ) ) {
+		$synced_post = new SyncedPost();
+
+		if ( '1' === get_option( 'source_site' ) ) {
 			new Posts();
-			new Log();
-		} else {
+
+			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_post, 'create_db_table_source' ] );
+		} elseif ( '0' === get_option( 'source_site' ) ) {
+
+			$connected_site = new ConnectedSite();
+			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $connected_site, 'create_db_table' ] );
+			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_post, 'create_db_table_receiver' ] );
+
 			$post_type = new PostType();
 			$post_type->create_db_table();
-			$register_cpts = new PostTypes();
+			new PostTypes();
 
 			$taxonomy = new Taxonomy();
 			$taxonomy->create_db_table();
 			new Taxonomies();
 		}
 
-		// TODO: hook into all cpts' capabilites and add them into administrators' capabilities dynamically
 	}
 
 }

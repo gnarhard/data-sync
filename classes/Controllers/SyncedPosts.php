@@ -19,6 +19,8 @@ class SyncedPosts {
 
 	public static function filter( object $post, $source_options, $synced_posts ) {
 
+		// TODO: SEND FLAG TO SOURCE IF RECEIVER POST WAS UPDATED MORE RECENTLY THAN THE LAST SOURCE POST WAS UPDATED.
+
 		$post->synced   = self::is_synced( $post, $synced_posts );
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
 
@@ -28,8 +30,6 @@ class SyncedPosts {
 			} else {
 
 				if ( true !== (bool) $source_options->overwrite_yoast ) {
-
-					// TODO: still doesn't work yet.
 
 					if ( $post->synced ) {
 						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
@@ -69,6 +69,35 @@ class SyncedPosts {
 //		$data = self::get_synced_post_data( $post );
 //
 //		return isset( $data->id );
+	}
+
+	public static function retrieve_from_receiver( $data_sync_start_time ) {
+
+		// TODO: ALL ENTRIES AFTER $data_sync_start_time
+
+		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$all_data        = array();
+
+		foreach ( $connected_sites as $site ) {
+			$url = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/all' );
+			$args       = array(
+				'body' => [ 'datetime' => $data_sync_start_time ],
+			);
+			$response = wp_remote_get( $url, $args );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				print_r( wp_remote_retrieve_body( $response ) );
+			}
+
+			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );
+		}
+
+		return $all_data;
+
 	}
 
 	public static function get_receiver_post_id( $post, $synced_posts ) {
@@ -121,7 +150,18 @@ class SyncedPosts {
 		return $response;
 	}
 
-	public static function save( int $receiver_post_id, object $source_post ) {
+	public function get_after_date( WP_REST_Request $request ) {
+		if ( $request ) {
+			$datetime = $request->get_param( 'datetime' );
+			if ( $datetime ) {
+				return SyncedPost::get_all_and_sort( [ 'datetime' => 'DESC' ], $datetime );
+			}
+		} else {
+			return array();
+		}
+	}
+
+	public static function save_to_source( int $receiver_post_id, object $source_post ) {
 
 		// RECEIVER SIDE.
 		$data                   = new stdClass();
@@ -144,10 +184,31 @@ class SyncedPosts {
 		}
 	}
 
+	public static function save_to_receiver( int $receiver_post_id, object $source_post ) {
+		$data                   = new stdClass();
+		$data->source_post_id   = $source_post->ID;
+		$data->name             = $source_post->post_title;
+		$data->receiver_post_id = $receiver_post_id;
+		$data->receiver_site_id = get_option( 'data_sync_receiver_site_id' );
+
+		return self::save( $data );
+
+	}
+
 	public function save_to_sync_table( WP_REST_Request $request ) {
 
 		// SOURCE SIDE.
-		$data                 = (object) json_decode( file_get_contents( 'php://input' ) );
+		$data = (object) json_decode( file_get_contents( 'php://input' ) );
+		self::save( $data );
+
+		$response = new WP_REST_Response( $data );
+		$response->set_status( 201 );
+
+		return $response;
+
+	}
+
+	public static function save( $data ) {
 		$existing_synced_post = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
@@ -155,18 +216,23 @@ class SyncedPosts {
 			)
 		);
 
+//		print_r($existing_synced_post);die();
+
 		if ( count( $existing_synced_post ) ) {
 			$data->id = $existing_synced_post[0]->id;
-			SyncedPost::update( $data );
+
+			return SyncedPost::update( $data );
 		} else {
-			SyncedPost::create( $data );
+			return SyncedPost::create( $data );
 		}
+	}
 
-		$response = new WP_REST_Response( $data );
-		$response->set_status( 201 );
-
-		return $response;
-
+	public static function save_all_to_source( array $receiver_synced_posts ) {
+		foreach ( $receiver_synced_posts as $site_synced_posts ) {
+			foreach ( $site_synced_posts as $synced_post ) {
+				$result = self::save( $synced_post );
+			}
+		}
 	}
 
 	public function delete( $post_id ) {
@@ -302,6 +368,17 @@ class SyncedPosts {
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_all' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/synced_posts/retrieve_from_receiver',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_after_date' ),
 				),
 			)
 		);

@@ -45,7 +45,7 @@ class Receiver {
 	}
 
 	private function parse( object $source_data ) {
-		// TODO: FIGURE OUT WHAT IS CAUSING THE CURL ERROR 28
+
 		$receiver_options = (object) Options::receiver()->get_data();
 
 		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
@@ -78,7 +78,7 @@ class Receiver {
 
 					if ( false !== $filtered_post ) {
 						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
-//						SyncedPosts::save( $receiver_post_id, $filtered_post );
+						SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 
 						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
 						unset( $log );
