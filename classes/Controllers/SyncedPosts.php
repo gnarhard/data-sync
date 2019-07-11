@@ -28,9 +28,22 @@ class SyncedPosts {
 				return false;
 			} else {
 
+				if ( $post->synced ) {
+					if ( true !== $source_options->overwrite_receiver_post ) {
+						$receiver_post_more_recent = self::check_date_modified( $post, $synced_posts );
 
-				// TODO: SEND FLAG TO SOURCE IF RECEIVER POST WAS UPDATED MORE RECENTLY THAN THE LAST SOURCE POST WAS UPDATED.
-				$receiver_post_more_recent = self::check_date_modified();
+						if ( $receiver_post_more_recent === 'asdf' ) {
+							print_r($post);
+						}
+
+						if ( $receiver_post_more_recent ) {
+							$log = new Logs( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );
+							unset( $log );
+
+							return false;
+						}
+					}
+				}
 
 
 				if ( true !== (bool) $source_options->overwrite_yoast ) {
@@ -65,6 +78,29 @@ class SyncedPosts {
 	public static function check_date_modified( object $post, array $synced_posts ) {
 
 
+		foreach ( $synced_posts as $synced_post ) {
+			if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) get_option( 'data_sync_receiver_site_id' ) === (int) $synced_post->receiver_site_id ) ) {
+				$synced_modified_timestamp   = strtotime( $synced_post->date_modified );
+				$receiver_post               = get_post( $synced_post->receiver_post_id );
+				$receiver_modified_timestamp = get_post_modified_time( 'U', false, $receiver_post, false );
+
+//				print_r($synced_posts);
+//				print_r( $receiver_post );
+//				var_dump( $receiver_post->post_title );
+//				var_dump( $receiver_modified_timestamp );
+//				var_dump( $synced_modified_timestamp );
+//				die();
+
+				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS
+				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		return 'asdf';
 
 	}
 
@@ -288,7 +324,9 @@ class SyncedPosts {
 						$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 						unset( $log );
 					} else {
-						print_r( $response['body'] );
+						if ( get_option( 'show_body_responses' ) ) {
+							print_r( wp_remote_retrieve_body( $response ) );
+						}
 
 						SyncedPost::delete( $synced_post->id );
 					}
@@ -317,7 +355,9 @@ class SyncedPosts {
 				$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				print_r( $response['body'] );
+				if ( get_option( 'show_body_responses' ) ) {
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
 				$log = new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url() );
 				unset( $log );
 			}

@@ -94,8 +94,11 @@ class Options {
 			}
 		}
 
-		$options->enable_new_cpts = get_option( 'enable_new_cpts' );
-		$options->overwrite_yoast = get_option( 'overwrite_yoast' );
+		$options->enable_new_cpts         = (bool) get_option( 'enable_new_cpts' );
+		$options->overwrite_yoast         = (bool) get_option( 'overwrite_yoast' );
+		$options->overwrite_receiver_post = false;
+		$options->debug                   = (bool) get_option( 'debug' );
+		$options->show_body_responses     = (bool) get_option( 'show_body_response' );
 
 		$response = new WP_REST_Response( $options );
 		$response->set_status( 201 );

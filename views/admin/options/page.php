@@ -9,7 +9,8 @@ function data_sync_options_page() {
 	?>
 	<div id="feedback"></div>
 	<div class="wrap">
-		<h2>Data Sync Settings</h2>
+		<h2>DATA SYNC</h2>
+		<h3>Settings</h3>
 		<form method="POST" action="options.php">
 			<?php
 			settings_fields( 'data_sync_options' );

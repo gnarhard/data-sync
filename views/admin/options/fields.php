@@ -124,6 +124,7 @@ function display_connected_sites() {
  *
  */
 function display_connected_sites_modal() {
+	// TODO: Improve modal design
 	?>
   <div class="lightbox_wrap">
     <div class="add_site_modal">
