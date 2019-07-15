@@ -3,13 +3,14 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
 use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
-use DataSync\Controllers\Logs;
 use stdClass;
+use DataSync\Models\DB;
 
 class SourceData {
 
@@ -29,6 +30,17 @@ class SourceData {
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'push' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/source_data/start_fresh',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'start_fresh' ),
 				),
 			)
 		);
@@ -69,6 +81,41 @@ class SourceData {
 		new Media( $this->source_data->posts );
 
 		wp_send_json_success( 'Push complete.' );
+
+	}
+
+	public function start_fresh() {
+
+		$db               = new DB();
+		$connected_sites  = (array) ConnectedSites::get_all()->get_data();
+		$sql_statements   = array();
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
+
+		foreach ( $sql_statements as $sql ) {
+			$db->query( $sql );
+		}
+
+		foreach ( $connected_sites as $site ) {
+
+			$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/start_fresh';
+			$response = wp_remote_get( $url );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				if ( get_option( 'show_body_responses' ) ) {
+					if ( get_option( 'show_body_responses' ) ) {
+						print_r( wp_remote_retrieve_body( $response ) );
+					}
+				}
+			}
+
+		}
+
+		wp_send_json_success( 'Source table truncation completed.' );
 
 	}
 

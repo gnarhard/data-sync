@@ -9,6 +9,7 @@ use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_REST_Response;
+use DataSync\Models\DB;
 
 class Receiver {
 
@@ -30,6 +31,35 @@ class Receiver {
 				),
 			)
 		);
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/start_fresh',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'start_fresh' ),
+				),
+			)
+		);
+	}
+
+	public function start_fresh() {
+
+		$db = new DB();
+		$sql_statements   = array();
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_post_types';
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_taxonomies';
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
+		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE wp_posts';
+		$sql_statements[] = 'TRUNCATE TABLE wp_postmeta';
+
+		foreach( $sql_statements as $sql ) {
+			$db->query($sql);
+		}
+
+		wp_send_json_success( 'Receiver table truncation completed.' );
+
 	}
 
 	public function receive() {

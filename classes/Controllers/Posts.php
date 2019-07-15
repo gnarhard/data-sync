@@ -222,11 +222,6 @@ class Posts {
 		}
 
 		$receiver_post_id = wp_insert_post( $post_array );
-//		if ( 3 == get_option( 'data_sync_receiver_site_id' ) ) {
-//			var_dump($receiver_post_id);
-//			print_r($post_array);
-//			die();
-//		}
 
 		if ( is_wp_error( $receiver_post_id ) ) {
 			$log = new Logs( $receiver_post_id->get_error_message(), true );

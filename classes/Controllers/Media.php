@@ -76,7 +76,7 @@ class Media {
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
-				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
@@ -123,9 +123,15 @@ class Media {
 				'post_status'    => 'inherit',
 			);
 
-			$sql           = 'SELECT ID FROM wp_posts where post_name = "' . $post->post_name . '" AND post_type = "attachment" LIMIT 1';
+
+
+			$sql           = 'SELECT ID FROM wp_posts where post_title = "' . $post->post_title . '" AND post_type = "attachment" LIMIT 1';
 			$db            = new DB();
 			$existing_post = $db->query( $sql );
+
+			if ( $media['post_parent'] == 47 ) {
+				echo $sql;
+			}
 
 			if ( count( $existing_post ) ) {
 				$attachment_id = $existing_post[0]->ID;
