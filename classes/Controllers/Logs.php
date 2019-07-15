@@ -81,7 +81,7 @@ class Logs {
 		$this->log->datetime   = current_time( 'Y-m-d H:i:s.u' );
 		$this->log();
 
-		wp_send_json_success();
+		wp_send_json_success( $this->log );
 	}
 
 	public function log() {

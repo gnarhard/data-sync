@@ -39,6 +39,7 @@ class Load {
 		new SyncedPosts();
 		new TemplateSync();
 		new Log();
+		new Media();
 
 		$synced_post = new SyncedPost();
 

@@ -41,7 +41,7 @@ class Receiver {
 		$log = new Logs( 'SYNC COMPLETE.' );
 		unset( $log );
 
-		wp_send_json_success();
+		wp_send_json_success( 'Receiver parse complete.' );
 	}
 
 	private function parse( object $source_data ) {

@@ -160,7 +160,7 @@ class Options {
 		$success = update_option( $key, $data );
 
 		if ( $success ) {
-			wp_send_json_success();
+			wp_send_json_success( $data );
 		} else {
 			$log = new Logs( 'ERROR: Options not saved.', true );
 			unset( $log );

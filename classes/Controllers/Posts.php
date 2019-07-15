@@ -247,7 +247,6 @@ class Posts {
 			}
 
 			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );
-			new Media( $receiver_post_id, $post->media, $post->source_url );
 
 			return $receiver_post_id;
 		}

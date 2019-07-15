@@ -24,7 +24,7 @@ class DB {
 	 *
 	 * @param $table_name
 	 */
-	public function __construct( $table_name ) {
+	public function __construct( $table_name = '' ) {
 		global $wpdb;
 		$this->table_name = $wpdb->prefix . $table_name;
 	}

@@ -33,7 +33,7 @@ class TemplateSync {
 				$result       = File::copy( $source_url, $receiver_url );
 			}
 
-			wp_send_json_success();
+			wp_send_json_success( 'Templates synced.' );
 
 		}
 

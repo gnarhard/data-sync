@@ -109,7 +109,7 @@ class ConnectedSites {
 		if ( $id ) {
 			$response = ConnectedSite::delete( $id );
 			if ( $response ) {
-				wp_send_json_success();
+				wp_send_json_success( 'Connected site deleted.' );
 			} else {
 				$log = new Logs( 'Connected site was not deleted.', true );
 				unset( $log );

@@ -66,7 +66,9 @@ class SourceData {
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		wp_send_json_success();
+		new Media( $this->source_data->posts );
+
+		wp_send_json_success( 'Push complete.' );
 
 	}
 

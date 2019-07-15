@@ -84,14 +84,7 @@ class SyncedPosts {
 				$receiver_post               = get_post( $synced_post->receiver_post_id );
 				$receiver_modified_timestamp = get_post_modified_time( 'U', false, $receiver_post, false );
 
-//				print_r($synced_posts);
-//				print_r( $receiver_post );
-//				var_dump( $receiver_post->post_title );
-//				var_dump( $receiver_modified_timestamp );
-//				var_dump( $synced_modified_timestamp );
-//				die();
-
-				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS
+				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS.
 				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
 					return true;
 				} else {
