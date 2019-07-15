@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 
 use DataSync\Controllers\File;
 use DataSync\Models\DB;
+use DataSync\Models\SyncedPost;
 use WP_REST_Server;
 
 class Media {
@@ -124,17 +125,14 @@ class Media {
 			);
 
 
+			$args        = array(
+				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+				'source_post_id'   => $post->ID,
+			);
+			$synced_post = SyncedPost::get_where( $args );
 
-			$sql           = 'SELECT ID FROM wp_posts where post_title = "' . $post->post_title . '" AND post_type = "attachment" LIMIT 1';
-			$db            = new DB();
-			$existing_post = $db->query( $sql );
-
-			if ( $media['post_parent'] == 47 ) {
-				echo $sql;
-			}
-
-			if ( count( $existing_post ) ) {
-				$attachment_id = $existing_post[0]->ID;
+			if ( count( $synced_post ) ) {
+				$attachment_id = $synced_post[0]->id;
 			} else {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, $media['post_parent'] );
 			}
@@ -144,6 +142,8 @@ class Media {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
 				wp_update_attachment_metadata( $attachment_id, $attachment_data );
+
+				SyncedPosts::save_to_receiver( $attachment_id, $post );
 			}
 		}
 	}
