@@ -128,6 +128,22 @@ class Posts {
 
 	}
 
+	public static function get_single( int $id ) {
+
+		$post             = get_post( $id );
+		$post->source_url = get_site_url();
+		$post->post_meta  = get_post_meta( $post->ID );
+		$post->taxonomies = array();
+
+		foreach ( get_taxonomies() as $taxonomy ) {
+			$post->taxonomies[ $taxonomy ] = get_the_terms( $post->ID, $taxonomy );
+		}
+
+		$post->media = self::get_media( $post->ID );
+
+		return $post;
+	}
+
 	private static function get_wp_posts( string $type ) {
 		$args = array(
 			'post_type'      => $type,
@@ -236,7 +252,7 @@ class Posts {
 
 				// Yoast and ACF data will be in here.
 
-				foreach( $meta_value as $value ) {
+				foreach ( $meta_value as $value ) {
 					$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
 				}
 			}

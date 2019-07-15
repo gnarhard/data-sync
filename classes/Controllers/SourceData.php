@@ -6,6 +6,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
+use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
 use ACF_Admin_Tool_Export;
@@ -44,11 +45,74 @@ class SourceData {
 				),
 			)
 		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/source_data/overwrite/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'overwrite_receiver_post' ),
+					'args'     => array(
+						'source_post_id'   => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+						'receiver_site_id' => array(
+							'description' => 'Receiver Site ID',
+							'type'        => 'int',
+						),
+					),
+				),
+			)
+		);
+	}
+
+	public function overwrite_receiver_post( WP_REST_Request $request ) {
+		$url_params   = $request->get_url_params();
+		$synced_posts = new SyncedPosts();
+		$options      = Options::source()->get_data();
+
+		$args           = [ 'id' => (int) $url_params['receiver_site_id'] ];
+		$connected_site = ConnectedSite::get_where( $args );
+		$connected_site = $connected_site[0];
+
+		$this->source_data                                     = new stdClass();
+		$this->source_data->receiver_site_id                   = (int) $url_params['receiver_site_id'];
+		$this->source_data->single_overwrite                   = true;
+		$this->source_data->start_time                         = (string) current_time( 'mysql' );
+		$this->source_data->start_microtime                    = (float) microtime( true );
+		$this->source_data->options                            = (array) $options;
+		$this->source_data->options['overwrite_receiver_post_on_conflict'] = true;
+		$this->source_data->url                                = (string) get_site_url();
+		$this->source_data->nonce                              = (string) wp_create_nonce( 'data_push' );
+		$this->source_data->post                               = (object) Posts::get_single( (int) $url_params['source_post_id'] );
+		$this->source_data->synced_posts                       = (array) $synced_posts->get_all()->get_data();
+
+		$auth     = new Auth();
+		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
+		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+		$response = wp_remote_post( $url, [ 'body' => $json ] );
+
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Error in SourceData->overwrite_receiver_post() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
+			unset( $log );
+		} else {
+			if ( get_option( 'show_body_responses' ) ) {
+				if ( get_option( 'show_body_responses' ) ) {
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
+			}
+		}
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		wp_send_json_success( 'Single overwrite successful.' );
 	}
 
 	public function push() {
-
-		// TODO: Create interface for pushing single post and overwriting the receiver when the receiver post was updated more recently.
 
 		$this->consolidate();
 		$this->validate();
@@ -79,6 +143,9 @@ class SourceData {
 		$this->save_receiver_data();
 
 		new Media( $this->source_data->posts );
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
 
 		wp_send_json_success( 'Push complete.' );
 
@@ -147,6 +214,7 @@ class SourceData {
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$this->source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
+		$this->source_data->single_overwrite  = false;
 
 	}
 

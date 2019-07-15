@@ -63,9 +63,11 @@ class Media {
 
 	public function send_to_receiver( $media, $connected_sites ) {
 
-		$data             = new \stdClass();
-		$data->media      = $media;
-		$data->source_url = get_site_url();
+		$synced_posts       = new SyncedPosts();
+		$data               = new \stdClass();
+		$data->media        = $media;
+		$data->source_url   = get_site_url();
+		$data->synced_posts = (array) $synced_posts->get_all()->get_data();
 
 		foreach ( $connected_sites as $site ) {
 
@@ -93,12 +95,12 @@ class Media {
 
 	public function update() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->insert_into_wp( $data->source_url, $data->media );
+		$this->insert_into_wp( $data->source_url, $data->media, $data->synced_posts );
 		wp_send_json_success( $data->media );
 	}
 
 
-	public function insert_into_wp( string $source_url, object $post ) {
+	public function insert_into_wp( string $source_url, object $post, array $synced_posts ) {
 
 		$post_array      = (array) $post;
 		$receiver_url    = $post_array['guid'];
@@ -132,6 +134,19 @@ class Media {
 			$synced_post = SyncedPost::get_where( $args );
 
 			if ( count( $synced_post ) ) {
+//				if ( true !== get_option( 'overwrite_receiver_post_on_conflict' ) ) {
+//					$post->diverged = SyncedPosts::check_date_modified( $post, $synced_posts );
+// UPDATE SYNCED POSTS DATABASE TABLE BUT ONLY CHANGE DIVERGED VALUE. DO NOT CHANGE THE DATE MODIFIED!
+//				$args  = array(
+//					'id'       => $synced_post[0]->id,
+//					'diverged' => true,
+//				);
+//				$where = [ 'id' => $synced_post[0]->id ];
+//				$db    = new DB( SyncedPost::$table_name );
+//				$db->update( $args, $where );
+//					return false;
+//				}
+				$post->diverged = false;
 				$attachment_id = $synced_post[0]->id;
 			} else {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, $media['post_parent'] );
@@ -142,14 +157,9 @@ class Media {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
 				wp_update_attachment_metadata( $attachment_id, $attachment_data );
-
 				SyncedPosts::save_to_receiver( $attachment_id, $post );
 			}
 		}
-	}
-
-	public function delete() {
-		// TODO: PROCESS DELETING A MEDIA ITEM
 	}
 
 

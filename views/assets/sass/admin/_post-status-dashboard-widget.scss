@@ -7,6 +7,10 @@
     .wp_data_synced_post_status_icons {
       text-align: center;
 
+      .dashicons-editor-unlink {
+        cursor: pointer;
+      }
+
       .dashicons-update {
         animation-name: spin;
         animation-duration: 4000ms;

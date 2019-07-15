@@ -94,11 +94,11 @@ class Options {
 			}
 		}
 
-		$options->enable_new_cpts         = (bool) get_option( 'enable_new_cpts' );
-		$options->overwrite_yoast         = (bool) get_option( 'overwrite_yoast' );
-		$options->overwrite_receiver_post = false;
-		$options->debug                   = (bool) get_option( 'debug' );
-		$options->show_body_responses     = (bool) get_option( 'show_body_response' );
+		$options->enable_new_cpts                     = (bool) get_option( 'enable_new_cpts' );
+		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
+		$options->overwrite_receiver_post_on_conflict = (bool) get_option( 'overwrite_receiver_post_on_conflict' );
+		$options->debug                               = (bool) get_option( 'debug' );
+		$options->show_body_responses                 = (bool) get_option( 'show_body_response' );
 
 		$response = new WP_REST_Response( $options );
 		$response->set_status( 201 );
@@ -252,6 +252,9 @@ class Options {
 
 			add_settings_field( 'overwrite_yoast', 'Overwrite Receiver Yoast Settings', $this->view_namespace . '\display_overwrite_yoast_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'overwrite_yoast' );
+
+			add_settings_field( 'overwrite_receiver_post_on_conflict', 'Overwrite Receiver Post if Receiver Post Was More Recently Edited', $this->view_namespace . '\display_overwrite_receiver_post_checkbox', 'data-sync-options', 'data_sync_options' );
+			register_setting( 'data_sync_options', 'overwrite_receiver_post_on_conflict' );
 
 			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'push_enabled_post_types' );

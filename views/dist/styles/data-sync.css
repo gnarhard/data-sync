@@ -90,6 +90,10 @@
   text-align: center;
 }
 
+#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-editor-unlink {
+  cursor: pointer;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-update {
   -webkit-animation-name: spin;
           animation-name: spin;

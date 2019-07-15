@@ -45,7 +45,7 @@ class Receiver {
 
 	public function start_fresh() {
 
-		$db = new DB();
+		$db               = new DB();
 		$sql_statements   = array();
 		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_post_types';
 		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_taxonomies';
@@ -54,8 +54,8 @@ class Receiver {
 		$sql_statements[] = 'TRUNCATE TABLE wp_posts';
 		$sql_statements[] = 'TRUNCATE TABLE wp_postmeta';
 
-		foreach( $sql_statements as $sql ) {
-			$db->query($sql);
+		foreach ( $sql_statements as $sql ) {
+			$db->query( $sql );
 		}
 
 		wp_send_json_success( 'Receiver table truncation completed.' );
@@ -76,43 +76,60 @@ class Receiver {
 
 	private function parse( object $source_data ) {
 
-		$receiver_options = (object) Options::receiver()->get_data();
+		if ( $source_data->single_overwrite ) {
+			// OVERWRITE SINGLE POST.
+			$filtered_post = SyncedPosts::filter( $source_data->post, $source_data->options, $source_data->synced_posts );
 
-		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
-		update_option( 'data_sync_source_site_url', $source_data->url );
-		update_option( 'debug', $source_data->options->debug );
-		update_option( 'show_body_responses', $source_data->options->show_body_responses );
+			if ( false !== $filtered_post ) {
+				$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+				SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 
-		PostTypes::process( $source_data->options->push_enabled_post_types );
-		if ( true === $source_data->options->enable_new_cpts ) {
-			PostTypes::save_options();
-		}
-		$log = new Logs( 'Finished syncing post types.' );
-		unset( $log );
+				$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+				unset( $log );
+			}
 
-		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
-			Taxonomies::save( $taxonomy );
-		}
+		} else {
+			// DO BULK UPLOAD.
 
-		$log = new Logs( 'Finished syncing custom taxonomies.' );
-		unset( $log );
+			$receiver_options = (object) Options::receiver()->get_data();
 
-		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
+			update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
+			update_option( 'data_sync_source_site_url', $source_data->url );
+			update_option( 'debug', $source_data->options->debug );
+			update_option( 'show_body_responses', $source_data->options->show_body_responses );
+			update_option( 'overwrite_receiver_post_on_conflict', $source_data->options->overwrite_receiver_post_on_conflict );
 
-			$post_count = count( $source_data->posts->$post_type_slug );
+			PostTypes::process( $source_data->options->push_enabled_post_types );
+			if ( true === $source_data->options->enable_new_cpts ) {
+				PostTypes::save_options();
+			}
+			$log = new Logs( 'Finished syncing post types.' );
+			unset( $log );
 
-			if ( 0 === $post_count ) {
-				$log = new Logs( 'No posts in data.', true );
-			} else {
-				foreach ( $source_data->posts->$post_type_slug as $post ) {
-					$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
+			foreach ( $source_data->custom_taxonomies as $taxonomy ) {
+				Taxonomies::save( $taxonomy );
+			}
 
-					if ( false !== $filtered_post ) {
-						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
-						SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+			$log = new Logs( 'Finished syncing custom taxonomies.' );
+			unset( $log );
 
-						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
-						unset( $log );
+			foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
+
+				$post_count = count( $source_data->posts->$post_type_slug );
+
+				if ( 0 === $post_count ) {
+					$log = new Logs( 'No posts in data.', true );
+				} else {
+					foreach ( $source_data->posts->$post_type_slug as $post ) {
+						$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
+
+						if ( false !== $filtered_post ) {
+							$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+							SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+
+							$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+							unset( $log );
+						}
 					}
 				}
 			}

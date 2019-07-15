@@ -39,22 +39,32 @@ function display_synced_posts_table() {
 
 					foreach ( $post_types as $post ) {
 
-						$result = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
+						$post_status = '';
+						$result      = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 
 						if ( count( $result ) ) {
+							foreach ( $result as $synced_post ) {
+								if ( true === (bool) $synced_post->diverged ) {
+									$post_status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to repair." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
+								}
+							}
+
 							$synced_post = (object) $result[0];
-							$time        = strtotime( $synced_post->date_modified );
-							$synced      = date( 'm/d/Y g:i:s a', $time );
+							$time   = strtotime( $synced_post->date_modified );
+							$synced = date( 'm/d/Y g:i:s a', $time );
+
 						} else {
 							$synced = 'Unsynced';
 						}
 
-						if ( count( $result ) === $number_of_sites_connected ) {
-							$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-						} elseif ( 0 === count( $result ) ) {
-							$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
-						} else {
-							$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+						if ( '' === $post_status ) {
+							if ( count( $result ) === $number_of_sites_connected ) {
+								$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+							} elseif ( 0 === count( $result ) ) {
+								$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+							} else {
+								$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+							}
 						}
 
 						?>

@@ -48,8 +48,16 @@ class SyncedPost {
 			'receiver_post_id' => $data->receiver_post_id,
 			'receiver_site_id' => $data->receiver_site_id,
 			'name'             => $data->name,
-			'date_modified'    => current_time( 'mysql' ),
+			'post_type'        => $data->post_type,
+			'diverged'         => 0,
 		);
+
+		if ( isset( $data->date_modified ) ) {
+			$args['date_modified'] = $data->date_modified;
+		} else {
+			$args['date_modified'] = current_time( 'mysql' );
+		}
+
 		$sprintf = array(
 			'%d',
 			'%d',
@@ -71,8 +79,15 @@ class SyncedPost {
 			'source_post_id'   => $data->source_post_id,
 			'receiver_post_id' => $data->receiver_post_id,
 			'receiver_site_id' => $data->receiver_site_id,
-			'date_modified'    => current_time( 'mysql' ),
+			'post_type'        => $data->post_type,
+			'diverged'         => $data->diverged,
 		);
+
+		if ( isset( $data->date_modified ) ) {
+			$args['date_modified'] = $data->date_modified;
+		} else {
+			$args['date_modified'] = current_time( 'mysql' );
+		}
 
 		$where = [ 'id' => $data->id ];
 		$db    = new DB( self::$table_name );
@@ -101,6 +116,8 @@ class SyncedPost {
 	        receiver_post_id   INT NOT NULL,
 	        receiver_site_id            INT NOT NULL,
 	        name              VARCHAR(255) NOT NULL,
+	        post_type       VARCHAR(255) NOT NULL,
+	        diverged        TINYINT(1),
 	        date_modified    DATETIME NOT NULL
 	    );'
 		);
@@ -120,6 +137,8 @@ class SyncedPost {
 	        receiver_post_id   INT NOT NULL,
 	        receiver_site_id            INT NOT NULL,
 	        name              VARCHAR(255) NOT NULL,
+	        post_type       VARCHAR(255) NOT NULL,
+	        diverged        TINYINT(1),
 	        date_modified    DATETIME NOT NULL
 	    );'
 		);

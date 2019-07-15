@@ -120,6 +120,8 @@ function display_connected_sites() {
 	display_connected_sites_modal();
 }
 
+
+
 /**
  *
  */
@@ -212,6 +214,12 @@ function display_debug_checkbox() {
 function display_overwrite_yoast_checkbox() {
 	?>
 	<input type="checkbox" value="1" name="overwrite_yoast" <?php checked( '1', get_option( 'overwrite_yoast' ) ); ?>/>
+	<?php
+}
+
+function display_overwrite_receiver_post_checkbox() {
+	?>
+	<input type="checkbox" value="1" name="overwrite_receiver_post_on_conflict" <?php checked( '1', get_option( 'overwrite_receiver_post_on_conflict' ) ); ?>/>
 	<?php
 }
 
