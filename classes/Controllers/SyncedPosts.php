@@ -34,7 +34,7 @@ class SyncedPosts {
 
 				if ( $post->synced ) {
 					$post->diverged = self::check_date_modified( $post, $synced_posts );
-					var_dump( $post->diverged );
+
 					if ( $post->diverged ) {
 						if ( true !== $source_options->overwrite_receiver_post_on_conflict ) {
 							$log = new Logs( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );

@@ -83,32 +83,33 @@ document.addEventListener( 'DOMContentLoaded', function () {
 									if ( post_modified_date_timestamp > sync_start_time ) {
 										
 										let synced_post_id = parseInt( synced_post.source_post_id );
+									
 										
-										// IF RECEIVER SITE ID MATCHES A CONNECTED SITE ID
-										if ( -1 !== connected_site_ids_int.indexOf( receiver_site_id ) ) {
+										// INDICATE THAT A RECEIVER WAS SYNCED, BUT NOT ALL OF THEM
+										document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-info" title="Partially synced. Please allow time for the data to propogate. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+										
+										if ( 0 === sites_left_to_check ) {
 											
-											if ( 1 === parseInt( synced_post.diverged ) ) {
-												document.getElementById( 'synced_post-' + synced_post_id ).setAttribute( 'diverged', 1 );
+											// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
+											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+											
+											syncs_to_complete--;
+											if ( 0 === syncs_to_complete ) {
+												clearInterval( post_status_interval );
 											}
-											
-											// INDICATE THAT A RECEIVER WAS SYNCED, BUT NOT ALL OF THEM
-											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-info" title="Partially synced. Please allow time for the data to propogate. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
-											
-											if ( 0 === sites_left_to_check ) {
-												
-												// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
-												document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-												
-												syncs_to_complete--;
-												if ( 0 === syncs_to_complete ) {
-													clearInterval( post_status_interval );
-												}
-											}
-											
-											// UPDATE SYNCED TIME
-											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
 										}
 										
+										// UPDATE SYNCED TIME
+										document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
+									
+									} else {
+										if ( 1 === parseInt( synced_post.diverged ) ) {
+											let tr = document.getElementById( 'synced_post-' + synced_post.source_post_id );
+											let att = document.createAttribute('diverged');
+											att.value = 1;
+											tr.setAttributeNode( att );
+											syncs_to_complete--;
+										}
 									}
 								}
 								
@@ -124,10 +125,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				
 			} );
 			
-			
-			
-			// MAKE SURE AJAX CAN PROCESS NEW ELEMENT.
-			diverged_post_init();
 		};
 	}
 	
@@ -148,24 +145,38 @@ function display_diverged_notice( synced_posts) {
 			if ( 1 == $(this).attr('diverged') ) {
 				let receiver_site_id = null;
 				synced_posts.forEach( (synced_post) => {
-					if ( synced_post.id == $(this).attr('data-id') ) {
+					if ( synced_post.source_post_id == $(this).attr('data-id') ) {
 						receiver_site_id = synced_post.receiver_site_id;
 					}
 				});
-				$(this).closest( '.wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to repair." data-receiver-site-id="' + receiver_site_id + '" data-source-post-id="' + $(this).attr('data-id') + '"></i>';
+				$( '#synced_post-' + $(this).attr('data-id') + ' .wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to repair." data-receiver-site-id="' + receiver_site_id + '" data-source-post-id="' + $(this).attr('data-id') + '"></i>';
 			}
 		});
 	} );
+	
+	// MAKE SURE AJAX CAN PROCESS NEW ELEMENT.
+	diverged_post_init();
 }
 
 function diverged_post_init() {
 	jQuery( function ( $ ) {
 		$('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function() {
+			
+			// CHANGE ICON TO SPINNING UPDATE ICON
+			$(this).innerHTML = '<i class="dashicons dashicons-update"></i>';
+			
 			let receiver_site_id = $(this).data('receiver-site-id');
 			let source_post_id = $(this).data('source-post-id');
 			
 			AJAX.get( DataSync.api.url + '/source_data/overwrite/' + receiver_site_id + '/' + source_post_id ).then( function ( result ) {
 				console.log( result );
+				if ( result ) {
+					let synced_post = result.data;
+					// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
+					document.getElementById( 'synced_post-' + source_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+					// UPDATE SYNCED TIME
+					document.getElementById( 'synced_post-' + source_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
+				}
 			} );
 		});
 	} );

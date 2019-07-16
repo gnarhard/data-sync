@@ -77,17 +77,17 @@ class SourceData {
 		$connected_site = ConnectedSite::get_where( $args );
 		$connected_site = $connected_site[0];
 
-		$this->source_data                                     = new stdClass();
-		$this->source_data->receiver_site_id                   = (int) $url_params['receiver_site_id'];
-		$this->source_data->single_overwrite                   = true;
-		$this->source_data->start_time                         = (string) current_time( 'mysql' );
-		$this->source_data->start_microtime                    = (float) microtime( true );
-		$this->source_data->options                            = (array) $options;
+		$this->source_data                                                 = new stdClass();
+		$this->source_data->receiver_site_id                               = (int) $url_params['receiver_site_id'];
+		$this->source_data->single_overwrite                               = true;
+		$this->source_data->start_time                                     = (string) current_time( 'mysql' );
+		$this->source_data->start_microtime                                = (float) microtime( true );
+		$this->source_data->options                                        = (array) $options;
 		$this->source_data->options['overwrite_receiver_post_on_conflict'] = true;
-		$this->source_data->url                                = (string) get_site_url();
-		$this->source_data->nonce                              = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->post                               = (object) Posts::get_single( (int) $url_params['source_post_id'] );
-		$this->source_data->synced_posts                       = (array) $synced_posts->get_all()->get_data();
+		$this->source_data->url                                            = (string) get_site_url();
+		$this->source_data->nonce                                          = (string) wp_create_nonce( 'data_push' );
+		$this->source_data->post                                           = (object) Posts::get_single( (int) $url_params['source_post_id'] );
+		$this->source_data->synced_posts                                   = (array) $synced_posts->get_all()->get_data();
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
@@ -109,7 +109,7 @@ class SourceData {
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		wp_send_json_success( 'Single overwrite successful.' );
+		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
 	}
 
 	public function push() {
@@ -199,9 +199,7 @@ class SourceData {
 	private function consolidate() {
 
 		$synced_posts = new SyncedPosts();
-
-		update_option( 'show_body_responses', true );
-		$options = Options::source()->get_data();
+		$options      = Options::source()->get_data();
 
 		$this->source_data                    = new stdClass();
 		$this->source_data->start_time        = (string) current_time( 'mysql' );
