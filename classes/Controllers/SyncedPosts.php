@@ -389,7 +389,7 @@ class SyncedPosts {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
 		$log  = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
 		unset( $log );
-
+		wp_trash_post( $data->receiver_post_id );
 		return wp_delete_post( $data->receiver_post_id );
 	}
 
