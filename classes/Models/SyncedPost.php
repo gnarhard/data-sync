@@ -18,9 +18,17 @@ class SyncedPost {
 	}
 
 	public static function get_all() {
-		$db = new DB( self::$table_name );
+		$db           = new DB( self::$table_name );
+		$synced_posts = $db->get_all();
 
-		return $db->get_all();
+		foreach ( $synced_posts as $index => $synced_post ) {
+			$post = get_post( $synced_post->source_post_id );
+			if ( 'trash' === $post->post_status ) {
+				unset( $synced_posts[ $index ] );
+			}
+		}
+
+		return $synced_posts;
 	}
 
 	public static function get_where( array $args ) {
@@ -43,7 +51,7 @@ class SyncedPost {
 
 	public static function create( object $data ) {
 
-		$args    = array(
+		$args = array(
 			'source_post_id'   => $data->source_post_id,
 			'receiver_post_id' => $data->receiver_post_id,
 			'receiver_site_id' => $data->receiver_site_id,

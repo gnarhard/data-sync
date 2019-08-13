@@ -12,7 +12,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			document.querySelectorAll( '.wp_data_synced_post_status_icons' ).forEach( function ( node ) {
 				node.innerHTML = '<i class="dashicons dashicons-update"></i>';
 			} );
-			
+
 			let sync_start_time = parseInt( Date.now() );
 			let syncs_to_complete = document.querySelectorAll( '.wp_data_synced_post_status_icons' ).length;
 			let connected_site_ids_strings = document.getElementById( 'sites_connected_info' ).getAttribute( 'data-ids' ).split( ',' );
@@ -45,7 +45,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 						
 						
 						
-						
 						// LOOP THROUGH CONNECTED SITE IDS
 						connected_site_ids_strings.forEach( function( connected_site_id ) {
 							
@@ -62,55 +61,58 @@ document.addEventListener( 'DOMContentLoaded', function () {
 							// LOOP THROUGH SYNCED POSTS WITH MATCHED CONNECTED SITE IDS
 							array_indexes.forEach( function( i ) {
 								
-								
-								
-								
+
 								let synced_post = synced_posts[i];
 								let receiver_site_id = parseInt( synced_post.receiver_site_id );
-								
-								
-								// SKIP IF IT'S MEDIA.
-								if ( 'attachment' !== synced_post.post_type ) {
-									
-									
-									// SET LAST UPDATED DATE STRING
-									let post_modified_date = new Date( synced_post.date_modified ).toLocaleString( 'en-US', { timeZone: 'America/Denver' } );
-									
-									// SET LAST UPDATED DATE TIMESTAMP TO COMPARE WITH START TIME TO MAKE SURE IT'S THE MOST UP-TO-DATE RESULT
-									let post_modified_date_timestamp = parseInt( new Date( synced_post.date_modified ).getTime() );
-									
-									// ONLY CHANGE UI IF MODIFIED DATE IS NEWER THAN THE TIME THE SYNC STARTED
-									if ( post_modified_date_timestamp > sync_start_time ) {
-										
-										let synced_post_id = parseInt( synced_post.source_post_id );
-									
-										
-										// INDICATE THAT A RECEIVER WAS SYNCED, BUT NOT ALL OF THEM
-										document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-info" title="Partially synced. Please allow time for the data to propogate. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
-										
-										if ( 0 === sites_left_to_check ) {
-											
-											// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
-											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-											
-											syncs_to_complete--;
-											if ( 0 === syncs_to_complete ) {
-												clearInterval( post_status_interval );
+
+								if ( -1 !== DataSync.options.enabled_post_types.indexOf( synced_post.post_type ) ) {
+
+
+									// SKIP IF IT'S MEDIA.
+									if ( 'attachment' !== synced_post.post_type ) {
+
+
+										// SET LAST UPDATED DATE STRING
+										let post_modified_date = new Date( synced_post.date_modified ).toLocaleString( 'en-US', { timeZone: 'America/Denver' } );
+
+										// SET LAST UPDATED DATE TIMESTAMP TO COMPARE WITH START TIME TO MAKE SURE IT'S THE MOST UP-TO-DATE RESULT
+										let post_modified_date_timestamp = parseInt( new Date( synced_post.date_modified ).getTime() );
+
+										// ONLY CHANGE UI IF MODIFIED DATE IS NEWER THAN THE TIME THE SYNC STARTED
+										if ( post_modified_date_timestamp > sync_start_time ) {
+
+											let synced_post_id = parseInt( synced_post.source_post_id );
+
+
+											// INDICATE THAT A RECEIVER WAS SYNCED, BUT NOT ALL OF THEM
+											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-info" title="Partially synced. Please allow time for the data to propogate. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+
+											if ( 0 === sites_left_to_check ) {
+
+												// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
+												document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+
+												syncs_to_complete--;
+												if ( 0 === syncs_to_complete ) {
+													clearInterval( post_status_interval );
+												}
+											}
+
+											// UPDATE SYNCED TIME
+											document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
+
+										} else {
+											if ( 1 === parseInt( synced_post.diverged ) ) {
+												let tr = document.getElementById( 'synced_post-' + synced_post.source_post_id );
+												let att = document.createAttribute('diverged');
+												att.value = 1;
+												tr.setAttributeNode( att );
+												syncs_to_complete--;
 											}
 										}
-										
-										// UPDATE SYNCED TIME
-										document.getElementById( 'synced_post-' + synced_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
-									
-									} else {
-										if ( 1 === parseInt( synced_post.diverged ) ) {
-											let tr = document.getElementById( 'synced_post-' + synced_post.source_post_id );
-											let att = document.createAttribute('diverged');
-											att.value = 1;
-											tr.setAttributeNode( att );
-											syncs_to_complete--;
-										}
 									}
+
+
 								}
 								
 							});

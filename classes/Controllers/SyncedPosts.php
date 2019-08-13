@@ -25,8 +25,8 @@ class SyncedPosts {
 
 		// THIS WILL RETURN AN ARRAY WITH ONE VALUE OF 0 IF NOTHING IS EXCLUDED.
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
-		echo $post->post_title;
-		print_r($excluded_sites);die();
+//		echo $post->post_title;
+//		print_r($excluded_sites);die();
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
 

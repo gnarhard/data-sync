@@ -38,6 +38,9 @@ class Enqueue {
 						'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
 						'nonce' => wp_create_nonce( 'wp_rest' ),
 					),
+					'options' => array(
+						'enabled_post_types' => (array) get_option( 'enabled_post_types' ),
+					),
 				)
 			);
 
