@@ -7,8 +7,8 @@ function add_canonical_radio_inputs( $post ) {
 	$value = get_post_meta( $post->ID, '_canonical_site', true );
 
 	?>
-	<input type="radio" id="canonical_site" name="canonical_site" value="0" size="25" <?php checked( $value, 0 ); ?>/>
-	<label for="canonical_site">Source</label>
+<!--	<input type="radio" id="canonical_site" name="canonical_site" value="0" size="25" --><?php //checked( $value, 0 ); ?><!--/>-->
+<!--	<label for="canonical_site">None</label>-->
 
 	<?php
 	$connected_sites_obj = new ConnectedSites();
@@ -38,7 +38,7 @@ function add_excluded_sites_select_field( $post ) {
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	?>
 	<select name="excluded_sites[]" multiple id="excluded_sites" style="width: 100%; min-height: 200px;">
-		<option value="0" <?php selected( in_array( 0, $value ) ); ?>>None</option>
+<!--		<option value="0" --><?php //selected( in_array( 0, $value ) ); ?><!-->None</option>-->
 		<?php
 		if ( is_array( $connected_sites ) ) {
 			foreach ( $connected_sites as $site ) {

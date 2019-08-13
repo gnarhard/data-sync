@@ -45,7 +45,7 @@ function display_synced_posts_table() {
 						if ( count( $result ) ) {
 							foreach ( $result as $synced_post ) {
 								if ( true === (bool) $synced_post->diverged ) {
-									$post_status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to repair." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
+									$post_status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
 								}
 							}
 

@@ -131,7 +131,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	if ( document.getElementById( 'template_push' ) ) {
 		document.getElementById( 'template_push' ).onclick = function ( e ) {
 			e.preventDefault();
-			AJAX.post( DataSync.api.url + '/templates/sync' ).then( function ( result ) {
+			AJAX.post( DataSync.api.url + '/templates/start_sync' ).then( function ( result ) {
 				console.log( result );
 			} );
 		};

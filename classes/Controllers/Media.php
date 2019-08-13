@@ -66,7 +66,7 @@ class Media {
 		$synced_posts       = new SyncedPosts();
 		$data               = new \stdClass();
 		$data->media        = $media;
-		$data->source_url   = get_site_url();
+		$data->source_base_url   = get_site_url();
 		$data->synced_posts = (array) $synced_posts->get_all()->get_data();
 
 		foreach ( $connected_sites as $site ) {
@@ -95,23 +95,23 @@ class Media {
 
 	public function update() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->insert_into_wp( $data->source_url, $data->media, $data->synced_posts );
+		$this->insert_into_wp( $data->source_base_url, $data->media, $data->synced_posts );
 		wp_send_json_success( $data->media );
 	}
 
 
-	public function insert_into_wp( string $source_url, object $post, array $synced_posts ) {
+	public function insert_into_wp( string $source_base_url, object $post, array $synced_posts ) {
 
 		$post_array      = (array) $post;
 		$receiver_url    = $post_array['guid'];
 		$upload_dir      = wp_get_upload_dir();
 		$upload_base_dir = $upload_dir['basedir'];
 
-		$result = File::copy( $source_url, $receiver_url );
+		$result = File::copy( $source_base_url, $receiver_url );
 
 		if ( $result ) {
 			$media['post_parent'] = (int) $post->receiver_post_id;
-			$media['guid']        = (string) str_replace( $source_url, get_site_url(), $post_array['guid'] );
+			$media['guid']        = (string) str_replace( $source_base_url, get_site_url(), $post_array['guid'] );
 
 			$file_path_exploded = explode( '/uploads', $media['guid'] );
 			$file_path          = $upload_base_dir . $file_path_exploded[1];
