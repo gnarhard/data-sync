@@ -60,19 +60,16 @@ class SyncedPost {
 			'name'             => $data->name,
 			'post_type'        => $data->post_type,
 			'diverged'         => 0,
+			'date_modified'    => $data->date_modified,
 		);
-
-		if ( isset( $data->date_modified ) ) {
-			$args['date_modified'] = $data->date_modified;
-		} else {
-			$args['date_modified'] = current_time( 'mysql' );
-		}
 
 		$sprintf = array(
 			'%d',
 			'%d',
 			'%d',
 			'%s',
+			'%s',
+			'%d',
 			'%s',
 		);
 
@@ -91,13 +88,8 @@ class SyncedPost {
 			'receiver_site_id' => $data->receiver_site_id,
 			'post_type'        => $data->post_type,
 			'diverged'         => $data->diverged,
+			'date_modified'    => $data->date_modified,
 		);
-
-		if ( isset( $data->date_modified ) ) {
-			$args['date_modified'] = $data->date_modified;
-		} else {
-			$args['date_modified'] = current_time( 'mysql' );
-		}
 
 		$where = [ 'id' => $data->id ];
 		$db    = new DB( self::$table_name );

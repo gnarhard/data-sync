@@ -211,7 +211,7 @@ class SyncedPosts {
 			unset( $log );
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
-				var_dump($response );
+				var_dump( $response );
 			}
 		}
 
@@ -262,6 +262,7 @@ class SyncedPosts {
 		$data->name             = $source_post->post_title;
 		$data->post_type        = $source_post->post_type;
 		$data->diverged         = $source_post->diverged;
+		$data->date_modified    = current_time( 'mysql' );
 
 		return self::save( $data );
 	}

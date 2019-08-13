@@ -38,10 +38,10 @@ function display_synced_posts_table() {
 
 					foreach ( $post_types as $post ) {
 
-						$post_status    = '';
-						$post_meta      = get_post_meta( $post->ID );
-						$excluded_sites = unserialize( $post_meta['_excluded_sites'][0] );
-						$result         = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
+						$post_status                     = '';
+						$post_meta                       = get_post_meta( $post->ID );
+						$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
+						$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 						$number_of_synced_posts_returned = count( $result );
 
 						if ( $number_of_synced_posts_returned ) {
@@ -72,7 +72,7 @@ function display_synced_posts_table() {
 									$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
 								} else {
 									$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
-                                }
+								}
 							}
 						}
 
