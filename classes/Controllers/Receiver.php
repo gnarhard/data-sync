@@ -102,14 +102,18 @@ class Receiver {
 
 	private function bulk_process( object $source_data ) {
 
+		// STEP 1: GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
 		$receiver_options = (object) Options::receiver()->get_data();
 
+		// STEP 2: UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
 		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->options->debug );
 		update_option( 'show_body_responses', $source_data->options->show_body_responses );
 		update_option( 'overwrite_receiver_post_on_conflict', $source_data->options->overwrite_receiver_post_on_conflict );
 
+		// STEP 3: ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT.
+		// IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
 		PostTypes::process( $source_data->options->push_enabled_post_types );
 		if ( true === $source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
@@ -117,21 +121,26 @@ class Receiver {
 		$log = new Logs( 'Finished syncing post types.' );
 		unset( $log );
 
+		// STEP 4: ADD AND SAVE ALL TAXONOMIES.
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
-
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 
+		// STEP 5: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
 
 			if ( 0 === $post_count ) {
-				$log = new Logs( 'No posts in data.', true );
+				$log = new Logs( 'No posts in source data.', true );
+				unset( $log );
 			} else {
+				// LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
 				foreach ( $source_data->posts->$post_type_slug as $post ) {
+
+					// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
 					$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
 
 					if ( false !== $filtered_post ) {

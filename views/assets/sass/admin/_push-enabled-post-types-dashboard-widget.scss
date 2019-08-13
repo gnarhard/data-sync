@@ -1,6 +1,7 @@
 #wp_data_sync_enabled_post_types_dashboard {
   select {
     width: 100%;
+    min-height: 100px;
   }
 
   #save_push_enabled_post_types {

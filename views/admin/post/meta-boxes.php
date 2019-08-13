@@ -38,7 +38,7 @@ function add_excluded_sites_select_field( $post ) {
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	?>
 	<select name="excluded_sites[]" multiple id="excluded_sites" style="width: 100%; min-height: 200px;">
-<!--		<option value="0" --><?php //selected( in_array( 0, $value ) ); ?><!-->None</option>-->
+		<option value="0" <?php selected( in_array( 0, $value ) ); ?>>None</option>
 		<?php
 		if ( is_array( $connected_sites ) ) {
 			foreach ( $connected_sites as $site ) {
