@@ -23,8 +23,10 @@ class SyncedPost {
 
 		foreach ( $synced_posts as $index => $synced_post ) {
 			$post = get_post( $synced_post->source_post_id );
-			if ( 'trash' === $post->post_status ) {
-				unset( $synced_posts[ $index ] );
+			if ( isset( $post->ID ) ) {
+				if ( 'trash' === $post->post_status ) {
+					unset( $synced_posts[ $index ] );
+				}
 			}
 		}
 

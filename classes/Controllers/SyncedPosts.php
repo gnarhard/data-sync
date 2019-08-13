@@ -205,6 +205,16 @@ class SyncedPosts {
 		$response = new WP_REST_Response( SyncedPost::get_all() );
 		$response->set_status( 201 );
 
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Failed to get synced posts.', true );
+			unset( $log );
+		} else {
+			if ( get_option( 'show_body_responses' ) ) {
+				var_dump($response );
+			}
+		}
+
 		return $response;
 	}
 

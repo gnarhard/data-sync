@@ -53,5 +53,6 @@ function status_widget() {
 	<div id="error_log_wrap">
 		<a href="<?php echo admin_url( 'options-general.php?page=data-sync-options' ); ?>">Go to error log</a>
 	</div>
+    <div id="status_wrap"></div>
 	<?php
 }

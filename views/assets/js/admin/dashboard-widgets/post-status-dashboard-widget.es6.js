@@ -1,7 +1,7 @@
 import AJAX from '../AJAX.es6.js';
 
 document.addEventListener( 'DOMContentLoaded', function () {
-	
+	//TODO: ADD STATUS MESSAGES.
 	diverged_post_init();
 	
 	if ( document.getElementById( 'bulk_data_push' ) ) {
@@ -42,7 +42,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					AJAX.get( DataSync.api.url + '/synced_posts/all' ).then( function ( synced_posts ) {
 						
 						let sites_left_to_check = connected_site_count;
-						
+
+
+						console.log(synced_posts);
 						
 						
 						// LOOP THROUGH CONNECTED SITE IDS
@@ -53,9 +55,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 							
 							// FIND INDEXES OF SYNCED POSTS THAT MATCH THE CONNECTED SITE ID
 							let array_indexes = getAllIndexesWhere( synced_posts, 'receiver_site_id', connected_site_id );
-							
-							
-							
+
 							
 							
 							// LOOP THROUGH SYNCED POSTS WITH MATCHED CONNECTED SITE IDS
@@ -132,9 +132,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	
 	if ( document.getElementById( 'template_push' ) ) {
 		document.getElementById( 'template_push' ).onclick = function ( e ) {
+			document.getElementById( 'status_wrap' ).innerHTML += 'Pushing template <i class="dashicons dashicons-update"></i>';
 			e.preventDefault();
 			AJAX.post( DataSync.api.url + '/templates/start_sync' ).then( function ( result ) {
 				console.log( result );
+				document.getElementById( 'template_push' ).innerHTML += 'Template pushed successfully.';
 			} );
 		};
 	}

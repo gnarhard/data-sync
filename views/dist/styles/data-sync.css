@@ -147,6 +147,17 @@
   display: block;
 }
 
+#wp_data_sync_status_dashboard #status_wrap .dashicons-update {
+  -webkit-animation-name: spin;
+          animation-name: spin;
+  -webkit-animation-duration: 4000ms;
+          animation-duration: 4000ms;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+          animation-timing-function: linear;
+}
+
 @-webkit-keyframes spin {
   from {
     -webkit-transform: rotate(0deg);

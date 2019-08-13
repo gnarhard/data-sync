@@ -189,11 +189,18 @@ class SourceData {
 	private function get_receiver_data() {
 		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
 		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
+		$log                         = new Logs( 'Received error logs from receivers.' );
+		$log                         = new Logs( 'Received synced posts from receivers.' );
+		unset( $log );
 	}
 
 	private function save_receiver_data() {
 		Logs::save_to_source( $this->receiver_logs );
+		$log = new Logs( 'Synced receiver error logs to source.' );
+
 		SyncedPosts::save_all_to_source( $this->receiver_synced_posts );
+		$log = new Logs( 'Added receiver synced posts to source.' );
+		unset( $log );
 	}
 
 	private function consolidate() {

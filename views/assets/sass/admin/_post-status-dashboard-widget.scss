@@ -58,6 +58,15 @@
     }
   }
 
+  #status_wrap {
+    .dashicons-update {
+      animation-name: spin;
+      animation-duration: 4000ms;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+  }
+
 }
 
 @keyframes spin {

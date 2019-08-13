@@ -264,6 +264,8 @@ class Options {
 			add_settings_field( 'show_body_responses', 'Print AJAX Body Responses', $this->view_namespace . '\display_show_body_responses_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'show_body_responses' );
 
+			add_settings_field( 'start_fresh', 'Start Fresh', $this->view_namespace . '\display_start_fresh_link', 'data-sync-options', 'data_sync_options' );
+
 		elseif ( '0' === $source ) :
 
 			add_settings_field( 'awareness_messages', '', $this->view_namespace . '\display_awareness_messages', 'data-sync-options', 'data_sync_options' );

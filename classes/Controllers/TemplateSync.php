@@ -66,7 +66,6 @@ class TemplateSync {
 			}
 		}
 
-
 		wp_send_json_success();
 
 	}
@@ -111,7 +110,7 @@ class TemplateSync {
 	public function sync( $source_data ) {
 
 		$result = File::copy( $source_data->source_base_url, $source_data->remote_file_url, $source_data->file_contents );
-
+//TODO: FIX RETURN RESULT
 		if ( $result ) {
 			wp_send_json_success( $result );
 		} else {

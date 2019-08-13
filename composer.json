@@ -5,5 +5,8 @@
     "psr-4": {
       "DataSync\\": "./classes/"
     }
+  },
+  "require": {
+    "ext-json": "*"
   }
 }
