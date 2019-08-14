@@ -168,7 +168,7 @@ function diverged_post_init() {
 		$('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function() {
 			
 			// CHANGE ICON TO SPINNING UPDATE ICON
-			$(this).innerHTML = '<i class="dashicons dashicons-update"></i>';
+			$(this).parent()[0].innerHTML = '<i class="dashicons dashicons-update"></i>';
 			
 			let receiver_site_id = $(this).data('receiver-site-id');
 			let source_post_id = $(this).data('source-post-id');
