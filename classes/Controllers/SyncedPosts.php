@@ -63,28 +63,29 @@ class SyncedPosts {
 				}
 
 
-				if ( true !== (bool) $source_options->overwrite_yoast ) {
-
-					if ( $post->synced ) {
-						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
-						// AND THE POST IS ALREADY SYNCED,
-						// THEN DELETE ALL YOAST POST META DATA.
-						$post_meta = (array) $post->post_meta;
-
-						foreach ( $post_meta as $key => $value ) {
-							if ( strpos( $key, 'yoast' ) ) {
-								unset( $post_meta[ $key ] );
-							}
-						}
-
-						$post->post_meta = (object) $post_meta;
-
-					}
-
-					// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
-					// AND THE POST ISN'T SYNCED,
-					// THEN INCLUDE ALL YOAST POST META DATA.
-				}
+//				if ( true !== (bool) $source_options->overwrite_yoast ) {
+//
+//					if ( $post->synced ) {
+//						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
+//						// AND THE POST IS ALREADY SYNCED,
+//						// THEN DELETE ALL YOAST POST META DATA TRYING TO OVERWRITE
+//						// RECEIVER YOAST DATA.
+//						$post_meta = (array) $post->post_meta;
+//
+//						foreach ( $post_meta as $key => $value ) {
+//							if ( strpos( $key, 'yoast' ) ) {
+//								unset( $post_meta[ $key ] );
+//							}
+//						}
+//
+//						$post->post_meta = (object) $post_meta;
+//
+//					}
+//
+//					// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
+//					// AND THE POST ISN'T SYNCED,
+//					// THEN INCLUDE ALL YOAST POST META DATA.
+//				}
 
 				return $post;
 			}

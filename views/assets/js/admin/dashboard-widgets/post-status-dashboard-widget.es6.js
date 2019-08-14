@@ -2,6 +2,7 @@ import AJAX from '../AJAX.es6.js';
 
 document.addEventListener( 'DOMContentLoaded', function () {
 	//TODO: ADD STATUS MESSAGES.
+	// TODO: ADD CHECK FOR EXCLUDED SITES
 	diverged_post_init();
 	
 	if ( document.getElementById( 'bulk_data_push' ) ) {

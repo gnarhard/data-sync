@@ -17,7 +17,7 @@ function data_sync_options_page() {
 			do_settings_sections( 'data-sync-options' );
 			submit_button();
 			if ( get_option( 'source_site' ) ) {
-				if ( get_option ( 'debug' ) ) {
+				if ( '1' === get_option ( 'debug' ) ) {
 					?>
 					<h2>Log</h2>
 					<span id="refresh_error_log">Refresh log</span>

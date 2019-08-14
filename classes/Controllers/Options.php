@@ -95,7 +95,7 @@ class Options {
 		}
 
 		$options->enable_new_cpts                     = (bool) get_option( 'enable_new_cpts' );
-		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
+//		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
 		$options->overwrite_receiver_post_on_conflict = (bool) get_option( 'overwrite_receiver_post_on_conflict' );
 		$options->debug                               = (bool) get_option( 'debug' );
 		$options->show_body_responses                 = (bool) get_option( 'show_body_response' );
@@ -116,7 +116,7 @@ class Options {
 		$enabled_post_types = get_option( 'enabled_post_types' );
 		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
 			if ( count( $enabled_post_types ) > 0 ) {
-				print_r($enabled_post_types);die();
+//				print_r($enabled_post_types);die();
 				foreach ( $enabled_post_types as $post_type ) {
 					var_dump($post_type);
 					$post_type_object = get_post_type_object( $post_type );
@@ -253,8 +253,8 @@ class Options {
 			add_settings_field( 'enable_new_cpts', 'Automatically Enable New Custom Post Types On Receiver', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'enable_new_cpts' );
 
-			add_settings_field( 'overwrite_yoast', 'Overwrite Receiver Yoast Settings', $this->view_namespace . '\display_overwrite_yoast_checkbox', 'data-sync-options', 'data_sync_options' );
-			register_setting( 'data_sync_options', 'overwrite_yoast' );
+//			add_settings_field( 'overwrite_yoast', 'Overwrite Receiver Yoast Settings', $this->view_namespace . '\display_overwrite_yoast_checkbox', 'data-sync-options', 'data_sync_options' );
+//			register_setting( 'data_sync_options', 'overwrite_yoast' );
 
 			add_settings_field( 'overwrite_receiver_post_on_conflict', 'Overwrite Receiver Post if Receiver Post Was More Recently Edited', $this->view_namespace . '\display_overwrite_receiver_post_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'overwrite_receiver_post_on_conflict' );
@@ -264,10 +264,12 @@ class Options {
 
 			add_settings_field( 'debug', 'Debug', $this->view_namespace . '\display_debug_checkbox', 'data-sync-options', 'data_sync_options' );
 
-			add_settings_field( 'show_body_responses', 'Print AJAX Body Responses', $this->view_namespace . '\display_show_body_responses_checkbox', 'data-sync-options', 'data_sync_options' );
-			register_setting( 'data_sync_options', 'show_body_responses' );
+			if ( '1' === get_option( 'debug' ) ) :
+				add_settings_field( 'show_body_responses', 'Print AJAX Body Responses', $this->view_namespace . '\display_show_body_responses_checkbox', 'data-sync-options', 'data_sync_options' );
+				register_setting( 'data_sync_options', 'show_body_responses' );
 
-			add_settings_field( 'start_fresh', 'Start Fresh', $this->view_namespace . '\display_start_fresh_link', 'data-sync-options', 'data_sync_options' );
+				add_settings_field( 'start_fresh', 'Start Fresh', $this->view_namespace . '\display_start_fresh_link', 'data-sync-options', 'data_sync_options' );
+			endif;
 
 		elseif ( '0' === $source ) :
 

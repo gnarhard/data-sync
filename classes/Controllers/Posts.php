@@ -263,10 +263,15 @@ class Posts {
 		} elseif ( $receiver_post_id ) {
 
 			$receiver_post_id = (int) $receiver_post_id;
+			$override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
 
+			// Yoast and ACF data will be in here.
 			foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
-				// Yoast and ACF data will be in here.
+				// IF POST-LEVEL SETTING ALLOWS OVERRIDE
+				if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, 'yoast' ) ) ) {
+					unset($post->post_meta->$meta_key);
+				}
 
 				foreach ( $meta_value as $value ) {
 					$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
