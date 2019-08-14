@@ -31,6 +31,9 @@ class Taxonomies {
 	}
 
 	public static function save_to_wp( int $post_id, object $taxonomies ) {
+		$current_terms = wp_get_post_terms( $post_id );
+		print_r($current_terms);die();
+
 		foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
 			if ( false !== $taxonomy_data ) {
 				foreach ( $taxonomy_data as $term ) {
@@ -85,5 +88,10 @@ class Taxonomies {
 			$result = register_taxonomy( $taxonomy->name, $post_types, $args );
 		}
 
+	}
+
+
+	public function delete() {
+		// TODO: BUILD THIS
 	}
 }

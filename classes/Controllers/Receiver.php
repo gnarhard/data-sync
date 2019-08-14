@@ -126,7 +126,7 @@ class Receiver {
 		unset( $log );
 
 		// STEP 4: ADD AND SAVE ACF FIELDS
-		ACF::save_acf_fields( $source_data->acf );
+		ACFs::save_acf_fields( $source_data->acf );
 		$log = new Logs( 'Finished syncing ACF fields.' );
 		unset( $log );
 

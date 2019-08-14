@@ -10,6 +10,7 @@ use DataSync\Controllers\Widgets;
 use DataSync\Controllers\Receiver;
 use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\Posts;
+use DataSync\Models\ACF;
 use DataSync\Models\ConnectedSite;
 use DataSync\Controllers\Logs;
 use DataSync\Models\Log;
@@ -60,6 +61,10 @@ class Load {
 			$taxonomy = new Taxonomy();
 			$taxonomy->create_db_table();
 			new Taxonomies();
+
+			$acf = new ACF();
+			$acf->create_db_table();;
+
 		}
 
 	}
