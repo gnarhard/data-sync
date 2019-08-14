@@ -13,16 +13,37 @@ use ACF_Admin_Tool_Export;
 use stdClass;
 use DataSync\Models\DB;
 
+/**
+ * Class SourceData
+ * @package DataSync\Controllers
+ */
 class SourceData {
 
+	/**
+	 * @var
+	 */
 	public $source_data;
+	/**
+	 * @var
+	 */
 	public $receiver_logs;
+	/**
+	 * @var
+	 */
 	public $receiver_synced_posts;
 
+	/**
+	 * SourceData constructor.
+	 * Instantiate RESTful Route
+	 */
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
+	/**
+	 * Register RESTful routes for Data Sync API
+	 *
+	 */
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -68,6 +89,11 @@ class SourceData {
 		);
 	}
 
+	/**
+	 * Manually overwrite receiver post via API call
+	 *
+	 * @param WP_REST_Request $request
+	 */
 	public function overwrite_receiver_post( WP_REST_Request $request ) {
 		$url_params   = $request->get_url_params();
 		$synced_posts = new SyncedPosts();
@@ -112,10 +138,15 @@ class SourceData {
 		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
 	}
 
+	/**
+	 * Send data to all authorized connected sites
+	 *
+	 */
 	public function push() {
 
 		$this->consolidate();
 		$this->validate();
+		$this->configure_canonical_urls();
 
 		foreach ( $this->source_data->connected_sites as $site ) {
 
@@ -151,6 +182,11 @@ class SourceData {
 
 	}
 
+	/**
+	 *
+	 * Truncate source tables for a fresh testing start
+	 *
+	 */
 	public function start_fresh() {
 
 		$db               = new DB();
@@ -186,6 +222,10 @@ class SourceData {
 
 	}
 
+	/**
+	 *
+	 * Pull receiver logs and synced posts
+	 */
 	private function get_receiver_data() {
 		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
 		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
@@ -194,6 +234,10 @@ class SourceData {
 		unset( $log );
 	}
 
+	/**
+	 * Save pulled receiver logs and synced posts to source database
+	 *
+	 */
 	private function save_receiver_data() {
 		Logs::save_to_source( $this->receiver_logs );
 		$log = new Logs( 'Synced receiver error logs to source.' );
@@ -203,6 +247,10 @@ class SourceData {
 		unset( $log );
 	}
 
+	/**
+	 * Organize all source data before push
+	 *
+	 */
 	private function consolidate() {
 
 		$synced_posts = new SyncedPosts();
@@ -212,7 +260,7 @@ class SourceData {
 		$this->source_data->start_time        = (string) current_time( 'mysql' );
 		$this->source_data->start_microtime   = (float) microtime( true );
 		$this->source_data->options           = (array) $options;
-		$this->source_data->acf               = (array) ACF::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+		$this->source_data->acf               = (array) ACF::get_acf_fields();
 		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$this->source_data->url               = (string) get_site_url();
 		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
@@ -220,9 +268,37 @@ class SourceData {
 		$this->source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
 		$this->source_data->single_overwrite  = false;
+		$this->source_data->canonical_urls    = array();
 
 	}
 
+
+	/**
+	 *
+	 * Set up canonical urls that point to the permalink set in the canonical site
+	 */
+	private function configure_canonical_urls() {
+		foreach ( $this->source_data->posts as $post_type => $post_data ) {
+
+			foreach ( $post_data as $key => $post ) {
+
+				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
+				$connected_site = ConnectedSite::get( $canonical_site_id )[0];
+				$permalink = get_permalink( $post->ID );
+				$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
+
+				$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+			}
+
+		}
+	}
+
+
+	/**
+	 *
+	 * Validate specific settings before sending to receiver
+	 * Unset posts if they don't meet the criteria and send error
+	 */
 	private function validate() {
 
 		foreach ( $this->source_data->posts as $post_type => $post_data ) {

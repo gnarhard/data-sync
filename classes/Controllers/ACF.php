@@ -57,12 +57,10 @@ class ACF {
 	}
 
 	public static function save_acf_fields( $acf_data ) {
-		print_r($acf_data);
 
 		foreach ( $acf_data as $field_group ) {
 			$acf_group_data_array = Helpers::object_to_array( $field_group );
 			$result = acf_import_field_group( $acf_group_data_array );
-			print_r($result);
 		}
 
 	}
