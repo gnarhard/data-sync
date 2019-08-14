@@ -44,6 +44,8 @@ function display_synced_posts_table() {
 						$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 						$number_of_synced_posts_returned = count( $result );
 
+//						print_r($post);
+
 						if ( $number_of_synced_posts_returned ) {
 							foreach ( $result as $synced_post ) {
 								if ( true === (bool) $synced_post->diverged ) {
@@ -51,9 +53,15 @@ function display_synced_posts_table() {
 								}
 							}
 
-							$synced_post = (object) $result[0];
-							$time        = strtotime( $synced_post->date_modified );
-							$synced      = date( 'm/d/Y g:i:s a', $time );
+							$synced_post               = (object) $result[0];
+							$synced_post_modified_time = strtotime( $synced_post->date_modified );
+							$source_post_modified_time = strtotime( $post->post_modified );
+
+							if ( $source_post_modified_time > $synced_post_modified_time ) {
+								$synced = 'Source updated since last sync.';
+							} else {
+								$synced = date( 'm/d/Y g:i:s a', $synced_post_modified_time );
+							}
 
 						} else {
 							$synced = 'Unsynced';
