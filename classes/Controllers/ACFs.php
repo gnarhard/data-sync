@@ -6,7 +6,6 @@ namespace DataSync\Controllers;
 use DataSync\Helpers;
 use WP_Query;
 use stdClass;
-use DataSync\Models\ACF;
 
 
 class ACFs {
@@ -61,20 +60,7 @@ class ACFs {
 
 	public static function save_acf_fields( $acf_data ) {
 
-
 		$acf_group_data_array = Helpers::object_to_array( $acf_data );
-
-//		$synced_acf_groups = ACF::get_all();
-//
-//		foreach ( $synced_acf_groups as $synced_group ) {
-//			foreach ( $acf_data as $source_field_group ) {
-//				if ( $synced_group->name === $source_field_group['title'] ) {
-//					$source_field_group['ID']        = (int) $synced_group->receiver_id;
-//					$source_field_group['synced_id'] = (int) $synced_group->id;
-//				}
-//			}
-//		}
-
 
 		foreach ( $acf_group_data_array as $source_field_group ) {
 
@@ -85,26 +71,6 @@ class ACFs {
 			}
 
 			$result = acf_import_field_group( $source_field_group );
-
-//			if ( count( $result ) ) {
-//				self::save_to_sync_table( $result );
-//			}
-		}
-
-	}
-
-
-	public static function save_to_sync_table( $saved_group ) {
-
-		$data              = new \stdClass();
-		$data->name        = $saved_group['title'];
-		$data->receiver_id = $saved_group['ID'];
-
-		if ( isset( $saved_group['synced_id'] ) ) {
-			$data->id = (int) $saved_group['synced_id'];
-			$result   = ACF::update( $data );
-		} else {
-			$result = ACF::create( $data );
 		}
 
 	}
