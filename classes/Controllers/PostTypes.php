@@ -52,6 +52,9 @@ class PostTypes {
 	/**
 	 * @param object $data
 	 *
+	 * Saves all custom post types to database
+	 * DB Table Name: data_sync_custom_post_types
+	 *
 	 * @return mixed
 	 */
 	static function save( object $data ) {
@@ -81,6 +84,8 @@ class PostTypes {
 
 	/**
 	 *
+	 * Saves enabled custom post types for plugin option
+	 *
 	 */
 	public static function save_options() {
 		$data = (array) get_option( 'enabled_post_types' );
@@ -95,6 +100,7 @@ class PostTypes {
 	}
 
 	/**
+	 * Registers CTPs on plugin load
 	 *
 	 */
 	public function register() {

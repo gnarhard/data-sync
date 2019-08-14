@@ -212,7 +212,7 @@ class SourceData {
 		$this->source_data->start_time        = (string) current_time( 'mysql' );
 		$this->source_data->start_microtime   = (float) microtime( true );
 		$this->source_data->options           = (array) $options;
-		$this->source_data->acf               = (array) Posts::get_acf_fields(); // use acf_add_local_field_group() to install this array.
+		$this->source_data->acf               = (array) ACF::get_acf_fields(); // use acf_add_local_field_group() to install this array.
 		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$this->source_data->url               = (string) get_site_url();
 		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();

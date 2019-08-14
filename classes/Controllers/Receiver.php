@@ -125,14 +125,19 @@ class Receiver {
 		$log = new Logs( 'Finished syncing post types.' );
 		unset( $log );
 
-		// STEP 4: ADD AND SAVE ALL TAXONOMIES.
+		// STEP 4: ADD AND SAVE ACF FIELDS
+		ACF::save_acf_fields( $source_data->acf );
+		$log = new Logs( 'Finished syncing ACF fields.' );
+		unset( $log );
+
+		// STEP 5: ADD AND SAVE ALL TAXONOMIES.
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			Taxonomies::save( $taxonomy );
 		}
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 
-		// STEP 5: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
+		// STEP 6: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
