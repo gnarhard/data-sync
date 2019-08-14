@@ -6,17 +6,36 @@ namespace DataSync\Controllers;
 use DataSync\Models\PostType;
 use DataSync\Controllers\Logs;
 
+/**
+ * Class PostTypes
+ * @package DataSync\Controllers
+ */
 class PostTypes {
 
+	/**
+	 * PostTypes constructor.
+	 * Registers all CTPs
+	 */
 	public function __construct() {
 		add_action( 'init', [ $this, 'register' ] );
 	}
 
+	/**
+	 * @param string $slug
+	 *
+	 * @return mixed
+	 */
 	public static function get_id_from_slug( string $slug ) {
 		$args = [ 'name' => $slug ];
 		return PostType::get_where( $args );
 	}
 
+	/**
+	 * Saves all Custom Post Types to database table
+	 * DB Table: data_sync_custom_post_types
+	 *
+	 * @param object $post_types
+	 */
 	public static function process( object $post_types ) {
 		foreach ( $post_types as $post_type => $post_type_data ) :
 
@@ -29,6 +48,12 @@ class PostTypes {
 		endforeach;
 	}
 
+
+	/**
+	 * @param object $data
+	 *
+	 * @return mixed
+	 */
 	static function save( object $data ) {
 
 		$existing_post_types = (array) self::get_id_from_slug( $data->name );
@@ -54,10 +79,13 @@ class PostTypes {
 		return wp_parse_args( $new_data );
 	}
 
+	/**
+	 *
+	 */
 	public static function save_options() {
 		$data = (array) get_option( 'enabled_post_types' );
 
-		$synced_custom_post_types = self::get();
+		$synced_custom_post_types = PostType::get_all();
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$data[] = $post_type->name;
@@ -66,6 +94,9 @@ class PostTypes {
 		update_option( 'enabled_post_types', $data );
 	}
 
+	/**
+	 *
+	 */
 	public function register() {
 
 		$synced_custom_post_types = PostType::get_all();
