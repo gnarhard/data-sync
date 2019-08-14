@@ -33,6 +33,7 @@ class SyncedPosts {
 			} else {
 
 				if ( $post->synced ) {
+
 					$post->diverged = self::check_date_modified( $post, $synced_posts );
 
 					if ( $post->diverged ) {

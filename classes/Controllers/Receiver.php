@@ -154,6 +154,7 @@ class Receiver {
 
 					if ( false !== $filtered_post ) {
 						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+
 						$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 //						var_dump($synced_post_result);die();
 

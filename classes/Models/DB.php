@@ -74,8 +74,6 @@ class DB {
 			$i ++;
 		}
 
-//		print_r($query);die();
-
 		return $wpdb->get_results( $query );
 
 	}
