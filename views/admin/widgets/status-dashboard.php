@@ -47,7 +47,14 @@ function status_widget() {
 	</div>
 
 	<div id="status_dashboard_button_wrap">
-		<a id="bulk_data_push" href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></a>
+        <?php
+        if ( get_option( 'show_body_responses' ) ) {
+	        ?><button class="disabled" disabled title="Please disable 'Show Body Responses' option in the settings to enable data push." id="bulk_data_push" href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+        } else {
+	        ?><button id="bulk_data_push" href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+        }
+        ?>
+
 		<button id="template_push"><?php _e( 'Push Template', 'data_sync' ); ?></button>
 	</div>
 	<div id="error_log_wrap">

@@ -25,8 +25,6 @@ class SyncedPosts {
 
 		// THIS WILL RETURN AN ARRAY WITH ONE VALUE OF 0 IF NOTHING IS EXCLUDED.
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
-//		echo $post->post_title;
-//		print_r($excluded_sites);die();
 
 		foreach ( $excluded_sites as $excluded_site_id ) {
 
@@ -211,7 +209,7 @@ class SyncedPosts {
 			unset( $log );
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
-				var_dump( $response );
+				print_r( $response->data );
 			}
 		}
 
@@ -307,6 +305,7 @@ class SyncedPosts {
 
 	public function delete( $post_id ) {
 
+		// BULK DELETE
 		if ( get_option( 'source_site' ) ) {
 
 			$source_data                 = new stdClass();
@@ -357,6 +356,7 @@ class SyncedPosts {
 				}
 			}
 
+			// RECEIVER SIDE DELETION
 		} else {
 
 
@@ -389,14 +389,27 @@ class SyncedPosts {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
 		$log  = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
 		unset( $log );
+
+		// MUST TRASH BEFORE DELETION TO PERMANENTLY DELETE.
 		wp_trash_post( $data->receiver_post_id );
-		return wp_delete_post( $data->receiver_post_id );
+		wp_delete_post( $data->receiver_post_id );
+
+		$delete_orphaned_term_relationships_query = 'DELETE FROM ' . $wpdb->prefix . 'term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM posts)';
+		$db = new DB( 'term_relationships' );
+
+		return $this->delete_synced_post( $data );
 	}
 
-	public function delete_synced_post() {
-		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$log  = new Logs( 'Received delete request for post: ' . wp_json_encode( $data ) );
-		unset( $log );
+	public function delete_synced_post( $receiver_data = false ) {
+
+		if ( ! $receiver_data ) {
+			$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
+			$log         = new Logs( 'Received delete request for post: ' . wp_json_encode( $source_data ) );
+			unset( $log );
+			$data = $source_data;
+		} else {
+			$data = $receiver_data;
+		}
 
 		$args        = array(
 			'receiver_site_id' => (int) $data->receiver_site_id,

@@ -241,6 +241,10 @@ function display_start_fresh_link() {
         <li><code>wp_data_sync_posts</code></li>
         <li><code>wp_posts</code></li>
         <li><code>wp_postmeta</code></li>
+        <li><code>wp_terms</code></li>
+        <li><code>wp_termmeta</code></li>
+        <li><code>wp_term_taxonomy</code></li>
+        <li><code>wp_term_relationships</code></li>
     </ol>
     <?php
 }
@@ -254,6 +258,12 @@ function display_post_types_to_accept() {
 	$operator = 'and'; // 'and' or 'or'
 
 	$registered_post_types = get_post_types( $args, $output, $operator );
+
+	$allowed_post_types = get_option( 'enabled_post_types' );
+	if ( ! $allowed_post_types ) {
+	    $allowed_post_types = array();
+    }
+
 	?>
   <select name="enabled_post_types[]" multiple id="enabled_post_types">
 	  <?php
@@ -264,8 +274,7 @@ function display_post_types_to_accept() {
 		  }
 		  $post_type_object = get_post_type_object( $post_type );
 		  ?>
-        <option
-            value="<?php echo $post_type_object->name; ?>" <?php selected( in_array( $post_type_object->name, get_option( 'enabled_post_types' ) ) ); ?>><?php echo $post_type_object->name; ?></option>
+          <option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ), $allowed_post_types ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
 		  <?php
 	  }
 	  ?>

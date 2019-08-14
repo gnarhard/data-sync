@@ -95,7 +95,7 @@ class DB {
 			$sprintf
 		);
 
-		echo $wpdb->last_query;
+//		echo $wpdb->last_query;
 		if ( false === $created ) {
 			$error_msg = 'DB insert failed: ' . $wpdb->last_error;
 			$log       = new Logs( $error_msg, true );

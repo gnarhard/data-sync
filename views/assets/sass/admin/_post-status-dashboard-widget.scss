@@ -41,6 +41,11 @@
         margin: 10px;
       }
 
+      .disabled {
+        background: grey;
+        cursor: not-allowed;
+      }
+
       a:hover,
       button:hover {
         background: grey;

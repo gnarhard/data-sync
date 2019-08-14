@@ -28,6 +28,17 @@ class Posts {
 		$registered_post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
 
 		add_meta_box(
+			'override_post_yoast',
+			__(
+				'Override Receiver Yoast Settings',
+				'textdomain'
+			),
+			$this->view_namespace . '\add_override_post_yoast_checkbox',
+			$registered_post_types,
+			'side',
+		);
+
+		add_meta_box(
 			'canonical_site',
 			__(
 				'Canonical Site',
@@ -96,6 +107,11 @@ class Posts {
 			$data           = $_POST['excluded_sites'];
 			$sanitized_data = array_map( 'absint', $data );
 			update_post_meta( $post_id, '_excluded_sites', $sanitized_data );
+		}
+		if ( isset( $_POST['override_post_yoast'] ) ) {
+			update_post_meta( $post_id, '_override_post_yoast', $_POST['override_post_yoast'] );
+		} else {
+			update_post_meta( $post_id, '_override_post_yoast', 0 );
 		}
 
 		return true;

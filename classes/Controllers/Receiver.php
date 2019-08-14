@@ -53,6 +53,10 @@ class Receiver {
 		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
 		$sql_statements[] = 'TRUNCATE TABLE wp_posts';
 		$sql_statements[] = 'TRUNCATE TABLE wp_postmeta';
+		$sql_statements[] = 'TRUNCATE TABLE wp_terms';
+		$sql_statements[] = 'TRUNCATE TABLE wp_termmeta';
+		$sql_statements[] = 'TRUNCATE TABLE wp_term_taxonomy';
+		$sql_statements[] = 'TRUNCATE TABLE wp_term_relationships';
 
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );
