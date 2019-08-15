@@ -8,8 +8,17 @@ use DataSync\Models\DB;
 use DataSync\Models\SyncedPost;
 use WP_REST_Server;
 
+/**
+ * Class Media
+ * @package DataSync\Controllers
+ */
 class Media {
 
+	/**
+	 * Media constructor.
+	 *
+	 * @param null $all_posts
+	 */
 	public function __construct( $all_posts = null ) {
 
 		if ( null === $all_posts ) {
@@ -61,13 +70,17 @@ class Media {
 
 	}
 
+	/**
+	 * @param $media
+	 * @param $connected_sites
+	 */
 	public function send_to_receiver( $media, $connected_sites ) {
 
-		$synced_posts       = new SyncedPosts();
-		$data               = new \stdClass();
-		$data->media        = $media;
-		$data->source_base_url   = get_site_url();
-		$data->synced_posts = (array) $synced_posts->get_all()->get_data();
+		$synced_posts          = new SyncedPosts();
+		$data                  = new \stdClass();
+		$data->media           = $media;
+		$data->source_base_url = get_site_url();
+		$data->synced_posts    = (array) $synced_posts->get_all()->get_data();
 
 		foreach ( $connected_sites as $site ) {
 
@@ -93,6 +106,9 @@ class Media {
 
 	}
 
+	/**
+	 *
+	 */
 	public function update() {
 		$data = (object) json_decode( file_get_contents( 'php://input' ) );
 		$this->insert_into_wp( $data->source_base_url, $data->media, $data->synced_posts );
@@ -100,12 +116,18 @@ class Media {
 	}
 
 
+	/**
+	 * @param string $source_base_url
+	 * @param object $post
+	 * @param array $synced_posts
+	 */
 	public function insert_into_wp( string $source_base_url, object $post, array $synced_posts ) {
 
 		$post_array      = (array) $post;
 		$receiver_url    = $post_array['guid'];
 		$upload_dir      = wp_get_upload_dir();
 		$upload_base_dir = $upload_dir['basedir'];
+
 
 		$result = File::copy( $source_base_url, $receiver_url );
 
@@ -147,7 +169,7 @@ class Media {
 //					return false;
 //				}
 				$post->diverged = false;
-				$attachment_id = $synced_post[0]->id;
+				$attachment_id  = $synced_post[0]->receiver_post_id;
 			} else {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, $media['post_parent'] );
 			}
@@ -157,12 +179,32 @@ class Media {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
 				wp_update_attachment_metadata( $attachment_id, $attachment_data );
+				$this->update_thumbnail_id( $post, $attachment_id );
 				SyncedPosts::save_to_receiver( $attachment_id, $post );
 			}
+
+
 		}
 	}
 
 
+	/**
+	 * This makes sure the parent's thumbnail id to the attached image (featured image) is updated.
+	 */
+	private function update_thumbnail_id( $post, $attachment_id ) {
+		$args               = array(
+			'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+			'source_post_id'   => $post->post_parent,
+		);
+		$synced_post_parent = SyncedPost::get_where( $args )[0];
+
+		$updated     = update_post_meta( $synced_post_parent->receiver_post_id, '_thumbnail_id', $attachment_id );
+	}
+
+
+	/**
+	 *
+	 */
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
