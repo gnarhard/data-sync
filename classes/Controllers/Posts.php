@@ -122,7 +122,8 @@ class Posts {
 
 		foreach ( $types as $type ) {
 
-			$posts->$type = self::get_wp_posts( $type );
+			// Must convert single string to array.
+			$posts->$type = self::get_wp_posts( [ $type ] );
 
 			foreach ( $posts->$type as $post ) {
 
@@ -160,7 +161,8 @@ class Posts {
 		return $post;
 	}
 
-	private static function get_wp_posts( string $type ) {
+	public static function get_wp_posts( array $type ) {
+
 		$args = array(
 			'post_type'      => $type,
 			'post_status'    => array( 'publish' ),

@@ -13,10 +13,8 @@ function display_synced_posts_table() {
 	$connected_sites           = $connected_sites_obj->get_all()->data;
 	$number_of_sites_connected = count( $connected_sites );
 	$source_options            = Options::source()->get_data();
-	$posts                     = Posts::get( array_keys( $source_options->push_enabled_post_types ) );
-//	print_r($posts);
-	$sorted_posts   = clone( (object) array_reverse( (array) $posts ) );
-	$array_of_posts = (array) $sorted_posts;
+	$post_types                = array_keys( $source_options->push_enabled_post_types );
+	$posts                     = Posts::get_wp_posts( $post_types );
 	?>
     <table id="wp_data_sync_status">
         <thead>
@@ -31,72 +29,66 @@ function display_synced_posts_table() {
         <tbody>
 		<?php
 
-		if ( count( $array_of_posts ) ) {
-			foreach ( $sorted_posts as $post_types ) {
+		if ( count( $posts ) ) {
 
-				if ( ! empty( $post_types ) ) {
+			foreach ( $posts as $post ) {
 
-					foreach ( $post_types as $post ) {
-
-						$post_status                     = '';
-						$post_meta                       = get_post_meta( $post->ID );
-						$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
-						$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
-						$number_of_synced_posts_returned = count( $result );
+				$post_status                     = '';
+				$post_meta                       = get_post_meta( $post->ID );
+				$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
+				$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
+				$number_of_synced_posts_returned = count( $result );
 
 //						print_r($post);
 
-						if ( $number_of_synced_posts_returned ) {
-							foreach ( $result as $synced_post ) {
-								if ( true === (bool) $synced_post->diverged ) {
-									$post_status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
-								}
-							}
-
-							$synced_post               = (object) $result[0];
-							$synced_post_modified_time = strtotime( $synced_post->date_modified );
-							$source_post_modified_time = strtotime( $post->post_modified );
-
-							if ( $source_post_modified_time > $synced_post_modified_time ) {
-								$synced = 'Source updated since last sync.';
-							} else {
-								$synced = date( 'm/d/Y g:i:s a', $synced_post_modified_time );
-							}
-
-						} else {
-							$synced = 'Unsynced';
+				if ( $number_of_synced_posts_returned ) {
+					foreach ( $result as $synced_post ) {
+						if ( true === (bool) $synced_post->diverged ) {
+							$post_status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
 						}
-
-						if ( '' === $post_status ) {
-							if ( count( $result ) === $number_of_sites_connected ) {
-								$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-							} elseif ( 0 === count( $result ) ) {
-								$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
-							} else {
-
-								$amount_of_sites_synced = $number_of_sites_connected - count( $excluded_sites );
-
-								if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
-									$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
-								} else {
-									$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
-								}
-							}
-						}
-
-						?>
-                        <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
-                            <td><?php echo esc_html( $post->ID ); ?></td>
-                            <td><?php echo esc_html( $post->post_title ); ?></td>
-                            <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
-                            <td class="wp_data_synced_post_status_synced_time"><?php echo esc_html( $synced ); ?></td>
-                            <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
-                        </tr>
-						<?php
-
 					}
 
+					$synced_post               = (object) $result[0];
+					$synced_post_modified_time = strtotime( $synced_post->date_modified );
+					$source_post_modified_time = strtotime( $post->post_modified );
+
+					if ( $source_post_modified_time > $synced_post_modified_time ) {
+						$synced = 'Source updated since last sync.';
+					} else {
+						$synced = date( 'm/d/Y g:i:s a', $synced_post_modified_time );
+					}
+
+				} else {
+					$synced = 'Unsynced';
 				}
+
+				if ( '' === $post_status ) {
+					if ( count( $result ) === $number_of_sites_connected ) {
+						$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+					} elseif ( 0 === count( $result ) ) {
+						$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+					} else {
+
+						$amount_of_sites_synced = $number_of_sites_connected - count( $excluded_sites );
+
+						if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
+							$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+						} else {
+							$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+						}
+					}
+				}
+
+				?>
+                <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
+                    <td><?php echo esc_html( $post->ID ); ?></td>
+                    <td><?php echo esc_html( $post->post_title ); ?></td>
+                    <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
+                    <td class="wp_data_synced_post_status_synced_time"><?php echo esc_html( $synced ); ?></td>
+                    <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
+                </tr>
+				<?php
+
 			}
 		} else {
 			echo '<tr>No posts to sync</tr>';
