@@ -137,29 +137,32 @@ class Receiver {
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 
-		// STEP 6: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
-		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
+		// SAFEGUARD AGAINST SITES WITHOUT ANY ENABLED POST TYPES.
+		if ( 'string' !== gettype( $receiver_options->enabled_post_types ) ) {
 
-			$post_count = count( $source_data->posts->$post_type_slug );
-			echo 'post count: ' . $post_count;
+			// STEP 6: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
+			foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
-			if ( 0 === $post_count ) {
-				$log = new Logs( 'No posts in source data.', true );
-				unset( $log );
-			} else {
-				// LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
-				foreach ( $source_data->posts->$post_type_slug as $post ) {
+				$post_count = count( $source_data->posts->$post_type_slug );
 
-					// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
-					$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
+				if ( 0 === $post_count ) {
+					$log = new Logs( 'No posts in source data.', true );
+					unset( $log );
+				} else {
+					// LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
+					foreach ( $source_data->posts->$post_type_slug as $post ) {
 
-					if ( false !== $filtered_post ) {
-						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+						// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
+						$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
 
-						$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+						if ( false !== $filtered_post ) {
+							$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
 
-						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
-						unset( $log );
+							$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+
+							$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+							unset( $log );
+						}
 					}
 				}
 			}
