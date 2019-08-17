@@ -66,7 +66,7 @@ class ACFs {
 
 			$existing_acf_group = get_page_by_path( $source_field_group['key'], ARRAY_A, 'acf-field-group' );
 
-			if ( count( $existing_acf_group ) ) {
+			if ( $existing_acf_group ) {
 				$source_field_group['ID'] = $existing_acf_group['ID'];
 			}
 

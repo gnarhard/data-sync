@@ -89,6 +89,7 @@ class TemplateSync {
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
 				if ( get_option( 'show_body_responses' ) ) {
+					echo 'Template Sync';
 					print_r( wp_remote_retrieve_body( $response ) );
 				}
 			}

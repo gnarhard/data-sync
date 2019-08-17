@@ -140,7 +140,7 @@ class Posts {
 		return true;
 	}
 
-	public static function get( array $types ) {
+	public static function get_all( array $types ) {
 		$posts = new stdClass();
 
 		foreach ( $types as $type ) {
@@ -214,8 +214,8 @@ class Posts {
 
 		$postmeta = get_post_meta( $post_id );
 
-		foreach( $postmeta as $key => $meta ) {
-			$postmeta[$key] = $meta[0];
+		foreach ( $postmeta as $key => $meta ) {
+			$postmeta[ $key ] = $meta[0];
 		}
 
 		$postmeta['_excluded_sites'] = unserialize( $postmeta['_excluded_sites'] );
@@ -256,20 +256,25 @@ class Posts {
 			return false;
 		} elseif ( $receiver_post_id ) {
 
-			$receiver_post_id    = (int) $receiver_post_id;
-			$override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
+			$receiver_post_id = (int) $receiver_post_id;
 
-			// Yoast and ACF data will be in here.
-			foreach ( $post->post_meta as $meta_key => $meta_value ) {
+			if ( 'attachment' !== $post->post_type ) {
 
-				// IF POST-LEVEL SETTING ALLOWS OVERRIDE
-				if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, 'yoast' ) ) ) {
-					unset( $post->post_meta->$meta_key );
+				$override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
+
+				// Yoast and ACF data will be in here.
+				foreach ( $post->post_meta as $meta_key => $meta_value ) {
+
+					// IF POST-LEVEL SETTING DOES NOT ALLOW OVERWRITING OF YOAST DATA, UNSET YOAST-RELATED POSTMETA.
+					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, 'yoast' ) ) ) {
+						unset( $post->post_meta->$meta_key );
+					}
+
+					foreach ( $meta_value as $value ) {
+						$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
+					}
 				}
 
-				foreach ( $meta_value as $value ) {
-					$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
-				}
 			}
 
 			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );

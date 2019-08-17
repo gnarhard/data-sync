@@ -67,6 +67,7 @@ class Logs {
 			unset( $log );
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
+				echo 'Logs';
 				print_r( wp_remote_retrieve_body( $response ) );
 			}
 		}
@@ -106,6 +107,7 @@ class Logs {
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
+					echo 'Logs';
 					print_r( wp_remote_retrieve_body( $response ) );
 				}
 			}

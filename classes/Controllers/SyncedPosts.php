@@ -63,31 +63,6 @@ class SyncedPosts {
 					}
 				}
 
-
-//				if ( true !== (bool) $source_options->overwrite_yoast ) {
-//
-//					if ( $post->synced ) {
-//						// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
-//						// AND THE POST IS ALREADY SYNCED,
-//						// THEN DELETE ALL YOAST POST META DATA TRYING TO OVERWRITE
-//						// RECEIVER YOAST DATA.
-//						$post_meta = (array) $post->post_meta;
-//
-//						foreach ( $post_meta as $key => $value ) {
-//							if ( strpos( $key, 'yoast' ) ) {
-//								unset( $post_meta[ $key ] );
-//							}
-//						}
-//
-//						$post->post_meta = (object) $post_meta;
-//
-//					}
-//
-//					// IF SOURCE IS NOT ALLOWED TO OVERWRITE YOAST SETTINGS,
-//					// AND THE POST ISN'T SYNCED,
-//					// THEN INCLUDE ALL YOAST POST META DATA.
-//				}
-
 				return $post;
 			}
 		}
@@ -146,6 +121,7 @@ class SyncedPosts {
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
+					echo 'SyncedPosts';
 					print_r( wp_remote_retrieve_body( $response ) );
 				}
 			}
@@ -211,6 +187,7 @@ class SyncedPosts {
 			unset( $log );
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
+				echo 'SyncedPosts';
 				print_r( $response->data );
 			}
 		}
@@ -346,6 +323,7 @@ class SyncedPosts {
 						unset( $log );
 					} else {
 						if ( get_option( 'show_body_responses' ) ) {
+							echo 'SyncedPosts';
 							print_r( wp_remote_retrieve_body( $response ) );
 						}
 
@@ -378,6 +356,7 @@ class SyncedPosts {
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
+					echo 'SyncedPosts';
 					print_r( wp_remote_retrieve_body( $response ) );
 				}
 				$log = new Logs( 'Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url() );
@@ -397,7 +376,7 @@ class SyncedPosts {
 		wp_delete_post( $data->receiver_post_id );
 
 		$delete_orphaned_term_relationships_query = 'DELETE FROM ' . $wpdb->prefix . 'term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM posts)';
-		$db = new DB( 'term_relationships' );
+		$db                                       = new DB( 'term_relationships' );
 
 		return $this->delete_synced_post( $data );
 	}

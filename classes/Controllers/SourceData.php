@@ -128,6 +128,7 @@ class SourceData {
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
 				if ( get_option( 'show_body_responses' ) ) {
+					echo 'SourceData';
 					print_r( wp_remote_retrieve_body( $response ) );
 				}
 			}
@@ -164,6 +165,7 @@ class SourceData {
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
 					if ( get_option( 'show_body_responses' ) ) {
+						echo 'SourceData';
 						print_r( wp_remote_retrieve_body( $response ) );
 					}
 				}
@@ -212,6 +214,7 @@ class SourceData {
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
 					if ( get_option( 'show_body_responses' ) ) {
+						echo 'SourceData';
 						print_r( wp_remote_retrieve_body( $response ) );
 					}
 				}
@@ -266,7 +269,7 @@ class SourceData {
 		$this->source_data->url               = (string) get_site_url();
 		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->posts             = (object) Posts::get( array_keys( $options->push_enabled_post_types ) );
+		$this->source_data->posts             = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
 		$this->source_data->single_overwrite  = false;
 		$this->source_data->canonical_urls    = array();

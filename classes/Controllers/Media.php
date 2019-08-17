@@ -97,6 +97,7 @@ class Media {
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
 					if ( get_option( 'show_body_responses' ) ) {
+						echo 'Media';
 						print_r( wp_remote_retrieve_body( $response ) );
 					}
 				}
@@ -155,6 +156,9 @@ class Media {
 			);
 			$synced_post = SyncedPost::get_where( $args );
 
+			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME
+			$post->diverged = false;
+
 			if ( count( $synced_post ) ) {
 //				if ( true !== get_option( 'overwrite_receiver_post_on_conflict' ) ) {
 //					$post->diverged = SyncedPosts::check_date_modified( $post, $synced_posts );
@@ -196,9 +200,15 @@ class Media {
 			'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 			'source_post_id'   => $post->post_parent,
 		);
-		$synced_post_parent = SyncedPost::get_where( $args )[0];
+		$synced_post_parent = SyncedPost::get_where( $args );
+		if ( $synced_post_parent ) {
+			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+		} else {
+			$log = new Logs( 'ERROR: Post thumbnail not updated for ' . $post->post_title, true );
+			unset( $log );
+		}
 
-		$updated     = update_post_meta( $synced_post_parent->receiver_post_id, '_thumbnail_id', $attachment_id );
+
 	}
 
 

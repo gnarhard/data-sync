@@ -114,7 +114,7 @@ class Receiver {
 		update_option( 'data_sync_source_site_url', $source_data->url );
 		update_option( 'debug', $source_data->options->debug );
 		update_option( 'show_body_responses', $source_data->options->show_body_responses );
-		update_option( 'overwrite_receiver_post_on_conflict', $source_data->options->overwrite_receiver_post_on_conflict );
+		update_option( 'overwrite_receiver_post_on_conflict', (bool) $source_data->options->overwrite_receiver_post_on_conflict );
 
 		// STEP 3: ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT.
 		// IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
@@ -141,6 +141,7 @@ class Receiver {
 		foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 			$post_count = count( $source_data->posts->$post_type_slug );
+			echo 'post count: ' . $post_count;
 
 			if ( 0 === $post_count ) {
 				$log = new Logs( 'No posts in source data.', true );
@@ -156,7 +157,6 @@ class Receiver {
 						$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
 
 						$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
-//						var_dump($synced_post_result);die();
 
 						$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
 						unset( $log );

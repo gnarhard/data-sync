@@ -114,14 +114,15 @@ class Options {
 		);
 
 		$enabled_post_types = get_option( 'enabled_post_types' );
-		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-			if ( count( $enabled_post_types ) > 0 ) {
-				foreach ( $enabled_post_types as $post_type ) {
-					$post_type_object = get_post_type_object( $post_type );
-					$option_keys[]    = $post_type_object->name . '_perms';
-				}
-			}
-		}
+		// FOR PERMISSIONS
+//		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
+//			if ( count( $enabled_post_types ) > 0 ) {
+//				foreach ( $enabled_post_types as $post_type ) {
+//					$post_type_object = get_post_type_object( $post_type );
+//					$option_keys[]    = $post_type_object->name . '_perms';
+//				}
+//			}
+//		}
 
 		return Options::get_all( $option_keys );
 	}

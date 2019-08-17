@@ -88,15 +88,10 @@ class PostTypes {
 	 *
 	 */
 	public static function save_options() {
-		$data = (array) get_option( 'enabled_post_types' );
-
+		$enabled_post_types = (array) get_option( 'enabled_post_types' );
 		$synced_custom_post_types = PostType::get_all();
 
-		foreach ( $synced_custom_post_types as $post_type ) {
-			$data[] = $post_type->name;
-		}
-
-		update_option( 'enabled_post_types', $data );
+		update_option( 'enabled_post_types', array_merge( $enabled_post_types, $synced_custom_post_types ) );
 	}
 
 	/**
