@@ -82,7 +82,7 @@ function display_synced_posts_table() {
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
-                    <td><?php echo esc_html( $post->post_title ); ?></td>
+                    <td><a href="/wp-admin/post.php?post=<?php echo $post->ID;?>&action=edit" target="_blank"><?php echo esc_html( $post->post_title ); ?></a></td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
                     <td class="wp_data_synced_post_status_synced_time"><?php echo esc_html( $synced ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>

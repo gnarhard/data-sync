@@ -145,6 +145,11 @@
   cursor: not-allowed;
 }
 
+#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap .wait {
+  background: grey;
+  cursor: wait;
+}
+
 #wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap a:hover,
 #wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button:hover {
   background: grey;

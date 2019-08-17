@@ -54,6 +54,11 @@
         cursor: not-allowed;
       }
 
+      .wait {
+        background: grey;
+        cursor: wait;
+      }
+
       a:hover,
       button:hover {
         background: grey;

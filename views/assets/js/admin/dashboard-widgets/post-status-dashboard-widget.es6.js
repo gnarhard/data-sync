@@ -8,7 +8,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	if ( document.getElementById( 'bulk_data_push' ) ) {
 		document.getElementById( 'bulk_data_push' ).onclick = function ( e ) {
 			e.preventDefault();
-			
+
+			document.getElementById( 'bulk_data_push' ).classList.add('wait');
+			let disabled_att = document.createAttribute('disabled');
+			document.getElementById( 'bulk_data_push' ).setAttributeNode( disabled_att );
+
 			// CHANGE ICONS TO SPINNING UPDATE ICON
 			document.querySelectorAll( '.wp_data_synced_post_status_icons' ).forEach( function ( node ) {
 				node.innerHTML = '<i class="dashicons dashicons-update"></i>';
@@ -45,7 +49,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 						let sites_left_to_check = connected_site_count;
 
 
-						console.log(synced_posts);
+						// console.log(synced_posts);
 						
 						
 						// LOOP THROUGH CONNECTED SITE IDS
@@ -107,6 +111,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 														syncs_to_complete--;
 														if ( 0 === syncs_to_complete ) {
 															clearInterval( post_status_interval );
+															// DONE!
+															document.getElementById( 'bulk_data_push' ).classList.remove('wait');
+															document.getElementById( 'bulk_data_push' ).removeAttributeNode( disabled_att );
 														}
 													}
 
