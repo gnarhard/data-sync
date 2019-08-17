@@ -55,7 +55,7 @@ function display_synced_posts_table() {
 					if ( $source_post_modified_time > $synced_post_modified_time ) {
 						$synced = 'Source updated since last sync.';
 					} else {
-						$synced = date( 'm/d/Y g:i:s a', $synced_post_modified_time );
+						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
 					}
 
 				} else {

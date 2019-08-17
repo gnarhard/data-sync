@@ -5,6 +5,8 @@ namespace DataSync\Controllers;
 
 use WP_Query;
 use stdClass;
+use WP_REST_Server;
+use WP_REST_Request;
 
 class Posts {
 
@@ -15,6 +17,27 @@ class Posts {
 		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
 		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
 		add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+	}
+
+	public function register_routes() {
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/post_meta/(?P<id>\d+)',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_custom_post_meta' ),
+					'args'     => array(
+						'id' => array(
+							'description'       => 'ID of post',
+							'type'              => 'int',
+							'validate_callback' => 'is_numeric',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	public function add_meta_boxes_into_cpts( $args ) {
@@ -47,7 +70,7 @@ class Posts {
 			$this->view_namespace . '\add_canonical_radio_inputs',
 			$registered_post_types,
 			'side',
-			);
+		);
 
 		add_meta_box(
 			'excluded_sites',
@@ -58,7 +81,7 @@ class Posts {
 			$this->view_namespace . '\add_excluded_sites_select_field',
 			$registered_post_types,
 			'side',
-			);
+		);
 	}
 
 	public function save_meta_boxes( int $post_id ) {
@@ -186,6 +209,20 @@ class Posts {
 	}
 
 
+	public function get_custom_post_meta( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		$postmeta = get_post_meta( $post_id );
+
+		foreach( $postmeta as $key => $meta ) {
+			$postmeta[$key] = $meta[0];
+		}
+
+		$postmeta['_excluded_sites'] = unserialize( $postmeta['_excluded_sites'] );
+
+		return $postmeta;
+	}
+
 
 	public static function save( object $post, array $synced_posts ) {
 
@@ -219,7 +256,7 @@ class Posts {
 			return false;
 		} elseif ( $receiver_post_id ) {
 
-			$receiver_post_id = (int) $receiver_post_id;
+			$receiver_post_id    = (int) $receiver_post_id;
 			$override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
 
 			// Yoast and ACF data will be in here.
@@ -227,7 +264,7 @@ class Posts {
 
 				// IF POST-LEVEL SETTING ALLOWS OVERRIDE
 				if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, 'yoast' ) ) ) {
-					unset($post->post_meta->$meta_key);
+					unset( $post->post_meta->$meta_key );
 				}
 
 				foreach ( $meta_value as $value ) {
