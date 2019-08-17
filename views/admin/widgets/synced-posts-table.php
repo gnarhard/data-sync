@@ -52,12 +52,6 @@ function display_synced_posts_table() {
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified );
 
-					if ( $source_post_modified_time > $synced_post_modified_time ) {
-						$synced = 'Source updated since last sync.';
-					} else {
-						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
-					}
-
 				} else {
 					$synced = 'Unsynced';
 				}
@@ -77,6 +71,13 @@ function display_synced_posts_table() {
 							$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
 						}
 					}
+				}
+
+				if ( $source_post_modified_time > $synced_post_modified_time ) {
+					$synced = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
+					$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+				} else {
+					$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
 				}
 
 				?>

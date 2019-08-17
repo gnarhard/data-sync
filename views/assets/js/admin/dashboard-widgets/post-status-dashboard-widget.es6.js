@@ -93,10 +93,12 @@ document.addEventListener( 'DOMContentLoaded', function () {
 												if ( postmeta ) {
 													console.log( postmeta._excluded_sites );
 													// SUBTRACT THE NUMBER OF EXCLUDED SITES FROM THE SITES LEFT TO CHECK.
-													if ( ( 0 !== postmeta._excluded_sites[0] ) && ( 0 < sites_left_to_check ) ) {
-														// 0 IS THE DEFAULT VALUE FOR NONE
-														sites_left_to_check -= postmeta._excluded_sites.length;
-													}
+													// TODO: STILL DOESN'T WORK YET!
+
+													// if ( ( 0 !== postmeta._excluded_sites[0] ) && ( 0 < sites_left_to_check ) ) {
+													// 	// 0 IS THE DEFAULT VALUE FOR NONE
+													// 	sites_left_to_check -= postmeta._excluded_sites.length;
+													// }
 
 													console.log( sites_left_to_check );
 
