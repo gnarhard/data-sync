@@ -50,6 +50,13 @@ function display_synced_posts_table() {
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified );
 
+					if ( $source_post_modified_time > $synced_post_modified_time ) {
+						$synced = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
+						$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+					} else {
+						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
+					}
+
 				} else {
 					$synced = 'Unsynced';
 				}
@@ -71,13 +78,6 @@ function display_synced_posts_table() {
 					}
 				}
 
-				if ( $source_post_modified_time > $synced_post_modified_time ) {
-					$synced = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
-					$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
-				} else {
-					$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
-				}
-
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
@@ -87,8 +87,8 @@ function display_synced_posts_table() {
                     <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
                 </tr>
 				<?php
-
 			}
+
 		} else {
 			echo '<tr>No posts to sync</tr>';
 		}
