@@ -85,6 +85,10 @@
   color: orange;
 }
 
+#wp_data_sync_status_dashboard .push_post_now {
+  cursor: pointer;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status {
   width: 100%;
   text-align: left;
