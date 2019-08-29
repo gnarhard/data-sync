@@ -87,8 +87,8 @@ function display_synced_posts_table() {
                     <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
                 </tr>
 				<?php
-
 			}
+
 		} else {
 			echo '<tr>No posts to sync</tr>';
 		}
