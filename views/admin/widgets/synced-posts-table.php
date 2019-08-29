@@ -39,8 +39,6 @@ function display_synced_posts_table() {
 				$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 				$number_of_synced_posts_returned = count( $result );
 
-//						print_r($post);
-
 				if ( $number_of_synced_posts_returned ) {
 					foreach ( $result as $synced_post ) {
 						if ( true === (bool) $synced_post->diverged ) {
