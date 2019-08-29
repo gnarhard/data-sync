@@ -14,10 +14,11 @@ class Posts {
 
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'save_post', [ $this, 'save_meta_boxes' ] );
+		add_action( 'save_post', [ $this, 'save_custom_values' ] );
 		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
 		add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
 	}
 
 	public function register_routes() {
@@ -38,6 +39,16 @@ class Posts {
 				),
 			)
 		);
+	}
+
+	public function display_admin_notices() {
+		$errors = get_option( 'my_admin_errors' );
+
+		if ( $errors ) {
+
+			echo '<div class="error"><p>' . $errors . '</p></div>';
+
+		}
 	}
 
 	public function add_meta_boxes_into_cpts( $args ) {
@@ -84,7 +95,11 @@ class Posts {
 		);
 	}
 
-	public function save_meta_boxes( int $post_id ) {
+	public function save_custom_values( int $post_id ) {
+
+		// To keep the errors in
+		$errors = false;
+
 		/*
 		 * We need to verify this came from the our screen and with proper authorization,
 		 * because save_post can be triggered at other times.
@@ -125,17 +140,26 @@ class Posts {
 		if ( isset( $_POST['canonical_site'] ) ) {
 			$data = sanitize_text_field( wp_unslash( $_POST['canonical_site'] ) );
 			update_post_meta( $post_id, '_canonical_site', $data );
+		} else {
+			// Add an error here - for some reason doesn't work?!
+			$errors .= 'A canonical site is required before proper post syndication to connected sites.';
 		}
+
 		if ( isset( $_POST['excluded_sites'] ) ) {
 			$data           = $_POST['excluded_sites'];
 			$sanitized_data = array_map( 'absint', $data );
 			update_post_meta( $post_id, '_excluded_sites', $sanitized_data );
+		} else {
+			update_post_meta( $post_id, '_excluded_sites', 0 );
 		}
+
 		if ( isset( $_POST['override_post_yoast'] ) ) {
 			update_post_meta( $post_id, '_override_post_yoast', $_POST['override_post_yoast'] );
 		} else {
 			update_post_meta( $post_id, '_override_post_yoast', 0 );
 		}
+
+		update_option( 'my_admin_errors', $errors );
 
 		return true;
 	}
