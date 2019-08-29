@@ -35,7 +35,6 @@ function display_synced_posts_table() {
 
 				$post_status                     = '';
 				$post_meta                       = get_post_meta( $post->ID );
-//				var_dump($post_meta);
 				$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
 				$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 				$number_of_synced_posts_returned = count( $result );
