@@ -17,7 +17,7 @@ function add_canonical_radio_inputs( $post ) {
 		foreach ( $connected_sites as $site ) {
 			?>
             <br>
-            <input type="radio" id="canonical_site" name="canonical_site" value="<?php echo esc_html( $site->id ); ?>"
+            <input type="radio" name="canonical_site" value="<?php echo esc_html( $site->id ); ?>"
                    size="25" <?php checked( $value, $site->id ); ?>/>
             <label for="canonical_site">
 				<?php echo esc_html( $site->name ); ?>
