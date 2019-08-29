@@ -4,6 +4,10 @@
     width: 100%;
     text-align: left;
 
+    .trashed {
+      color: red;
+    }
+
     .wp_data_synced_post_status_icons {
       text-align: center;
 

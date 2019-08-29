@@ -206,11 +206,17 @@ class Posts {
 		return $post;
 	}
 
-	public static function get_wp_posts( array $type ) {
+	public static function get_wp_posts( array $type, $get_trashed = false ) {
+
+		if ( $get_trashed ) {
+			$statuses = array( 'publish', 'trash' );
+		} else {
+			$statuses = array( 'publish' );
+		}
 
 		$args = array(
 			'post_type'      => $type,
-			'post_status'    => array( 'publish' ),
+			'post_status'    => $statuses,
 			'orderby'        => 'post_date',
 			'order'          => 'DESC',
 			'posts_per_page' => - 1, // show all posts.
