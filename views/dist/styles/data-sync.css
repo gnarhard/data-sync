@@ -81,6 +81,10 @@
   padding: 5px;
 }
 
+#wp_data_sync_status_dashboard .warning {
+  color: orange;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status {
   width: 100%;
   text-align: left;
@@ -96,10 +100,6 @@
 
 #wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-editor-unlink {
   cursor: pointer;
-}
-
-#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-warning {
-  color: red;
 }
 
 #wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-yes {

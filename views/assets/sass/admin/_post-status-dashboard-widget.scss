@@ -1,4 +1,8 @@
 #wp_data_sync_status_dashboard {
+  .warning {
+    color: orange;
+  }
+
 
   #wp_data_sync_status {
     width: 100%;
@@ -13,10 +17,6 @@
 
       .dashicons-editor-unlink {
         cursor: pointer;
-      }
-
-      .dashicons-warning {
-        color: red;
       }
 
       .dashicons-yes {

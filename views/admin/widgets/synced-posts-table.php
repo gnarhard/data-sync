@@ -52,8 +52,8 @@ function display_synced_posts_table() {
 					$source_post_modified_time = strtotime( $post->post_modified );
 
 					if ( $source_post_modified_time > $synced_post_modified_time ) {
-						$synced      = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
-						$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+						$synced      = '<span class="warning">Source updated since last sync. <a>Push Now.</a></span>';
+						$post_status = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 					} else {
 						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
 					}
@@ -71,7 +71,7 @@ function display_synced_posts_table() {
 					if ( count( $result ) === $number_of_sites_connected ) {
 						$post_status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
 					} elseif ( 0 === count( $result ) ) {
-						$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+						$post_status = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 					} else {
 
 						$amount_of_sites_synced = $number_of_sites_connected - count( $excluded_sites );
@@ -93,7 +93,7 @@ function display_synced_posts_table() {
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
-                    <td class="wp_data_synced_post_status_synced_time"><?php echo esc_html( $synced ); ?></td>
+                    <td class="wp_data_synced_post_status_synced_time"><?php echo $synced; ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
                 </tr>
 				<?php
