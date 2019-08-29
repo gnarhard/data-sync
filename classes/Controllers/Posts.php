@@ -141,8 +141,8 @@ class Posts {
 			$data = sanitize_text_field( wp_unslash( $_POST['canonical_site'] ) );
 			update_post_meta( $post_id, '_canonical_site', $data );
 		} else {
-			// Add an error here - for some reason doesn't work?!
-			$errors .= 'A canonical site is required before proper post syndication to connected sites.';
+			// Add an error here.
+			$errors .= "A canonical site is required in post $post_id before proper post syndication to connected sites.";
 		}
 
 		if ( isset( $_POST['excluded_sites'] ) ) {
@@ -158,8 +158,6 @@ class Posts {
 		} else {
 			update_post_meta( $post_id, '_override_post_yoast', 0 );
 		}
-
-		update_option( 'my_admin_errors', $errors );
 
 		return true;
 	}
@@ -208,11 +206,17 @@ class Posts {
 		return $post;
 	}
 
-	public static function get_wp_posts( array $type ) {
+	public static function get_wp_posts( array $type, $get_trashed = false ) {
+
+		if ( $get_trashed ) {
+			$statuses = array( 'publish', 'trash' );
+		} else {
+			$statuses = array( 'publish' );
+		}
 
 		$args = array(
 			'post_type'      => $type,
-			'post_status'    => array( 'publish' ),
+			'post_status'    => $statuses,
 			'orderby'        => 'post_date',
 			'order'          => 'DESC',
 			'posts_per_page' => - 1, // show all posts.

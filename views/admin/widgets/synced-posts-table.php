@@ -14,7 +14,7 @@ function display_synced_posts_table() {
 	$number_of_sites_connected = count( $connected_sites );
 	$source_options            = Options::source()->get_data();
 	$post_types                = array_keys( $source_options->push_enabled_post_types );
-	$posts                     = Posts::get_wp_posts( $post_types );
+	$posts                     = Posts::get_wp_posts( $post_types, true );
 	?>
     <table id="wp_data_sync_status">
         <thead>
@@ -38,6 +38,7 @@ function display_synced_posts_table() {
 				$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
 				$result                          = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 				$number_of_synced_posts_returned = count( $result );
+				$trash_class                     = "";
 
 				if ( $number_of_synced_posts_returned ) {
 					foreach ( $result as $synced_post ) {
@@ -51,7 +52,7 @@ function display_synced_posts_table() {
 					$source_post_modified_time = strtotime( $post->post_modified );
 
 					if ( $source_post_modified_time > $synced_post_modified_time ) {
-						$synced = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
+						$synced      = 'Source updated since last sync. <a class="">Push Now (doesnt work yet but would you like it to?).</a>';
 						$post_status = '<i class="dashicons dashicons-warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 					} else {
 						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
@@ -59,6 +60,11 @@ function display_synced_posts_table() {
 
 				} else {
 					$synced = 'Unsynced';
+				}
+
+				if ( 'trash' === $post->post_status ) {
+					$post_status = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
+					$trash_class = "trashed";
 				}
 
 				if ( '' === $post_status ) {
@@ -76,12 +82,16 @@ function display_synced_posts_table() {
 							$post_status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
 						}
 					}
+
 				}
 
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
-                    <td><a href="/wp-admin/post.php?post=<?php echo $post->ID;?>&action=edit" target="_blank"><?php echo esc_html( $post->post_title ); ?></a></td>
+                    <td>
+                        <a class="<?php echo $trash_class ?>" href="/wp-admin/post.php?post=<?php echo $post->ID; ?>&action=edit"
+                           target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
+                    </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
                     <td class="wp_data_synced_post_status_synced_time"><?php echo esc_html( $synced ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $post_status; ?></td>
