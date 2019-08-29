@@ -1,27 +1,31 @@
 window.onload = function(e){
-  let publishButton = document.getElementsByClassName('editor-post-publish-button' )[0];
 
-  publishButton.onclick = function ( e ) {
-    e.preventDefault();
+  if ( document.getElementsByClassName('editor-post-publish-button' ).length ) {
+    let publishButton = document.getElementsByClassName('editor-post-publish-button' )[0];
 
-    let radios = document.getElementsByName('canonical_site');
+    publishButton.onclick = function ( e ) {
+      e.preventDefault();
 
-    for (let i = 0, length = radios.length; i < length; i++)
-    {
-      if (radios[i].checked)
+      let radios = document.getElementsByName('canonical_site');
+
+      for (let i = 0, length = radios.length; i < length; i++)
       {
-        // do whatever you want with the checked radio
-        let canonical_setting_value = adios[i].value;
+        if (radios[i].checked)
+        {
+          // do whatever you want with the checked radio
+          let canonical_setting_value = adios[i].value;
 
-        // only one radio can be logically checked, don't check the rest
-        break;
+          // only one radio can be logically checked, don't check the rest
+          break;
+        }
+      }
+
+      if ( typeof canonical_setting_value === 'undefined' ) {
+        alert( 'Please choose a canonical site before proceeding.');
+        e.stopImmediatePropagation();
+        return;
       }
     }
-
-    if ( typeof canonical_setting_value === 'undefined' ) {
-      alert( 'Please choose a canonical site before proceeding.');
-      e.stopImmediatePropagation();
-      return;
-    }
   }
+
 }

@@ -52,7 +52,7 @@ function display_synced_posts_table() {
 					$source_post_modified_time = strtotime( $post->post_modified );
 
 					if ( $source_post_modified_time > $synced_post_modified_time ) {
-						$synced      = '<span class="warning">Source updated since last sync. <a>Push Now.</a></span>';
+						$synced      = '<span class="warning">Source updated since last sync. <a class="push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Push Now.</a></span>';
 						$post_status = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 					} else {
 						$synced = date( 'g:i:s A n/d/Y', $synced_post_modified_time );
