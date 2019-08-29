@@ -33,6 +33,9 @@ function add_excluded_sites_select_field( $post ) {
 
 	if ( count( $value ) ) {
 		$value = $value[0];
+	} else {
+		// DEFAULT TO NONE.
+		$value = [ 0 ];
 	}
 
 	$connected_sites_obj = new ConnectedSites();

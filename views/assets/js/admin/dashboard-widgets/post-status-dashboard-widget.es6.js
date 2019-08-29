@@ -211,7 +211,9 @@ function diverged_post_init() {
 					// INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
 					document.getElementById( 'synced_post-' + source_post_id ).getElementsByClassName( 'wp_data_synced_post_status_icons' )[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
 					// UPDATE SYNCED TIME
-					document.getElementById( 'synced_post-' + source_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = synced_post.date_modified;
+					// TODO: DATE FORMAT IS INCORRECT, DOUBLE CHECK THE FIX
+					let post_modified_date = new Date( synced_post.date_modified ).toLocaleString( 'en-US', { timeZone: 'America/Denver' } );
+					document.getElementById( 'synced_post-' + source_post_id ).getElementsByClassName( 'wp_data_synced_post_status_synced_time' )[0].innerHTML = post_modified_date;
 				}
 			} );
 		});
