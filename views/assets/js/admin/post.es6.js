@@ -20,6 +20,7 @@ window.onload = function(e){
 
     if ( typeof canonical_setting_value === 'undefined' ) {
       alert( 'Please choose a canonical site before proceeding.');
+      e.stopImmediatePropagation();
       return;
     }
   }
