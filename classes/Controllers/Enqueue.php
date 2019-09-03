@@ -53,7 +53,8 @@ class Enqueue {
 	 * Enqueues styles
 	 */
 	public function admin_styles() {
-		wp_enqueue_style( 'jquery-ui' );
+
+		wp_enqueue_style( 'jquery-ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css' );
 
 		wp_register_style( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1 );
 		wp_enqueue_style( 'data-sync-admin' );

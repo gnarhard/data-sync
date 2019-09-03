@@ -3,8 +3,10 @@
 
 namespace DataSync\Controllers;
 
-use DataSync\Models\PostType;
 use DataSync\Controllers\Logs;
+use DataSync\Models\PostType;
+use DataSync\Controllers\Options;
+use WP_REST_Server;
 
 /**
  * Class PostTypes
@@ -18,6 +20,7 @@ class PostTypes {
 	 */
 	public function __construct() {
 		add_action( 'init', [ $this, 'register' ] );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	/**
@@ -27,7 +30,49 @@ class PostTypes {
 	 */
 	public static function get_id_from_slug( string $slug ) {
 		$args = [ 'name' => $slug ];
+
 		return PostType::get_where( $args );
+	}
+
+	public static function check_enabled_post_types_on_receiver() {
+
+		$connected_sites             = (array) ConnectedSites::get_all()->get_data();
+		$enabled_post_type_site_data = array();
+
+		foreach ( $connected_sites as $site ) {
+
+			$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
+			$response = wp_remote_get( $url );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				if ( get_option( 'show_body_responses' ) ) {
+					if ( get_option( 'show_body_responses' ) ) {
+						echo 'check_enabled_post_types_on_receiver()';
+						print_r( wp_remote_retrieve_body( $response ) );
+					}
+				}
+
+				$enabled_post_type_site_data[] = [
+					'site_id'            => $site->id,
+					'enabled_post_types' => json_decode( wp_remote_retrieve_body( $response ) ),
+				];
+			}
+
+		}
+
+		return $enabled_post_type_site_data;
+	}
+
+	public function check_enabled_post_types() {
+
+		$receiver_options = (object) Options::receiver()->get_data();
+
+		return $receiver_options->enabled_post_types;
+
 	}
 
 	/**
@@ -88,7 +133,7 @@ class PostTypes {
 	 *
 	 */
 	public static function save_options() {
-		$enabled_post_types = (array) get_option( 'enabled_post_types' );
+		$enabled_post_types       = (array) get_option( 'enabled_post_types' );
 		$synced_custom_post_types = PostType::get_all();
 
 		update_option( 'enabled_post_types', array_merge( $enabled_post_types, $synced_custom_post_types ) );
@@ -111,11 +156,26 @@ class PostTypes {
 				}
 			}
 
-			$args['labels'] = array( 'menu_name' => $args['label'] );
+			$args['labels']    = array( 'menu_name' => $args['label'] );
 			$args['menu_icon'] = ( '' === $args['menu_icon'] ) ? 'dashicons-admin-post' : $args['menu_icon'];
 
 			$result = register_post_type( $post_type->name, $args );
 		}
+
+	}
+
+	public function register_routes() {
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/post_types/check',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'check_enabled_post_types' ),
+				),
+			)
+		);
 
 	}
 

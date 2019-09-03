@@ -89,6 +89,41 @@
   cursor: pointer;
 }
 
+#wp_data_sync_status_dashboard .none_enabled {
+  color: red;
+}
+
+#wp_data_sync_status_dashboard table {
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+#wp_data_sync_status_dashboard table td:first-of-type {
+  width: 30px;
+}
+
+#wp_data_sync_status_dashboard table th:first-of-type {
+  float: left;
+}
+
+#wp_data_sync_status_dashboard table th:last-of-type {
+  float: right;
+}
+
+#wp_data_sync_status_dashboard table .reveal_connected_site_details {
+  cursor: pointer;
+  float: right;
+}
+
+#wp_data_sync_status_dashboard table .connected_site_details {
+  padding: 10px;
+  margin: 10px 0 10px 0;
+}
+
+#wp_data_sync_status_dashboard #connected_site_link_wrap a {
+  color: #0073aa;
+}
+
 #wp_data_sync_status_dashboard #wp_data_sync_status {
   width: 100%;
   text-align: left;
