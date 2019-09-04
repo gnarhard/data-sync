@@ -49,12 +49,12 @@ class PostTypes {
 				$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'check_enabled_post_types_on_receiver()';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
+//				if ( get_option( 'show_body_responses' ) ) {
+//					if ( get_option( 'show_body_responses' ) ) {
+//						echo 'check_enabled_post_types_on_receiver()';
+//						print_r( wp_remote_retrieve_body( $response ) );
+//					}
+//				}
 
 				$enabled_post_type_site_data[] = [
 					'site_id'            => $site->id,
@@ -133,10 +133,15 @@ class PostTypes {
 	 *
 	 */
 	public static function save_options() {
-		$enabled_post_types       = (array) get_option( 'enabled_post_types' );
-		$synced_custom_post_types = PostType::get_all();
+		$enabled_post_types              = (array) get_option( 'enabled_post_types' );
+		$synced_custom_post_types        = PostType::get_all();
+		$synced_custom_post_types_to_add = array();
 
-		update_option( 'enabled_post_types', array_merge( $enabled_post_types, $synced_custom_post_types ) );
+		foreach ( $synced_custom_post_types as $cpt ) {
+			$synced_custom_post_types_to_add[] = $cpt->name;
+		}
+
+		update_option( 'enabled_post_types', array_merge( $enabled_post_types, $synced_custom_post_types_to_add ) );
 	}
 
 	/**
