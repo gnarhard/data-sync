@@ -267,7 +267,6 @@ function show_success( result ) {
 
 jQuery(function ($) {
   $(document).ready(function () {
-    $('.post_details').hide();
 
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
