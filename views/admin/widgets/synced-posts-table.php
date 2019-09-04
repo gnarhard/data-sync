@@ -77,10 +77,6 @@ function display_synced_posts_table() {
 }
 
 
-
-
-
-
 function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
 	?>
     <div class="connected_site_info">
@@ -131,10 +127,17 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
                     </ol>
 					<?php
 				} else {
-					$no_enabled_post_types_on_site = true;
+
 					?>
-                    <span class="none_enabled"><strong>No enabled post types on this site. Syndication will fail.</strong></span>
-					<?php
+                    <span class="none_enabled"><strong>No enabled post types on this site. Syndication will fail.</strong></span><?php
+
+					$no_enabled_post_types_on_site = true;
+					$post_meta                     = get_post_meta( $post->ID );
+
+					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
+						?><span class="none_enabled"><strong>This post's canonical settings are pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
+					}
+
 				}
 			}
 
