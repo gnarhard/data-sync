@@ -234,12 +234,19 @@ function push_single_post ( receiver_site_id, source_post_id ) {
 
 jQuery(function ($) {
   $(document).ready(function () {
-    $('#data_sync_status_tabs').tabs();
-    $('.connected_site_details').hide();
+    // $('#data_sync_status_tabs').tabs();
+
+    // $('.connected_site_details').hide();
+    $('.post_details').hide();
 
     $('.reveal_connected_site_details').unbind().click( function() {
       let id = $(this).data('id');
       $('#connected_site-' + id).toggle();
+    });
+
+    $('.expand_post_details').unbind().click( function() {
+      let id = $(this).data('id');
+      $('#post-' + id).toggle();
     });
   })
 

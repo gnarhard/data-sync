@@ -3,6 +3,20 @@
     color: orange;
   }
 
+  .danger_button {
+    background:#d9534f;
+    color: white;
+  }
+
+  .warning_button {
+    background:#f0ad4e;
+    color: white;
+  }
+
+  .success {
+    color: #5cb85c;
+  }
+
   .push_post_now {
     cursor: pointer;
   }
@@ -30,6 +44,7 @@
     .reveal_connected_site_details {
       cursor: pointer;
       float: right;
+      font-size: 30px;
     }
 
     .connected_site_details {
@@ -52,6 +67,43 @@
 
     .trashed {
       color: red;
+    }
+
+    .expand_post_details {
+      float: right;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+
+    .post_details {
+      padding: 10px;
+      margin: 10px 0 10px 0;
+      background: #0c0c0c05;
+
+      span {
+        width: 100%;
+        display: block;
+        margin: 5px 0 5px 0;
+      }
+
+      .post_detail_wrap {
+        padding: 10px;
+
+        h4 {
+          text-align: center;
+          font-weight: bold;
+        }
+
+        .source_details, .connected_site_info {
+          margin-bottom: 30px;
+        }
+
+        .details {
+          margin-bottom: 40px;
+        }
+      }
+
     }
 
     .wp_data_synced_post_status_icons {

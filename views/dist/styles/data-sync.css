@@ -85,6 +85,20 @@
   color: orange;
 }
 
+#wp_data_sync_status_dashboard .danger_button {
+  background: #d9534f;
+  color: white;
+}
+
+#wp_data_sync_status_dashboard .warning_button {
+  background: #f0ad4e;
+  color: white;
+}
+
+#wp_data_sync_status_dashboard .success {
+  color: #5cb85c;
+}
+
 #wp_data_sync_status_dashboard .push_post_now {
   cursor: pointer;
 }
@@ -113,6 +127,7 @@
 #wp_data_sync_status_dashboard table .reveal_connected_site_details {
   cursor: pointer;
   float: right;
+  font-size: 30px;
 }
 
 #wp_data_sync_status_dashboard table .connected_site_details {
@@ -131,6 +146,42 @@
 
 #wp_data_sync_status_dashboard #wp_data_sync_status .trashed {
   color: red;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .expand_post_details {
+  float: right;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details {
+  padding: 10px;
+  margin: 10px 0 10px 0;
+  background: #0c0c0c05;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details span {
+  width: 100%;
+  display: block;
+  margin: 5px 0 5px 0;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap {
+  padding: 10px;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap h4 {
+  text-align: center;
+  font-weight: bold;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .source_details,
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .connected_site_info {
+  margin-bottom: 30px;
+}
+
+#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .details {
+  margin-bottom: 40px;
 }
 
 #wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons {
