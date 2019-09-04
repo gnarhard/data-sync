@@ -95,7 +95,7 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 		$connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false;
 		?>
-        <strong>Site ID: <?php echo $site->id ?>  &middot;  <?php echo $site->url ?></strong>
+        <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong>
         <div class="details">
 			<?php
 			if ( ! empty( $connected_site_synced_post ) ) {
@@ -120,9 +120,9 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 				$no_enabled_post_types_on_site = true;
 				$post_meta                     = get_post_meta( $post->ID );
-				$excluded_sites = unserialize( $post_meta['_excluded_sites'][0] );
+				$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
 
-				if ( in_array( (int) $site->id, $excluded_sites) ) {
+				if ( in_array( (int) $site->id, $excluded_sites ) ) {
 					?><span class="none_enabled"><strong>This post is excluding this receiver.</strong></span><?php
 
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
@@ -169,12 +169,12 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				} else {
 					// NOT SYNCED.
 
-					if ( in_array( (int) $site->id, $excluded_sites) ) {
+					if ( in_array( (int) $site->id, $excluded_sites ) ) {
 						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 					} else {
 						$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
 						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
-                    }
+					}
 
 				}
 
