@@ -266,13 +266,21 @@ class Posts {
 		$syndication_info->trash_class   = "";
 		$source_version_edited           = false;
 		$sync_status                     = 'unsynced';
+		$amount_of_sites_synced          = $number_of_sites_connected - count( $excluded_sites );
 
 		if ( $number_of_synced_posts_returned ) {
 			foreach ( $synced_post_result as $synced_post ) {
 				if ( true === (bool) $synced_post->diverged ) {
 					$sync_status = 'diverged';
-
 				}
+			}
+
+			if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
+				$sync_status = 'synced';
+			} elseif ( 0 === $amount_of_sites_synced ) {
+				$sync_status = 'unsynced';
+			} else {
+				$sync_status = 'partial';
 			}
 
 			$synced_post               = (object) $synced_post_result[0];
@@ -297,24 +305,6 @@ class Posts {
 		if ( 'trash' === $post->post_status ) {
 			$sync_status                   = 'trashed';
 			$syndication_info->trash_class = "trashed";
-		}
-
-		if ( '' === $syndication_info->status ) {
-			if ( count( $synced_post_result ) === $number_of_sites_connected ) {
-				$sync_status = 'synced';
-			} elseif ( 0 === count( $synced_post_result ) ) {
-				$sync_status = 'unsynced';
-			} else {
-
-				$amount_of_sites_synced = $number_of_sites_connected - count( $excluded_sites );
-
-				if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
-					$sync_status = 'synced';
-				} else {
-					$sync_status = 'partial';
-				}
-			}
-
 		}
 
 		if ( 'synced' === $sync_status ) {

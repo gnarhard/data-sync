@@ -118,6 +118,15 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 			// CONNECTED SITES INFO
 			$site_info = $enabled_post_type_site_data[ $index ];
 			if ( $site->id === $site_info['site_id'] ) {
+
+				$no_enabled_post_types_on_site = true;
+				$post_meta                     = get_post_meta( $post->ID );
+
+
+				if ( in_array($site->id, $post_meta['_excluded_site'][0]) ) {
+					?><span class="none_enabled"><strong>This post is excluding this receiver. No syndication will occur.</strong></span><?php
+				}
+
 				if ( ! empty( $site_info['enabled_post_types'] ) ) {
 					?>
                     <span><strong>Enabled Post Types:</strong></span>
@@ -135,8 +144,7 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 					?>
                     <span class="none_enabled"><strong>No enabled post types on this site. Syndication will fail.</strong></span><?php
 
-					$no_enabled_post_types_on_site = true;
-					$post_meta                     = get_post_meta( $post->ID );
+
 
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
 						?><span class="none_enabled"><strong>This post's canonical settings are pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
