@@ -147,15 +147,15 @@ class SourceData {
 
 		if ( is_wp_error( $response ) ) {
 			echo $response->get_error_message();
-			$log = new Logs( 'Error in SourceData->overwrite_receiver_post() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
+			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
 		} else {
-//				if ( get_option( 'show_body_responses' ) ) {
-//					if ( get_option( 'show_body_responses' ) ) {
-//						echo 'SourceData';
-			print_r( wp_remote_retrieve_body( $response ) );
-//					}
-//				}
+			if ( get_option( 'show_body_responses' ) ) {
+				if ( get_option( 'show_body_responses' ) ) {
+					echo 'SourceData';
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
+			}
 		}
 
 		$this->finish_push( $response );
@@ -178,7 +178,7 @@ class SourceData {
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
-				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
