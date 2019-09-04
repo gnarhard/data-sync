@@ -95,8 +95,7 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 		$connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false;
 		?>
-        <strong>Site ID: <?php echo $site->id ?></strong>
-        <span><?php echo $site->url ?></span>
+        <strong>Site ID: <?php echo $site->id ?>  &middot;  <?php echo $site->url ?></strong>
         <div class="details">
 			<?php
 			if ( ! empty( $connected_site_synced_post ) ) {
@@ -124,7 +123,11 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				$excluded_sites = unserialize( $post_meta['_excluded_sites'][0] );
 
 				if ( in_array( (int) $site->id, $excluded_sites) ) {
-					?><span class="none_enabled"><strong>This post is excluding this receiver. Syndication will fail.</strong></span><?php
+					?><span class="none_enabled"><strong>This post is excluding this receiver.</strong></span><?php
+
+					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
+						?><span class="none_enabled"><strong>This post's canonical URL is pointing to a receiver that is excluded.</strong></span><?php
+					}
 				}
 
 				if ( ! empty( $site_info['enabled_post_types'] ) ) {
@@ -142,11 +145,11 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				} else {
 
 					?>
-                    <span class="none_enabled"><strong>No enabled post types on this site. Syndication will fail.</strong></span><?php
+                    <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
 
 
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
-						?><span class="none_enabled"><strong>This post's canonical settings are pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
+						?><span class="none_enabled"><strong>This post's canonical URL is pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
 					}
 
 				}
@@ -165,8 +168,14 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 				} else {
 					// NOT SYNCED.
-					$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-					$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+
+					if ( in_array( (int) $site->id, $excluded_sites) ) {
+						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+					} else {
+						$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+                    }
+
 				}
 
 			} else {
