@@ -269,32 +269,37 @@ class Posts {
 		$amount_of_sites_synced          = $number_of_sites_connected - count( $excluded_sites );
 
 		if ( $number_of_synced_posts_returned ) {
-			foreach ( $synced_post_result as $synced_post ) {
-				if ( true === (bool) $synced_post->diverged ) {
-					$sync_status = 'diverged';
-				}
-			}
+
+			$synced_post = (object) $synced_post_result[0];
 
 			if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
-				$sync_status = 'synced';
+
+				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
+				$synced_post_modified_time = strtotime( $synced_post->date_modified );
+				$source_post_modified_time = strtotime( $post->post_modified );
+
+				if ( $source_post_modified_time > $synced_post_modified_time ) {
+					$syndication_info->source_version_edited = true;
+					$syndication_info->synced                = '<span class="warning">Source updated since last sync.</span>';
+					$syndication_info->synced                .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
+					$sync_status                             = 'diverged';
+				} else {
+					$sync_status              = 'synced';
+					$syndication_info->synced = '<span class="success">All good here!</span>';
+				}
+
 			} elseif ( 0 === $amount_of_sites_synced ) {
 				$sync_status = 'unsynced';
 			} else {
 				$sync_status = 'partial';
 			}
 
-			$synced_post               = (object) $synced_post_result[0];
-			$synced_post_modified_time = strtotime( $synced_post->date_modified );
-			$source_post_modified_time = strtotime( $post->post_modified );
-
-			if ( $source_post_modified_time > $synced_post_modified_time ) {
-				$syndication_info->source_version_edited = true;
-				$syndication_info->synced                = '<span class="warning">Source updated since last sync.</span>';
-				$syndication_info->synced                .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
-				$sync_status                             = 'unsynced';
-			} else {
-				$syndication_info->synced = '<span class="success">All good here!</span>';
+			foreach ( $synced_post_result as $synced_post ) {
+				if ( true === (bool) $synced_post->diverged ) {
+					$sync_status = 'diverged';
+				}
 			}
+
 
 			$syndication_info->synced_post = $synced_post;
 
