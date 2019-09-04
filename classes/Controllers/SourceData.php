@@ -134,11 +134,11 @@ class SourceData {
 		$this->prepare_single_overwrite( $request->get_url_params() );
 
 
-		$args           = [ 'id' => (int) $url_params['receiver_site_id'] ];
+		$args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
 		$connected_site = ConnectedSite::get_where( $args );
 		$connected_site = $connected_site[0];
 
-		$this->source_data->receiver_site_id = (int) $url_params['receiver_site_id'];
+		$this->source_data->receiver_site_id = (int) $request->get_url_params()['receiver_site_id'];
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );

@@ -6,6 +6,7 @@ use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\Posts;
 use DataSync\Controllers\PostTypes;
+use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\SyncedPost;
 
 function display_synced_posts_table() {
@@ -21,6 +22,8 @@ function display_synced_posts_table() {
 	$enabled_post_type_site_data   = PostTypes::check_enabled_post_types_on_receiver();
 	$status                        = '';
 	$no_enabled_post_types_on_site = false;
+
+	$synced_posts = SyncedPost::get_all();
 
 	?>
     <table id="wp_data_sync_status">
@@ -51,7 +54,7 @@ function display_synced_posts_table() {
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
-                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->post_status; ?></td>
+                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->status; ?></td>
                     <td class="expand_post_details" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
                 <tr class="post_details" id="post-<?php echo $post->ID ?>">
@@ -60,7 +63,7 @@ function display_synced_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->synced ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -77,22 +80,22 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
+function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ) {
 	?>
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
 	<?php
 	foreach ( $connected_sites as $index => $site ) {
-		$result                     = SyncedPost::get_where(
+		$result = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $site->id, FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
-		$connected_site_synced_post = $result[0];
+
+		$connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false;
 		?>
-        <strong>Site ID: <?php echo $site->id ?></strong>
-        <span><?php echo $site->url ?></span>
+        <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong>
         <div class="details">
 			<?php
 			if ( ! empty( $connected_site_synced_post ) ) {
@@ -114,6 +117,19 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 			// CONNECTED SITES INFO
 			$site_info = $enabled_post_type_site_data[ $index ];
 			if ( $site->id === $site_info['site_id'] ) {
+
+				$no_enabled_post_types_on_site = true;
+				$post_meta                     = get_post_meta( $post->ID );
+				$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
+
+				if ( in_array( (int) $site->id, $excluded_sites ) ) {
+					?><span class="none_enabled"><strong>This post is excluding this receiver.</strong></span><?php
+
+					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
+						?><span class="none_enabled"><strong>This post's canonical URL is pointing to a receiver that is excluded.</strong></span><?php
+					}
+				}
+
 				if ( ! empty( $site_info['enabled_post_types'] ) ) {
 					?>
                     <span><strong>Enabled Post Types:</strong></span>
@@ -129,20 +145,49 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				} else {
 
 					?>
-                    <span class="none_enabled"><strong>No enabled post types on this site. Syndication will fail.</strong></span><?php
+                    <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
 
-					$no_enabled_post_types_on_site = true;
-					$post_meta                     = get_post_meta( $post->ID );
 
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
-						?><span class="none_enabled"><strong>This post's canonical settings are pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
+						?><span class="none_enabled"><strong>This post's canonical URL is pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
 					}
 
 				}
 			}
 
+			$post_synced_on_receiver = false;
+			if ( ! empty( $synced_posts ) ) {
+				foreach ( $synced_posts as $synced_post ) {
+					if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
+						$post_synced_on_receiver = true;
+					}
+				}
+
+				if ( $post_synced_on_receiver ) {
+					// SYNCED.
+					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+				} else {
+					// NOT SYNCED.
+
+					if ( in_array( (int) $site->id, $excluded_sites ) ) {
+						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+					} else {
+						$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+					}
+
+				}
+
+			} else {
+				// NO SYNCED POSTS - STARTED FRESH.
+				$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+				$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+			}
+
+
+			echo $site_status;
+
 			?>
-            <span>Status: <?php echo $syndication_info->post_status ?></span>
         </div>
         </div>
 		<?php
