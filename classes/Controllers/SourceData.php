@@ -48,11 +48,11 @@ class SourceData {
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/source_data/push',
+			'/source_data/bulk_push',
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'push' ),
+					'callback' => array( $this, 'bulk_push' ),
 				),
 			)
 		);
@@ -70,11 +70,28 @@ class SourceData {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/source_data/overwrite/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
+			'/source_data/overwrite/(?P<source_post_id>\d+)',
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'overwrite_receiver_post' ),
+					'callback' => array( $this, 'overwrite_post_on_all_receivers' ),
+					'args'     => array(
+						'source_post_id' => array(
+							'description' => 'Source Post ID',
+							'type'        => 'int',
+						),
+					),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/source_data/overwrite/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'overwrite_post_on_single_receiver' ),
 					'args'     => array(
 						'source_post_id'   => array(
 							'description' => 'Source Post ID',
@@ -90,31 +107,38 @@ class SourceData {
 		);
 	}
 
+
+	public function prepare_single_overwrite( $url_params ) {
+		$this->consolidate();
+
+		$post      = (object) Posts::get_single( (int) $url_params['source_post_id'] );
+		$post_type = $post->post_type;
+
+		$this->source_data->single_overwrite                               = true;
+		$this->source_data->posts                                          = new stdClass(); // CLEAR ALL OTHER POSTS.
+		$this->source_data->posts->$post_type                              = [ $post ];
+		$this->source_data->options['overwrite_receiver_post_on_conflict'] = true;
+
+		$this->validate();
+		$this->configure_canonical_urls();
+	}
+
+
 	/**
 	 * Manually overwrite receiver post via API call
 	 *
 	 * @param WP_REST_Request $request
 	 */
-	public function overwrite_receiver_post( WP_REST_Request $request ) {
-		$url_params   = $request->get_url_params();
-		$synced_posts = new SyncedPosts();
-		$options      = Options::source()->get_data();
+	public function overwrite_post_on_single_receiver( WP_REST_Request $request ) {
+
+		$this->prepare_single_overwrite( $request->get_url_params() );
+
 
 		$args           = [ 'id' => (int) $url_params['receiver_site_id'] ];
 		$connected_site = ConnectedSite::get_where( $args );
 		$connected_site = $connected_site[0];
 
-		$this->source_data                                                 = new stdClass();
-		$this->source_data->receiver_site_id                               = (int) $url_params['receiver_site_id'];
-		$this->source_data->single_overwrite                               = true;
-		$this->source_data->start_time                                     = (string) current_time( 'mysql' );
-		$this->source_data->start_microtime                                = (float) microtime( true );
-		$this->source_data->options                                        = (array) $options;
-		$this->source_data->options['overwrite_receiver_post_on_conflict'] = true;
-		$this->source_data->url                                            = (string) get_site_url();
-		$this->source_data->nonce                                          = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->post                                           = (object) Posts::get_single( (int) $url_params['source_post_id'] );
-		$this->source_data->synced_posts                                   = (array) $synced_posts->get_all()->get_data();
+		$this->source_data->receiver_site_id = (int) $url_params['receiver_site_id'];
 
 		$auth     = new Auth();
 		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
@@ -126,29 +150,23 @@ class SourceData {
 			$log = new Logs( 'Error in SourceData->overwrite_receiver_post() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
 		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'SourceData';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
-			}
+//				if ( get_option( 'show_body_responses' ) ) {
+//					if ( get_option( 'show_body_responses' ) ) {
+//						echo 'SourceData';
+			print_r( wp_remote_retrieve_body( $response ) );
+//					}
+//				}
 		}
 
-		$this->get_receiver_data();
-		$this->save_receiver_data();
+		$this->finish_push( $response );
 
-		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+
 	}
 
-	/**
-	 * Send data to all authorized connected sites
-	 *
-	 */
-	public function push() {
 
-		$this->consolidate();
-		$this->validate();
-		$this->configure_canonical_urls();
+	public function overwrite_post_on_all_receivers( WP_REST_Request $request ) {
+
+		$this->prepare_single_overwrite( $request->get_url_params() );
 
 		foreach ( $this->source_data->connected_sites as $site ) {
 
@@ -173,6 +191,12 @@ class SourceData {
 
 		}
 
+		$this->finish_push( $response );
+	}
+
+
+	public function finish_push( $response ) {
+
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
@@ -181,7 +205,44 @@ class SourceData {
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		wp_send_json_success( 'Push complete.' );
+		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+	}
+
+
+	/**
+	 * Send data to all authorized connected sites
+	 *
+	 */
+	public function bulk_push() {
+
+		$this->consolidate();
+		$this->validate();
+		$this->configure_canonical_urls();
+
+		foreach ( $this->source_data->connected_sites as $site ) {
+
+			$this->source_data->receiver_site_id = (int) $site->id;
+			$auth                                = new Auth();
+			$json                                = $auth->prepare( $this->source_data, $site->secret_key );
+			$url                                 = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$response                            = wp_remote_post( $url, [ 'body' => $json ] );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				if ( get_option( 'show_body_responses' ) ) {
+					if ( get_option( 'show_body_responses' ) ) {
+						echo 'SourceData';
+						print_r( wp_remote_retrieve_body( $response ) );
+					}
+				}
+			}
+
+		}
+
+		$this->finish_push( $response );
 
 	}
 
@@ -209,7 +270,7 @@ class SourceData {
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
-				$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
 				if ( get_option( 'show_body_responses' ) ) {
@@ -287,9 +348,9 @@ class SourceData {
 			foreach ( $post_data as $key => $post ) {
 
 				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
-				$connected_site = ConnectedSite::get( $canonical_site_id )[0];
-				$permalink = get_permalink( $post->ID );
-				$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
+				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
+				$permalink         = get_permalink( $post->ID );
+				$canonical_link    = str_replace( get_site_url(), $connected_site->url, $permalink );
 
 				$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
 			}
