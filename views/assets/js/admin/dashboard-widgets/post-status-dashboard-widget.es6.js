@@ -249,20 +249,20 @@ function push_single_post_to_single_receiver( receiver_site_id, source_post_id )
   AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
     console.log(result)
     if (result) {
-      show_success();
+      show_success( result );
     }
 
   })
 }
 
 
-function show_success() {
+function show_success( result ) {
   let synced_post = result.data
   // INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
-  document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>'
+  // document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>'
   // UPDATE SYNCED TIME
-  let post_modified_date = new Date(synced_post.date_modified).toLocaleString('en-US', { timeZone: 'America/Denver' })
-  document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = post_modified_date
+  // let post_modified_date = new Date(synced_post.date_modified).toLocaleString('en-US', { timeZone: 'America/Denver' })
+  // document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = post_modified_date
 }
 
 jQuery(function ($) {

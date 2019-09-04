@@ -54,7 +54,7 @@ function display_synced_posts_table() {
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
-                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->post_status; ?></td>
+                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->status; ?></td>
                     <td class="expand_post_details" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
                 <tr class="post_details" id="post-<?php echo $post->ID ?>">
@@ -146,18 +146,28 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 			}
 
 			$post_synced_on_receiver = false;
-			foreach ( $synced_posts as $synced_post ) {
-				if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) $site->id === $synced_post->receiver_site_id ) ) {
-					$post_synced_on_receiver = true;
+			if ( ! empty( $synced_posts ) ) {
+				foreach ( $synced_posts as $synced_post ) {
+					if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
+						$post_synced_on_receiver = true;
+					}
 				}
 
 				if ( $post_synced_on_receiver ) {
+					// SYNCED.
 					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 				} else {
+					// NOT SYNCED.
 					$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-					$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite this receiver</a>';
+					$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
 				}
-			}
+
+            } else {
+			    // NO SYNCED POSTS - STARTED FRESH.
+				$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+				$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+            }
+
 
 			echo $site_status;
 
