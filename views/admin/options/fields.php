@@ -226,7 +226,7 @@ function display_overwrite_receiver_post_checkbox() {
 function display_show_body_responses_checkbox() {
 	?>
 	<span>This will break the dashboard widget's functionality.</span><br>
-	<span>Only use if you're debugging the <a href="/wp-json/data-sync/v1/source_data/push" target="_blank">push page</a></span><br>
+	<span>Only use if you're debugging the <a href="/wp-json/data-sync/v1/source_data/bulk_push" target="_blank">push page</a></span><br>
 	<input type="checkbox" value="1" name="show_body_responses" <?php checked( '1', get_option( 'show_body_responses' ) ); ?>/>
 	<?php
 }

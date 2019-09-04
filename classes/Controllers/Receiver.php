@@ -69,11 +69,11 @@ class Receiver {
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
-		if ( $source_data->single_overwrite ) {
-			$this->single_overwrite( $source_data );
-		} else {
+//		if ( $source_data->single_overwrite ) {
+//			$this->single_overwrite( $source_data );
+//		} else {
 			$this->bulk_process( $source_data );
-		}
+//		}
 
 //		$email = new Email();
 //		unset( $email );
@@ -84,25 +84,29 @@ class Receiver {
 		wp_send_json_success( 'Receiver parse complete.' );
 	}
 
-	private function single_overwrite( object $source_data ) {
-		$filtered_post = SyncedPosts::filter( $source_data->post, $source_data->options, $source_data->synced_posts );
-
-		if ( false !== $filtered_post ) {
-			$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
-			SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
-
-			$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
-			unset( $log );
-
-			$args        = array(
-				'receiver_post_id' => $receiver_post_id,
-				'receiver_site_id' => get_option( 'data_sync_receiver_site_id' ),
-			);
-			$synced_post = SyncedPost::get_where( $args );
-
-			wp_send_json( $synced_post[0] );
-		}
-	}
+//	private function single_overwrite( object $source_data ) {
+//
+//
+//
+//		print_r( $source_data->posts );
+//		$filtered_post = SyncedPosts::filter( $source_data->post, $source_data->options, $source_data->synced_posts );
+//
+//		if ( false !== $filtered_post ) {
+//			$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+//			SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+//
+//			$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+//			unset( $log );
+//
+//			$args        = array(
+//				'receiver_post_id' => $receiver_post_id,
+//				'receiver_site_id' => get_option( 'data_sync_receiver_site_id' ),
+//			);
+//			$synced_post = SyncedPost::get_where( $args );
+//
+//			wp_send_json( $synced_post[0] );
+//		}
+//	}
 
 	private function bulk_process( object $source_data ) {
 
@@ -142,6 +146,10 @@ class Receiver {
 
 			// STEP 6: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
 			foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
+
+				if ( ! isset( $source_data->posts->$post_type_slug ) ) {
+					continue; // SKIPS EMPTY DATA.
+				}
 
 				$post_count = count( $source_data->posts->$post_type_slug );
 

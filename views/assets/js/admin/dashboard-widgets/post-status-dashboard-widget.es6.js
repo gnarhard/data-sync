@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
       let connected_site_count = connected_site_ids_int.length
 
       // BEGIN DATA PUSH
-      AJAX.get(DataSync.api.url + '/source_data/push').then(function (push_result) {
+      AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function (push_result) {
 
         console.log(push_result)
 
@@ -202,47 +202,72 @@ function diverged_post_init () {
 
       // CHANGE ICON TO SPINNING UPDATE ICON
       let row = $(this).parent().parent().parent()[0];
+
+      // TODO: THIS WON'T WORK -- START
       let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
       status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
+      // TODO: THIS WON'T WORK -- END
 
       let receiver_site_id = $(this).data('receiver-site-id')
       let source_post_id = $(this).data('source-post-id')
 
-      push_single_post( receiver_site_id, source_post_id );
+      push_single_post_to_all_receivers( receiver_site_id, source_post_id );
 
     })
+
+    $('.overwrite_single_receiver').unbind().click(function (e) {
+
+    	e.preventDefault();
+
+      // CHANGE ICON TO SPINNING UPDATE ICON
+      let row = $(this).parent().parent().parent()[0];
+      // let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
+      // status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
+
+      let receiver_site_id = $(this).data('receiver-site-id')
+      let source_post_id = $(this).data('source-post-id')
+
+      push_single_post_to_single_receiver( receiver_site_id, source_post_id );
+
+    })
+
   })
 
 }
 
-function push_single_post ( receiver_site_id, source_post_id ) {
-
-  AJAX.get(DataSync.api.url + '/source_data/overwrite/' + receiver_site_id + '/' + source_post_id).then(function (result) {
+function push_single_post_to_all_receivers( receiver_site_id, source_post_id ) {
+  AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
     console.log(result)
     if (result) {
-      let synced_post = result.data
-      // INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
-      document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>'
-      // UPDATE SYNCED TIME
-      // TODO: DATE FORMAT IS INCORRECT, DOUBLE CHECK THE FIX
-      let post_modified_date = new Date(synced_post.date_modified).toLocaleString('en-US', { timeZone: 'America/Denver' })
-      document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = post_modified_date
+      show_success();
     }
 
   })
 }
 
+function push_single_post_to_single_receiver( receiver_site_id, source_post_id ) {
+  AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
+    console.log(result)
+    if (result) {
+      show_success();
+    }
+
+  })
+}
+
+
+function show_success() {
+  let synced_post = result.data
+  // INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
+  document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>'
+  // UPDATE SYNCED TIME
+  let post_modified_date = new Date(synced_post.date_modified).toLocaleString('en-US', { timeZone: 'America/Denver' })
+  document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = post_modified_date
+}
+
 jQuery(function ($) {
   $(document).ready(function () {
-    // $('#data_sync_status_tabs').tabs();
-
-    // $('.connected_site_details').hide();
     $('.post_details').hide();
-
-    $('.reveal_connected_site_details').unbind().click( function() {
-      let id = $(this).data('id');
-      $('#connected_site-' + id).toggle();
-    });
 
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
