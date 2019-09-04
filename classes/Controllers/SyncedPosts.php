@@ -366,10 +366,10 @@ class SyncedPosts {
 					unset( $log );
 				} else {
 
-//				if ( get_option( 'show_body_responses' ) ) {
+				if ( get_option( 'show_body_responses' ) ) {
 					echo 'SyncedPosts';
 					print_r( wp_remote_retrieve_body( $response ) );
-//				}
+				}
 
 					$deleted = SyncedPost::delete( $synced_post[0]->id );
 
@@ -396,18 +396,18 @@ class SyncedPosts {
 		$delete_orphaned_term_relationships_query = 'DELETE FROM ' . $wpdb->prefix . 'term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM posts)';
 		$db                                       = new DB( 'term_relationships' );
 
-		return $this->delete_synced_post( $data );
+		return $this->delete_synced_post( null, $data );
 	}
 
-	public function delete_synced_post( $receiver_data = false ) {
+	public function delete_synced_post( WP_REST_Request $data_from_receiver, $data_from_source = false ) {
 
-		if ( ! $receiver_data ) {
+		if ( ! $data_from_source ) {
 			$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 			$log         = new Logs( 'Received delete request for post: ' . wp_json_encode( $source_data ) );
 			unset( $log );
 			$data = $source_data;
 		} else {
-			$data = $receiver_data;
+			$data = $data_from_receiver;
 		}
 
 		$args        = array(
