@@ -6,6 +6,7 @@ use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\Posts;
 use DataSync\Controllers\PostTypes;
+use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\SyncedPost;
 
 function display_synced_posts_table() {
@@ -21,6 +22,8 @@ function display_synced_posts_table() {
 	$enabled_post_type_site_data   = PostTypes::check_enabled_post_types_on_receiver();
 	$status                        = '';
 	$no_enabled_post_types_on_site = false;
+
+	$synced_posts = SyncedPost::get_all();
 
 	?>
     <table id="wp_data_sync_status">
@@ -60,7 +63,7 @@ function display_synced_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->synced ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -77,19 +80,20 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
+function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ) {
 	?>
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
 	<?php
 	foreach ( $connected_sites as $index => $site ) {
-		$result                     = SyncedPost::get_where(
+		$result = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $site->id, FILTER_SANITIZE_NUMBER_INT ),
 			)
 		);
-		$connected_site_synced_post = $result[0];
+
+		$connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false;
 		?>
         <strong>Site ID: <?php echo $site->id ?></strong>
         <span><?php echo $site->url ?></span>
@@ -141,8 +145,23 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				}
 			}
 
+			$post_synced_on_receiver = false;
+			foreach ( $synced_posts as $synced_post ) {
+				if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) $site->id === $synced_post->receiver_site_id ) ) {
+					$post_synced_on_receiver = true;
+				}
+
+				if ( $post_synced_on_receiver ) {
+					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+				} else {
+					$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+					$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite this receiver</a>';
+				}
+			}
+
+			echo $site_status;
+
 			?>
-            <span>Status: <?php echo $syndication_info->post_status ?></span>
         </div>
         </div>
 		<?php
