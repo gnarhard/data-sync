@@ -8,6 +8,7 @@ use WP_Query;
 use stdClass;
 use WP_REST_Server;
 use WP_REST_Request;
+use WPSEO_Meta;
 
 class Posts {
 
@@ -392,18 +393,21 @@ class Posts {
 			if ( 'attachment' !== $post->post_type ) {
 
 				$override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
+				$yoast_meta_prefix   = WPSEO_Meta::$meta_prefix;
 
 				// Yoast and ACF data will be in here.
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
 					// IF POST-LEVEL SETTING DOES NOT ALLOW OVERWRITING OF YOAST DATA, UNSET YOAST-RELATED POSTMETA.
-					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, 'yoast' ) ) ) {
-						unset( $post->post_meta->$meta_key );
+					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, $yoast_meta_prefix ) ) ) {
+						unset( $post->post_meta->$meta_key ); // DELETES SOURCE POST'S META DATA RELATED TO YOAST TO NOT OVERWRITE.
+						continue;
 					}
 
 					foreach ( $meta_value as $value ) {
 						$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
 					}
+
 				}
 
 			}
