@@ -11,14 +11,27 @@ use WP_REST_Server;
 use WP_REST_Response;
 use DataSync\Models\DB;
 
+/**
+ * Class Receiver
+ * @package DataSync\Controllers
+ */
 class Receiver {
 
+	/**
+	 * @var string
+	 */
 	public $response = '';
 
+	/**
+	 * Receiver constructor.
+	 */
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
+	/**
+	 *
+	 */
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -41,8 +54,22 @@ class Receiver {
 				),
 			)
 		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/plugin_versions',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_plugin_versions' ),
+				),
+			)
+		);
 	}
 
+	/**
+	 *
+	 */
 	public function start_fresh() {
 
 		$db               = new DB();
@@ -66,13 +93,69 @@ class Receiver {
 
 	}
 
+
+	/**
+	 * Source side that initiates request for receiver plugin versions.
+	 */
+	public static function get_receiver_plugin_versions() {
+
+		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+
+		$plugin_versions = array();
+
+		foreach ( $connected_sites as $site ) {
+
+			$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/plugin_versions';
+			$response = wp_remote_get( $url );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				if ( get_option( 'show_body_responses' ) ) {
+					if ( get_option( 'show_body_responses' ) ) {
+						echo 'Receiver';
+						var_dump( wp_remote_retrieve_body( $response ) );
+					}
+				}
+
+				$plugin_versions[] = [
+					'site_id' => $site->id,
+					'versions' => json_decode( wp_remote_retrieve_body( $response ) )->data,
+				];
+
+			}
+
+		}
+
+		return $plugin_versions;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function get_plugin_versions() {
+		$plugins = get_plugins();
+
+		$versions          = array();
+		$versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
+		$versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+
+		return wp_send_json_success( $versions );
+
+	}
+
+	/**
+	 *
+	 */
 	public function receive() {
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
 //		if ( $source_data->single_overwrite ) {
 //			$this->single_overwrite( $source_data );
 //		} else {
-			$this->bulk_process( $source_data );
+		$this->bulk_process( $source_data );
 //		}
 
 //		$email = new Email();
@@ -108,6 +191,9 @@ class Receiver {
 //		}
 //	}
 
+	/**
+	 * @param object $source_data
+	 */
 	private function bulk_process( object $source_data ) {
 
 		// STEP 1: GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
