@@ -273,6 +273,8 @@ class Posts {
 		if ( $number_of_synced_posts_returned ) {
 
 			$synced_post = (object) $synced_post_result[0];
+			$synced_post_modified_time = strtotime( $synced_post->date_modified );
+			$source_post_modified_time = strtotime( $post->post_modified );
 
 			if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
 
@@ -291,10 +293,6 @@ class Posts {
 
 				}
 
-
-				$synced_post_modified_time = strtotime( $synced_post->date_modified );
-				$source_post_modified_time = strtotime( $post->post_modified );
-
 				if ( $receiver_modified_time > $source_post_modified_time ) {
 					$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
 					$sync_status                               = 'diverged';
@@ -303,6 +301,8 @@ class Posts {
 					$sync_status                             = 'diverged';
 				} else if ( $receiver_modified_time === $source_post_modified_time ) {
 					$sync_status = 'synced';
+				} else if ( 0 === $receiver_modified_time ) {
+					$sync_status = 'unsynced';
 				}
 
 			} elseif ( 0 === $amount_of_sites_synced ) {
@@ -332,7 +332,7 @@ class Posts {
 			$syndication_info->synced = '<span class="success">All good here!</span>';
 		} else if ( 'diverged' === $sync_status ) {
 
-			if ( $source_post_modified_time > $synced_post_modified_time ) {
+			if ( ( $source_post_modified_time > $synced_post_modified_time ) && ( $number_of_synced_posts_returned ) ) {
 				$syndication_info->synced = '<span class="warning">Source updated since last sync.</span>';
 			} else if ( $source_post_modified_time < $synced_post_modified_time ) {
 				$syndication_info->synced = '<span class="warning">A receiver post was updated after the last sync.</span>';
@@ -340,6 +340,8 @@ class Posts {
 
 			$syndication_info->status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
 			$syndication_info->synced .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
+
+
 		} else if ( 'partial' === $sync_status ) {
 			$syndication_info->status = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
 			$syndication_info->synced = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with a connected site. Please check connected site info or logs for more details.</span>';

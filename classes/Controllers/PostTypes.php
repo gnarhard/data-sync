@@ -141,7 +141,9 @@ class PostTypes {
 			$synced_custom_post_types_to_add[] = $cpt->name;
 		}
 
-		update_option( 'enabled_post_types', array_merge( $enabled_post_types, $synced_custom_post_types_to_add ) );
+		$merged_post_types = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
+
+		update_option( 'enabled_post_types', array_unique( $merged_post_types ) );
 	}
 
 	/**
