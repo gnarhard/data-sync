@@ -280,12 +280,9 @@ class Posts {
 
 				if ( $source_post_modified_time > $synced_post_modified_time ) {
 					$syndication_info->source_version_edited = true;
-					$syndication_info->synced                = '<span class="warning">Source updated since last sync.</span>';
-					$syndication_info->synced                .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
 					$sync_status                             = 'diverged';
 				} else {
-					$sync_status              = 'synced';
-					$syndication_info->synced = '<span class="success">All good here!</span>';
+					$sync_status = 'synced';
 				}
 
 			} elseif ( 0 === $amount_of_sites_synced ) {
@@ -303,8 +300,6 @@ class Posts {
 
 			$syndication_info->synced_post = $synced_post;
 
-		} else {
-			$syndication_info->synced = '<span class="warning">Unsynced.</span>';
 		}
 
 		if ( 'trash' === $post->post_status ) {
@@ -314,14 +309,27 @@ class Posts {
 
 		if ( 'synced' === $sync_status ) {
 			$syndication_info->status = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>';
+			$syndication_info->synced = '<span class="success">All good here!</span>';
 		} else if ( 'diverged' === $sync_status ) {
+
+			if ( $source_post_modified_time > $synced_post_modified_time ) {
+				$syndication_info->synced = '<span class="warning">Source updated since last sync.</span>';
+			} else if ( $source_post_modified_time < $synced_post_modified_time ) {
+				$syndication_info->synced = '<span class="warning">A receiver post was updated after the last sync. Click to overwrite with source post.</span>';
+			}
+
 			$syndication_info->status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
+
+			$syndication_info->synced .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
 		} else if ( 'partial' === $sync_status ) {
-			$syndication_info->status = '<i class="dashicons dashicons-info" title="Partially synced. Some posts may have failed to sync with a connected site because the post type isn\'t enabled on the receiver or there was an error."></i>';
+			$syndication_info->status = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
+			$syndication_info->synced = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with a connected site. Please check connected site info or logs for more details.</span>';
 		} else if ( 'unsynced' === $sync_status ) {
 			$syndication_info->status = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+			$syndication_info->synced = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
 		} else if ( 'trashed' === $sync_status ) {
 			$syndication_info->status = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
+			$syndication_info->synced = '<span class="warning">Trashed at source but still live on receivers. To delete on receivers, delete permanently at source.</span>';
 		}
 
 
