@@ -23,7 +23,16 @@ function display_synced_posts_table() {
 	$status                        = '';
 	$no_enabled_post_types_on_site = false;
 
-	$synced_posts = SyncedPost::get_all();
+	$synced_posts   = SyncedPost::get_all();
+	$receiver_posts = array();
+
+	foreach ( $connected_sites as $site ) {
+		$receiver_posts_response = wp_remote_get( $site->url . '/wp-json/wp/v2/posts' );
+		$receiver_posts[]        = array(
+			'site_id' => $site->id,
+			'posts'   => json_decode( wp_remote_retrieve_body( $receiver_posts_response ) ),
+		);
+	}
 
 	?>
     <table id="wp_data_sync_status">
@@ -43,7 +52,7 @@ function display_synced_posts_table() {
 
 			foreach ( $posts as $post ) {
 
-				$syndication_info = Posts::get_syndication_info( $post, $connected_sites );
+				$syndication_info = Posts::get_syndication_info( $post, $connected_sites, $receiver_posts );
 
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
@@ -63,7 +72,7 @@ function display_synced_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->synced ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -80,12 +89,13 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post, $synced_posts ) {
+function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
 	?>
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
 	<?php
 	foreach ( $connected_sites as $index => $site ) {
+
 		$result = SyncedPost::get_where(
 			array(
 				'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
@@ -94,7 +104,9 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 		);
 
 		$connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false;
+
 		?>
+
         <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong>
         <div class="details">
 			<?php
@@ -156,19 +168,23 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 			}
 
 			$post_synced_on_receiver = false;
-			if ( ! empty( $synced_posts ) ) {
-				foreach ( $synced_posts as $synced_post ) {
-					if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
-						$post_synced_on_receiver = true;
-					}
+			if ( ! empty( $connected_site_synced_post ) ) {
+				if ( ( (int) $post->ID === (int) $connected_site_synced_post->source_post_id ) && ( (int) $site->id === (int) $connected_site_synced_post->receiver_site_id ) ) {
+					$post_synced_on_receiver = true;
 				}
 
 				if ( $post_synced_on_receiver ) {
-					// SYNCED.
-					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+
+					if ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
+						$site_status = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
+						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+					} else {
+						// SYNCED.
+						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+					}
+
 				} else {
 					// NOT SYNCED.
-
 					if ( in_array( (int) $site->id, $excluded_sites ) ) {
 						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 					} else {

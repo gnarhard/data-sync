@@ -253,18 +253,19 @@ class Posts {
 	}
 
 
-	public static function get_syndication_info( $post, $connected_sites ) {
+	public static function get_syndication_info( $post, $connected_sites, $receiver_posts ) {
 
-		$syndication_info = new stdClass();
+		$syndication_info                             = new stdClass();
+		$syndication_info->status                     = '';
+		$syndication_info->trash_class                = "";
+		$syndication_info->receiver_version_edited[0] = false;
+		$syndication_info->source_version_edited      = false;
 
 		$number_of_sites_connected       = count( $connected_sites );
-		$syndication_info->status        = '';
 		$post_meta                       = get_post_meta( $post->ID );
 		$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
 		$synced_post_result              = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 		$number_of_synced_posts_returned = count( $synced_post_result );
-		$syndication_info->trash_class   = "";
-		$source_version_edited           = false;
 		$sync_status                     = 'unsynced';
 		$amount_of_sites_synced          = $number_of_sites_connected - count( $excluded_sites );
 
@@ -274,14 +275,32 @@ class Posts {
 
 			if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
 
+				$receiver_modified_time = 0;
+
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
+				foreach ( $receiver_posts as $receiver_post ) {
+					if ( (int) $synced_post->receiver_site_id === (int) $receiver_post['site_id'] ) {
+						foreach ( $receiver_post['posts'] as $r_post ) {
+							if ( (int) $synced_post->receiver_post_id === (int) $r_post->id ) {
+								$receiver_modified_time = strtotime( $r_post->modified );
+							}
+						}
+
+					}
+
+				}
+
+
 				$synced_post_modified_time = strtotime( $synced_post->date_modified );
 				$source_post_modified_time = strtotime( $post->post_modified );
 
-				if ( $source_post_modified_time > $synced_post_modified_time ) {
+				if ( $receiver_modified_time > $source_post_modified_time ) {
+					$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
+					$sync_status                               = 'diverged';
+				} else if ( $receiver_modified_time < $source_post_modified_time ) {
 					$syndication_info->source_version_edited = true;
 					$sync_status                             = 'diverged';
-				} else {
+				} else if ( $receiver_modified_time === $source_post_modified_time ) {
 					$sync_status = 'synced';
 				}
 
@@ -315,11 +334,10 @@ class Posts {
 			if ( $source_post_modified_time > $synced_post_modified_time ) {
 				$syndication_info->synced = '<span class="warning">Source updated since last sync.</span>';
 			} else if ( $source_post_modified_time < $synced_post_modified_time ) {
-				$syndication_info->synced = '<span class="warning">A receiver post was updated after the last sync. Click to overwrite with source post.</span>';
+				$syndication_info->synced = '<span class="warning">A receiver post was updated after the last sync.</span>';
 			}
 
 			$syndication_info->status = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
-
 			$syndication_info->synced .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
 		} else if ( 'partial' === $sync_status ) {
 			$syndication_info->status = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
