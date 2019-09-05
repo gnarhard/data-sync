@@ -113,12 +113,12 @@ class Receiver {
 				$log = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'Receiver';
-						var_dump( wp_remote_retrieve_body( $response ) );
-					}
-				}
+//				if ( get_option( 'show_body_responses' ) ) {
+//					if ( get_option( 'show_body_responses' ) ) {
+//						echo 'Receiver';
+//						var_dump( wp_remote_retrieve_body( $response ) );
+//					}
+//				}
 
 				$plugin_versions[] = [
 					'site_id' => $site->id,
