@@ -2,6 +2,7 @@
 
 use DataSync\Controllers\Auth;
 use DataSync\Controllers\ConnectedSites;
+use DataSync\Controllers\Receiver;
 use WP_User_Query;
 use DataSync\Controllers\Logs;
 
@@ -203,6 +204,29 @@ function display_awareness_messages() {
 		<span style="color: red">CPT UI needs to be installed or activated on this site.</span>
 		<?php
 	}
+
+	$plugins = get_plugins();
+
+	$source_acf_version = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
+	$source_cptui_version = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+
+	$receiver_plugin_versions = Receiver::get_receiver_plugin_versions();
+
+	foreach ( $receiver_plugin_versions as $site_plugin_data ) {
+	    if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
+		    ?>
+            <span style="color: red">ACF's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+		    <?php
+        }
+
+		if ( $source_cptui_version !== $site_plugin_data['versions']->cptui ) {
+			?>
+            <span style="color: red">CPT UI's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+			<?php
+		}
+    }
+
+
 }
 
 function display_debug_checkbox() {
