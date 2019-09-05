@@ -206,31 +206,6 @@ class SyncedPosts {
 		}
 	}
 
-//	public static function save_to_source( int $receiver_post_id, object $source_post ) {
-//
-//		// RECEIVER SIDE.
-//		$data                   = new stdClass();
-//		$data->source_post_id   = $source_post->ID;
-//		$data->name             = $source_post->post_title;
-//		$data->receiver_post_id = $receiver_post_id;
-//		$data->receiver_site_id = get_option( 'data_sync_receiver_site_id' );
-//
-//		$auth     = new Auth();
-//		$json     = $auth->prepare( $data, get_option( 'secret_key' ) );
-//		$url      = Helpers::format_url( trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/sync_post' );
-//		$response = wp_remote_post( $url, [ 'body' => $json ] );
-//
-//		if ( is_wp_error( $response ) ) {
-//			echo $response->get_error_message();
-//			$log = new Logs( 'Error in SyncedPosts->save_to_source() received from ' . get_option( 'data_sync_source_site_url' ) . '. ' . $response->get_error_message(), true );
-//			unset( $log );
-//		} else {
-//			if ( get_option( 'show_body_responses' ) ) {
-//				print_r( wp_remote_retrieve_body( $response ) );
-//			}
-//		}
-//	}
-
 	public static function save_to_receiver( int $receiver_post_id, object $source_post ) {
 		$data                   = new stdClass();
 		$data->source_post_id   = $source_post->ID;
