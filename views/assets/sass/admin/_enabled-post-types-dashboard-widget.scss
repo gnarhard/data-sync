@@ -18,4 +18,17 @@
   #save_push_enabled_post_types:hover {
     background: grey;
   }
+
+  h3 {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .connected_site_enabled_post_types {
+    margin: 40px 0;
+
+    span {
+      width: 100%;
+    }
+  }
 }

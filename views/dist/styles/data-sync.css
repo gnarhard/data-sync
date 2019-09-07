@@ -315,3 +315,16 @@
   background: grey;
 }
 
+#wp_data_sync_enabled_post_types_dashboard h3 {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+#wp_data_sync_enabled_post_types_dashboard .connected_site_enabled_post_types {
+  margin: 40px 0;
+}
+
+#wp_data_sync_enabled_post_types_dashboard .connected_site_enabled_post_types span {
+  width: 100%;
+}
+
