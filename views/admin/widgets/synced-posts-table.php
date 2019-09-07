@@ -131,19 +131,7 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 					}
 				}
 
-				if ( ! empty( $site_info['enabled_post_types'] ) ) {
-					?>
-                    <span><strong>Enabled Post Types:</strong></span>
-                    <ol>
-						<?php
-						foreach ( $site_info['enabled_post_types'] as $post_type ) {
-							?>
-                            <li><?php echo $post_type ?></li><?php
-						}
-						?>
-                    </ol>
-					<?php
-				} else {
+				if ( empty( $site_info['enabled_post_types'] ) ) {
 
 					?>
                     <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
