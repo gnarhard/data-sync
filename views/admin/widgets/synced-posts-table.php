@@ -164,15 +164,16 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 					$site_status = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
 
-					if ( $syndication_info->source_version_edited ) {
+					if ( ( $syndication_info->source_version_edited ) && ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) ) {
 						echo '<span class="warning">Source AND receiver updated since last sync.</span>';
-						echo '<br>';
-						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
-					} else if ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
+					} elseif ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
 						echo '<span class="warning">Receiver post was updated after the last sync.</span>';
-						echo '<br>';
-						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+					} elseif ( $syndication_info->source_version_edited ) {
+						echo '<span class="warning">Source updated since last sync.</span>';
 					}
+
+					echo '<br>';
+					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
 
 				} else {
 					// SYNCED.
