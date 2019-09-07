@@ -66,13 +66,16 @@ class SyncedTerms {
 	public static function save_to_wp( int $post_id, object $taxonomies ) {
 //		$current_terms = wp_get_post_terms( $post_id );
 
+
 		foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
 			if ( false !== $taxonomy_data ) {
+
+				// REMOVE ALL TERMS FROM POST.
+				wp_set_object_terms( $post_id, null, $taxonomy_slug );
+
 				foreach ( $taxonomy_data as $term ) {
 
 					$new_term = wp_set_object_terms( $post_id, $term->slug, $taxonomy_slug, true );
-//					echo 'new term';
-//					print_r( $new_term );
 
 					if ( ! is_wp_error( $new_term ) ) {
 						$new_synced_term = SyncedTerms::save( $term );
@@ -86,9 +89,6 @@ class SyncedTerms {
 
 		$synced_terms = SyncedTerm::get_all();
 
-//		echo 'synced terms';
-//		print_r( $synced_terms );
-
 		foreach ( $synced_terms as $synced_term ) {
 
 			// GET RECEIVER TERM.
@@ -97,15 +97,11 @@ class SyncedTerms {
 			// CHECK IF SYNCED TERM PARENT ID IS 0 - MEANING NO PARENT.
 			if ( 0 !== (int) $synced_term->source_parent_id ) {
 
-				// GET PARENT TERM
+				// GET PARENT SYNCED TERM ID TO FIND PARENT RECEIVER TERM.
 				$parent_synced_term = SyncedTerm::get_where( [ 'source_term_id' => $synced_term->source_parent_id ] )[0];
-//				echo 'parent synced term';
-//				print_r( $parent_synced_term );
 
+				// GET RECEIVER PARENT TERM.
 				$parent_receiver_term = get_term( $parent_synced_term->receiver_term_id );
-
-//				echo 'parent term';
-//				print_r( $parent_receiver_term );
 
 				$args = array(
 					'parent' => (int) $parent_receiver_term->term_id,
