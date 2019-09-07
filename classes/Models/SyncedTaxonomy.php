@@ -5,7 +5,7 @@ namespace DataSync\Models;
 
 use DataSync\Models\DB;
 
-class Taxonomy {
+class SyncedTaxonomy {
 
 	public static $table_name = 'data_sync_custom_taxonomies';
 

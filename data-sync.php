@@ -7,7 +7,7 @@ use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
-use DataSync\Models\Taxonomy;
+use DataSync\Models\SyncedTaxonomy;
 
 /**
  * Plugin Name: Data Sync

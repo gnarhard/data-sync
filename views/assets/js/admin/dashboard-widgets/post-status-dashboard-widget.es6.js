@@ -204,8 +204,8 @@ function diverged_post_init () {
       let row = $(this).parent().parent().parent()[0];
 
       // TODO: THIS WON'T WORK -- START
-      let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
-      status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
+      // let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
+      // status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
       // TODO: THIS WON'T WORK -- END
 
       let receiver_site_id = $(this).data('receiver-site-id')

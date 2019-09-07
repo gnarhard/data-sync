@@ -414,7 +414,7 @@ class Posts {
 
 			}
 
-			Taxonomies::save_to_wp( $receiver_post_id, $post->taxonomies );
+			SyncedTerms::save_to_wp( $receiver_post_id, $post->taxonomies );
 
 			return $receiver_post_id;
 		}

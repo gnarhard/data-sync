@@ -94,7 +94,11 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
 	<?php
-	foreach ( $connected_sites as $index => $site ) {
+	foreach (
+		$connected_sites
+
+		as $index => $site
+	) {
 
 		$result = SyncedPost::get_where(
 			array(
@@ -110,21 +114,6 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
         <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong>
         <div class="details">
 			<?php
-			if ( ! empty( $connected_site_synced_post ) ) {
-				echo '<span>Last syndication: ' . date( 'g:i:s A n/d/Y', strtotime( $connected_site_synced_post->date_modified ) ) . '</span>';
-				if ( 0 !== (int) $connected_site_synced_post->diverged ) {
-					$post_status = '<i class="dashicons dashicons-editor-unlink"></i>';
-					if ( $syndication_info->source_version_edited ) {
-						echo '<span class="warning">Source AND receiver updated since last sync.</span>';
-						echo '<br>';
-						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
-					} else {
-						echo '<span class="warning">Receiver post was updated after the last sync.</span>';
-						echo '<br>';
-						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
-					}
-				}
-			}
 
 			// CONNECTED SITES INFO
 			$site_info = $enabled_post_type_site_data[ $index ];
@@ -167,35 +156,36 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 				}
 			}
 
-			$post_synced_on_receiver = false;
 			if ( ! empty( $connected_site_synced_post ) ) {
-				if ( ( (int) $post->ID === (int) $connected_site_synced_post->source_post_id ) && ( (int) $site->id === (int) $connected_site_synced_post->receiver_site_id ) ) {
-					$post_synced_on_receiver = true;
-				}
 
-				if ( $post_synced_on_receiver ) {
+				echo '<span>Last syndication: ' . date( 'g:i:s A n/d/Y', strtotime( $connected_site_synced_post->date_modified ) ) . '</span>';
 
-					if ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
-						$site_status = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
-						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
-					} else {
-						// SYNCED.
-						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+				if ( 0 !== (int) $connected_site_synced_post->diverged ) {
+
+					$site_status = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
+
+					if ( ( $syndication_info->source_version_edited ) && ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) ) {
+						echo '<span class="warning">Source AND receiver updated since last sync.</span>';
+					} elseif ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
+						echo '<span class="warning">Receiver post was updated after the last sync.</span>';
+					} elseif ( $syndication_info->source_version_edited ) {
+						echo '<span class="warning">Source updated since last sync.</span>';
 					}
+
+					echo '<br>';
+					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
 
 				} else {
-					// NOT SYNCED.
-					if ( in_array( (int) $site->id, $excluded_sites ) ) {
-						$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
-					} else {
-						$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-						$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
-					}
-
+					// SYNCED.
+					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 				}
 
+
+			} else if ( in_array( (int) $site->id, $excluded_sites ) ) {
+				// NOT SYNCED ON PURPOSE BECAUSE OF EXCLUDED SITE.
+				$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 			} else {
-				// NO SYNCED POSTS - STARTED FRESH.
+				// NOT SYNCED.
 				$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
 				$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
 			}
