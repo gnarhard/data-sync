@@ -269,7 +269,7 @@ class Posts {
 		$number_of_synced_posts_returned = count( $synced_post_result );
 		$sync_status                     = 'unsynced';
 
-		// CHECK EXCLUDED SITES' DEFAULT VALUE OF 0 FOR NO EXCLUDED SITES
+		// CHECK EXCLUDED SITES' DEFAULT VALUE OF 0 FOR NO EXCLUDED SITES.
 		if ( 0 === (int) $excluded_sites[0] ) {
 			$sites_syndicating = $number_of_sites_connected;
 		} else {
@@ -294,7 +294,6 @@ class Posts {
 								$receiver_modified_time = strtotime( $r_post->modified );
 							}
 						}
-
 					}
 
 				}
