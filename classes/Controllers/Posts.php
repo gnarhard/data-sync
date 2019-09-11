@@ -268,15 +268,21 @@ class Posts {
 		$synced_post_result              = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
 		$number_of_synced_posts_returned = count( $synced_post_result );
 		$sync_status                     = 'unsynced';
-		$amount_of_sites_synced          = $number_of_sites_connected - count( $excluded_sites );
+
+		// CHECK EXCLUDED SITES' DEFAULT VALUE OF 0 FOR NO EXCLUDED SITES.
+		if ( 0 === (int) $excluded_sites[0] ) {
+			$sites_syndicating = $number_of_sites_connected;
+		} else {
+			$sites_syndicating = $number_of_sites_connected - count( $excluded_sites );
+		}
 
 		if ( $number_of_synced_posts_returned ) {
 
-			$synced_post = (object) $synced_post_result[0];
+			$synced_post               = (object) $synced_post_result[0];
 			$synced_post_modified_time = strtotime( $synced_post->date_modified );
 			$source_post_modified_time = strtotime( $post->post_modified );
 
-			if ( $amount_of_sites_synced === $number_of_synced_posts_returned ) {
+			if ( $sites_syndicating === $number_of_synced_posts_returned ) {
 
 				$receiver_modified_time = 0;
 
@@ -288,26 +294,25 @@ class Posts {
 								$receiver_modified_time = strtotime( $r_post->modified );
 							}
 						}
-
 					}
 
 				}
 
-				if ( $receiver_modified_time > $source_post_modified_time ) {
+				if ( $receiver_modified_time > $synced_post_modified_time ) {
 					$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
 					$sync_status                               = 'diverged';
-				} else if ( $receiver_modified_time < $source_post_modified_time ) {
+				} else if ( $source_post_modified_time > $synced_post_modified_time ) {
 					$syndication_info->source_version_edited = true;
 					$sync_status                             = 'diverged';
-				} else if ( $receiver_modified_time === $source_post_modified_time ) {
+				} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
 					$sync_status = 'synced';
 				} else if ( 0 === $receiver_modified_time ) {
 					$sync_status = 'unsynced';
 				}
 
-			} elseif ( 0 === $amount_of_sites_synced ) {
+			} elseif ( 0 === $sites_syndicating ) {
 				$sync_status = 'unsynced';
-			} else {
+			} else if ( ( 0 < $sites_syndicating ) && ( $number_of_synced_posts_returned < $sites_syndicating ) ) {
 				$sync_status = 'partial';
 			}
 
@@ -334,7 +339,7 @@ class Posts {
 
 			if ( ( $source_post_modified_time > $synced_post_modified_time ) && ( $number_of_synced_posts_returned ) ) {
 				$syndication_info->synced = '<span class="warning">Source updated since last sync.</span>';
-			} else if ( $source_post_modified_time < $synced_post_modified_time ) {
+			} else if ( $receiver_modified_time > $synced_post_modified_time ) {
 				$syndication_info->synced = '<span class="warning">A receiver post was updated after the last sync.</span>';
 			}
 
