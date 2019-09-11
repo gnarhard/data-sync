@@ -136,7 +136,6 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 					?>
                     <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
 
-
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
 						?><span class="none_enabled"><strong>This post's canonical URL is pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
 					}

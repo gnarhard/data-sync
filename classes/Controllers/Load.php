@@ -47,6 +47,7 @@ class Load {
 		if ( '1' === get_option( 'source_site' ) ) {
 			new Posts();
 
+			// TODO: WHAT IF SETTING DOESN'T EXIST BEFORE REGISTRATION?
 			$connected_site = new ConnectedSite();
 			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $connected_site, 'create_db_table' ] );
 			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_post, 'create_db_table_source' ] );
