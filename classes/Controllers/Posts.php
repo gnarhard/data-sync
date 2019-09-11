@@ -276,10 +276,6 @@ class Posts {
 			$sites_syndicating = $number_of_sites_connected - count( $excluded_sites );
 		}
 
-		print_r( $excluded_sites );
-		print_r( $sites_syndicating );
-		var_dump( $number_of_synced_posts_returned );
-
 		if ( $number_of_synced_posts_returned ) {
 
 			$synced_post               = (object) $synced_post_result[0];
@@ -309,7 +305,7 @@ class Posts {
 				} else if ( $source_post_modified_time > $synced_post_modified_time ) {
 					$syndication_info->source_version_edited = true;
 					$sync_status                             = 'diverged';
-				} else if ( $synced_post_modified_time === $receiver_modified_time ) {
+				} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
 					$sync_status = 'synced';
 				} else if ( 0 === $receiver_modified_time ) {
 					$sync_status = 'unsynced';
