@@ -171,7 +171,7 @@ function display_notified_users() {
 
 	$notified_users = get_option( 'notified_users' );
 
-	if ( '' === $notified_users ) {
+	if ( ( false === $notified_users ) || ( '' === $notified_users ) ) {
 		$notified_users = array();
 	}
 
