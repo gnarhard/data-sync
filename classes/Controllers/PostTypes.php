@@ -138,11 +138,19 @@ class PostTypes {
 		$synced_custom_post_types_to_add = array();
 
 		foreach ( $synced_custom_post_types as $cpt ) {
-			$synced_custom_post_types_to_add[] = $cpt->name;
+			if ( '' !== $cpt->name ) {
+				$synced_custom_post_types_to_add[] = $cpt->name;
+			}
+		}
+
+		foreach ( $enabled_post_types as $key => $enabled_post_type ) {
+			if ( '' === $enabled_post_type ) {
+				unset( $enabled_post_types[$key] );
+			}
 		}
 
 		$merged_post_types = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
-		print_r($merged_post_types);die();
+		$merged_post_types[] = 'post'; // NOT INCLUDED IF IT'S A BRAND NEW RECEIVER SITE, THEY HAVEN'T ENABLED ANY POST TYPES, AND THE SETTING TO OVERWRITE ENABLED POST TYPES WAS SET.
 
 		update_option( 'enabled_post_types', array_unique( $merged_post_types ) );
 	}

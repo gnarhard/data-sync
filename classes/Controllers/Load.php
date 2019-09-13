@@ -39,6 +39,12 @@ class Load {
 
 	}
 
+	public function load_once() {
+			new Options();
+			new Enqueue();
+			new Widgets();
+	}
+
 	public function check_multisite() {
 
 		if ( is_multisite() ) {
@@ -48,6 +54,7 @@ class Load {
 
 			if ( $network_blog_id !== get_current_blog_id() ) {
 				$this->include();
+				$this->load_once();
 			}
 
 			foreach ( $blog_ids as $index => $blog_id ) {
@@ -67,6 +74,7 @@ class Load {
 			// not a multi-site.
 			$this->include();
 			$this->activate();
+			$this->load_once();
 		}
 	}
 
@@ -83,7 +91,13 @@ class Load {
 
 
 	public function include() {
-		$this->load_generics();
+
+		new ConnectedSites();
+		new SourceData();
+		new Receiver();
+		new SyncedPosts();
+		new TemplateSync();
+		new Media();
 
 		if ( $this->source ) {
 			new Posts();
@@ -103,25 +117,22 @@ class Load {
 		$synced_post = new SyncedPost();
 
 		if ( $this->source ) {
-
-			// TODO: WHAT IF SETTING DOESN'T EXIST BEFORE REGISTRATION?
 			$connected_site = new ConnectedSite();
-			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $connected_site, 'create_db_table' ] );
-			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [
-				$synced_post,
-				'create_db_table_source'
-			] );
+			$connected_site->create_db_table();
 
+			global $wpdb;
+			$result = $wpdb->get_results('show tables like "' . $wpdb->prefix . 'data_sync_posts"');
+
+			if ( empty( $result ) ) {
+				$synced_post->create_db_table_source();
+			}
 		} else {
 
-			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [
-				$synced_post,
-				'create_db_table_receiver'
-			] );
+			$synced_post->create_db_table_receiver();
 
 			$synced_term = new SyncedTerm();
 			new SyncedTerms();
-			register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $synced_term, 'create_db_table' ] );
+			$synced_term->create_db_table();
 
 			$post_type = new PostType();
 			$post_type->create_db_table();
@@ -133,18 +144,6 @@ class Load {
 
 		}
 
-	}
-
-	public function load_generics() {
-		new Enqueue();
-		new Options();
-		new Widgets();
-		new ConnectedSites();
-		new SourceData();
-		new Receiver();
-		new SyncedPosts();
-		new TemplateSync();
-		new Media();
 	}
 
 }
