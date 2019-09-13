@@ -333,5 +333,7 @@
 
 #wp_data_sync_enabled_post_types_dashboard .connected_site_enabled_post_types span {
   width: 100%;
+  display: block;
+  margin: 10px;
 }
 
