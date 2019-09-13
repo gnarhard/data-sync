@@ -108,13 +108,9 @@ function display_connected_sites() {
 		}
 	}
 	?>
-    <tr>
-      <td>
-        <button id="add_site">Add Site</button>
-      </td>
-    </tr>
     </tbody>
   </table>
+    <button class="btn button-primary" id="add_site">Add Site</button>
   <input type="hidden" name="connected_sites[]" value="<?php echo esc_html( $connected_sites ); ?>"/>
 	<?php
 
@@ -216,13 +212,13 @@ function display_awareness_messages() {
 		foreach ( $receiver_plugin_versions as $site_plugin_data ) {
 			if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
 				?>
-                <span style="color: red">ACF's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+                <span style="color: red">ACF's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
 				<?php
 			}
 
 			if ( $source_cptui_version !== $site_plugin_data['versions']->cptui ) {
 				?>
-                <span style="color: red">CPT UI's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+                <span style="color: red">CPT UI's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
 				<?php
 			}
 		}

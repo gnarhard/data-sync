@@ -123,8 +123,10 @@ class Receiver {
 //				}
 
 				$plugin_versions[] = [
-					'site_id' => $site->id,
-					'versions' => json_decode( wp_remote_retrieve_body( $response ) )->data,
+					'site_id'        => $site->id,
+					'site_name'      => $site->name,
+					'site_admin_url' => $site->url . '/wp-admin/plugins.php',
+					'versions'       => json_decode( wp_remote_retrieve_body( $response ) )->data,
 				];
 
 			}

@@ -28,88 +28,48 @@ class Load {
 	public function __construct() {
 
 		if ( '1' === get_option( 'source_site' ) ) {
-			$this->source = true;
+			$this->source               = true;
 			$this->no_site_type_setting = false;
 		} elseif ( '0' === get_option( 'source_site' ) ) {
-			$this->source = false;
+			$this->source               = false;
 			$this->no_site_type_setting = false;
 		}
 
-		register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', [ $this, 'check_multisite' ] );
-
-		global $wpdb;
-		$blog_ids = $wpdb->get_col( 'SELECT blog_id FROM ' . $wpdb->blogs );
-
-		foreach ( $blog_ids as $index => $blog_id ) {
-			// DON'T RUN ON MAIN NETWORK SITE.
-			if ( 0 !== $index ) {
-				$this->include();
-			}
-		}
+		$this->check_multisite();
 
 	}
 
-	public function check_multisite( $network_wide ) {
+	public function check_multisite() {
 
 		if ( is_multisite() ) {
 
-			global $wpdb;
-			$blog_ids = $wpdb->get_col( 'SELECT blog_id FROM ' . $wpdb->blogs );
-			$network_blog_id = $blog_ids[0];
+			$blog_ids        = get_sites();
+			$network_blog_id = (int) $blog_ids[0]->blog_id;
 
-			if ( '' === $network_wide ) {
-				if ( $network_blog_id === get_current_blog_id() ) {
-					$network_wide = true;
-				}
+			if ( $network_blog_id !== get_current_blog_id() ) {
+				$this->include();
 			}
 
-			if ( $network_wide ) {
+			foreach ( $blog_ids as $index => $blog_id ) {
 
-
-				foreach ( $blog_ids as $index => $blog_id ) {
-
-					// DON'T INSTALL ON MAIN NETWORK SITE.
-					if ( 0 === $index ) {
-						continue;
-					}
-
-					switch_to_blog( $blog_id );
-					$this->activate();
-					restore_current_blog();
-
+				// NEVER INSTALL ON MASTER NETWORK SITE.
+				if ( $network_blog_id === get_current_blog_id() ) {
+					continue;
 				}
 
-			} else {
-
-				echo ' activated on a single site within a multi-site.';die();
-				// activated on a single site within a multi-site.
+				switch_to_blog( $blog_id );
 				$this->activate();
+				restore_current_blog();
 
 			}
 
 		} else {
-			 echo 'not a multi-site.';die();
-			 // not a multi-site.
+			// not a multi-site.
+			$this->include();
 			$this->activate();
 		}
 	}
 
-	public function include() {
-		$this->load_generics();
-
-		if ( $this->source ) {
-			new Posts();
-		}
-
-		var_dump($this->no_site_type_setting);
-
-		if ( ! $this->no_site_type_setting ) {
-			new Logs();
-			new Log();
-			$this->create_db_tables();
-		}
-
-	}
 
 	public function activate() {
 
@@ -120,6 +80,23 @@ class Load {
 		register_activation_hook( DATA_SYNC_PATH . 'data-sync.php', 'flush_rewrite_rules' );
 
 	}
+
+
+	public function include() {
+		$this->load_generics();
+
+		if ( $this->source ) {
+			new Posts();
+		}
+
+		if ( ! $this->no_site_type_setting ) {
+			new Logs();
+			new Log();
+			$this->create_db_tables();
+		}
+
+	}
+
 
 	public function create_db_tables() {
 
