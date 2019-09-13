@@ -72,20 +72,21 @@ class Receiver {
 	 */
 	public function start_fresh() {
 
+		global $wpdb;
 		$db               = new DB();
 		$sql_statements   = array();
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_post_types';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_taxonomies';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_terms';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_post_types';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_taxonomies';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_terms';
 
-		$sql_statements[] = 'TRUNCATE TABLE wp_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_postmeta';
-		$sql_statements[] = 'TRUNCATE TABLE wp_terms';
-		$sql_statements[] = 'TRUNCATE TABLE wp_termmeta';
-		$sql_statements[] = 'TRUNCATE TABLE wp_term_taxonomy';
-		$sql_statements[] = 'TRUNCATE TABLE wp_term_relationships';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'postmeta';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'terms';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'termmeta';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'term_taxonomy';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'term_relationships';
 
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );

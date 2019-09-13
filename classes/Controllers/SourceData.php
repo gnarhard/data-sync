@@ -253,11 +253,12 @@ class SourceData {
 	 */
 	public function start_fresh() {
 
+		global $wpdb;
 		$db               = new DB();
 		$connected_sites  = (array) ConnectedSites::get_all()->get_data();
 		$sql_statements   = array();
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
 
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );

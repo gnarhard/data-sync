@@ -116,23 +116,30 @@ class Load {
 
 		$synced_post = new SyncedPost();
 
+		global $wpdb;
+
 		if ( $this->source ) {
 			$connected_site = new ConnectedSite();
 			$connected_site->create_db_table();
 
-			global $wpdb;
 			$result = $wpdb->get_results('show tables like "' . $wpdb->prefix . 'data_sync_posts"');
 
 			if ( empty( $result ) ) {
 				$synced_post->create_db_table_source();
 			}
+
 		} else {
 
 			$synced_post->create_db_table_receiver();
 
 			$synced_term = new SyncedTerm();
 			new SyncedTerms();
-			$synced_term->create_db_table();
+			$result = $wpdb->get_results('show tables like "' . $wpdb->prefix . 'data_sync_terms"');
+
+			if ( empty( $result ) ) {
+				$synced_term->create_db_table();
+			}
+
 
 			$post_type = new PostType();
 			$post_type->create_db_table();
