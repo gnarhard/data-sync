@@ -7,7 +7,7 @@ use DataSync\Controllers\Load;
 /**
  * Plugin Name: Data Sync
  * Version:     1.0.0
- * Description: Securely synchronizes all post data, custom ACF fields, and Yoast data across multiple, authorized sites. Dependent on these third-party plugins: ACF Pro and CPT UI
+ * Description: Multi-site compatible WordPress data syndicator. Syndicates post data, post meta, custom post types, custom ACF fields and data, and Yoast data with multiple authenticated sites.
  * Author:      Copper Leaf Creative
  * Author URI:  https://copperleafcreative.com
  * Text Domain: data-sync

@@ -142,6 +142,7 @@ class PostTypes {
 		}
 
 		$merged_post_types = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
+		print_r($merged_post_types);die();
 
 		update_option( 'enabled_post_types', array_unique( $merged_post_types ) );
 	}
