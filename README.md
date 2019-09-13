@@ -1,5 +1,5 @@
 # Data Sync
-Synchronizes all post data, custom ACF fields, and Yoast data across multiple authenticated sites.
+Multi-site compatible WordPress data syndicator. Syndicates post, post meta, custom ACF fields and data, and Yoast data with multiple authenticated sites.
 
 <b>Installation:</b>
 <ol>
