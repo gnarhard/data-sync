@@ -213,6 +213,8 @@ class Receiver {
 					continue; // SKIPS EMPTY DATA.
 				}
 
+				echo 'posts related to post type slug';
+				var_dump($source_data->posts->$post_type_slug);
 				$post_count = count( $source_data->posts->$post_type_slug );
 
 				if ( 0 === $post_count ) {
