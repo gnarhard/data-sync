@@ -321,8 +321,11 @@ class SourceData {
 
 		$synced_posts = new SyncedPosts();
 		$options      = Options::source()->get_data();
+		$upload_dir   = wp_get_upload_dir();
 
 		$this->source_data                    = new stdClass();
+		$this->source_data->upload_path       = $upload_dir['path'];
+		$this->source_data->upload_url        = $upload_dir['url'];
 		$this->source_data->start_time        = (string) current_time( 'mysql' );
 		$this->source_data->start_microtime   = (float) microtime( true );
 		$this->source_data->options           = (array) $options;

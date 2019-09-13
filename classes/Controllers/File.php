@@ -11,17 +11,26 @@ class File {
 	 * Transfer Files Server to Server using PHP Copy
 	 *
 	 */
-	public static function copy( string $source_base_url, string $remote_file_url, $file_contents = false ) {
+	public static function copy( object $source_data, $file_contents = false ) {
+
+		$upload_dir      = wp_get_upload_dir();
 
 		/* New file name and path for this file */
-		$local_file = str_replace( $source_base_url, ABSPATH, $remote_file_url );
+		$local_file = (string) str_replace( $source_data->source_upload_url, $upload_dir['path'], $source_data->media->guid );
+
+		var_dump('asdf');
+		var_dump( $local_file );
+		var_dump($source_data->source_upload_url);
+		var_dump($upload_dir['path']);
+		var_dump($source_data->media->guid);
+		var_dump($source_data->filename);
 
 		/* Copy the file from source url to server */
-		$copied = copy( $remote_file_url, $local_file );
+		$copied = copy( $source_data->media->guid, $local_file );
 
 		/* Add notice for success/failure */
 		if ( ! $copied ) {
-			$log = new Logs( 'Failed to copy ' . $remote_file_url . '.', true );
+			$log = new Logs( 'Failed to copy ' . $source_data->media->guid . '.', true );
 			unset( $log );
 			return false;
 		}
