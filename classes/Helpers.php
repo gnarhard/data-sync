@@ -63,4 +63,18 @@ class Helpers {
 		return $new;
 	}
 
+
+	public static function delete_media( $dir ) {
+		if ( is_dir( $dir ) ) {
+			$files = scandir( $dir );
+			foreach ( $files as $file ) {
+				if ( $file !== "." && $file !== ".." ) {
+					self::delete_media( "$dir/$file" );
+				}
+			}
+			rmdir( $dir );
+		} else if ( file_exists( $dir ) ) {
+			unlink( $dir );
+		}
+	}
 }

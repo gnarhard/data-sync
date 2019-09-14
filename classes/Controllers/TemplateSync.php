@@ -59,13 +59,12 @@ class TemplateSync {
 
 				$source_data                     = new stdClass();
 				$source_data->filename           = $file;
-				$source_data->source_base_url    = get_site_url();
-				$source_data->remote_file_url    = DATA_SYNC_URL . 'templates/' . $file;
 				$source_data->file_contents      = file_get_contents( $template_dir . '/' . $file );
+				$source_data->source_upload_path = DATA_SYNC_PATH . 'templates/';
+				$source_data->source_upload_url  = DATA_SYNC_URL . 'templates/';
+				$source_data->media->guid        = DATA_SYNC_URL . 'templates/' . $file;
 				$source_data->receiver_site_id   = (int) $connected_site->id;
 				$source_data->start_time         = (string) current_time( 'mysql' );
-				$source_data->source_upload_path = $upload_dir['path'];
-				$source_data->source_upload_url  = $upload_dir['url'];
 
 				$this->push( $connected_site, $source_data );
 			}

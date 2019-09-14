@@ -80,13 +80,14 @@ class Media {
 		$upload_dir   = wp_get_upload_dir();
 		$path         = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
 
-		$data                     = new \stdClass();
-		$data->media              = $media;
-		$data->source_base_url    = get_site_url();
-		$data->synced_posts       = (array) $synced_posts->get_all()->get_data();
-		$data->source_upload_path = $upload_dir['path'];
-		$data->source_upload_url  = $upload_dir['url'];
-		$data->filename           = basename( $path['path'] );
+		$data                            = new \stdClass();
+		$data->media                     = $media;
+		$data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
+		$data->source_base_url           = get_site_url();
+		$data->synced_posts              = (array) $synced_posts->get_all()->get_data();
+		$data->source_upload_path        = $upload_dir['path'];
+		$data->source_upload_url         = $upload_dir['url'];
+		$data->filename                  = basename( $path['path'] );
 
 		foreach ( $connected_sites as $site ) {
 
@@ -117,8 +118,14 @@ class Media {
 	 *
 	 */
 	public function update() {
-		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->insert_into_wp( $source_data );
+		$source_data      = (object) json_decode( file_get_contents( 'php://input' ) );
+		$receiver_options = (object) Options::receiver()->get_data();
+
+		// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
+		if ( in_array( $source_data->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {
+			$this->insert_into_wp( $source_data );
+		}
+
 		wp_send_json_success( $source_data );
 	}
 
@@ -130,11 +137,8 @@ class Media {
 	 */
 	public function insert_into_wp( object $source_data ) {
 
-		$upload_dir      = wp_get_upload_dir();
-		$file_path       = $upload_dir['path'] . '/' . $source_data->filename;
-
-		var_dump( 'file path' );
-		var_dump( $file_path );
+		$upload_dir = wp_get_upload_dir();
+		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
 
 		$result = File::copy( $source_data );
 
@@ -148,6 +152,7 @@ class Media {
 				'post_title'     => preg_replace( '/\.[^.]+$/', '', $source_data->filename ),
 				'post_content'   => '',
 				'post_status'    => 'inherit',
+				'guid'           => (string) str_replace( $source_data->source_upload_url, $upload_dir['url'], $source_data->media->guid ),
 			);
 
 			$args        = array(
@@ -166,6 +171,8 @@ class Media {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
 			}
 
+			var_dump( 'attachment id' );
+			var_dump( $attachment_id );
 
 			if ( ! is_wp_error( $attachment_id ) ) {
 				require_once ABSPATH . 'wp-admin/includes/image.php';

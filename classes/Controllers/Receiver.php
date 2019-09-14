@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 
 
 use DataSync\Controllers\Email;
+use DataSync\Helpers;
 use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -91,6 +92,9 @@ class Receiver {
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );
 		}
+
+		$upload_dir = wp_upload_dir();
+		Helpers::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
 
 		wp_send_json_success( 'Receiver table truncation completed.' );
 
