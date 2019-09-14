@@ -62,6 +62,7 @@ class Posts {
 	public function add_meta_boxes() {
 
 		$registered_post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
+		unset( $registered_post_types['attachment'] );
 
 		add_meta_box(
 			'override_post_yoast',

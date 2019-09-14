@@ -33,9 +33,6 @@ class File {
 		var_dump( $source_data->source_upload_url );
 		var_dump( $upload_dir['path'] );
 
-		// CHECK DIRECTORIES EXIST.
-		mkdir( dirname( $local_file ), 0644, true );
-
 		/* Copy the file from source url to server */
 		$copied = copy( $source_data->media->guid, $local_file );
 
