@@ -94,15 +94,19 @@ class Receiver {
 		}
 
 
-		if ( is_multisite() ) {
+		$upload_dir = wp_upload_dir();
 
+		if ( is_multisite() ) {
 			$blog_ids        = get_sites();
 			$network_blog_id = (int) $blog_ids[0]->blog_id;
 
 			if ( $network_blog_id !== get_current_blog_id() ) {
-				$upload_dir = wp_upload_dir();
-				Helpers::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
+				File::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
+				mkdir( $upload_dir['basedir'], 0755);
 			}
+		} else {
+			File::delete_media( $upload_dir['basedir'] );
+			mkdir( $upload_dir['basedir'], 0755);
 		}
 
 

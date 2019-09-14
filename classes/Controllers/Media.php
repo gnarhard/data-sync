@@ -84,7 +84,6 @@ class Media {
 		$data->media                     = $media;
 		$data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
 		$data->source_base_url           = get_site_url();
-		$data->synced_posts              = (array) $synced_posts->get_all()->get_data();
 		$data->source_upload_path        = $upload_dir['path'];
 		$data->source_upload_url         = $upload_dir['url'];
 		$data->filename                  = basename( $path['path'] );
@@ -140,7 +139,13 @@ class Media {
 		$upload_dir = wp_get_upload_dir();
 		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
 
+		var_dump( $source_data );
+		var_dump( $file_path );
+
 		$result = File::copy( $source_data );
+
+		var_dump( 'copy result' );
+		var_dump( $result );
 
 		if ( $result ) {
 
