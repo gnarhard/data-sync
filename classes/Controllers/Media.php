@@ -139,13 +139,7 @@ class Media {
 		$upload_dir = wp_get_upload_dir();
 		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
 
-		var_dump( $source_data );
-		var_dump( $file_path );
-
 		$result = File::copy( $source_data );
-
-		var_dump( 'copy result' );
-		var_dump( $result );
 
 		if ( $result ) {
 
@@ -169,9 +163,6 @@ class Media {
 			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
 			$source_data->media->diverged = false;
 
-			var_dump( 'media synced post' );
-			var_dump($synced_post);
-
 			if ( count( $synced_post ) ) {
 				$source_data->media->diverged = false;
 				$attachment_id                = $synced_post[0]->receiver_post_id;
@@ -179,13 +170,10 @@ class Media {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
 			}
 
-			var_dump( 'attachment id' );
-			var_dump( $attachment_id );
-
 			if ( ! is_wp_error( $attachment_id ) ) {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
-				wp_update_attachment_metadata( $attachment_id, $attachment_data );
+				$updated_meta = wp_update_attachment_metadata( $attachment_id, $attachment_data );
 				$this->update_thumbnail_id( $source_data->media, $attachment_id );
 				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
 			} else {
@@ -207,8 +195,12 @@ class Media {
 			'source_post_id'   => $post->post_parent,
 		);
 		$synced_post_parent = SyncedPost::get_where( $args );
+		var_dump( 'synced post parent thumbnail' );
+		var_dump( $synced_post_parent );
 		if ( $synced_post_parent ) {
 			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+			var_dump( 'updated post meta' );
+			var_dump( $updated );
 		} else {
 			$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
 			unset( $log );

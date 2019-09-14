@@ -16,9 +16,6 @@ class File {
 		$upload_dir = wp_get_upload_dir();
 		$ext        = pathinfo( $source_data->filename, PATHINFO_EXTENSION );
 
-		print_r($upload_dir);
-		var_dump($source_data->source_upload_url);
-
 		/* New file name and path for this file */
 		if ( ( 'php' === $ext ) && ( $file_contents ) ) {
 			// TEMPLATE FILE.
@@ -28,11 +25,6 @@ class File {
 			$local_file = $upload_dir['path'] . '/' . $source_data->filename;
 			$local_url = $upload_dir['url'] . '/' . $source_data->filename;
 		}
-
-		var_dump( 'file guid' );
-		var_dump( $source_data->media->guid );
-		var_dump( 'local file' );
-		var_dump( $local_file );
 
 		/* Copy the file from source url to server */;
 		mkdir( $upload_dir['path'], 0755, true ); // UNFORTUNATELY NECESSARY.

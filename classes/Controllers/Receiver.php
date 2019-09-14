@@ -73,6 +73,9 @@ class Receiver {
 	 */
 	public function start_fresh() {
 
+		var_dump(get_current_blog_id() );
+		var_dump( get_site_url() );
+
 		global $wpdb;
 		$db               = new DB();
 		$sql_statements   = array();
