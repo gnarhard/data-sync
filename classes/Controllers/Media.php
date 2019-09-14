@@ -157,12 +157,15 @@ class Media {
 
 			$args        = array(
 				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-				'source_post_id'   => $source_data->media->ID,
+				'source_post_id'   => (int) $source_data->media->ID,
 			);
 			$synced_post = SyncedPost::get_where( $args );
 
 			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
 			$source_data->media->diverged = false;
+
+			var_dump( 'media synced post' );
+			var_dump($synced_post);
 
 			if ( count( $synced_post ) ) {
 				$source_data->media->diverged = false;

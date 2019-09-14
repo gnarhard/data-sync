@@ -93,8 +93,18 @@ class Receiver {
 			$db->query( $sql );
 		}
 
-		$upload_dir = wp_upload_dir();
-		Helpers::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
+
+		if ( is_multisite() ) {
+
+			$blog_ids        = get_sites();
+			$network_blog_id = (int) $blog_ids[0]->blog_id;
+
+			if ( $network_blog_id !== get_current_blog_id() ) {
+				$upload_dir = wp_upload_dir();
+				Helpers::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
+			}
+		}
+
 
 		wp_send_json_success( 'Receiver table truncation completed.' );
 

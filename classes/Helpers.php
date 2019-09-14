@@ -43,7 +43,7 @@ class Helpers {
 	/**
 	 * @param $obj
 	 *
-	 * Recursively convert and object to an array
+	 * Recursively convert an object into an array
 	 *
 	 * @return array
 	 */
@@ -64,6 +64,11 @@ class Helpers {
 	}
 
 
+	/**
+	 * Recursively delete folders and files.
+	 *
+	 * @param $dir
+	 */
 	public static function delete_media( $dir ) {
 		if ( is_dir( $dir ) ) {
 			$files = scandir( $dir );
