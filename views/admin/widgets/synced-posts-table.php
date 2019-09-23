@@ -90,15 +90,13 @@ function display_synced_posts_table() {
 
 
 function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
+
 	?>
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
 	<?php
-	foreach (
-		$connected_sites
 
-		as $index => $site
-	) {
+	foreach ( $connected_sites as $index => $site ) {
 
 		$result = SyncedPost::get_where(
 			array(
@@ -170,9 +168,11 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 			} else if ( in_array( (int) $site->id, $excluded_sites ) ) {
 				// NOT SYNCED ON PURPOSE BECAUSE OF EXCLUDED SITE.
+				echo '<span>Last syndication: Never.';
 				$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 			} else {
 				// NOT SYNCED.
+				echo '<span>Last syndication: Never.';
 				$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
 				$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
 			}

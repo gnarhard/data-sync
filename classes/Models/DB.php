@@ -19,6 +19,8 @@ class DB {
 	 */
 	public $table_name;
 
+	private $wpdb;
+
 	/**
 	 * DB constructor.
 	 *
@@ -26,6 +28,7 @@ class DB {
 	 */
 	public function __construct( $table_name = '' ) {
 		global $wpdb;
+		$this->wpdb = $wpdb;
 		$this->table_name = $wpdb->prefix . $table_name;
 	}
 
@@ -35,16 +38,12 @@ class DB {
 	 * @return mixed
 	 */
 	public function get( int $id ) {
-		global $wpdb;
-
-		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $this->table_name . ' WHERE id = %d', $id ) );
+		return $this->wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . $this->table_name . ' WHERE id = %d', $id ) );
 	}
 
 
 	public function get_all() {
-		global $wpdb;
-
-		return $wpdb->get_results( 'SELECT * FROM ' . $this->table_name );
+		return $this->wpdb->get_results( 'SELECT * FROM ' . $this->table_name );
 	}
 
 	/**
@@ -53,7 +52,6 @@ class DB {
 	 * @return mixed
 	 */
 	public function get_where( array $args ) {
-		global $wpdb;
 
 		$query     = 'SELECT * FROM ' . $this->table_name . ' WHERE';
 		$arg_count = count( $args );
@@ -74,7 +72,7 @@ class DB {
 			$i ++;
 		}
 
-		return $wpdb->get_results( $query );
+		return $this->wpdb->get_results( $query );
 
 	}
 
@@ -85,9 +83,7 @@ class DB {
 	 * @return WP_Error
 	 */
 	public function create( array $args, array $sprintf ) {
-		global $wpdb;
-
-		$created = $wpdb->insert(
+		$created = $this->wpdb->insert(
 			$this->table_name,
 			$args,
 			$sprintf
@@ -95,7 +91,7 @@ class DB {
 
 //		echo $wpdb->last_query;
 		if ( false === $created ) {
-			$error_msg = 'DB insert failed: ' . $wpdb->last_error;
+			$error_msg = 'DB insert failed: ' . $this->wpdb->last_error;
 			$log       = new Logs( $error_msg, true );
 			unset( $log );
 
@@ -113,12 +109,10 @@ class DB {
 	 * @return WP_Error
 	 */
 	public function update( array $args, $where ) {
-		global $wpdb;
-
-		$updated = $wpdb->update( $this->table_name, $args, $where );
+		$updated = $this->wpdb->update( $this->table_name, $args, $where );
 
 		if ( false === $updated ) {
-			$error_msg = 'Database failed to update: ' . $wpdb->last_error;
+			$error_msg = 'Database failed to update: ' . $this->wpdb->last_error;
 			$log       = new Logs( $error_msg, true );
 			unset( $log );
 
@@ -134,8 +128,8 @@ class DB {
 	 * @return mixed
 	 */
 	public function delete( int $id ) {
-		global $wpdb;
-		$result = $wpdb->delete(
+
+		$result = $this->wpdb->delete(
 			$this->table_name,
 			array(
 				'id' => $id,
@@ -150,11 +144,7 @@ class DB {
 	}
 
 	public function query( string $sql ) {
-		global $wpdb;
-
-		$result = $wpdb->get_results( $sql );
-
-		return $result;
+		return $this->wpdb->get_results( $sql );
 	}
 
 

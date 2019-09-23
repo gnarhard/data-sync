@@ -195,18 +195,7 @@ class SourceData {
 	}
 
 
-	public function finish_push( $response ) {
 
-		$this->get_receiver_data();
-		$this->save_receiver_data();
-
-		new Media( $this->source_data->posts );
-
-		$this->get_receiver_data();
-		$this->save_receiver_data();
-
-		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
-	}
 
 
 	/**
@@ -245,6 +234,24 @@ class SourceData {
 		$this->finish_push( $response );
 
 	}
+
+
+
+
+	public function finish_push( $response ) {
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		new Media( $this->source_data->posts );
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+	}
+
+
 
 	/**
 	 *

@@ -111,7 +111,7 @@ function display_connected_sites() {
     </tbody>
   </table>
     <button class="btn button-primary" id="add_site">Add Site</button>
-  <input type="hidden" name="connected_sites[]" value="<?php echo esc_html( $connected_sites ); ?>"/>
+<!--  <input type="hidden" name="connected_sites[]" value="--><?php //echo esc_html( $connected_sites ); ?><!--"/>-->
 	<?php
 
 	display_connected_sites_modal();
