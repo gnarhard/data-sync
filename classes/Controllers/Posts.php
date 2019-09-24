@@ -87,7 +87,7 @@ class Posts {
 		);
 
 		add_meta_box(
-			'excluded_sites',
+			'excluded_site_meta',
 			__(
 				'Sites Excluded From Sync',
 				'textdomain'

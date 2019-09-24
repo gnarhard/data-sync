@@ -1,4 +1,4 @@
-import AJAX from './AJAX.es6.js';
+import AJAX from '../AJAX.es6.js';
 
 class ConnectedSites {
 

@@ -1,4 +1,5 @@
 import AJAX from '../AJAX.es6.js';
+import Helpers from '../Helpers.es6.js';
 
 document.addEventListener( "DOMContentLoaded", function () {
     if ( document.getElementById( 'save_push_enabled_post_types' ) ) {
@@ -7,7 +8,7 @@ document.addEventListener( "DOMContentLoaded", function () {
 
             let data = {};
             let input_name = document.getElementById( 'push_enabled_post_types' ).getAttribute( 'name' ).replace( /[^a-z0-9_]/gi, '' );
-            data = getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
+            data = Helpers.getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
             // console.log(data);
             AJAX.post( DataSync.api.url + '/options/push_enabled_post_types', data ).then( function() {
                 window.location.reload();
@@ -17,18 +18,3 @@ document.addEventListener( "DOMContentLoaded", function () {
     }
 
 } );
-
-function getSelectValues( select ) {
-    var result = [];
-    var options = select && select.options;
-    var opt;
-
-    for ( var i = 0, iLen = options.length; i < iLen; i++ ) {
-        opt = options[i];
-
-        if ( opt.selected ) {
-            result.push( opt.value.replace(/\s/g,'') || opt.text.replace(/\s/g,'') );
-        }
-    }
-    return result;
-}

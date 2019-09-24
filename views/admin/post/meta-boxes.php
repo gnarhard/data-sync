@@ -6,11 +6,6 @@ function add_canonical_radio_inputs( $post ) {
 	wp_nonce_field( 'data_sync_post_meta_box', 'data_sync_post_meta_box_nonce' );
 	$value = get_post_meta( $post->ID, '_canonical_site', true );
 
-	?>
-    <!--	<input type="radio" id="canonical_site" name="canonical_site" value="0" size="25" --><?php //checked( $value, 0 ); ?><!--/>-->
-    <!--	<label for="canonical_site">None</label>-->
-
-	<?php
 	$connected_sites_obj = new ConnectedSites();
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	if ( is_array( $connected_sites ) ) {
