@@ -151,8 +151,9 @@ class PostTypes {
 
 		$merged_post_types = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
 		$merged_post_types[] = 'post'; // NOT INCLUDED IF IT'S A BRAND NEW RECEIVER SITE, THEY HAVEN'T ENABLED ANY POST TYPES, AND THE SETTING TO OVERWRITE ENABLED POST TYPES WAS SET.
+		$unique_post_types = array_unique( $merged_post_types );
 
-		update_option( 'enabled_post_types', array_unique( $merged_post_types ) );
+		update_option( 'enabled_post_types',  $unique_post_types);
 	}
 
 	/**

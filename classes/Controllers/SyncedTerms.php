@@ -80,7 +80,7 @@ class SyncedTerms {
 					if ( ! is_wp_error( $new_term ) ) {
 						$new_synced_term = SyncedTerms::save( $term );
 					} else {
-						$log = new Logs( 'Term: ' . $term->slug . ' failed to connect to post.', true );
+						$log = new Logs( 'Term: ' . $term->slug . ' failed to connect to post. ' . $new_term->get_error_message(), true );
 						unset( $log );
 					}
 				}

@@ -55,7 +55,6 @@ class Receiver {
 				),
 			)
 		);
-
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
 			'/plugin_versions',
@@ -176,6 +175,7 @@ class Receiver {
 	 *
 	 */
 	public function receive() {
+
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
 		$this->process( $source_data );
@@ -222,6 +222,7 @@ class Receiver {
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			SyncedTaxonomies::save( $taxonomy );
 		}
+		new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 

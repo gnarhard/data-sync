@@ -27,7 +27,9 @@ class File {
 		}
 
 		/* Copy the file from source url to server */;
-		mkdir( $upload_dir['path'], 0755, true ); // UNFORTUNATELY NECESSARY.
+		if ( !file_exists( $upload_dir['path'] ) ) {
+			mkdir( $upload_dir['path'], 0755, true ); // UNFORTUNATELY NECESSARY.
+		}
 		$copied = copy( $source_data->media->guid, $local_file );
 
 		/* Add notice for success/failure */
