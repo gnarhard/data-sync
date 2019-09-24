@@ -1,4 +1,12 @@
 .settings_page_data-sync-options {
+
+  #connected_sites {
+    td:first-child, th:first-child {
+      width: 50px;
+    }
+
+  }
+
   input[type=text] {
     width: 400px;
   }
@@ -29,7 +37,7 @@
       background: white;
       border-radius: 2px;
       padding: 10px;
-      box-shadow: 1px 1px 4px black;
+      box-shadow: 0px 0px 11px 0px black;
 
       h2 {
         text-align: center;
@@ -41,6 +49,7 @@
       }
 
       .input_wrap {
+        padding-bottom: 30px;
         width: 100%;
         display: block;
         clear: both;
@@ -67,6 +76,7 @@
 
   .display {
     display: block;
+    position: fixed;
   }
 
   #refresh_error_log {

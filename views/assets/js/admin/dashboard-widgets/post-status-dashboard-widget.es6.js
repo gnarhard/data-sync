@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault()
       AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
         console.log(result)
-        document.getElementById('template_push').innerHTML += 'Template pushed successfully.'
+        document.getElementById('template_push').innerHTML += 'Template pushed successfully <i class="dashicons yes"></i>'
       })
     }
   }

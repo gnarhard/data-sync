@@ -43,7 +43,7 @@ class Helpers {
 	/**
 	 * @param $obj
 	 *
-	 * Recursively convert and object to an array
+	 * Recursively convert an object into an array
 	 *
 	 * @return array
 	 */
@@ -62,5 +62,6 @@ class Helpers {
 
 		return $new;
 	}
+
 
 }

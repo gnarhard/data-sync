@@ -48,7 +48,7 @@ function display_connected_sites_enabled_post_types() {
 		} else {
 
 			?>
-            <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
+            <span class="none_enabled">No enabled post types on this site.</span><?php
 
 		}
 	}

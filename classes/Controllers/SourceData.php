@@ -13,6 +13,7 @@ use ACF_Admin_Tool_Export;
 use stdClass;
 use DataSync\Models\DB;
 use DataSync\Controllers\ACFs;
+use WP_Http_Cookie;
 
 /**
  * Class SourceData
@@ -195,17 +196,45 @@ class SourceData {
 	}
 
 
-	public function finish_push( $response ) {
+	public function create_request_data( $site ) {
 
-		$this->get_receiver_data();
-		$this->save_receiver_data();
+		$post_data = new stdClass();
 
-		new Media( $this->source_data->posts );
+		if ( false !== strpos( $site->url, 'receiver1' ) ) {
+			$xdebug_ide_key = 'RECEIVER1';
+		} elseif ( false !== strpos( $site->url, 'receiver2' ) ) {
+			$xdebug_ide_key = 'RECEIVER2';
+		} elseif ( false !== strpos( $site->url, 'multi' ) ) {
+			$xdebug_ide_key = 'MULTI';
+		}
 
-		$this->get_receiver_data();
-		$this->save_receiver_data();
+		$this->source_data->receiver_site_id = (int) $site->id;
 
-		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+		if ( $this->source_data->options->debug ) {
+//			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive?XDEBUG_SESSION_START=' . $xdebug_ide_key;
+			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+
+			$post_data->cookies = [];
+
+			$xdebug_cookie = array(
+				'name' => 'XDEBUG_SESSION',
+				'value' => $xdebug_ide_key,
+//				'value' => 'PHPSTORM',
+//				'domain' => $site->url,
+				'expires' => time() + (86400 * 30),
+				'path' => '/',
+			);
+			$post_data->cookies[] = new WP_Http_Cookie( $xdebug_cookie );
+			$this->source_data->xdebug_ide_key = $xdebug_ide_key;
+		} else {
+			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$this->source_data->xdebug_ide_key = '';
+		}
+
+		$auth                                = new Auth();
+		$post_data->json                     = $auth->prepare( $this->source_data, $site->secret_key );
+
+		return $post_data;
 	}
 
 
@@ -221,11 +250,12 @@ class SourceData {
 
 		foreach ( $this->source_data->connected_sites as $site ) {
 
-			$this->source_data->receiver_site_id = (int) $site->id;
-			$auth                                = new Auth();
-			$json                                = $auth->prepare( $this->source_data, $site->secret_key );
-			$url                                 = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$response                            = wp_remote_post( $url, [ 'body' => $json ] );
+			$post_data = $this->create_request_data( $site );
+
+			$response = wp_remote_post( $post_data->url, [
+				'body'    => $post_data->json,
+//				'cookies' => $post_data->cookies,
+			] );
 
 			if ( is_wp_error( $response ) ) {
 				echo $response->get_error_message();
@@ -246,6 +276,21 @@ class SourceData {
 
 	}
 
+
+	public function finish_push( $response ) {
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		new Media( $this->source_data->posts );
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+	}
+
+
 	/**
 	 *
 	 * Truncate source tables for a fresh testing start
@@ -253,11 +298,12 @@ class SourceData {
 	 */
 	public function start_fresh() {
 
+		global $wpdb;
 		$db               = new DB();
 		$connected_sites  = (array) ConnectedSites::get_all()->get_data();
 		$sql_statements   = array();
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
 
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );
@@ -320,11 +366,14 @@ class SourceData {
 
 		$synced_posts = new SyncedPosts();
 		$options      = Options::source()->get_data();
+		$upload_dir   = wp_get_upload_dir();
 
 		$this->source_data                    = new stdClass();
+		$this->source_data->upload_path       = $upload_dir['path'];
+		$this->source_data->upload_url        = $upload_dir['url'];
 		$this->source_data->start_time        = (string) current_time( 'mysql' );
 		$this->source_data->start_microtime   = (float) microtime( true );
-		$this->source_data->options           = (array) $options;
+		$this->source_data->options           = (object) $options;
 		$this->source_data->acf               = (array) ACFs::get_acf_fields();
 		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$this->source_data->url               = (string) get_site_url();

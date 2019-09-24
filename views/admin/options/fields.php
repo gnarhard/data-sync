@@ -108,14 +108,10 @@ function display_connected_sites() {
 		}
 	}
 	?>
-    <tr>
-      <td>
-        <button id="add_site">Add Site</button>
-      </td>
-    </tr>
     </tbody>
   </table>
-  <input type="hidden" name="connected_sites[]" value="<?php echo esc_html( $connected_sites ); ?>"/>
+    <button class="btn button-primary" id="add_site">Add Site</button>
+<!--  <input type="hidden" name="connected_sites[]" value="--><?php //echo esc_html( $connected_sites ); ?><!--"/>-->
 	<?php
 
 	display_connected_sites_modal();
@@ -171,7 +167,7 @@ function display_notified_users() {
 
 	$notified_users = get_option( 'notified_users' );
 
-	if ( '' === $notified_users ) {
+	if ( ( false === $notified_users ) || ( '' === $notified_users ) ) {
 		$notified_users = array();
 	}
 
@@ -216,13 +212,13 @@ function display_awareness_messages() {
 		foreach ( $receiver_plugin_versions as $site_plugin_data ) {
 			if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
 				?>
-                <span style="color: red">ACF's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+                <span style="color: red">ACF's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
 				<?php
 			}
 
 			if ( $source_cptui_version !== $site_plugin_data['versions']->cptui ) {
 				?>
-                <span style="color: red">CPT UI's plugin version is different on site <?php echo $site_plugin_data['site_id']?>.</span><br>
+                <span style="color: red">CPT UI's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
 				<?php
 			}
 		}
@@ -260,16 +256,16 @@ function display_start_fresh_link() {
     ?>
     <span><a href="/wp-json/data-sync/v1/source_data/start_fresh" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
     <ol>
-        <li><code>wp_data_sync_custom_post_types</code></li>
-        <li><code>wp_data_sync_custom_taxonomies</code></li>
-        <li><code>wp_data_sync_log</code></li>
-        <li><code>wp_data_sync_posts</code></li>
-        <li><code>wp_posts</code></li>
-        <li><code>wp_postmeta</code></li>
-        <li><code>wp_terms</code></li>
-        <li><code>wp_termmeta</code></li>
-        <li><code>wp_term_taxonomy</code></li>
-        <li><code>wp_term_relationships</code></li>
+        <li><code>data_sync_custom_post_types</code></li>
+        <li><code>data_sync_custom_taxonomies</code></li>
+        <li><code>data_sync_log</code></li>
+        <li><code>data_sync_posts</code></li>
+        <li><code>posts</code></li>
+        <li><code>postmeta</code></li>
+        <li><code>terms</code></li>
+        <li><code>termmeta</code></li>
+        <li><code>term_taxonomy</code></li>
+        <li><code>term_relationships</code></li>
     </ol>
     <?php
 }

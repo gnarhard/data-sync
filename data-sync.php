@@ -3,16 +3,11 @@
 namespace DataSync;
 
 use DataSync\Controllers\Load;
-use DataSync\Controllers\PostTypes;
-use DataSync\Controllers\SyncedPosts;
-use DataSync\Models\ConnectedSite;
-use DataSync\Models\SyncedPost;
-use DataSync\Models\SyncedTaxonomy;
 
 /**
  * Plugin Name: Data Sync
  * Version:     1.0.0
- * Description: Securely synchronizes all post data, custom ACF fields, and Yoast data across multiple, authorized sites. Dependent on these plugins: ACF-pro, JWT Authentication for WP REST API, and CPT UI
+ * Description: Multi-site compatible WordPress data syndicator. Syndicates post data, post meta, custom post types, custom ACF fields and data, and Yoast data with multiple authenticated sites.
  * Author:      Copper Leaf Creative
  * Author URI:  https://copperleafcreative.com
  * Text Domain: data-sync

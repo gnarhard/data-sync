@@ -76,11 +76,17 @@ class Media {
 	 */
 	public function send_to_receiver( $media, $connected_sites ) {
 
-		$synced_posts          = new SyncedPosts();
-		$data                  = new \stdClass();
-		$data->media           = $media;
-		$data->source_base_url = get_site_url();
-		$data->synced_posts    = (array) $synced_posts->get_all()->get_data();
+		$synced_posts = new SyncedPosts();
+		$upload_dir   = wp_get_upload_dir();
+		$path         = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
+
+		$data                            = new \stdClass();
+		$data->media                     = $media;
+		$data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
+		$data->source_base_url           = get_site_url();
+		$data->source_upload_path        = $upload_dir['path'];
+		$data->source_upload_url         = $upload_dir['url'];
+		$data->filename                  = basename( $path['path'] );
 
 		foreach ( $connected_sites as $site ) {
 
@@ -111,9 +117,15 @@ class Media {
 	 *
 	 */
 	public function update() {
-		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		$this->insert_into_wp( $data->source_base_url, $data->media, $data->synced_posts );
-		wp_send_json_success( $data->media );
+		$source_data      = (object) json_decode( file_get_contents( 'php://input' ) );
+		$receiver_options = (object) Options::receiver()->get_data();
+
+		// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
+		if ( in_array( $source_data->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {
+			$this->insert_into_wp( $source_data );
+		}
+
+		wp_send_json_success( $source_data );
 	}
 
 
@@ -122,69 +134,51 @@ class Media {
 	 * @param object $post
 	 * @param array $synced_posts
 	 */
-	public function insert_into_wp( string $source_base_url, object $post, array $synced_posts ) {
+	public function insert_into_wp( object $source_data ) {
 
-		$post_array      = (array) $post;
-		$receiver_url    = $post_array['guid'];
-		$upload_dir      = wp_get_upload_dir();
-		$upload_base_dir = $upload_dir['basedir'];
+		$upload_dir = wp_get_upload_dir();
+		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
 
-
-		$result = File::copy( $source_base_url, $receiver_url );
+		$result = File::copy( $source_data );
 
 		if ( $result ) {
-			$media['post_parent'] = (int) $post->receiver_post_id;
-			$media['guid']        = (string) str_replace( $source_base_url, get_site_url(), $post_array['guid'] );
 
-			$file_path_exploded = explode( '/uploads', $media['guid'] );
-			$file_path          = $upload_base_dir . $file_path_exploded[1];
-			$filename           = basename( $file_path );
-			$wp_filetype        = wp_check_filetype( $filename, null );
+			$wp_filetype = wp_check_filetype( $source_data->filename, null );
 
 			$attachment = array(
 				'post_mime_type' => $wp_filetype['type'],
-				'post_parent'    => $media['post_parent'],
-				'post_title'     => preg_replace( '/\.[^.]+$/', '', $filename ),
+				'post_parent'    => (int) $source_data->media->receiver_post_id,
+				'post_title'     => preg_replace( '/\.[^.]+$/', '', $source_data->filename ),
 				'post_content'   => '',
 				'post_status'    => 'inherit',
+				'guid'           => (string) str_replace( $source_data->source_upload_url, $upload_dir['url'], $source_data->media->guid ),
 			);
-
 
 			$args        = array(
 				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-				'source_post_id'   => $post->ID,
+				'source_post_id'   => (int) $source_data->media->ID,
 			);
 			$synced_post = SyncedPost::get_where( $args );
 
-			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME
-			$post->diverged = false;
+			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
+			$source_data->media->diverged = false;
 
 			if ( count( $synced_post ) ) {
-//				if ( true !== get_option( 'overwrite_receiver_post_on_conflict' ) ) {
-//					$post->diverged = SyncedPosts::check_date_modified( $post, $synced_posts );
-// UPDATE SYNCED POSTS DATABASE TABLE BUT ONLY CHANGE DIVERGED VALUE. DO NOT CHANGE THE DATE MODIFIED!
-//				$args  = array(
-//					'id'       => $synced_post[0]->id,
-//					'diverged' => true,
-//				);
-//				$where = [ 'id' => $synced_post[0]->id ];
-//				$db    = new DB( SyncedPost::$table_name );
-//				$db->update( $args, $where );
-//					return false;
-//				}
-				$post->diverged = false;
-				$attachment_id  = $synced_post[0]->receiver_post_id;
+				$source_data->media->diverged = false;
+				$attachment_id                = $synced_post[0]->receiver_post_id;
 			} else {
-				$attachment_id = wp_insert_attachment( $attachment, $file_path, $media['post_parent'] );
+				$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
 			}
-
 
 			if ( ! is_wp_error( $attachment_id ) ) {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
-				wp_update_attachment_metadata( $attachment_id, $attachment_data );
-				$this->update_thumbnail_id( $post, $attachment_id );
-				SyncedPosts::save_to_receiver( $attachment_id, $post );
+				$updated_meta = wp_update_attachment_metadata( $attachment_id, $attachment_data );
+				$this->update_thumbnail_id( $source_data->media, $attachment_id );
+				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
+			} else {
+				$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
+				unset( $log );
 			}
 
 
@@ -201,10 +195,14 @@ class Media {
 			'source_post_id'   => $post->post_parent,
 		);
 		$synced_post_parent = SyncedPost::get_where( $args );
+		var_dump( 'synced post parent thumbnail' );
+		var_dump( $synced_post_parent );
 		if ( $synced_post_parent ) {
 			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+			var_dump( 'updated post meta' );
+			var_dump( $updated );
 		} else {
-			$log = new Logs( 'ERROR: Post thumbnail not updated for ' . $post->post_title, true );
+			$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
 			unset( $log );
 		}
 

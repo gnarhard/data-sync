@@ -5,6 +5,7 @@ namespace DataSync\Controllers;
 
 
 use DataSync\Controllers\Email;
+use DataSync\Helpers;
 use DataSync\Models\SyncedPost;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -54,7 +55,6 @@ class Receiver {
 				),
 			)
 		);
-
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
 			'/plugin_versions',
@@ -72,24 +72,45 @@ class Receiver {
 	 */
 	public function start_fresh() {
 
+		var_dump(get_current_blog_id() );
+		var_dump( get_site_url() );
+
+		global $wpdb;
 		$db               = new DB();
 		$sql_statements   = array();
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_post_types';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_custom_taxonomies';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_log';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_data_sync_terms';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_post_types';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_taxonomies';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_terms';
 
-		$sql_statements[] = 'TRUNCATE TABLE wp_posts';
-		$sql_statements[] = 'TRUNCATE TABLE wp_postmeta';
-		$sql_statements[] = 'TRUNCATE TABLE wp_terms';
-		$sql_statements[] = 'TRUNCATE TABLE wp_termmeta';
-		$sql_statements[] = 'TRUNCATE TABLE wp_term_taxonomy';
-		$sql_statements[] = 'TRUNCATE TABLE wp_term_relationships';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'posts';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'postmeta';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'terms';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'termmeta';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'term_taxonomy';
+		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'term_relationships';
 
 		foreach ( $sql_statements as $sql ) {
 			$db->query( $sql );
 		}
+
+
+		$upload_dir = wp_upload_dir();
+
+		if ( is_multisite() ) {
+			$blog_ids        = get_sites();
+			$network_blog_id = (int) $blog_ids[0]->blog_id;
+
+			if ( $network_blog_id !== get_current_blog_id() ) {
+				File::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
+				mkdir( $upload_dir['basedir'], 0755);
+			}
+		} else {
+			File::delete_media( $upload_dir['basedir'] );
+			mkdir( $upload_dir['basedir'], 0755);
+		}
+
 
 		wp_send_json_success( 'Receiver table truncation completed.' );
 
@@ -123,8 +144,10 @@ class Receiver {
 //				}
 
 				$plugin_versions[] = [
-					'site_id' => $site->id,
-					'versions' => json_decode( wp_remote_retrieve_body( $response ) )->data,
+					'site_id'        => $site->id,
+					'site_name'      => $site->name,
+					'site_admin_url' => $site->url . '/wp-admin/plugins.php',
+					'versions'       => json_decode( wp_remote_retrieve_body( $response ) )->data,
 				];
 
 			}
@@ -152,6 +175,7 @@ class Receiver {
 	 *
 	 */
 	public function receive() {
+
 		$source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
 		$this->process( $source_data );
@@ -198,6 +222,7 @@ class Receiver {
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			SyncedTaxonomies::save( $taxonomy );
 		}
+		new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 
@@ -211,9 +236,7 @@ class Receiver {
 					continue; // SKIPS EMPTY DATA.
 				}
 
-				$post_count = count( $source_data->posts->$post_type_slug );
-
-				if ( 0 === $post_count ) {
+				if ( empty( $source_data->posts->$post_type_slug ) ) {
 					$log = new Logs( 'No posts in source data.', true );
 					unset( $log );
 				} else {
