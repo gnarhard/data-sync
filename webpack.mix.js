@@ -53,10 +53,11 @@ mix.version();
 let sassConfig = {
   outputStyle: 'expanded',
   indentType: 'tab',
-  indentWidth: 1
+  indentWidth: 1,
 };
 
-mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
+// mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
+mix.sass( `${devPath}/sass/data-sync.scss`, 'styles' );
 
 /*
  * Compile JavaScript.
