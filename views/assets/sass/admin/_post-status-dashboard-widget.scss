@@ -1,4 +1,4 @@
-#wp_data_sync_status_dashboard {
+#syndicated_posts {
   .warning {
     color: orange;
   }
@@ -51,14 +51,6 @@
       padding: 10px;
       margin: 10px 0 10px 0;
     }
-  }
-
-  #connected_site_link_wrap {
-
-    a {
-      color: #0073aa;
-    }
-
   }
 
   #wp_data_sync_status {

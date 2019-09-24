@@ -42,7 +42,6 @@ class Load {
 	public function load_once() {
 			new Options();
 			new Enqueue();
-			new Widgets();
 	}
 
 	public function check_multisite() {

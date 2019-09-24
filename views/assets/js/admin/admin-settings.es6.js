@@ -2,6 +2,10 @@ import AJAX from './AJAX.es6.js'
 import ConnectedSites from './ConnectedSites.es6.js'
 
 jQuery(function ($) {
+
+	$(document).ready( function() {
+		$('#data_sync_tabs').tabs();
+	});
 	
 	$('#bulk_data_push').unbind().click(function (e) {
 		e.preventDefault()

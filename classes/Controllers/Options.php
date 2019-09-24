@@ -248,7 +248,7 @@ class Options {
 
 		if ( '1' === $source ) :
 
-			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-options', 'data_sync_options' );
+//			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-options', 'data_sync_options' );
 
 			add_settings_field( 'enable_new_cpts', 'Automatically Enable New Custom Post Types On Receiver', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'enable_new_cpts' );
@@ -259,8 +259,8 @@ class Options {
 			add_settings_field( 'overwrite_receiver_post_on_conflict', 'Overwrite Receiver Post if Receiver Post Was More Recently Edited', $this->view_namespace . '\display_overwrite_receiver_post_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'overwrite_receiver_post_on_conflict' );
 
-			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
-			register_setting( 'data_sync_options', 'push_enabled_post_types' );
+//			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
+//			register_setting( 'data_sync_options', 'push_enabled_post_types' );
 
 			add_settings_field( 'debug', 'Debug', $this->view_namespace . '\display_debug_checkbox', 'data-sync-options', 'data_sync_options' );
 

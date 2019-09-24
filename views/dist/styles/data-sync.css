@@ -1,6 +1,5 @@
-.settings_page_data-sync-options #connected_sites td:first-child,
-.settings_page_data-sync-options #connected_sites th:first-child {
-  width: 50px;
+.settings_page_data-sync-options table {
+  width: 100%;
 }
 
 .settings_page_data-sync-options input[type=text] {
@@ -13,11 +12,31 @@
   width: 400px;
 }
 
-.settings_page_data-sync-options .remove_site {
+.settings_page_data-sync-options .display {
+  display: block;
+  position: fixed;
+}
+
+#refresh_error_log {
+  cursor: pointer;
+  float: right;
+}
+
+#error_log table tr td {
+  min-width: 150px;
+  padding: 5px;
+}
+
+#connected_sites td:first-child,
+#connected_sites th:first-child {
+  width: 50px;
+}
+
+#connected_sites .remove_site {
   cursor: pointer;
 }
 
-.settings_page_data-sync-options .lightbox_wrap {
+#connected_sites .lightbox_wrap {
   display: none;
   background: rgba(0, 0, 0, 0.5);
   position: absolute;
@@ -28,7 +47,7 @@
   height: 100%;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal {
+#connected_sites .lightbox_wrap .add_site_modal {
   max-width: 500px;
   position: relative;
   margin: 100px auto 0 auto;
@@ -39,172 +58,153 @@
           box-shadow: 0px 0px 11px 0px black;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal h2 {
+#connected_sites .lightbox_wrap .add_site_modal h2 {
   text-align: center;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal #close {
+#connected_sites .lightbox_wrap .add_site_modal #close {
   float: right;
   cursor: pointer;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap {
+#connected_sites .lightbox_wrap .add_site_modal .input_wrap {
   padding-bottom: 30px;
   width: 100%;
   display: block;
   clear: both;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap input,
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap textarea {
+#connected_sites .lightbox_wrap .add_site_modal .input_wrap input,
+#connected_sites .lightbox_wrap .add_site_modal .input_wrap textarea {
   float: right;
   width: 75%;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal .input_wrap textarea {
+#connected_sites .lightbox_wrap .add_site_modal .input_wrap textarea {
   width: 100%;
   float: none;
 }
 
-.settings_page_data-sync-options .lightbox_wrap .add_site_modal .submit {
+#connected_sites .lightbox_wrap .add_site_modal .submit {
   width: 50px;
   display: block;
   clear: both;
   margin: 40px auto;
 }
 
-.settings_page_data-sync-options .display {
-  display: block;
-  position: fixed;
-}
-
-.settings_page_data-sync-options #refresh_error_log {
-  cursor: pointer;
-  float: right;
-}
-
-.settings_page_data-sync-options #error_log table tr td {
-  min-width: 150px;
-  padding: 5px;
-}
-
-#wp_data_sync_status_dashboard .warning {
+#syndicated_posts .warning {
   color: orange;
 }
 
-#wp_data_sync_status_dashboard .danger_button {
+#syndicated_posts .danger_button {
   background: #d9534f;
   color: white;
 }
 
-#wp_data_sync_status_dashboard .warning_button {
+#syndicated_posts .warning_button {
   background: #f0ad4e;
   color: white;
 }
 
-#wp_data_sync_status_dashboard .success {
+#syndicated_posts .success {
   color: #5cb85c;
 }
 
-#wp_data_sync_status_dashboard .push_post_now {
+#syndicated_posts .push_post_now {
   cursor: pointer;
 }
 
-#wp_data_sync_status_dashboard .none_enabled {
+#syndicated_posts .none_enabled {
   color: red;
 }
 
-#wp_data_sync_status_dashboard table {
+#syndicated_posts table {
   width: 100%;
   margin-bottom: 60px;
 }
 
-#wp_data_sync_status_dashboard table td:first-of-type {
+#syndicated_posts table td:first-of-type {
   width: 30px;
 }
 
-#wp_data_sync_status_dashboard table th:first-of-type {
+#syndicated_posts table th:first-of-type {
   float: left;
 }
 
-#wp_data_sync_status_dashboard table th:last-of-type {
+#syndicated_posts table th:last-of-type {
   float: right;
 }
 
-#wp_data_sync_status_dashboard table .reveal_connected_site_details {
+#syndicated_posts table .reveal_connected_site_details {
   cursor: pointer;
   float: right;
   font-size: 30px;
 }
 
-#wp_data_sync_status_dashboard table .connected_site_details {
+#syndicated_posts table .connected_site_details {
   padding: 10px;
   margin: 10px 0 10px 0;
 }
 
-#wp_data_sync_status_dashboard #connected_site_link_wrap a {
-  color: #0073aa;
-}
-
-#wp_data_sync_status_dashboard #wp_data_sync_status {
+#syndicated_posts #wp_data_sync_status {
   width: 100%;
   text-align: left;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .trashed {
+#syndicated_posts #wp_data_sync_status .trashed {
   color: red;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .expand_post_details {
+#syndicated_posts #wp_data_sync_status .expand_post_details {
   float: right;
   font-size: 30px;
   cursor: pointer;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details {
+#syndicated_posts #wp_data_sync_status .post_details {
   padding: 10px;
   margin: 10px 0 10px 0;
   background: #0c0c0c05;
   display: none;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details span {
+#syndicated_posts #wp_data_sync_status .post_details span {
   width: 100%;
   display: block;
   margin: 5px 0 5px 0;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap {
+#syndicated_posts #wp_data_sync_status .post_details .post_detail_wrap {
   padding: 10px;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap h4 {
+#syndicated_posts #wp_data_sync_status .post_details .post_detail_wrap h4 {
   text-align: center;
   font-weight: bold;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .source_details,
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .connected_site_info {
+#syndicated_posts #wp_data_sync_status .post_details .post_detail_wrap .source_details,
+#syndicated_posts #wp_data_sync_status .post_details .post_detail_wrap .connected_site_info {
   margin-bottom: 30px;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .post_details .post_detail_wrap .details {
+#syndicated_posts #wp_data_sync_status .post_details .post_detail_wrap .details {
   margin-bottom: 40px;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons {
+#syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons {
   text-align: center;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-editor-unlink {
+#syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-editor-unlink {
   cursor: pointer;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-yes {
+#syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-yes {
   color: green;
 }
 
-#wp_data_sync_status_dashboard #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-update {
+#syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-update {
   -webkit-animation-name: spin;
           animation-name: spin;
   -webkit-animation-duration: 4000ms;
@@ -215,11 +215,11 @@
           animation-timing-function: linear;
 }
 
-#wp_data_sync_status_dashboard .inside {
+#syndicated_posts .inside {
   overflow: hidden;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap {
+#syndicated_posts .inside #status_dashboard_button_wrap {
   width: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -231,8 +231,8 @@
   overflow: hidden;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button,
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap a {
+#syndicated_posts .inside #status_dashboard_button_wrap button,
+#syndicated_posts .inside #status_dashboard_button_wrap a {
   padding: 10px;
   background: #0073aa;
   color: white;
@@ -242,32 +242,32 @@
   margin: 10px;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap .disabled {
+#syndicated_posts .inside #status_dashboard_button_wrap .disabled {
   background: grey;
   cursor: not-allowed;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap .wait {
+#syndicated_posts .inside #status_dashboard_button_wrap .wait {
   background: grey;
   cursor: wait;
 }
 
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap a:hover,
-#wp_data_sync_status_dashboard .inside #status_dashboard_button_wrap button:hover {
+#syndicated_posts .inside #status_dashboard_button_wrap a:hover,
+#syndicated_posts .inside #status_dashboard_button_wrap button:hover {
   background: grey;
 }
 
-#wp_data_sync_status_dashboard .inside #error_log_wrap {
+#syndicated_posts .inside #error_log_wrap {
   margin-top: 20px;
 }
 
-#wp_data_sync_status_dashboard .inside #error_log_wrap a {
+#syndicated_posts .inside #error_log_wrap a {
   width: 100%;
   text-align: center;
   display: block;
 }
 
-#wp_data_sync_status_dashboard #status_wrap .dashicons-update {
+#syndicated_posts #status_wrap .dashicons-update {
   -webkit-animation-name: spin;
           animation-name: spin;
   -webkit-animation-duration: 4000ms;
@@ -302,12 +302,12 @@
   }
 }
 
-#wp_data_sync_enabled_post_types_dashboard select {
+#enabled_post_types select {
   width: 100%;
   min-height: 100px;
 }
 
-#wp_data_sync_enabled_post_types_dashboard #save_push_enabled_post_types {
+#enabled_post_types #save_push_enabled_post_types {
   padding: 10px;
   width: 100%;
   margin-top: 20px;
@@ -318,20 +318,20 @@
   cursor: pointer;
 }
 
-#wp_data_sync_enabled_post_types_dashboard #save_push_enabled_post_types:hover {
+#enabled_post_types #save_push_enabled_post_types:hover {
   background: grey;
 }
 
-#wp_data_sync_enabled_post_types_dashboard h3 {
+#enabled_post_types h3 {
   font-weight: bold;
   font-size: 1.2em;
 }
 
-#wp_data_sync_enabled_post_types_dashboard .connected_site_enabled_post_types {
+#enabled_post_types .connected_site_enabled_post_types {
   margin: 40px 0;
 }
 
-#wp_data_sync_enabled_post_types_dashboard .connected_site_enabled_post_types span {
+#enabled_post_types .connected_site_enabled_post_types span {
   width: 100%;
   display: block;
   margin: 10px;
