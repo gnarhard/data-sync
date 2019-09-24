@@ -52,8 +52,8 @@ mix.version();
 // Sass configuration.
 let sassConfig = {
   outputStyle: 'expanded',
-  indentType: 'tab',
-  indentWidth: 1
+  // indentType: 'tab',
+  // indentWidth: 1
 };
 
 mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
