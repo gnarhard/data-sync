@@ -75,7 +75,7 @@ class SyncedTerms {
 
 				foreach ( $taxonomy_data as $term ) {
 
-					$new_term = wp_set_object_terms( $post_id, $term->slug, $taxonomy_slug, true );
+					$new_term = wp_set_object_terms( $post_id, $term->name, $taxonomy_slug, true );
 
 					if ( ! is_wp_error( $new_term ) ) {
 						$new_synced_term = SyncedTerms::save( $term );
