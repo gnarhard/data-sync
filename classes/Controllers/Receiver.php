@@ -222,7 +222,8 @@ class Receiver {
 		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
 			SyncedTaxonomies::save( $taxonomy );
 		}
-		new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
+		$syncedTaxonomies = new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
+		$syncedTaxonomies->register();
 		$log = new Logs( 'Finished syncing custom taxonomies.' );
 		unset( $log );
 
