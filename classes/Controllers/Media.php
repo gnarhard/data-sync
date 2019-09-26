@@ -90,21 +90,25 @@ class Media {
 
 		foreach ( $connected_sites as $site ) {
 
-			$data->receiver_site_id = (int) $site->id;
-			$auth                   = new Auth();
-			$json                   = $auth->prepare( $data, $site->secret_key );
-			$url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/media/update';
-			$response               = wp_remote_post( $url, [ 'body' => $json ] );
+			$excluded = $this->check_parent_isnt_excluded( $data, $site );
 
-			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
-				$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
+			if ( ! $excluded ) {
+				$data->receiver_site_id = (int) $site->id;
+				$auth                   = new Auth();
+				$json                   = $auth->prepare( $data, $site->secret_key );
+				$url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/media/update';
+				$response               = wp_remote_post( $url, [ 'body' => $json ] );
+
+				if ( is_wp_error( $response ) ) {
+					echo $response->get_error_message();
+					$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+					unset( $log );
+				} else {
 					if ( get_option( 'show_body_responses' ) ) {
-						echo 'Media';
-						print_r( wp_remote_retrieve_body( $response ) );
+						if ( get_option( 'show_body_responses' ) ) {
+							echo 'Media';
+							print_r( wp_remote_retrieve_body( $response ) );
+						}
 					}
 				}
 			}
@@ -113,118 +117,130 @@ class Media {
 
 	}
 
-	/**
-	 *
-	 */
-	public function update() {
-		$source_data      = (object) json_decode( file_get_contents( 'php://input' ) );
-		$receiver_options = (object) Options::receiver()->get_data();
 
-		// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
-		if ( in_array( $source_data->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {
-			$this->insert_into_wp( $source_data );
+	public function check_parent_isnt_excluded( $data, $site ) {
+		$parent_post_meta = get_post_meta( $data->media->post_parent );
+		$excluded_sites   = unserialize( $parent_post_meta['_excluded_sites'][0] );
+
+		if ( in_array( (int) $site->id, $excluded_sites ) ) {
+			return true;
+		} else {
+			return false;
+		}
 		}
 
-		wp_send_json_success( $source_data );
-	}
+		/**
+		 *
+		 */
+		public
+		function update() {
+			$source_data      = (object) json_decode( file_get_contents( 'php://input' ) );
+			$receiver_options = (object) Options::receiver()->get_data();
 
-
-	/**
-	 * @param string $source_base_url
-	 * @param object $post
-	 * @param array $synced_posts
-	 */
-	public function insert_into_wp( object $source_data ) {
-
-		$upload_dir = wp_get_upload_dir();
-		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
-
-		$result = File::copy( $source_data );
-
-		if ( $result ) {
-
-			$wp_filetype = wp_check_filetype( $source_data->filename, null );
-
-			$attachment = array(
-				'post_mime_type' => $wp_filetype['type'],
-				'post_parent'    => (int) $source_data->media->receiver_post_id,
-				'post_title'     => preg_replace( '/\.[^.]+$/', '', $source_data->filename ),
-				'post_content'   => '',
-				'post_status'    => 'inherit',
-				'guid'           => (string) str_replace( $source_data->source_upload_url, $upload_dir['url'], $source_data->media->guid ),
-			);
-
-			$args        = array(
-				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-				'source_post_id'   => (int) $source_data->media->ID,
-			);
-			$synced_post = SyncedPost::get_where( $args );
-
-			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
-			$source_data->media->diverged = false;
-
-			if ( count( $synced_post ) ) {
-				$source_data->media->diverged = false;
-				$attachment_id                = $synced_post[0]->receiver_post_id;
-			} else {
-				$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
+			// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
+			if ( in_array( $source_data->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {
+				$this->insert_into_wp( $source_data );
 			}
 
-			if ( ! is_wp_error( $attachment_id ) ) {
-				require_once ABSPATH . 'wp-admin/includes/image.php';
-				$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
-				$updated_meta = wp_update_attachment_metadata( $attachment_id, $attachment_data );
-				$this->update_thumbnail_id( $source_data->media, $attachment_id );
-				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
+			wp_send_json_success( $source_data );
+		}
+
+
+		/**
+		 * @param string $source_base_url
+		 * @param object $post
+		 * @param array $synced_posts
+		 */
+		public
+		function insert_into_wp( object $source_data ) {
+
+			$upload_dir = wp_get_upload_dir();
+			$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
+
+			$result = File::copy( $source_data );
+
+			if ( $result ) {
+
+				$wp_filetype = wp_check_filetype( $source_data->filename, null );
+
+				$attachment = array(
+					'post_mime_type' => $wp_filetype['type'],
+					'post_parent'    => (int) $source_data->media->receiver_post_id,
+					'post_title'     => preg_replace( '/\.[^.]+$/', '', $source_data->filename ),
+					'post_content'   => '',
+					'post_status'    => 'inherit',
+					'guid'           => (string) str_replace( $source_data->source_upload_url, $upload_dir['url'], $source_data->media->guid ),
+				);
+
+				$args        = array(
+					'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+					'source_post_id'   => (int) $source_data->media->ID,
+				);
+				$synced_post = SyncedPost::get_where( $args );
+
+				// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
+				$source_data->media->diverged = false;
+
+				if ( count( $synced_post ) ) {
+					$source_data->media->diverged = false;
+					$attachment_id                = $synced_post[0]->receiver_post_id;
+				} else {
+					$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
+				}
+
+				if ( ! is_wp_error( $attachment_id ) ) {
+					require_once ABSPATH . 'wp-admin/includes/image.php';
+					$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
+					$updated_meta    = wp_update_attachment_metadata( $attachment_id, $attachment_data );
+					SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
+					$this->update_thumbnail_id( $source_data->media, $attachment_id );
+				} else {
+					$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
+					unset( $log );
+				}
+
+
+			}
+		}
+
+
+		/**
+		 * This makes sure the parent's thumbnail id to the attached image (featured image) is updated.
+		 */
+		private
+		function update_thumbnail_id( $post, $attachment_id ) {
+			$args               = array(
+				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+				'source_post_id'   => $post->post_parent,
+			);
+			$synced_post_parent = SyncedPost::get_where( $args );
+			if ( $synced_post_parent ) {
+				$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
 			} else {
-				$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
+				$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
 				unset( $log );
 			}
 
 
 		}
-	}
 
 
-	/**
-	 * This makes sure the parent's thumbnail id to the attached image (featured image) is updated.
-	 */
-	private function update_thumbnail_id( $post, $attachment_id ) {
-		$args               = array(
-			'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-			'source_post_id'   => $post->post_parent,
-		);
-		$synced_post_parent = SyncedPost::get_where( $args );
-		var_dump( 'synced post parent thumbnail' );
-		var_dump( $synced_post_parent );
-		if ( $synced_post_parent ) {
-			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
-			var_dump( 'updated post meta' );
-			var_dump( $updated );
-		} else {
-			$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
-			unset( $log );
+		/**
+		 *
+		 */
+		public
+		function register_routes() {
+			$registered = register_rest_route(
+				DATA_SYNC_API_BASE_URL,
+				'/media/update',
+				array(
+					array(
+						'methods'             => WP_REST_Server::EDITABLE,
+						'callback'            => array( $this, 'update' ),
+						'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+					),
+				)
+			);
 		}
 
-
 	}
-
-
-	/**
-	 *
-	 */
-	public function register_routes() {
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/media/update',
-			array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'update' ),
-					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-				),
-			)
-		);
-	}
-
-}
