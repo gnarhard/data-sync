@@ -31,11 +31,14 @@ class Log {
 		global $wpdb;
 		$column = array_key_first( $sortby );
 		$order  = $sortby[ $column ];
+		$limit = 50;
+
 
 		if ( $data_sync_start_time ) {
 			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE datetime > "' . $data_sync_start_time . '" ORDER BY ' . $column . ' ' . $order;
 		} else {
-			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT 50';
+//			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT ' . $limit;
+			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order;
 		}
 
 		$db  = new DB( self::$table_name );
