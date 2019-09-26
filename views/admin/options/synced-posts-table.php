@@ -52,7 +52,7 @@ function display_synced_posts_table() {
 
 			foreach ( $posts as $post ) {
 
-				$syndication_info = Posts::get_syndication_info( $post, $connected_sites, $receiver_posts );
+				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
 
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
@@ -63,16 +63,16 @@ function display_synced_posts_table() {
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
-                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->status; ?></td>
+                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
                     <td class="expand_post_details" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
                 <tr class="post_details" id="post-<?php echo $post->ID ?>">
                     <td class="post_detail_wrap" colspan="5">
                         <div class="source_details">
                             <h4>Source Info</h4>
-							<?php echo $syndication_info->synced ?>
+							<?php echo $syndication_info->source_message ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -89,7 +89,7 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
+function display_post_syndication_details_per_site( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
 
 	?>
     <div class="connected_site_info">
@@ -145,40 +145,40 @@ function display_post_syndication_details( $syndication_info, $enabled_post_type
 
 				echo '<span>Last syndication: ' . date( 'g:i:s A n/d/Y', strtotime( $connected_site_synced_post->date_modified ) ) . '</span>';
 
-				if ( 0 !== (int) $connected_site_synced_post->diverged ) {
+				if ( 'diverged' === $syndication_info->status ) {
 
-					$site_status = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
+					$site_status_icon = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
 
 					if ( ( $syndication_info->source_version_edited ) && ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) ) {
 						echo '<span class="warning">Source AND receiver updated since last sync.</span>';
 					} elseif ( ( $syndication_info->receiver_version_edited[0] ) && ( (int) $connected_site_synced_post->receiver_site_id === (int) $syndication_info->receiver_version_edited[1] ) ) {
 						echo '<span class="warning">Receiver post was updated after the last sync.</span>';
-					} elseif ( $syndication_info->source_version_edited ) {
-						echo '<span class="warning">Source updated since last sync.</span>';
 					}
 
-					echo '<br>';
-					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
+					if ( ! $syndication_info->source_version_edited ) {
+						echo '<br>';
+						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
+                    }
 
 				} else {
 					// SYNCED.
-					$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+					$site_status_icon = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 				}
 
 
 			} else if ( in_array( (int) $site->id, $excluded_sites ) ) {
 				// NOT SYNCED ON PURPOSE BECAUSE OF EXCLUDED SITE.
 				echo '<span>Last syndication: Never.';
-				$site_status = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+				$site_status_icon = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
 			} else {
 				// NOT SYNCED.
 				echo '<span>Last syndication: Never.';
-				$site_status = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-				$site_status .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+				$site_status_icon = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+				$site_status_icon .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
 			}
 
 
-			echo $site_status;
+			echo $site_status_icon;
 
 			?>
         </div>
