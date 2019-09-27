@@ -11,20 +11,12 @@ use DataSync\Models\SyncedPost;
 
 function display_synced_posts_table() {
 
-	$source_options = Options::source()->get_data();
-
+	$source_options      = Options::source()->get_data();
 	$connected_sites_obj = new ConnectedSites();
 	$connected_sites     = $connected_sites_obj->get_all()->data;
-
-	$post_types = array_keys( $source_options->push_enabled_post_types );
-	$posts      = Posts::get_wp_posts( $post_types, true );
-
-	$enabled_post_type_site_data   = PostTypes::check_enabled_post_types_on_receiver();
-	$status                        = '';
-	$no_enabled_post_types_on_site = false;
-
-	$synced_posts   = SyncedPost::get_all();
-	$receiver_posts = array();
+	$post_types          = array_keys( $source_options->push_enabled_post_types );
+	$posts               = Posts::get_wp_posts( $post_types, true );
+	$receiver_posts      = array();
 
 	foreach ( $connected_sites as $site ) {
 		$receiver_posts_response = wp_remote_get( $site->url . '/wp-json/wp/v2/posts' );
@@ -72,7 +64,7 @@ function display_synced_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->source_message ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -89,7 +81,7 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details_per_site( $syndication_info, $enabled_post_type_site_data, $connected_sites, $post ) {
+function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post ) {
 
 	?>
     <div class="connected_site_info">
@@ -114,31 +106,26 @@ function display_post_syndication_details_per_site( $syndication_info, $enabled_
 			<?php
 
 			// CONNECTED SITES INFO
-			$site_info = $enabled_post_type_site_data[ $index ];
-			if ( $site->id === $site_info['site_id'] ) {
+			$enabled_post_type_site_data = PostTypes::check_enabled_post_types_on_receiver( $site );
+			$post_meta                     = get_post_meta( $post->ID );
+			$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
 
-				$no_enabled_post_types_on_site = true;
-				$post_meta                     = get_post_meta( $post->ID );
-				$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
+			if ( in_array( (int) $site->id, $excluded_sites ) ) {
+				?><span class="none_enabled"><strong>Receiver excluded in post.</strong></span><?php
 
-				if ( in_array( (int) $site->id, $excluded_sites ) ) {
-					?><span class="none_enabled"><strong>Receiver excluded in post.</strong></span><?php
+				if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
+					?><span class="none_enabled"><strong>This post's canonical URL is pointing to a receiver that is excluded.</strong></span><?php
+				}
+			}
 
-					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
-						?><span class="none_enabled"><strong>This post's canonical URL is pointing to a receiver that is excluded.</strong></span><?php
-					}
+			if ( empty( $enabled_post_type_site_data ) ) {
+
+				?><span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
+
+				if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
+					?><span class="none_enabled"><strong>This post's canonical URL is pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
 				}
 
-				if ( empty( $site_info['enabled_post_types'] ) ) {
-
-					?>
-                    <span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
-
-					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
-						?><span class="none_enabled"><strong>This post's canonical URL is pointing to this receiver that doesn't have any post types enabled. No syndication will happen and SEO errors will occur. Please enable post types on this receiver or change the canonical site of this post.</strong></span><?php
-					}
-
-				}
 			}
 
 			if ( ! empty( $connected_site_synced_post ) ) {
@@ -158,7 +145,7 @@ function display_post_syndication_details_per_site( $syndication_info, $enabled_
 					if ( ! $syndication_info->source_version_edited ) {
 						echo '<br>';
 						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
-                    }
+					}
 
 				} else {
 					// SYNCED.

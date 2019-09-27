@@ -20,7 +20,9 @@ function data_sync_options_page() {
                     <li><a href="#syndicated_posts">Syndicated Posts</a></li>
                     <li><a href="#connected_sites">Connected Sites</a></li>
                     <li><a href="#enabled_post_types">Enabled Post Types</a></li>
-                    <li><a href="#debug_log">Log</a></li>
+                    <?php if ( '1' === get_option( 'debug' ) ) { ?>
+                        <li><a href="#debug_log">Log</a></li>
+                    <?php } ?>
                     <li><a href="#settings">Settings</a></li>
                 </ul>
 			<?php } else { ?>
@@ -63,9 +65,9 @@ function data_sync_options_page() {
             <div id="settings">
                 <form method="POST" action="options.php">
 					<?php
-					settings_fields( 'data_sync_options' );
-					do_settings_sections( 'data-sync-options' );
-					submit_button();
+//					settings_fields( 'data_sync_options' );
+//					do_settings_sections( 'data-sync-options' );
+//					submit_button();
 					?>
                 </form>
             </div>
