@@ -97,10 +97,7 @@ class Load {
 		new SyncedPosts();
 		new TemplateSync();
 		new Media();
-
-		if ( $this->source ) {
-			new Posts();
-		}
+		new Posts();
 
 		if ( ! $this->no_site_type_setting ) {
 			new Logs();

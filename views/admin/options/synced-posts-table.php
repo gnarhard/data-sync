@@ -16,15 +16,6 @@ function display_synced_posts_table() {
 	$connected_sites     = $connected_sites_obj->get_all()->data;
 	$post_types          = array_keys( $source_options->push_enabled_post_types );
 	$posts               = Posts::get_wp_posts( $post_types, true );
-	$receiver_posts      = array();
-
-	foreach ( $connected_sites as $site ) {
-		$receiver_posts_response = wp_remote_get( $site->url . '/wp-json/wp/v2/posts' );
-		$receiver_posts[]        = array(
-			'site_id' => $site->id,
-			'posts'   => json_decode( wp_remote_retrieve_body( $receiver_posts_response ) ),
-		);
-	}
 
 	?>
     <table id="wp_data_sync_status">
@@ -44,7 +35,7 @@ function display_synced_posts_table() {
 
 			foreach ( $posts as $post ) {
 
-				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
+				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites );
 
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
