@@ -407,8 +407,8 @@ class Posts {
 				// Yoast and ACF data will be in here.
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
-					// IF POST-LEVEL SETTING DOES NOT ALLOW OVERWRITING OF YOAST DATA, UNSET YOAST-RELATED POSTMETA.
-					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, $yoast_meta_prefix ) ) ) {
+					// IF POST IS ALREADY SYNCED AND THE POST-LEVEL SETTING DOES NOT ALLOW OVERWRITING OF YOAST DATA, UNSET/DELETE SOURCE YOAST DATA SO IT DOESN'T OVERWRITE RECEIVER YOAST DATA.
+					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, $yoast_meta_prefix ) ) && ( $post->synced ) ) {
 						unset( $post->post_meta->$meta_key ); // DELETES SOURCE POST'S META DATA RELATED TO YOAST TO NOT OVERWRITE.
 						continue;
 					}
