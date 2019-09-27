@@ -115,10 +115,10 @@ class SourceData {
 		$post      = (object) Posts::get_single( (int) $url_params['source_post_id'] );
 		$post_type = $post->post_type;
 
-		$this->source_data->single_overwrite                               = true;
-		$this->source_data->posts                                          = new stdClass(); // CLEAR ALL OTHER POSTS.
-		$this->source_data->posts->$post_type                              = [ $post ];
-		$this->source_data->options['overwrite_receiver_post_on_conflict'] = true;
+		$this->source_data->single_overwrite                             = true;
+		$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
+		$this->source_data->posts->$post_type                            = [ $post ];
+		$this->source_data->options->overwrite_receiver_post_on_conflict = true;
 
 		$this->validate();
 		$this->configure_canonical_urls();
@@ -212,27 +212,27 @@ class SourceData {
 
 		if ( $this->source_data->options->debug ) {
 //			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive?XDEBUG_SESSION_START=' . $xdebug_ide_key;
-			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$post_data->url = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 
 			$post_data->cookies = [];
 
-			$xdebug_cookie = array(
-				'name' => 'XDEBUG_SESSION',
-				'value' => $xdebug_ide_key,
+			$xdebug_cookie                     = array(
+				'name'    => 'XDEBUG_SESSION',
+				'value'   => $xdebug_ide_key,
 //				'value' => 'PHPSTORM',
 //				'domain' => $site->url,
-				'expires' => time() + (86400 * 30),
-				'path' => '/',
+				'expires' => time() + ( 86400 * 30 ),
+				'path'    => '/',
 			);
-			$post_data->cookies[] = new WP_Http_Cookie( $xdebug_cookie );
+			$post_data->cookies[]              = new WP_Http_Cookie( $xdebug_cookie );
 			$this->source_data->xdebug_ide_key = $xdebug_ide_key;
 		} else {
-			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$post_data->url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 			$this->source_data->xdebug_ide_key = '';
 		}
 
-		$auth                                = new Auth();
-		$post_data->json                     = $auth->prepare( $this->source_data, $site->secret_key );
+		$auth            = new Auth();
+		$post_data->json = $auth->prepare( $this->source_data, $site->secret_key );
 
 		return $post_data;
 	}
@@ -253,7 +253,7 @@ class SourceData {
 			$post_data = $this->create_request_data( $site );
 
 			$response = wp_remote_post( $post_data->url, [
-				'body'    => $post_data->json,
+				'body' => $post_data->json,
 //				'cookies' => $post_data->cookies,
 			] );
 

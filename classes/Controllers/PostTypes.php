@@ -7,6 +7,7 @@ use DataSync\Controllers\Logs;
 use DataSync\Models\PostType;
 use DataSync\Controllers\Options;
 use WP_REST_Server;
+use stdClass;
 
 /**
  * Class PostTypes
@@ -34,45 +35,23 @@ class PostTypes {
 		return PostType::get_where( $args );
 	}
 
-	public static function check_enabled_post_types_on_receiver() {
+	public static function check_enabled_post_types_on_receiver( object $site ) {
 
-		$connected_sites             = (array) ConnectedSites::get_all()->get_data();
-		$enabled_post_type_site_data = array();
+		$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
+		$response = wp_remote_get( $url );
 
-		foreach ( $connected_sites as $site ) {
-
-			$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
-			$response = wp_remote_get( $url );
-
-			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
-				$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-				unset( $log );
-			} else {
-//				if ( get_option( 'show_body_responses' ) ) {
-//					if ( get_option( 'show_body_responses' ) ) {
-//						echo 'check_enabled_post_types_on_receiver()';
-//						print_r( wp_remote_retrieve_body( $response ) );
-//					}
-//				}
-
-				$enabled_post_type_site_data[] = [
-					'site_id'            => $site->id,
-					'enabled_post_types' => json_decode( wp_remote_retrieve_body( $response ) ),
-				];
-			}
-
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+			unset( $log );
+			return false;
+		} else {
+			return json_decode( wp_remote_retrieve_body( $response ) );
 		}
-
-		return $enabled_post_type_site_data;
 	}
 
 	public function check_enabled_post_types() {
-
-		$receiver_options = (object) Options::receiver()->get_data();
-
-		return $receiver_options->enabled_post_types;
-
+		return Options::receiver()->get_data()->enabled_post_types;
 	}
 
 	/**
@@ -145,15 +124,15 @@ class PostTypes {
 
 		foreach ( $enabled_post_types as $key => $enabled_post_type ) {
 			if ( '' === $enabled_post_type ) {
-				unset( $enabled_post_types[$key] );
+				unset( $enabled_post_types[ $key ] );
 			}
 		}
 
-		$merged_post_types = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
+		$merged_post_types   = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
 		$merged_post_types[] = 'post'; // NOT INCLUDED IF IT'S A BRAND NEW RECEIVER SITE, THEY HAVEN'T ENABLED ANY POST TYPES, AND THE SETTING TO OVERWRITE ENABLED POST TYPES WAS SET.
-		$unique_post_types = array_unique( $merged_post_types );
+		$unique_post_types   = array_unique( $merged_post_types );
 
-		update_option( 'enabled_post_types',  $unique_post_types);
+		update_option( 'enabled_post_types', $unique_post_types );
 	}
 
 	/**

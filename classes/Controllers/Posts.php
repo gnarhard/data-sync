@@ -3,24 +3,31 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 use WP_Query;
 use stdClass;
 use WP_REST_Server;
 use WP_REST_Request;
 use WPSEO_Meta;
+use DataSync\Helpers;
 
 class Posts {
 
 	public $view_namespace = 'DataSync';
 
 	public function __construct() {
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'save_post', [ $this, 'save_custom_values' ] );
-		require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
-		add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-		add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
+		if ( '1' === get_option( 'source_site' ) ) {
+			add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
+			add_action( 'save_post', [ $this, 'save_custom_values' ] );
+			require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
+			add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
+			add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
+		} elseif ( '0' === get_option( 'source_site' ) ) {
+
+			add_action( 'rest_api_init', [ $this, 'register_receiver_routes' ] );
+		}
+
 	}
 
 	public function register_routes() {
@@ -36,6 +43,26 @@ class Posts {
 							'description'       => 'ID of post',
 							'type'              => 'int',
 							'validate_callback' => 'is_numeric',
+						),
+					),
+				),
+			)
+		);
+
+	}
+
+	public function register_receiver_routes() {
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/post/(?P<id>\d+)',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_post' ),
+					'args'     => array(
+						'id' => array(
+							'description' => 'ID of post',
+							'type'        => 'int',
 						),
 					),
 				),
@@ -255,7 +282,7 @@ class Posts {
 	}
 
 
-	public static function get_syndication_info_of_post( $post, $connected_sites, $receiver_posts ) {
+	public static function get_syndication_info_of_post( $post, $connected_sites ) {
 
 		$syndication_info                             = new stdClass();
 		$syndication_info->status                     = 'unsynced';
@@ -278,39 +305,33 @@ class Posts {
 
 		if ( $number_of_synced_posts_returned ) {
 
-			$synced_post                      = (object) $synced_post_result[0];
-			$synced_post_modified_time        = strtotime( $synced_post->date_modified );
-			$source_post_modified_time        = strtotime( $post->post_modified );
 			$syndication_info->source_message = '';
 			$syndication_info->icon           = '';
 
 			if ( $sites_syndicating === $number_of_synced_posts_returned ) {
 
-				$receiver_modified_time = 0;
-
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
-				foreach ( $receiver_posts as $receiver_post ) {
-					if ( (int) $synced_post->receiver_site_id === (int) $receiver_post['site_id'] ) {
-						foreach ( $receiver_post['posts'] as $r_post ) {
-							if ( (int) $synced_post->receiver_post_id === (int) $r_post->id ) {
-								$receiver_modified_time = strtotime( $r_post->modified );
-							}
-						}
+				foreach ( $synced_post_result as $synced_post ) {
+
+					$synced_post_modified_time = strtotime( $synced_post->date_modified );
+					$source_post_modified_time = strtotime( $post->post_modified );
+					$receiver_post             = self::get_receiver_post( $synced_post->receiver_post_id, $synced_post->receiver_site_id );
+					$receiver_modified_time    = strtotime( $receiver_post->post_modified );
+
+					if ( $receiver_modified_time > $synced_post_modified_time ) {
+						$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
+						$syndication_info->status                  = 'diverged';
+					} else if ( $source_post_modified_time > $synced_post_modified_time ) {
+						$syndication_info->source_version_edited = true;
+						$syndication_info->status                = 'diverged';
+					} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
+						$syndication_info->status = 'synced';
+					} else if ( 0 === $receiver_modified_time ) {
+						$syndication_info->status = 'unsynced';
 					}
 
 				}
 
-				if ( $receiver_modified_time > $synced_post_modified_time ) {
-					$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
-					$syndication_info->status                  = 'diverged';
-				} else if ( $source_post_modified_time > $synced_post_modified_time ) {
-					$syndication_info->source_version_edited = true;
-					$syndication_info->status                = 'diverged';
-				} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
-					$syndication_info->status = 'synced';
-				} else if ( 0 === $receiver_modified_time ) {
-					$syndication_info->status = 'unsynced';
-				}
 
 			} elseif ( 0 === $sites_syndicating ) {
 				$syndication_info->status = 'unsynced';
@@ -362,6 +383,31 @@ class Posts {
 
 
 		return $syndication_info;
+	}
+
+
+	public static function get_receiver_post( $receiver_post_id, $site_id ) {
+
+		$connected_site = ConnectedSite::get( $site_id )[0];
+		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post/' . $receiver_post_id );
+		$response       = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			echo $response->get_error_message();
+			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+			unset( $log );
+		} else {
+			if ( get_option( 'show_body_responses' ) ) {
+				echo 'Post';
+				print_r( wp_remote_retrieve_body( $response ) );
+			}
+
+			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
+		}
+	}
+
+	public static function get_post( WP_REST_Request $request ) {
+		return get_post( $request->get_param( 'id' ) );
 	}
 
 

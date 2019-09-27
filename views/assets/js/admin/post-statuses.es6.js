@@ -192,7 +192,7 @@ function diverged_post_init () {
       let receiver_site_id = $(this).data('receiver-site-id')
       let source_post_id = $(this).data('source-post-id')
 
-      push_single_post( receiver_site_id, source_post_id )
+      push_single_post_to_all_receivers( receiver_site_id, source_post_id )
 
     })
 
