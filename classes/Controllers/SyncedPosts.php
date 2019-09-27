@@ -26,45 +26,42 @@ class SyncedPosts {
 		// THIS WILL RETURN AN ARRAY WITH ONE VALUE OF 0 IF NOTHING IS EXCLUDED.
 		$excluded_sites = unserialize( $post->post_meta->_excluded_sites[0] );
 
-		foreach ( $excluded_sites as $excluded_site_id ) {
+		if ( in_array( (int) get_option( 'data_sync_receiver_site_id' ), $excluded_sites ) ) {
+			return false;
+		} else {
 
-			if ( (int) $excluded_site_id === (int) get_option( 'data_sync_receiver_site_id' ) ) {
-				return false;
-			} else {
+			if ( $post->synced ) {
 
-				if ( $post->synced ) {
+				$post->diverged = self::check_date_modified( $post, $synced_posts );
 
-					$post->diverged = self::check_date_modified( $post, $synced_posts );
+				if ( $post->diverged ) {
+					if ( true !== $source_options->overwrite_receiver_post_on_conflict ) {
+						$log = new Logs( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );
+						unset( $log );
 
-					if ( $post->diverged ) {
-						if ( true !== $source_options->overwrite_receiver_post_on_conflict ) {
-							$log = new Logs( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );
-							unset( $log );
+						$synced_post = SyncedPost::get_where(
+							array(
+								'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
+								'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+							)
+						);
 
-							$synced_post = SyncedPost::get_where(
-								array(
-									'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
-									'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-								)
-							);
+						// UPDATE SYNCED POSTS DATABASE TABLE BUT ONLY CHANGE DIVERGED VALUE. DO NOT CHANGE THE DATE MODIFIED!
+						$args  = array(
+							'id'       => (int) $synced_post[0]->id,
+							'diverged' => 1,
+						);
+						$where = [ 'id' => (int) $synced_post[0]->id ];
+						$db    = new DB( SyncedPost::$table_name );
+						$db->update( $args, $where );
 
-							// UPDATE SYNCED POSTS DATABASE TABLE BUT ONLY CHANGE DIVERGED VALUE. DO NOT CHANGE THE DATE MODIFIED!
-							$args  = array(
-								'id'       => (int) $synced_post[0]->id,
-								'diverged' => 1,
-							);
-							$where = [ 'id' => (int) $synced_post[0]->id ];
-							$db    = new DB( SyncedPost::$table_name );
-							$db->update( $args, $where );
-
-							return false;
-						}
-
+						return false;
 					}
-				}
 
-				return $post;
+				}
 			}
+
+			return $post;
 		}
 	}
 
@@ -341,10 +338,10 @@ class SyncedPosts {
 					unset( $log );
 				} else {
 
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'SyncedPosts';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
+					if ( get_option( 'show_body_responses' ) ) {
+						echo 'SyncedPosts';
+						print_r( wp_remote_retrieve_body( $response ) );
+					}
 
 					$deleted = SyncedPost::delete( $synced_post[0]->id );
 

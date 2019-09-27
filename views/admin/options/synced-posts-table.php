@@ -122,7 +122,7 @@ function display_post_syndication_details_per_site( $syndication_info, $enabled_
 				$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
 
 				if ( in_array( (int) $site->id, $excluded_sites ) ) {
-					?><span class="none_enabled"><strong>This post is excluding this receiver.</strong></span><?php
+					?><span class="none_enabled"><strong>Receiver excluded in post.</strong></span><?php
 
 					if ( (int) $site->id === (int) $post_meta['_canonical_site'][0] ) {
 						?><span class="none_enabled"><strong>This post's canonical URL is pointing to a receiver that is excluded.</strong></span><?php
