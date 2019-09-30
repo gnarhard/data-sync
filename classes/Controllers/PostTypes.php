@@ -35,6 +35,22 @@ class PostTypes {
 		return PostType::get_where( $args );
 	}
 
+
+	public static function get_all_enabled_post_types_from_receivers( $connected_sites ) {
+		$index                       = 0;
+		$enabled_post_type_site_data = array();
+
+		foreach ( $connected_sites as $site ) {
+			$enabled_post_type_site_data[ $index ] = new stdClass();
+			$enabled_post_type_site_data[ $index ]->site_id            = (int) $site->id;
+			$enabled_post_type_site_data[ $index ]->enabled_post_types = self::check_enabled_post_types_on_receiver( $site );
+			$index++;
+		}
+
+		return $enabled_post_type_site_data;
+	}
+
+
 	public static function check_enabled_post_types_on_receiver( object $site ) {
 
 		$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
@@ -44,6 +60,7 @@ class PostTypes {
 			echo $response->get_error_message();
 			$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
+
 			return false;
 		} else {
 			return json_decode( wp_remote_retrieve_body( $response ) );

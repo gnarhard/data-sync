@@ -41,7 +41,7 @@ function data_sync_options_page() {
                 </div>
                 <div id="enabled_post_types">
 					<?php
-					enabled_post_types_widget();
+					display_enabled_post_types();
 					?>
                 </div>
                 <div id="debug_log">

@@ -54,7 +54,7 @@ class Posts {
 	public function register_receiver_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/post/(?P<id>\d+)',
+			'/posts/(?P<id>\d+)',
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
@@ -65,6 +65,16 @@ class Posts {
 							'type'        => 'int',
 						),
 					),
+				),
+			)
+		);
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/posts/all',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_all_posts' ),
 				),
 			)
 		);
@@ -282,7 +292,7 @@ class Posts {
 	}
 
 
-	public static function get_syndication_info_of_post( $post, $connected_sites ) {
+	public static function get_syndication_info_of_post( $post, $connected_sites, $receiver_posts ) {
 
 		$syndication_info                             = new stdClass();
 		$syndication_info->status                     = 'unsynced';
@@ -315,8 +325,12 @@ class Posts {
 
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified );
-					$receiver_post             = self::get_receiver_post( $synced_post->receiver_post_id, $synced_post->receiver_site_id );
-					$receiver_modified_time    = strtotime( $receiver_post->post_modified );
+
+					$receiver_reference_post = null;
+
+					$receiver_post = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+
+					$receiver_modified_time = strtotime( $receiver_post->post_modified );
 
 					if ( $receiver_modified_time > $synced_post_modified_time ) {
 						$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
@@ -386,10 +400,54 @@ class Posts {
 	}
 
 
+	public static function find_receiver_post( array $receiver_posts, $site_id, $receiver_post_id) {
+		foreach( $receiver_posts as $receiver_site_posts ) {
+			if ( (int) $site_id === $receiver_site_posts->site_id ) {
+				foreach( $receiver_site_posts->posts as $receiver_post ) {
+					if ( (int) $receiver_post_id === $receiver_post->ID ) {
+						return $receiver_post;
+					}
+				}
+			}
+		}
+	}
+
+
+	public static function get_all_receiver_posts( $connected_sites ) {
+
+		$receiver_posts = array();
+		$index          = 0;
+
+		foreach ( $connected_sites as $site ) {
+			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/all' );
+			$response = wp_remote_get( $url );
+
+			if ( is_wp_error( $response ) ) {
+				echo $response->get_error_message();
+				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+				unset( $log );
+			} else {
+				if ( get_option( 'show_body_responses' ) ) {
+					echo 'Post';
+					print_r( wp_remote_retrieve_body( $response ) );
+				}
+
+				$receiver_posts[ $index ]          = new stdClass();
+				$receiver_posts[ $index ]->site_id = (int) $site->id;
+				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
+				$index ++;
+			}
+		}
+
+		return $receiver_posts;
+
+	}
+
+
 	public static function get_receiver_post( $receiver_post_id, $site_id ) {
 
 		$connected_site = ConnectedSite::get( $site_id )[0];
-		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post/' . $receiver_post_id );
+		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/' . $receiver_post_id );
 		$response       = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
@@ -406,8 +464,24 @@ class Posts {
 		}
 	}
 
-	public static function get_post( WP_REST_Request $request ) {
+	public function get_post( WP_REST_Request $request ) {
 		return get_post( $request->get_param( 'id' ) );
+	}
+
+	public function get_all_posts() {
+		$statuses = array( 'publish', 'trash' );
+
+		$args = array(
+			'post_type'      => 'any',
+			'post_status'    => $statuses,
+			'orderby'        => 'post_date',
+			'order'          => 'DESC',
+			'posts_per_page' => - 1, // show all posts.
+		);
+
+		$loop = new WP_Query( $args );
+
+		return $loop->posts;
 	}
 
 

@@ -4,7 +4,7 @@ import ConnectedSites from './ConnectedSites.es6.js'
 jQuery(function ($) {
 
 	$(document).ready( function() {
-		$('#data_sync_tabs').tabs();
+		init();
 	});
 	
 	$('#bulk_data_push').unbind().click(function (e) {
@@ -47,5 +47,11 @@ function refresh_log () {
 			document.getElementById('error_log').innerHTML = JSON.parse(result.html)
 		}
 	})
+}
+
+function init() {
+	$('#data_sync_tabs').tabs();
+
+
 }
 

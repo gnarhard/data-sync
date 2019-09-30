@@ -6,7 +6,7 @@ use DataSync\Controllers\PostTypes;
 /**
  * Dashboard widget that displays which post types are enabled to be synced
  */
-function enabled_post_types_widget() {
+function display_enabled_post_types() {
 	?>
     <h3>Source</h3>
     <span><em>Push-enabled post types:</em></span>

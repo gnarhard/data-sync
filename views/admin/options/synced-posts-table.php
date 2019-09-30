@@ -11,11 +11,13 @@ use DataSync\Models\SyncedPost;
 
 function display_synced_posts_table() {
 
-	$source_options      = Options::source()->get_data();
-	$connected_sites_obj = new ConnectedSites();
-	$connected_sites     = $connected_sites_obj->get_all()->data;
-	$post_types          = array_keys( $source_options->push_enabled_post_types );
-	$posts               = Posts::get_wp_posts( $post_types, true );
+	$source_options              = Options::source()->get_data();
+	$connected_sites_obj         = new ConnectedSites();
+	$connected_sites             = $connected_sites_obj->get_all()->data;
+	$post_types                  = array_keys( $source_options->push_enabled_post_types );
+	$posts                       = Posts::get_wp_posts( $post_types, true );
+	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
+	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
 
 	?>
     <table id="wp_data_sync_status">
@@ -35,7 +37,7 @@ function display_synced_posts_table() {
 
 			foreach ( $posts as $post ) {
 
-				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites );
+				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
 
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
@@ -55,7 +57,7 @@ function display_synced_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->source_message ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -72,7 +74,7 @@ function display_synced_posts_table() {
 }
 
 
-function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post ) {
+function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data ) {
 
 	?>
     <div class="connected_site_info">
@@ -96,10 +98,8 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
         <div class="details">
 			<?php
 
-			// CONNECTED SITES INFO
-			$enabled_post_type_site_data = PostTypes::check_enabled_post_types_on_receiver( $site );
-			$post_meta                     = get_post_meta( $post->ID );
-			$excluded_sites                = unserialize( $post_meta['_excluded_sites'][0] );
+			$post_meta      = get_post_meta( $post->ID );
+			$excluded_sites = unserialize( $post_meta['_excluded_sites'][0] );
 
 			if ( in_array( (int) $site->id, $excluded_sites ) ) {
 				?><span class="none_enabled"><strong>Receiver excluded in post.</strong></span><?php
@@ -109,7 +109,14 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 				}
 			}
 
-			if ( empty( $enabled_post_type_site_data ) ) {
+			foreach( $enabled_post_type_site_data as $enabled_post_type_site_datum ) {
+			    if ( (int) $site->id === $enabled_post_type_site_datum->site_id ) {
+				    $enabled_post_types = $enabled_post_type_site_datum->enabled_post_types;
+				    break;
+                }
+            }
+
+			if ( empty( $enabled_post_types ) ) {
 
 				?><span class="none_enabled"><strong>No enabled post types on this site.</strong></span><?php
 
