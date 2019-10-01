@@ -43,7 +43,6 @@ function display_syndicated_posts() {
 		}
 		?>
 
-        <button id="template_push" class="button button-primary"><?php _e( 'Push Template', 'data_sync' ); ?></button>
     </div>
     <div id="status_wrap"></div>
 	<?php

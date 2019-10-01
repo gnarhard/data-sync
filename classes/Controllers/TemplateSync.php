@@ -40,18 +40,22 @@ class TemplateSync {
 		);
 	}
 
+
+	public static function get_template_files() {
+		$template_dir = DATA_SYNC_PATH . '/templates';
+
+		return scandir( $template_dir );
+	}
+
+
 	public function initiate() {
 
-		$template_dir = DATA_SYNC_PATH . '/templates';
-		$files        = scandir( $template_dir );
-		$upload_dir   = wp_get_upload_dir();
-
+		$template_dir    = DATA_SYNC_PATH . '/templates';
+		$files           = self::get_template_files();
 		$connected_sites = (array) ConnectedSites::get_all()->get_data();
 
 		foreach ( $files as $file ) {
-			if ( '.' === $file ) {
-				continue;
-			} elseif ( '..' === $file ) {
+			if ( ( '.' === $file ) || ( '..' === $file ) || ( 'index.php' === $file ) ) {
 				continue;
 			}
 

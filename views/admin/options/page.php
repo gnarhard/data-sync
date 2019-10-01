@@ -1,6 +1,7 @@
 <?php namespace DataSync;
 
 use DataSync\Controllers\Logs;
+use DataSync\Controllers\TemplateSync;
 
 /**
  * Outputs HTML for settings page
@@ -17,7 +18,8 @@ function data_sync_options_page() {
         <div id="data_sync_tabs">
 			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
                 <ul>
-                    <li><a href="#syndicated_posts">Syndicated Posts</a></li>
+                    <li><a href="#syndicated_posts">Posts</a></li>
+                    <li><a href="#templates">Templates</a></li>
                     <li><a href="#connected_sites">Connected Sites</a></li>
                     <li><a href="#enabled_post_types">Enabled Post Types</a></li>
                     <li><a href="#debug_log">Log</a></li>
@@ -31,6 +33,10 @@ function data_sync_options_page() {
                     <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                     <div id="syndicated_posts_wrap"></div>
                 </div>
+                <div id="templates">
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
+                    <div id="templates_wrap"></div>
+                </div>
                 <div id="connected_sites">
                     <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                     <div id="connected_sites_wrap"></div>
@@ -43,7 +49,6 @@ function data_sync_options_page() {
 					<?php
 					if ( get_option( 'source_site' ) ) {
 						?>
-                        <h2>Log</h2>
 						<?php
 						if ( '1' === get_option( 'debug' ) ) {
 							?>

@@ -198,6 +198,9 @@ class Options {
 		} elseif ( 'syndicated_posts_table' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
 			\DataSync\display_syndicated_posts_table();
+		} elseif ( 'templates' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
+			\DataSync\display_synced_templates();
 		}
 
 	}

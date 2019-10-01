@@ -1,4 +1,5 @@
-import AJAX from '../AJAX.es6.js'
+import AJAX from '../../AJAX.es6.js'
+import Success from './Success.es6';
 
 class SyndicatedPosts {
 
@@ -10,6 +11,8 @@ class SyndicatedPosts {
   init() {
     $=jQuery;
 
+    this.refresh_table();
+
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
       $('#post-' + id).toggle();
@@ -17,25 +20,31 @@ class SyndicatedPosts {
 
     if (document.getElementById('bulk_data_push')) {
       document.getElementById('bulk_data_push').onclick = function (e) {
-        e.preventDefault()
-
-        document.getElementById('wp_data_sync_status').remove(); // REMOVE TABLE FOR LOADING.
-        document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
-
-        AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( response ) {
-          console.log( response );
-          AJAX.get_html(DataSync.api.url + '/settings_tab/syndicated_posts_table').then(function (result) {
-            let result_array = result.split('null')
-            result_array.slice(-1)[0]
-            let html = result_array.join()
-            document.getElementById('syndicated_posts_wrap').innerHTML = html
-            document.querySelector('#syndicated_posts .loading_spinner').classList.add('hidden')
-            this.single_post_actions_init();
-          })
-        })
-
+        this.bulk_push(e);
       }
     }
+
+
+  }
+
+  refresh_table() {
+    if (document.getElementById('syndicated_posts_wrap')) {
+      AJAX.get_html(DataSync.api.url + '/settings_tab/syndicated_posts' ).then(function( result) {
+        Success.display_html( result, 'syndicated_posts' )
+      });
+    }
+  }
+
+  bulk_push(e) {
+    e.preventDefault()
+
+    document.getElementById('wp_data_sync_status').remove(); // REMOVE TABLE FOR LOADING.
+    document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
+
+    AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( response ) {
+      console.log( response );
+      this.refresh_table();
+    })
   }
 
   single_post_actions_init() {

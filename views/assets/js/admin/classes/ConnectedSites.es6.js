@@ -1,6 +1,11 @@
-import AJAX from '../AJAX.es6.js';
+import AJAX from '../../AJAX.es6.js';
+import Success from './Success.es6';
 
 class ConnectedSites {
+
+    constructor() {
+        this.init();
+    }
 
     static save() {
         let data = [];
@@ -47,6 +52,45 @@ class ConnectedSites {
                 document.getElementById('site-'+site_id).remove();
             }
         });
+    }
+
+    init() {
+
+        this.refresh_table();
+
+        let self = this;
+
+        // ADD SITE
+        $('#add_site').unbind().click(function (e) {
+            e.preventDefault()
+
+            $('.lightbox_wrap').addClass('display')
+
+            $('#close').unbind().click(function () {
+                $('.lightbox_wrap').removeClass('display')
+            })
+
+            $('#submit_site').unbind().click(function (e) {
+                e.preventDefault()
+                self.save()
+            })
+        })
+
+        $('.remove_site').unbind().click(function (e) {
+            let site_id = parseInt($(this).parent().attr('id').split('site-')[1])
+            self.delete(site_id)
+        })
+
+
+    }
+
+    refresh_table() {
+        if (document.getElementById('connected_sites_wrap')) {
+            AJAX.get_html(DataSync.api.url + '/settings_tab/connected_sites' ).then(function( result) {
+                Success.display_html( result, 'connected_sites' )
+                ConnectedSites();
+            });
+        }
     }
 }
 
