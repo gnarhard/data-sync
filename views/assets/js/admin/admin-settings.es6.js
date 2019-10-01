@@ -1,5 +1,6 @@
 import AJAX from '../AJAX.es6.js'
 import ConnectedSites from './ConnectedSites.es6.js'
+import SyndicatedPosts from './SyndicatedPosts.es6.js';
 
 jQuery(function ($) {
 
@@ -35,10 +36,7 @@ function init() {
 			document.getElementById('syndicated_posts_wrap').innerHTML = html;
 			document.querySelector('#syndicated_posts .loading_spinner').classList.add('hidden');
 
-			$('#bulk_data_push').unbind().click(function (e) {
-				e.preventDefault()
-				AJAX.get(DataSync.api.url + '/source_data/push')
-			}, false)
+			new SyndicatedPosts();
 		});
 	}
 	if (document.getElementById('connected_sites_wrap')) {

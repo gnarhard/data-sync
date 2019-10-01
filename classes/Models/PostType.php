@@ -33,7 +33,7 @@ class PostType {
 		$args    = array(
 			'name'         => $data->name,
 			'data'         => wp_json_encode( $data ),
-			'date_created' => current_time( 'mysql' ),
+			'date_created' => current_time( 'mysql', 1 ),
 		);
 		$sprintf = array(
 			'%s',

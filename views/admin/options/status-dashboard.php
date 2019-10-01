@@ -14,7 +14,7 @@ function display_syndicated_posts() {
 	$i                         = 0;
 	$number_of_sites_connected = count( $connected_sites );
 
-	$status = display_synced_posts_table();
+	$status = display_syndicated_posts_table();
 
 	foreach ( $connected_sites as $index => $site ) {
 		$i ++;
