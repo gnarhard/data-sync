@@ -94,7 +94,7 @@ class Options {
 			}
 		}
 
-		$options->enable_new_cpts                     = (bool) get_option( 'enable_new_cpts' );
+		$options->enable_new_cpts = (bool) get_option( 'enable_new_cpts' );
 //		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
 		$options->overwrite_receiver_post_on_conflict = (bool) get_option( 'overwrite_receiver_post_on_conflict' );
 		$options->debug                               = (bool) get_option( 'debug' );
@@ -183,7 +183,7 @@ class Options {
 	}
 
 	public function get_settings_tab_html( WP_REST_Request $request ) {
-		$settings_tab = $request->get_param( 'tab' );
+		$settings_tab     = $request->get_param( 'tab' );
 		$settings_content = new stdClass();
 
 		if ( 'syndicated_posts' === $settings_tab ) {
@@ -204,6 +204,53 @@ class Options {
 		}
 
 	}
+
+
+	public function create_admin_notice( WP_REST_Request $request ) {
+		$params  = $request->get_params();
+		$output  = '';
+		$success = $params['success'];
+		$topic   = $params['topic'];
+
+		if ( $success ) {
+			$output .= '<div class="updated notice-success is-dismissible">';
+
+			if ( 'Enabled post types' === $topic ) {
+				$output .= '<p>' . $topic . ' saved successfully.</p>';
+			} elseif ( 'Connected sites' === $topic ) {
+				$output .= '<p>' . $topic . ' saved successfully.</p>';
+			} elseif ( 'Syndicated posts' === $topic ) {
+				$output .= '<p>' . $topic . ' successfully distributed.</p>';
+			} elseif ( 'Templates' === $topic ) {
+				$output .= '<p>' . $topic . ' successfully distributed.</p>';
+			}
+
+
+		} else {
+			$output .= '<div class="notice notice-warning is-dismissible">';
+
+			if ( 'Enabled post types' === $topic ) {
+				$output .= '<p>' . $topic . ' not saved.</p>';
+			} elseif ( 'Connected sites' === $topic ) {
+				$output .= '<p>' . $topic . ' not saved.</p>';
+			} elseif ( 'Syndicated posts' === $topic ) {
+				$output .= '<p>' . $topic . ' not distributed.</p>';
+			} elseif ( 'Templates' === $topic ) {
+				$output .= '<p>' . $topic . ' not distributed.</p>';
+			}
+
+		}
+
+		$output .= '<button type="button" class="notice-dismiss">';
+		$output .= '<span class="screen-reader-text">Dismiss this notice.</span>';
+		$output .= '</button>';
+
+		$output .= '</div>';
+
+		wp_send_json_success($output);
+
+	}
+
 
 	public function register_routes() {
 		$registered = register_rest_route(
@@ -254,14 +301,25 @@ class Options {
 			'/settings_tab/(?P<tab>[a-zA-Z-_]+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_settings_tab_html' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_settings_tab_html' ),
+					'args'     => array(
 						'tab' => array(
 							'description' => 'Tab to get',
 							'type'        => 'string',
 						),
 					),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/admin_notice',
+			array(
+				array(
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'create_admin_notice' ),
 				),
 			)
 		);

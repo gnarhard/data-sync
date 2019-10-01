@@ -4,14 +4,11 @@ import Success from './Success.es6';
 class SyndicatedPosts {
 
   constructor() {
-    this.init();
-    this.single_post_actions_init()
+    this.refresh_view();
   }
 
   init() {
     $=jQuery;
-
-    this.refresh_table();
 
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
@@ -27,10 +24,13 @@ class SyndicatedPosts {
 
   }
 
-  refresh_table() {
+  refresh_view() {
+    let self = this;
     if (document.getElementById('syndicated_posts_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/syndicated_posts' ).then(function( result) {
-        Success.display_html( result, 'syndicated_posts' )
+        Success.display_html( result, 'syndicated_posts', 'Syndicated posts' );
+        self.init();
+        self.single_post_actions_init()
       });
     }
   }
@@ -43,7 +43,7 @@ class SyndicatedPosts {
 
     AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( response ) {
       console.log( response );
-      this.refresh_table();
+      this.refresh_view();
     })
   }
 
@@ -117,10 +117,6 @@ class SyndicatedPosts {
       }
 
     })
-  }
-
-  show_success( result ) {
-
   }
 
 }

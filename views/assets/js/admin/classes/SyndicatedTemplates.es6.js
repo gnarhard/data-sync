@@ -4,7 +4,7 @@ import Success from './Success.es6';
 class SyndicatedTemplates {
 
   constructor () {
-    this.click_listeners()
+    this.refresh_view()
   }
 
   push_templates (e) {
@@ -20,7 +20,7 @@ class SyndicatedTemplates {
 
   }
 
-  click_listeners () {
+  init () {
     // PUSH TEMPLATES BUTTON PUSH
     if (document.getElementById('template_push')) {
       document.getElementById('template_push').onclick = function (e) {
@@ -28,10 +28,17 @@ class SyndicatedTemplates {
       }
     }
 
+
+  }
+
+  refresh_view() {
+
+    let self = this;
     // LOAD TEMPLATE LIST
     if (document.getElementById('templates_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/templates' ).then(function( result) {
-        Success.display_html( result, 'templates' )
+        Success.display_html( result, 'templates', 'Templates' )
+        self.init();
       });
     }
   }

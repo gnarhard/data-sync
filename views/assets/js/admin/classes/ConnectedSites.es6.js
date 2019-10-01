@@ -4,7 +4,7 @@ import Success from './Success.es6';
 class ConnectedSites {
 
     constructor() {
-        this.init();
+        this.refresh_view();
     }
 
     static save() {
@@ -56,8 +56,6 @@ class ConnectedSites {
 
     init() {
 
-        this.refresh_table();
-
         let self = this;
 
         // ADD SITE
@@ -84,11 +82,12 @@ class ConnectedSites {
 
     }
 
-    refresh_table() {
+    refresh_view() {
+        let self = this;
         if (document.getElementById('connected_sites_wrap')) {
             AJAX.get_html(DataSync.api.url + '/settings_tab/connected_sites' ).then(function( result) {
-                Success.display_html( result, 'connected_sites' )
-                ConnectedSites();
+                Success.display_html( result, 'connected_sites', 'Connected sites' );
+                self.init();
             });
         }
     }

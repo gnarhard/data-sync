@@ -1,3 +1,11 @@
+.settings_page_data-sync-options #feedback .error {
+  color: #d9534f;
+}
+
+.settings_page_data-sync-options #feedback .success {
+  color: #5cb85c;
+}
+
 .settings_page_data-sync-options table {
   width: 100%;
 }
@@ -331,7 +339,7 @@
 
 #enabled_post_types select {
   width: 100%;
-  min-height: 100px;
+  min-height: 200px;
 }
 
 #enabled_post_types #save_push_enabled_post_types {

@@ -1,5 +1,15 @@
 .settings_page_data-sync-options {
 
+  #feedback {
+    .error {
+      color: #d9534f;
+    }
+
+    .success {
+      color: #5cb85c;
+    }
+  }
+
   table {
     width: 100%;
   }
