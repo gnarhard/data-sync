@@ -20,11 +20,6 @@
   width: 400px;
 }
 
-.settings_page_data-sync-options .display {
-  display: block;
-  position: fixed;
-}
-
 .settings_page_data-sync-options .dashicons-update {
   -webkit-animation-name: spin;
           animation-name: spin;
@@ -137,6 +132,11 @@
   display: block;
   clear: both;
   margin: 40px auto;
+}
+
+#connected_sites .lightbox_wrap.display {
+  display: block;
+  position: fixed;
 }
 
 #syndicated_posts .warning {

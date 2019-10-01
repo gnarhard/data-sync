@@ -11,13 +11,14 @@
 
   .lightbox_wrap {
     display: none;
-    background: rgba(0,0,0,.5);
+    background: rgba(0, 0, 0, .5);
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     height: 100%;
+
 
     .add_site_modal {
       max-width: 500px;
@@ -61,6 +62,11 @@
         margin: 40px auto;
       }
     }
+  }
+
+  .lightbox_wrap.display {
+    display: block;
+    position: fixed;
   }
 
 }
