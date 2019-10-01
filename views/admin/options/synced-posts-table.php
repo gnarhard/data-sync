@@ -18,8 +18,9 @@ function display_synced_posts_table() {
 	$posts                       = Posts::get_wp_posts( $post_types, true );
 	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
 	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-
+	$output                      = '';
 	?>
+
     <table id="wp_data_sync_status">
         <thead>
         <tr>
@@ -109,12 +110,12 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 				}
 			}
 
-			foreach( $enabled_post_type_site_data as $enabled_post_type_site_datum ) {
-			    if ( (int) $site->id === $enabled_post_type_site_datum->site_id ) {
-				    $enabled_post_types = $enabled_post_type_site_datum->enabled_post_types;
-				    break;
-                }
-            }
+			foreach ( $enabled_post_type_site_data as $enabled_post_type_site_datum ) {
+				if ( (int) $site->id === $enabled_post_type_site_datum->site_id ) {
+					$enabled_post_types = $enabled_post_type_site_datum->enabled_post_types;
+					break;
+				}
+			}
 
 			if ( empty( $enabled_post_types ) ) {
 

@@ -30,19 +30,16 @@ function data_sync_options_page() {
 			<?php } ?>
 			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
                 <div id="syndicated_posts">
-					<?php
-					status_widget();
-					?>
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
+                    <div id="syndicated_posts_wrap"></div>
                 </div>
                 <div id="connected_sites">
-					<?php
-					display_connected_sites();
-					?>
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
+                    <div id="connected_sites_wrap"></div>
                 </div>
                 <div id="enabled_post_types">
-					<?php
-					display_enabled_post_types();
-					?>
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
+                    <div id="enabled_post_types_wrap"></div>
                 </div>
                 <div id="debug_log">
 					<?php
@@ -65,9 +62,9 @@ function data_sync_options_page() {
             <div id="settings">
                 <form method="POST" action="options.php">
 					<?php
-//					settings_fields( 'data_sync_options' );
-//					do_settings_sections( 'data-sync-options' );
-//					submit_button();
+					settings_fields( 'data_sync_options' );
+					do_settings_sections( 'data-sync-options' );
+					submit_button();
 					?>
                 </form>
             </div>

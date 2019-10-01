@@ -182,6 +182,22 @@ class Options {
 		);
 	}
 
+	public function get_settings_tab_html( WP_REST_Request $request ) {
+		$settings_tab = $request->get_param( 'tab' );
+		$settings_content = new stdClass();
+
+		if ( 'syndicated_posts' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/status-dashboard.php';
+			\DataSync\display_syndicated_posts();
+		} elseif ( 'connected_sites' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
+			\DataSync\display_connected_sites();
+		} elseif ( 'enabled_post_types' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
+			\DataSync\display_enabled_post_types();
+		}
+	}
+
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -225,6 +241,25 @@ class Options {
 				),
 			)
 		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/settings_tab/(?P<tab>[a-zA-Z-_]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_settings_tab_html' ),
+					'args'                => array(
+						'tab' => array(
+							'description' => 'Tab to get',
+							'type'        => 'string',
+						),
+					),
+				),
+			)
+		);
+
+
 	}
 
 	/**
