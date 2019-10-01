@@ -380,8 +380,8 @@ class Posts {
 				$syndication_info->source_message = '<span class="warning">A receiver post was updated after the last sync.</span>';
 			}
 
-			$syndication_info->icon           = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '"></i>';
-			$syndication_info->source_message .= '<button class="button danger_button push_post_now" data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $synced_post->source_post_id . '">Overwrite all receivers</button></span>';
+			$syndication_info->icon           = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
+			$syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 
 
 		} else if ( 'partial' === $syndication_info->status ) {
@@ -390,6 +390,7 @@ class Posts {
 		} else if ( 'unsynced' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 			$syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
+			$syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} else if ( 'trashed' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
 			$syndication_info->source_message = '<span class="warning">Trashed at source but still live on receivers. To delete on receivers, delete permanently at source.</span>';

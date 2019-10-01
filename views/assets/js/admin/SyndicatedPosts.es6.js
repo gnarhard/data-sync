@@ -39,6 +39,7 @@ class SyndicatedPosts {
   }
 
   single_post_actions_init() {
+    let self = this;
     jQuery(function ($) {
       $('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function () {
 
@@ -47,14 +48,14 @@ class SyndicatedPosts {
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        this.push_single_post_to_all_receivers( receiver_site_id, source_post_id )
+        self.push_single_post_to_all_receivers( receiver_site_id, source_post_id )
 
       })
 
       $('.push_post_now').unbind().click(function (e) {
 
         e.preventDefault();
-
+        console.log('here');
         // CHANGE ICON TO SPINNING UPDATE ICON
         let row = $(this).parent().parent().parent()[0];
 
@@ -63,10 +64,9 @@ class SyndicatedPosts {
         // status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
         // TODO: THIS WON'T WORK -- END
 
-        let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        this.push_single_post_to_all_receivers( receiver_site_id, source_post_id );
+        self.push_single_post_to_all_receivers( source_post_id );
 
       })
 
@@ -82,7 +82,7 @@ class SyndicatedPosts {
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        this.push_single_post_to_single_receiver( receiver_site_id, source_post_id );
+        self.push_single_post_to_single_receiver( receiver_site_id, source_post_id );
 
       })
 
@@ -90,11 +90,11 @@ class SyndicatedPosts {
 
   }
 
-  push_single_post_to_all_receivers( receiver_site_id, source_post_id ) {
+  push_single_post_to_all_receivers( source_post_id ) {
     AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
       console.log(result)
       if (result) {
-        this.show_success();
+        this.show_success( result );
       }
 
     })
@@ -111,12 +111,7 @@ class SyndicatedPosts {
   }
 
   show_success( result ) {
-    let synced_post = result.data
-    // INDICATE THAT ALL RECEIVERS HAVE BEEN SYNCED
-    // document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_icons')[0].innerHTML = '<i class="dashicons dashicons-yes" title="Synced on all connected sites."></i>'
-    // UPDATE SYNCED TIME
-    // let post_modified_date = new Date(synced_post.date_modified).toLocaleString('en-US', { timeZone: 'America/Denver' })
-    // document.getElementById('synced_post-' + source_post_id).getElementsByClassName('wp_data_synced_post_status_synced_time')[0].innerHTML = post_modified_date
+
   }
 
 }
