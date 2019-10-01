@@ -37,7 +37,7 @@ class SyncedTerm {
 			'receiver_site_id' => $data->receiver_site_id,
 			'source_parent_id' => $data->source_parent_id,
 			'diverged'         => $data->diverged,
-			'date_modified'    => current_time( 'mysql' ),
+			'date_modified'    => current_time( 'mysql', 1 ),
 		);
 
 		$sprintf = array(
@@ -64,7 +64,7 @@ class SyncedTerm {
 			'receiver_site_id' => $data->receiver_site_id,
 			'source_parent_id' => $data->source_parent_id,
 			'diverged'         => $data->diverged,
-			'date_modified'    => current_time( 'mysql' ),
+			'date_modified'    => current_time( 'mysql', 1 ),
 		);
 
 		$where = [ 'id' => $data->id ];

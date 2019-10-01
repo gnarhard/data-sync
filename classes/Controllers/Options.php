@@ -195,7 +195,11 @@ class Options {
 		} elseif ( 'enabled_post_types' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
 			\DataSync\display_enabled_post_types();
+		} elseif ( 'syndicated_posts_table' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+			\DataSync\display_syndicated_posts_table();
 		}
+
 	}
 
 	public function register_routes() {

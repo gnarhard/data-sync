@@ -211,7 +211,7 @@ class SyncedPosts {
 		$data->name             = $source_post->post_title;
 		$data->post_type        = $source_post->post_type;
 		$data->diverged         = $source_post->diverged;
-		$data->date_modified    = current_time( 'mysql' );
+		$data->date_modified    = current_time( 'mysql', 1 );
 
 		return self::save( $data );
 	}

@@ -9,7 +9,7 @@ use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\SyncedPost;
 
-function display_synced_posts_table() {
+function display_syndicated_posts_table() {
 
 	$source_options              = Options::source()->get_data();
 	$connected_sites_obj         = new ConnectedSites();

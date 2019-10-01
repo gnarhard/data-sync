@@ -254,7 +254,6 @@ class SourceData {
 
 			$response = wp_remote_post( $post_data->url, [
 				'body' => $post_data->json,
-//				'cookies' => $post_data->cookies,
 			] );
 
 			if ( is_wp_error( $response ) ) {
@@ -371,7 +370,7 @@ class SourceData {
 		$this->source_data                    = new stdClass();
 		$this->source_data->upload_path       = $upload_dir['path'];
 		$this->source_data->upload_url        = $upload_dir['url'];
-		$this->source_data->start_time        = (string) current_time( 'mysql' );
+		$this->source_data->start_time        = (string) current_time( 'mysql', 1 );
 		$this->source_data->start_microtime   = (float) microtime( true );
 		$this->source_data->options           = (object) $options;
 		$this->source_data->acf               = (array) ACFs::get_acf_fields();

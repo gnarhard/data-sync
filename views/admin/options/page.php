@@ -20,9 +20,7 @@ function data_sync_options_page() {
                     <li><a href="#syndicated_posts">Syndicated Posts</a></li>
                     <li><a href="#connected_sites">Connected Sites</a></li>
                     <li><a href="#enabled_post_types">Enabled Post Types</a></li>
-                    <?php if ( '1' === get_option( 'debug' ) ) { ?>
-                        <li><a href="#debug_log">Log</a></li>
-                    <?php } ?>
+                    <li><a href="#debug_log">Log</a></li>
                     <li><a href="#settings">Settings</a></li>
                 </ul>
 			<?php } else { ?>
@@ -44,16 +42,21 @@ function data_sync_options_page() {
                 <div id="debug_log">
 					<?php
 					if ( get_option( 'source_site' ) ) {
+						?>
+                        <h2>Log</h2>
+						<?php
 						if ( '1' === get_option( 'debug' ) ) {
 							?>
-                            <h2>Log</h2>
                             <span id="refresh_error_log">Refresh log</span>
                             <div id="error_log">
 								<?php include_once 'log.php'; ?>
 								<?php echo display_log(); ?>
                             </div>
 							<?php
+						} else {
+							?><span>Please enable debugging on the settings page to view error log. Debugging decreases this settings page performance so it's best to leave it disabled.</span><?php
 						}
+
 					}
 					?>
                 </div>
