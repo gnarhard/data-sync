@@ -25,7 +25,13 @@ class Success {
 
     let data = {}
     data.result = result.success
+
+    if ( typeof result.data !== 'undefined') {
+      data.message = result.data;
+    }
+
     data.topic = topic
+
     AJAX.post(DataSync.api.url + '/admin_notice', data).then(function ( result ) {
       console.log(result);
       let node = document.createRange().createContextualFragment( result.data );

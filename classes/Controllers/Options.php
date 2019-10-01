@@ -218,7 +218,12 @@ class Options {
 			if ( 'Enabled post types' === $topic ) {
 				$output .= '<p>' . $topic . ' saved successfully.</p>';
 			} elseif ( 'Connected sites' === $topic ) {
-				$output .= '<p>' . $topic . ' saved successfully.</p>';
+				if ( ! empty( $params['message'] ) ) {
+					$output .= '<p>' . $params['message'] . '</p>';
+				} else {
+					$output .= '<p>' . $topic . ' saved successfully.</p>';
+				}
+
 			} elseif ( 'Syndicated posts' === $topic ) {
 				$output .= '<p>' . $topic . ' successfully distributed.</p>';
 			} elseif ( 'Templates' === $topic ) {

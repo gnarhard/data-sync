@@ -27,6 +27,7 @@ class ConnectedSites {
         AJAX.delete( DataSync.api.url + '/connected_sites/' + site_id ).then(   function( response ) {
             if ( response.success ) {
                 document.getElementById('site-'+site_id).remove();
+                Success.show_success_message( response, 'Connected sites')
             }
         });
     }
@@ -47,13 +48,13 @@ class ConnectedSites {
 
             $('#submit_site').unbind().click(function (e) {
                 e.preventDefault()
-                self.save()
+                ConnectedSites.save()
             })
         })
 
         $('.remove_site').unbind().click(function (e) {
             let site_id = parseInt($(this).parent().attr('id').split('site-')[1])
-            self.delete(site_id)
+            ConnectedSites.delete(site_id)
         })
 
 
