@@ -209,7 +209,7 @@ class Options {
 	public function create_admin_notice( WP_REST_Request $request ) {
 		$params  = $request->get_params();
 		$output  = '';
-		$success = $params['success'];
+		$success = $params['result'];
 		$topic   = $params['topic'];
 
 		if ( $success ) {
