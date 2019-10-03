@@ -1,5 +1,5 @@
 import AJAX from '../../AJAX.es6'
-import Success from './Success.es6';
+import Success from './Success.es6'
 
 class Logs {
   constructor () {
@@ -7,27 +7,26 @@ class Logs {
   }
 
   init () {
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelector('#debug_log .loading_spinner').classList.add('hidden');
+    let self = this
+    document.querySelector('#debug_log .loading_spinner').classList.add('hidden')
 
-      if (document.getElementById('error_log')) {
+    if (document.getElementById('error_log')) {
 
-        document.getElementById('refresh_error_log').onclick = function (e) {
-          this.refresh_log()
-        }
+      document.getElementById('refresh_error_log').onclick = function (e) {
+        self.refresh_log()
       }
-    })
+    }
   }
 
   refresh_log () {
     AJAX.get(DataSync.api.url + '/log/get').then(function (result) {
       if (JSON.parse(result.html) !== document.getElementById('error_log').innerHTML) {
         document.getElementById('error_log').innerHTML = JSON.parse(result.html)
-        new Logs();
+        new Logs()
       }
     })
   }
 
 }
 
-export default Logs;
+export default Logs

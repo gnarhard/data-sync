@@ -10,9 +10,11 @@ class SyndicatedTemplates {
   push_templates (e) {
 
     e.preventDefault()
+    let self = this;
 
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
       Success.show_success_message( result, 'Templates' );
+      self.refresh_view();
     })
 
   }

@@ -235,7 +235,7 @@ class Options {
 			$output .= '<div class="notice notice-warning is-dismissible">';
 
 			if ( 'Enabled post types' === $topic ) {
-				$output .= '<p>' . $topic . ' not saved because data is identical to what is already saved.</p>';
+				$output .= '<p>' . $topic . ' data is identical to saved data.</p>';
 			} elseif ( 'Connected sites' === $topic ) {
 				$output .= '<p>' . $topic . ' not saved.</p>';
 			} elseif ( 'Syndicated posts' === $topic ) {

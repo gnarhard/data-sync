@@ -166,12 +166,12 @@
 }
 
 #syndicated_posts #bulk_data_push {
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 #syndicated_posts table {
   width: 100%;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
 }
 
 #syndicated_posts table td:first-of-type {

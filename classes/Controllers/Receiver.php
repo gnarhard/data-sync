@@ -97,6 +97,7 @@ class Receiver {
 
 
 		$upload_dir = wp_upload_dir();
+		$template_dir    = DATA_SYNC_PATH . 'templates';
 
 		if ( is_multisite() ) {
 			$blog_ids        = get_sites();
@@ -105,10 +106,18 @@ class Receiver {
 			if ( $network_blog_id !== get_current_blog_id() ) {
 				File::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
 				mkdir( $upload_dir['basedir'], 0755);
+
+				// DELETE TEMPLATES
+				File::delete_media( $template_dir );
+				mkdir( $template_dir, 0755);
 			}
 		} else {
 			File::delete_media( $upload_dir['basedir'] );
 			mkdir( $upload_dir['basedir'], 0755);
+
+			// DELETE TEMPLATES
+			File::delete_media( $template_dir );
+			mkdir( $template_dir, 0755);
 		}
 
 

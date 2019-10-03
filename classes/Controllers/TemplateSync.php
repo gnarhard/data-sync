@@ -50,7 +50,7 @@ class TemplateSync {
 
 	public function initiate() {
 
-		$template_dir    = DATA_SYNC_PATH . '/templates';
+		$template_dir    = DATA_SYNC_PATH . 'templates';
 		$files           = self::get_template_files();
 		$connected_sites = (array) ConnectedSites::get_all()->get_data();
 
@@ -75,6 +75,9 @@ class TemplateSync {
 			}
 		}
 
+		$receiver_logs = Logs::retrieve_receiver_logs( $source_data->start_time );
+		Logs::save_to_source( $receiver_logs );
+
 		wp_send_json_success();
 
 	}
@@ -85,9 +88,6 @@ class TemplateSync {
 		$json     = $auth->prepare( $source_data, $connected_site->secret_key );
 		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/templates/sync';
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
-
-		$receiver_logs = Logs::retrieve_receiver_logs( $source_data->start_time );
-		Logs::save_to_source( $receiver_logs );
 
 		if ( is_wp_error( $response ) ) {
 			echo $response->get_error_message();
@@ -118,12 +118,7 @@ class TemplateSync {
 	public function sync( $source_data ) {
 
 		$result = File::copy( $source_data, $source_data->file_contents );
-//TODO: FIX RETURN RESULT
-		if ( $result ) {
-			wp_send_json_success( $result );
-		} else {
-			wp_send_json_error( $result );
-		}
+		wp_send_json( $result );
 
 	}
 

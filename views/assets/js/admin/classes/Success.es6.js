@@ -25,25 +25,26 @@ class Success {
     let data = {}
     data.result = result.success
 
-    if ( typeof result.data !== 'undefined') {
-      data.message = result.data;
+    if (typeof result.data !== 'undefined') {
+      data.message = result.data
     }
 
     data.topic = topic
 
-    AJAX.post(DataSync.api.url + '/admin_notice', data).then(function ( result ) {
-      console.log(result);
-      let node = document.createRange().createContextualFragment( result.data );
-      document.getElementById('message').appendChild( node )
-      Success.dismiss_button_init();
+    AJAX.post(DataSync.api.url + '/admin_notice', data).then(function (result) {
+      console.log(result)
+      let node = document.createRange().createContextualFragment(result.data)
+      document.getElementById('message').appendChild(node)
+      Success.dismiss_button_init()
     })
 
   }
 
-  static dismiss_button_init() {
-      document.querySelector('#message .notice-dismiss').onclick = function (e) {
-        this.parentNode.remove();
-      }
+  static dismiss_button_init () {
+    $ = jQuery
+    $('#message .notice-dismiss').unbind().click(function () {
+      $(this).parentNode.remove()
+    })
   }
 }
 
