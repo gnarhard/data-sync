@@ -198,41 +198,11 @@ class SourceData {
 
 	public function create_request_data( $site ) {
 
-		$post_data = new stdClass();
-
-		if ( false !== strpos( $site->url, 'receiver1' ) ) {
-			$xdebug_ide_key = 'RECEIVER1';
-		} elseif ( false !== strpos( $site->url, 'receiver2' ) ) {
-			$xdebug_ide_key = 'RECEIVER2';
-		} elseif ( false !== strpos( $site->url, 'multi' ) ) {
-			$xdebug_ide_key = 'MULTI';
-		}
-
+		$post_data                           = new stdClass();
 		$this->source_data->receiver_site_id = (int) $site->id;
-
-		if ( $this->source_data->options->debug ) {
-//			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive?XDEBUG_SESSION_START=' . $xdebug_ide_key;
-			$post_data->url = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-
-			$post_data->cookies = [];
-
-			$xdebug_cookie                     = array(
-				'name'    => 'XDEBUG_SESSION',
-				'value'   => $xdebug_ide_key,
-//				'value' => 'PHPSTORM',
-//				'domain' => $site->url,
-				'expires' => time() + ( 86400 * 30 ),
-				'path'    => '/',
-			);
-			$post_data->cookies[]              = new WP_Http_Cookie( $xdebug_cookie );
-			$this->source_data->xdebug_ide_key = $xdebug_ide_key;
-		} else {
-			$post_data->url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$this->source_data->xdebug_ide_key = '';
-		}
-
-		$auth            = new Auth();
-		$post_data->json = $auth->prepare( $this->source_data, $site->secret_key );
+		$post_data->url                      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+		$auth                                = new Auth();
+		$post_data->json                     = $auth->prepare( $this->source_data, $site->secret_key );
 
 		return $post_data;
 	}
@@ -271,17 +241,15 @@ class SourceData {
 
 		}
 
+		// SYNC MEDIA FILES.
+		new Media( $this->source_data->posts );
+
 		$this->finish_push( $response );
 
 	}
 
 
 	public function finish_push( $response ) {
-
-		$this->get_receiver_data();
-		$this->save_receiver_data();
-
-		new Media( $this->source_data->posts );
 
 		$this->get_receiver_data();
 		$this->save_receiver_data();
@@ -399,8 +367,8 @@ class SourceData {
 				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
 
 				if ( ! empty( $connected_site ) ) {
-					$permalink         = get_permalink( $post->ID );
-					$canonical_link    = str_replace( get_site_url(), $connected_site->url, $permalink );
+					$permalink      = get_permalink( $post->ID );
+					$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
 
 					$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
 				} else {

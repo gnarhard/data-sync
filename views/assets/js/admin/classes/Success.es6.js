@@ -34,7 +34,7 @@ class Success {
     AJAX.post(DataSync.api.url + '/admin_notice', data).then(function (result) {
       console.log(result)
       let node = document.createRange().createContextualFragment(result.data)
-      document.getElementById('message').appendChild(node)
+      document.querySelector('#wpbody-content .wrap').appendChild(node)
       Success.dismiss_button_init()
     })
 
@@ -42,8 +42,8 @@ class Success {
 
   static dismiss_button_init () {
     $ = jQuery
-    $('#message .notice-dismiss').unbind().click(function () {
-      $(this).parentNode.remove()
+    $('.notice-dismiss').unbind().click(function () {
+      $(this).parent().remove()
     })
   }
 }

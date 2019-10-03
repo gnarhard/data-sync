@@ -27,8 +27,8 @@ function add_excluded_sites_select_field( $post ) {
 	$value = get_post_meta( $post->ID, '_excluded_sites' );
 
 	if ( ! empty( $value ) ) {
-		$value = (int) $value[0];
-		if ( 0 === $value ) {
+		$value = $value[0];
+		if ( 0 == $value ) {
 			$value = [ 0 ];
         }
 	} else {

@@ -10,11 +10,10 @@ class SyndicatedTemplates {
   push_templates (e) {
 
     e.preventDefault()
-    let self = this;
 
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
       Success.show_success_message( result, 'Templates' );
-      self.refresh_view();
+      new SyndicatedTemplates();
     })
 
   }
@@ -41,6 +40,7 @@ class SyndicatedTemplates {
     if (document.getElementById('templates_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/templates' ).then(function( result) {
         Success.display_html( result, 'templates', 'Templates' )
+        document.querySelector('#templates_wrap').classList.remove('hidden');
         self.init();
       });
     }

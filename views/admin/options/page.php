@@ -12,7 +12,6 @@ function data_sync_options_page() {
 	require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
 
 	?>
-    <div id="message"></div>
     <div class="wrap">
         <h2>DATA SYNC</h2>
         <div id="data_sync_tabs" class="hidden">
