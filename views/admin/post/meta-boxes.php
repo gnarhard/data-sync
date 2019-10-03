@@ -26,8 +26,11 @@ function add_excluded_sites_select_field( $post ) {
 	wp_nonce_field( 'data_sync_post_meta_box', 'data_sync_post_meta_box_nonce' );
 	$value = get_post_meta( $post->ID, '_excluded_sites' );
 
-	if ( count( $value ) ) {
-		$value = $value[0];
+	if ( ! empty( $value ) ) {
+		$value = (int) $value[0];
+		if ( 0 === $value ) {
+			$value = [ 0 ];
+        }
 	} else {
 		// DEFAULT TO NONE.
 		$value = [ 0 ];

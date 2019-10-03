@@ -286,7 +286,7 @@ class SourceData {
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+		return wp_remote_retrieve_body( $response );
 	}
 
 
@@ -397,10 +397,17 @@ class SourceData {
 
 				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
 				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
-				$permalink         = get_permalink( $post->ID );
-				$canonical_link    = str_replace( get_site_url(), $connected_site->url, $permalink );
 
-				$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+				if ( ! empty( $connected_site ) ) {
+					$permalink         = get_permalink( $post->ID );
+					$canonical_link    = str_replace( get_site_url(), $connected_site->url, $permalink );
+
+					$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+				} else {
+					$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
+					unset( $log );
+				}
+
 			}
 
 		}

@@ -165,6 +165,10 @@
   color: red;
 }
 
+#syndicated_posts #bulk_data_push {
+  margin-top: 40px;
+}
+
 #syndicated_posts table {
   width: 100%;
   margin-bottom: 60px;

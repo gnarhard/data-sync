@@ -13,7 +13,6 @@ class Success {
     document.getElementById(selector + '_wrap').innerHTML = html
     document.querySelector('#' + selector + ' .loading_spinner').classList.add('hidden')
 
-    console.log(result.success)
     if (typeof result.success !== 'undefined') {
       Success.show_success_message(result, topic)
     }

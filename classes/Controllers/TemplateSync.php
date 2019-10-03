@@ -62,9 +62,10 @@ class TemplateSync {
 			foreach ( $connected_sites as $connected_site ) {
 
 				$source_data                     = new stdClass();
+				$source_data->media              = new stdClass();
 				$source_data->filename           = $file;
 				$source_data->file_contents      = file_get_contents( $template_dir . '/' . $file );
-				$source_data->source_upload_path = DATA_SYNC_PATH . 'templates/';
+				$source_data->source_upload_path = $template_dir;
 				$source_data->source_upload_url  = DATA_SYNC_URL . 'templates/';
 				$source_data->media->guid        = DATA_SYNC_URL . 'templates/' . $file;
 				$source_data->receiver_site_id   = (int) $connected_site->id;

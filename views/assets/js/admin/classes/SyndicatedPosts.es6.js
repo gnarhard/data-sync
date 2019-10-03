@@ -1,5 +1,6 @@
 import AJAX from '../../AJAX.es6.js'
 import Success from './Success.es6';
+import EnabledPostTypes from './EnabledPostTypes.es6'
 
 class SyndicatedPosts {
 
@@ -9,6 +10,7 @@ class SyndicatedPosts {
 
   init() {
     $=jQuery;
+    let self = this;
 
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
@@ -17,7 +19,7 @@ class SyndicatedPosts {
 
     if (document.getElementById('bulk_data_push')) {
       document.getElementById('bulk_data_push').onclick = function (e) {
-        this.bulk_push(e);
+        self.bulk_push(e);
       }
     }
 
@@ -37,13 +39,16 @@ class SyndicatedPosts {
 
   bulk_push(e) {
     e.preventDefault()
+    let self = this;
 
     document.getElementById('wp_data_sync_status').remove(); // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
 
     AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( response ) {
       console.log( response );
-      this.refresh_view();
+      self.refresh_view();
+      Success.show_success_message( result, 'Syndicated Posts');
+      new EnabledPostTypes();
     })
   }
 
@@ -53,7 +58,6 @@ class SyndicatedPosts {
       $('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function () {
 
         // CHANGE ICON TO SPINNING UPDATE ICON
-        $(this).parent()[0].innerHTML = '<i class="dashicons dashicons-update"></i>'
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
@@ -64,14 +68,6 @@ class SyndicatedPosts {
       $('.push_post_now').unbind().click(function (e) {
 
         e.preventDefault();
-        console.log('here');
-        // CHANGE ICON TO SPINNING UPDATE ICON
-        let row = $(this).parent().parent().parent()[0];
-
-        // TODO: THIS WON'T WORK -- START
-        // let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
-        // status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
-        // TODO: THIS WON'T WORK -- END
 
         let source_post_id = $(this).data('source-post-id')
 
@@ -82,11 +78,6 @@ class SyndicatedPosts {
       $('.overwrite_single_receiver').unbind().click(function (e) {
 
         e.preventDefault();
-
-        // CHANGE ICON TO SPINNING UPDATE ICON
-        let row = $(this).parent().parent().parent()[0];
-        // let status_column = row.getElementsByClassName('wp_data_synced_post_status_icons')[0]
-        // status_column.innerHTML = '<i class="dashicons dashicons-update"></i>'
 
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
@@ -100,20 +91,26 @@ class SyndicatedPosts {
   }
 
   push_single_post_to_all_receivers( source_post_id ) {
+    let self = this;
     AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
       console.log(result)
       if (result) {
-        this.show_success( result );
+        self.refresh_view();
+        Success.show_success_message( result, 'Syndicated Posts');
+        new EnabledPostTypes();
       }
 
     })
   }
 
   push_single_post_to_single_receiver( receiver_site_id, source_post_id ) {
+    let self = this;
     AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
       console.log(result)
       if (result) {
-        this.show_success( result );
+        self.refresh_view();
+        Success.show_success_message( result, 'Syndicated Posts');
+        new EnabledPostTypes();
       }
 
     })

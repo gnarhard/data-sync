@@ -326,8 +326,6 @@ class Posts {
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified_gmt );
 
-					$receiver_reference_post = null;
-
 					$receiver_post = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
 
 					$receiver_modified_time = strtotime( $receiver_post->post_modified_gmt );

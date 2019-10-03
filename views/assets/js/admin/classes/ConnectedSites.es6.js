@@ -1,5 +1,7 @@
 import AJAX from '../../AJAX.es6.js';
 import Success from './Success.es6';
+import SyndicatedPosts from './SyndicatedPosts.es6'
+import EnabledPostTypes from './EnabledPostTypes.es6'
 
 class ConnectedSites {
 
@@ -24,12 +26,22 @@ class ConnectedSites {
 
 
     static delete( site_id ) {
-        AJAX.delete( DataSync.api.url + '/connected_sites/' + site_id ).then(   function( response ) {
-            if ( response.success ) {
-                document.getElementById('site-'+site_id).remove();
-                Success.show_success_message( response, 'Connected sites')
-            }
-        });
+
+        confirmed = window.confirm( 'Are you sure you want to delete this connected site?');
+
+        if ( confirmed ) {
+            document.getElementById('site-'+site_id).remove();
+
+            AJAX.delete( DataSync.api.url + '/connected_sites/' + site_id ).then(   function( response ) {
+                if ( response.success ) {
+                    Success.show_success_message( response, 'Connected sites')
+
+                    new SyndicatedPosts();
+                    new EnabledPostTypes();
+                }
+            });
+        }
+
     }
 
     init() {

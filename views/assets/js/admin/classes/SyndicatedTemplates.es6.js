@@ -11,20 +11,21 @@ class SyndicatedTemplates {
 
     e.preventDefault()
 
-    document.getElementById('status_wrap').innerHTML += 'Pushing template <i class="dashicons dashicons-update"></i>'
-
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
-      console.log(result)
-      document.getElementById('template_push').innerHTML += 'Template pushed successfully <i class="dashicons yes"></i>'
+      Success.show_success_message( result, 'Templates' );
     })
 
   }
 
   init () {
+    let self = this;
     // PUSH TEMPLATES BUTTON PUSH
     if (document.getElementById('template_push')) {
       document.getElementById('template_push').onclick = function (e) {
-        this.push_templates(e)
+
+        document.querySelector('#templates_wrap').classList.add('hidden');
+        document.querySelector('#templates .loading_spinner').classList.remove('hidden');
+        self.push_templates(e)
       }
     }
 
