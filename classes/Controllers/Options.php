@@ -162,8 +162,8 @@ class Options {
 		$settings_content = new stdClass();
 
 		if ( 'syndicated_posts' === $settings_tab ) {
-			require_once DATA_SYNC_PATH . 'views/admin/options/status-dashboard.php';
-			\DataSync\display_syndicated_posts();
+			require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+			\DataSync\display_syndicated_posts_table();
 		} elseif ( 'connected_sites' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
 			\DataSync\display_connected_sites();
@@ -327,25 +327,15 @@ class Options {
 
 		if ( '1' === $source ) :
 
-//			add_settings_field( 'connected_sites', 'Connected Sites', $this->view_namespace . '\display_connected_sites', 'data-sync-options', 'data_sync_options' );
-
 			add_settings_field( 'enable_new_cpts', 'Automatically Enable New Custom Post Types On Receiver', $this->view_namespace . '\display_auto_add_cpt_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'enable_new_cpts' );
-
-//			add_settings_field( 'overwrite_yoast', 'Overwrite Receiver Yoast Settings', $this->view_namespace . '\display_overwrite_yoast_checkbox', 'data-sync-options', 'data_sync_options' );
-//			register_setting( 'data_sync_options', 'overwrite_yoast' );
 
 			add_settings_field( 'overwrite_receiver_post_on_conflict', 'Overwrite Receiver Post if Receiver Post Was More Recently Edited', $this->view_namespace . '\display_overwrite_receiver_post_checkbox', 'data-sync-options', 'data_sync_options' );
 			register_setting( 'data_sync_options', 'overwrite_receiver_post_on_conflict' );
 
-//			add_settings_field( 'push_enabled_post_types', 'Push-Enabled Post Types', $this->view_namespace . '\display_push_enabled_post_types', 'data-sync-options', 'data_sync_options' );
-//			register_setting( 'data_sync_options', 'push_enabled_post_types' );
-
 			add_settings_field( 'debug', 'Debug', $this->view_namespace . '\display_debug_checkbox', 'data-sync-options', 'data_sync_options' );
 
 			if ( '1' === get_option( 'debug' ) ) :
-				add_settings_field( 'show_body_responses', 'Print AJAX Body Responses', $this->view_namespace . '\display_show_body_responses_checkbox', 'data-sync-options', 'data_sync_options' );
-				register_setting( 'data_sync_options', 'show_body_responses' );
 
 				add_settings_field( 'start_fresh', 'Start Fresh', $this->view_namespace . '\display_start_fresh_link', 'data-sync-options', 'data_sync_options' );
 			endif;

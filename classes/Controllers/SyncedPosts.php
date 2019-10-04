@@ -72,7 +72,7 @@ class SyncedPosts {
 			if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) get_option( 'data_sync_receiver_site_id' ) === (int) $synced_post->receiver_site_id ) ) {
 				$synced_modified_timestamp   = strtotime( $synced_post->date_modified );
 				$receiver_post               = get_post( $synced_post->receiver_post_id );
-				$receiver_modified_timestamp = get_post_modified_time( 'U', false, $receiver_post, false );
+				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $receiver_post, false );
 
 				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS.
 				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
@@ -264,7 +264,13 @@ class SyncedPosts {
 					$auth                          = new Auth();
 					$json                          = $auth->prepare( $source_data, $site->secret_key );
 					$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_receiver_post/';
-					$response                      = wp_remote_post( $url, [ 'body' => $json ] );
+					$response = wp_remote_post( $url, [
+						'body' => $json,
+						'httpversion' => '1.0',
+						'sslverify' => false,
+						'timeout' => 10,
+						'blocking' => true,
+					] );
 
 					if ( is_wp_error( $response ) ) {
 						$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
@@ -303,7 +309,13 @@ class SyncedPosts {
 				$auth                            = new Auth();
 				$json                            = $auth->prepare( $receiver_data, get_option( 'secret_key' ) );
 				$url                             = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_synced_post/';
-				$response                        = wp_remote_post( $url, [ 'body' => $json ] );
+				$response = wp_remote_post( $url, [
+					'body' => $json,
+					'httpversion' => '1.0',
+					'sslverify' => false,
+					'timeout' => 10,
+					'blocking' => true,
+				] );
 
 				if ( is_wp_error( $response ) ) {
 					$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );

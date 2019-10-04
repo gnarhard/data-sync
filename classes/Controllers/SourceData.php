@@ -143,11 +143,18 @@ class SourceData {
 		$auth     = new Auth();
 		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
 		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-		$response = wp_remote_post( $url, [ 'body' => $json ] );
+		$response = wp_remote_post( $url, [
+			'body' => $json,
+			'httpversion' => '1.0',
+			'sslverify' => false,
+			'timeout' => 10,
+			'blocking' => true,
+			] );
 
 		if ( is_wp_error( $response ) ) {
 			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
+
 			return $response;
 		}
 
@@ -167,11 +174,18 @@ class SourceData {
 			$auth                                = new Auth();
 			$json                                = $auth->prepare( $this->source_data, $site->secret_key );
 			$url                                 = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$response                            = wp_remote_post( $url, [ 'body' => $json ] );
+			$response = wp_remote_post( $url, [
+				'body' => $json,
+				'httpversion' => '1.0',
+				'sslverify' => false,
+				'timeout' => 10,
+				'blocking' => true,
+			] );
 
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			}
 
@@ -209,11 +223,16 @@ class SourceData {
 
 			$response = wp_remote_post( $post_data->url, [
 				'body' => $post_data->json,
+				'httpversion' => '1.0',
+				'sslverify' => false,
+				'timeout' => 10,
+				'blocking' => true,
 			] );
 
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			}
 
@@ -266,6 +285,7 @@ class SourceData {
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			}
 
