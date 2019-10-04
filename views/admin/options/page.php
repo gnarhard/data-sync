@@ -8,9 +8,6 @@ use DataSync\Controllers\TemplateSync;
  */
 function data_sync_options_page() {
 
-	require_once DATA_SYNC_PATH . 'views/admin/options/status-dashboard.php';
-	require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
-
 	?>
     <div class="wrap">
         <h2>DATA SYNC</h2>

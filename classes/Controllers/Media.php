@@ -98,7 +98,13 @@ class Media {
 				$auth                   = new Auth();
 				$json                   = $auth->prepare( $data, $site->secret_key );
 				$url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/media/update';
-				$response               = wp_remote_post( $url, [ 'body' => $json ] );
+				$response = wp_remote_post( $url, [
+					'body' => $json,
+					'httpversion' => '1.0',
+					'sslverify' => false,
+					'timeout' => 10,
+					'blocking' => true,
+				] );
 
 				if ( is_wp_error( $response ) ) {
 					$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
