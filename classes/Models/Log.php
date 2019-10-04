@@ -71,7 +71,7 @@ class Log {
 			'id'         => $data->id,
 			'log_entry'  => $data->log_entry,
 			'url_source' => Helpers::format_url( $data->url_source ),
-			'datetime'   => current_time( 'mysql' ),
+			'datetime'   => current_time( 'mysql', 1 ),
 		);
 
 		$where = [ 'id' => $data->id ];

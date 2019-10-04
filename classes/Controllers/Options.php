@@ -94,16 +94,12 @@ class Options {
 			}
 		}
 
-		$options->enable_new_cpts = (bool) get_option( 'enable_new_cpts' );
-//		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
+		$options->enable_new_cpts                     = (bool) get_option( 'enable_new_cpts' );
 		$options->overwrite_receiver_post_on_conflict = (bool) get_option( 'overwrite_receiver_post_on_conflict' );
 		$options->debug                               = (bool) get_option( 'debug' );
 		$options->show_body_responses                 = (bool) get_option( 'show_body_response' );
 
-		$response = new WP_REST_Response( $options );
-		$response->set_status( 201 );
-
-		return $response;
+		return $options;
 
 	}
 
@@ -113,17 +109,6 @@ class Options {
 			'enabled_post_types',
 		);
 
-		$enabled_post_types = get_option( 'enabled_post_types' );
-		// FOR PERMISSIONS
-//		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-//			if ( count( $enabled_post_types ) > 0 ) {
-//				foreach ( $enabled_post_types as $post_type ) {
-//					$post_type_object = get_post_type_object( $post_type );
-//					$option_keys[]    = $post_type_object->name . '_perms';
-//				}
-//			}
-//		}
-
 		return Options::get_all( $option_keys );
 	}
 
@@ -131,20 +116,10 @@ class Options {
 		$options = new stdClass();
 
 		foreach ( $option_keys as $key ) {
-			$request = new WP_REST_Request();
-			$request->set_method( 'GET' );
-			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/options/' . $key );
-			$request->set_url_params( array( self::$option_key => $key ) );
-			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
-
-			$response      = rest_do_request( $request );
-			$options->$key = $response->get_data();
+			$options->$key = get_option( $key );
 		}
 
-		$response = new WP_REST_Response( $options );
-		$response->set_status( 201 );
-
-		return $response;
+		return $options;
 	}
 
 	/**
@@ -195,9 +170,6 @@ class Options {
 		} elseif ( 'enabled_post_types' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
 			\DataSync\display_enabled_post_types();
-		} elseif ( 'syndicated_posts_table' === $settings_tab ) {
-			require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
-			\DataSync\display_syndicated_posts_table();
 		} elseif ( 'templates' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
 			\DataSync\display_synced_templates();
@@ -213,7 +185,7 @@ class Options {
 		$topic   = $params['topic'];
 
 		if ( $success ) {
-			$output .= '<div class="updated notice-success is-dismissible">';
+			$output .= '<div class="notice updated notice-success is-dismissible">';
 
 			if ( 'Enabled post types' === $topic ) {
 				$output .= '<p>' . $topic . ' saved successfully.</p>';
@@ -252,7 +224,7 @@ class Options {
 
 		$output .= '</div>';
 
-		wp_send_json_success($output);
+		wp_send_json_success( $output );
 
 	}
 
@@ -392,20 +364,6 @@ class Options {
 				'data-sync-options',
 				'data_sync_options'
 			);
-
-//			 TODO: Which user permission out of all permissions can edit content
-//
-//			$enabled_post_types = get_option( 'enabled_post_types' );
-//			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-//				if ( count( $enabled_post_types ) ) {
-//					foreach ( $enabled_post_types as $post_type ) {
-//						$post_type_object = get_post_type_object( $post_type );
-//
-//						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
-//						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
-//					}
-//				}
-//			}
 
 		endif;
 	}

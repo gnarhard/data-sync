@@ -9,8 +9,7 @@
   -ms-user-select: none;
   /* Internet Explorer/Edge */
   user-select: none;
-  /* Non-prefixed version, currently
-             supported by Chrome, Opera and Firefox */
+  /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
 }
 
 .settings_page_data-sync-options #feedback .error {
@@ -155,7 +154,7 @@
 }
 
 #syndicated_posts .warning {
-  color: orange;
+  color: #ff5400;
 }
 
 #syndicated_posts .danger_button {
@@ -180,8 +179,9 @@
   color: red;
 }
 
-#syndicated_posts #bulk_data_push {
-  margin-top: 20px;
+#syndicated_posts #bulk_data_push,
+#syndicated_posts #refresh_syndicated_posts {
+  margin: 20px;
 }
 
 #syndicated_posts table {

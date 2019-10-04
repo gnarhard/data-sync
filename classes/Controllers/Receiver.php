@@ -7,6 +7,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Email;
 use DataSync\Helpers;
 use DataSync\Models\SyncedPost;
+use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_REST_Response;
@@ -131,7 +132,7 @@ class Receiver {
 	 */
 	public static function get_receiver_plugin_versions() {
 
-		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites = (array) ConnectedSite::get_all();
 
 		$plugin_versions = array();
 
@@ -198,7 +199,7 @@ class Receiver {
 	private function process( object $source_data ) {
 
 		// GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
-		$receiver_options = (object) Options::receiver()->get_data();
+		$receiver_options = (object) Options::receiver();
 
 		// UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
 		$this->update_wp_options( $source_data );

@@ -5,12 +5,11 @@ import EnabledPostTypes from './EnabledPostTypes.es6'
 class SyndicatedPosts {
 
   constructor() {
-    this.refresh_view();
+    SyndicatedPosts.refresh_view();
   }
 
-  init() {
+  static init() {
     $=jQuery;
-    let self = this;
 
     $('.expand_post_details').unbind().click( function() {
       let id = $(this).data('id');
@@ -19,39 +18,46 @@ class SyndicatedPosts {
 
     if (document.getElementById('bulk_data_push')) {
       document.getElementById('bulk_data_push').onclick = function (e) {
-        self.bulk_push(e);
+        SyndicatedPosts.bulk_push(e);
+      }
+    }
+
+    if (document.getElementById('refresh_syndicated_posts')) {
+      document.getElementById('refresh_syndicated_posts').onclick = function (e) {
+        document.getElementById('syndicated_posts_wrap').remove(); // REMOVE TABLE FOR LOADING.
+        document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
+        SyndicatedPosts.refresh_view();
       }
     }
 
 
   }
 
-  refresh_view() {
-    let self = this;
+  static refresh_view() {
+
     if (document.getElementById('syndicated_posts_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/syndicated_posts' ).then(function( result) {
         Success.display_html( result, 'syndicated_posts', 'Syndicated posts' );
-        self.init();
-        self.single_post_actions_init()
+        SyndicatedPosts.init();
+        SyndicatedPosts.single_post_actions_init()
       });
     }
   }
 
-  bulk_push(e) {
+  static bulk_push(e) {
     e.preventDefault()
 
     document.getElementById('syndicated_posts_wrap').remove(); // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
 
-    AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( response ) {
-      new SyndicatedPosts();
+    AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function ( result ) {
+      SyndicatedPosts.refresh_view();
       Success.show_success_message( result, 'Posts');
       new EnabledPostTypes();
     })
   }
 
-  single_post_actions_init() {
-    let self = this;
+  static single_post_actions_init() {
     jQuery(function ($) {
       $('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function () {
 
@@ -59,7 +65,7 @@ class SyndicatedPosts {
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        self.push_single_post_to_all_receivers( receiver_site_id, source_post_id )
+        SyndicatedPosts.push_single_post_to_all_receivers( receiver_site_id, source_post_id )
 
       })
 
@@ -69,7 +75,7 @@ class SyndicatedPosts {
 
         let source_post_id = $(this).data('source-post-id')
 
-        self.push_single_post_to_all_receivers( source_post_id );
+        SyndicatedPosts.push_single_post_to_all_receivers( source_post_id );
 
       })
 
@@ -80,7 +86,7 @@ class SyndicatedPosts {
         let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        self.push_single_post_to_single_receiver( receiver_site_id, source_post_id );
+        SyndicatedPosts.push_single_post_to_single_receiver( receiver_site_id, source_post_id );
 
       })
 
@@ -88,23 +94,23 @@ class SyndicatedPosts {
 
   }
 
-  push_single_post_to_all_receivers( source_post_id ) {
+  static push_single_post_to_all_receivers( source_post_id ) {
     document.getElementById('syndicated_posts_wrap').remove(); // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
 
     AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
-        new SyndicatedPosts();
+      SyndicatedPosts.refresh_view();
         Success.show_success_message( result, 'Post');
         new EnabledPostTypes();
     })
   }
 
-  push_single_post_to_single_receiver( receiver_site_id, source_post_id ) {
+  static push_single_post_to_single_receiver( receiver_site_id, source_post_id ) {
     document.getElementById('syndicated_posts_wrap').remove(); // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden'); // SHOW LOADING SPINNER.
 
     AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
-        new SyndicatedPosts();
+      SyndicatedPosts.refresh_view();
         Success.show_success_message( result, 'Post');
         new EnabledPostTypes();
     })

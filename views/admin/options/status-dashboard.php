@@ -21,9 +21,8 @@ function display_syndicated_posts() {
                     id="bulk_data_push"
                     href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
 		} else {
-			?>
-            <button id="bulk_data_push" class="button button-primary"
-                    href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+			?><button id="bulk_data_push" class="button button-primary" href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+			?><button id="refresh_syndicated_posts" class="button button-secondary"><?php _e( 'Refresh', 'data_sync' ); ?></button><?php
 		}
 		?>
 

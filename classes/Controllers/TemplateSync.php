@@ -7,6 +7,7 @@ use DataSync\Controllers\File;
 use WP_REST_Server;
 use stdClass;
 use DataSync\Controllers\Logs;
+use DataSync\Models\ConnectedSite;
 
 class TemplateSync {
 
@@ -52,7 +53,7 @@ class TemplateSync {
 
 		$template_dir    = DATA_SYNC_PATH . 'templates';
 		$files           = self::get_template_files();
-		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites = (array) ConnectedSite::get_all();
 
 		foreach ( $files as $file ) {
 			if ( ( '.' === $file ) || ( '..' === $file ) || ( 'index.php' === $file ) ) {
@@ -69,7 +70,7 @@ class TemplateSync {
 				$source_data->source_upload_url  = DATA_SYNC_URL . 'templates/';
 				$source_data->media->guid        = DATA_SYNC_URL . 'templates/' . $file;
 				$source_data->receiver_site_id   = (int) $connected_site->id;
-				$source_data->start_time         = (string) current_time( 'mysql' );
+				$source_data->start_time         = (string) current_time( 'mysql', 1 );
 
 				$this->push( $connected_site, $source_data );
 			}

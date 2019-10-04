@@ -10,6 +10,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use stdClass;
 use DataSync\Models\DB;
+use DataSync\Models\ConnectedSite;
 
 class SyncedPosts {
 
@@ -102,7 +103,7 @@ class SyncedPosts {
 
 	public static function retrieve_from_receiver( $data_sync_start_time ) {
 
-		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites = (array) ConnectedSite::get_all();
 		$all_data        = array();
 
 		foreach ( $connected_sites as $site ) {
@@ -182,11 +183,6 @@ class SyncedPosts {
 			echo $response->get_error_message();
 			$log = new Logs( 'Failed to get synced posts.', true );
 			unset( $log );
-		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				echo 'SyncedPosts';
-				print_r( $response->data );
-			}
 		}
 
 		return $response;
@@ -214,19 +210,6 @@ class SyncedPosts {
 		$data->date_modified    = current_time( 'mysql', 1 );
 
 		return self::save( $data );
-	}
-
-	public function save_to_sync_table( WP_REST_Request $request ) {
-
-		// SOURCE SIDE.
-		$data = (object) json_decode( file_get_contents( 'php://input' ) );
-		self::save( $data );
-
-		$response = new WP_REST_Response( $data );
-		$response->set_status( 201 );
-
-		return $response;
-
 	}
 
 	public static function save( $data ) {
@@ -261,7 +244,7 @@ class SyncedPosts {
 
 			$source_data                 = new stdClass();
 			$source_data->source_post_id = $post_id;
-			$connected_sites             = (array) ConnectedSites::get_all()->get_data();
+			$connected_sites             = (array) ConnectedSite::get_all();
 
 			$post = get_post( $post_id );
 

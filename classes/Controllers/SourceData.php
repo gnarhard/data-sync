@@ -249,7 +249,7 @@ class SourceData {
 
 		global $wpdb;
 		$db               = new DB();
-		$connected_sites  = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites  = (array) ConnectedSite::get_all();
 		$sql_statements   = array();
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
@@ -306,7 +306,7 @@ class SourceData {
 	private function consolidate() {
 
 		$synced_posts = new SyncedPosts();
-		$options      = Options::source()->get_data();
+		$options      = Options::source();
 		$upload_dir   = wp_get_upload_dir();
 
 		$this->source_data                    = new stdClass();
@@ -318,7 +318,7 @@ class SourceData {
 		$this->source_data->acf               = (array) ACFs::get_acf_fields();
 		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$this->source_data->url               = (string) get_site_url();
-		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
+		$this->source_data->connected_sites   = (array) ConnectedSite::get_all();
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$this->source_data->posts             = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
@@ -339,6 +339,7 @@ class SourceData {
 
 				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
 				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
+
 
 				if ( ! empty( $connected_site ) ) {
 					$permalink      = get_permalink( $post->ID );

@@ -426,11 +426,6 @@ class Posts {
 				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
 			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'Post';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
-
 				$receiver_posts[ $index ]          = new stdClass();
 				$receiver_posts[ $index ]->site_id = (int) $site->id;
 				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
@@ -453,12 +448,8 @@ class Posts {
 			echo $response->get_error_message();
 			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 			unset( $log );
+			return $response;
 		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				echo 'Post';
-				print_r( wp_remote_retrieve_body( $response ) );
-			}
-
 			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
 		}
 	}

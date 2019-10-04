@@ -7,6 +7,7 @@ use DataSync\Controllers\File;
 use DataSync\Models\DB;
 use DataSync\Models\SyncedPost;
 use WP_REST_Server;
+use DataSync\Models\ConnectedSite;
 
 /**
  * Class Media
@@ -25,7 +26,7 @@ class Media {
 			add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		} else {
 
-			$connected_sites = (array) ConnectedSites::get_all()->get_data();
+			$connected_sites = (array) ConnectedSite::get_all();
 			$synced_posts    = new SyncedPosts();
 			$synced_posts    = (array) $synced_posts->get_all()->get_data();
 
@@ -103,13 +104,6 @@ class Media {
 					echo $response->get_error_message();
 					$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 					unset( $log );
-				} else {
-					if ( get_option( 'show_body_responses' ) ) {
-						if ( get_option( 'show_body_responses' ) ) {
-							echo 'Media';
-							print_r( wp_remote_retrieve_body( $response ) );
-						}
-					}
 				}
 			}
 
@@ -132,10 +126,9 @@ class Media {
 		/**
 		 *
 		 */
-		public
-		function update() {
+		public function update() {
 			$source_data      = (object) json_decode( file_get_contents( 'php://input' ) );
-			$receiver_options = (object) Options::receiver()->get_data();
+			$receiver_options = (object) Options::receiver();
 
 			// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
 			if ( in_array( $source_data->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {

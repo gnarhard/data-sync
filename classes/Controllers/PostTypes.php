@@ -68,7 +68,7 @@ class PostTypes {
 	}
 
 	public function check_enabled_post_types() {
-		return Options::receiver()->get_data()->enabled_post_types;
+		return Options::receiver()->enabled_post_types;
 	}
 
 	/**

@@ -16,16 +16,19 @@ class Load {
 
 		document.addEventListener( "DOMContentLoaded", function () {
 			$=jQuery;
-			$('#data_sync_tabs').tabs();
+			if ( document.getElementById('data_sync_tabs') ) {
+				$('#data_sync_tabs').tabs();
 
-			document.querySelector('#data_sync_tabs').classList.remove('hidden');
+				document.querySelector('#data_sync_tabs').classList.remove('hidden');
 
-			new SyndicatedPosts();
-			new SyndicatedTemplates();
-			new ConnectedSites();
-			new EnabledPostTypes();
-			new Logs();
-			new Settings();
+				new SyndicatedPosts();
+				new SyndicatedTemplates();
+				new ConnectedSites();
+				new EnabledPostTypes();
+				new Logs();
+				new Settings();
+			}
+
 		})
 
 	}

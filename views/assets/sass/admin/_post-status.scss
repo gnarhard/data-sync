@@ -1,6 +1,6 @@
 #syndicated_posts {
   .warning {
-    color: orange;
+    color: #ff5400;
   }
 
   .danger_button {
@@ -25,8 +25,8 @@
     color: red;
   }
 
-  #bulk_data_push {
-    margin-top: 20px;
+  #bulk_data_push, #refresh_syndicated_posts {
+    margin: 20px;
   }
 
   table {

@@ -24,7 +24,7 @@ class ConnectedSites {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_all' ),
+					'callback'            => array( 'DataSync\Models\ConnectedSite', 'get_all' ),
 					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
 				),
 				array(
@@ -73,16 +73,6 @@ class ConnectedSites {
 		$connected_site_data = ConnectedSite::get( $connected_site_id );
 
 		return $connected_site_data[0];
-	}
-
-	public static function get_all() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . ConnectedSite::$table_name;
-		$result     = $wpdb->get_results( 'SELECT * FROM ' . $table_name );
-		$response   = new WP_REST_Response( $result );
-		$response->set_status( 201 );
-
-		return $response;
 	}
 
 	public function save( WP_REST_Request $request ) {
