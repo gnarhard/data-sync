@@ -11,8 +11,7 @@ class AJAX {
       },
       body: JSON.stringify(data)
     })
-    let result = await response.json()
-    // jQuery( '#feedback' ).html( '<p>' + DataSync.strings.saved + '</p>' );
+    return await response.json()
   }
 
   static async get (url) {

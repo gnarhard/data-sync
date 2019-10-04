@@ -1,8 +1,8 @@
 <?php namespace DataSync;
 
 use DataSync\Controllers\Auth;
-use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Receiver;
+use DataSync\Models\ConnectedSite;
 use WP_User_Query;
 use DataSync\Controllers\Logs;
 
@@ -76,8 +76,7 @@ function display_secret_key() {
  *
  */
 function display_connected_sites() {
-	$connected_sites_obj = new ConnectedSites();
-	$connected_sites     = $connected_sites_obj->get_all()->data;
+	$connected_sites     = (array) ConnectedSite::get_all();
 	?>
   <table id="connected_sites">
     <thead>
@@ -123,7 +122,6 @@ function display_connected_sites() {
  *
  */
 function display_connected_sites_modal() {
-	// TODO: Improve modal design
 	?>
   <div class="lightbox_wrap">
     <div class="add_site_modal">

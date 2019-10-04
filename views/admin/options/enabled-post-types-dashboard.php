@@ -2,6 +2,7 @@
 
 use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\PostTypes;
+use DataSync\Models\ConnectedSite;
 
 /**
  * Dashboard widget that displays which post types are enabled to be synced
@@ -22,8 +23,7 @@ function display_enabled_post_types() {
 
 function display_connected_sites_enabled_post_types() {
 
-	$connected_sites_obj         = new ConnectedSites();
-	$connected_sites             = $connected_sites_obj->get_all()->data;
+	$connected_sites             = (array) ConnectedSite::get_all();
 
 	foreach ( $connected_sites as $index => $site ) {
 

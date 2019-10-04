@@ -147,16 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  if (document.getElementById('template_push')) {
-    document.getElementById('template_push').onclick = function (e) {
-      document.getElementById('status_wrap').innerHTML += 'Pushing template <i class="dashicons dashicons-update"></i>'
-      e.preventDefault()
-      AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
-        console.log(result)
-        document.getElementById('template_push').innerHTML += 'Template pushed successfully <i class="dashicons yes"></i>'
-      })
-    }
-  }
+  
 
 })
 

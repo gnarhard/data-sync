@@ -7,6 +7,7 @@ use DataSync\Controllers\File;
 use WP_REST_Server;
 use stdClass;
 use DataSync\Controllers\Logs;
+use DataSync\Models\ConnectedSite;
 
 class TemplateSync {
 
@@ -40,35 +41,43 @@ class TemplateSync {
 		);
 	}
 
+
+	public static function get_template_files() {
+		$template_dir = DATA_SYNC_PATH . '/templates';
+
+		return scandir( $template_dir );
+	}
+
+
 	public function initiate() {
 
-		$template_dir = DATA_SYNC_PATH . '/templates';
-		$files        = scandir( $template_dir );
-		$upload_dir   = wp_get_upload_dir();
-
-		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$template_dir    = DATA_SYNC_PATH . 'templates';
+		$files           = self::get_template_files();
+		$connected_sites = (array) ConnectedSite::get_all();
 
 		foreach ( $files as $file ) {
-			if ( '.' === $file ) {
-				continue;
-			} elseif ( '..' === $file ) {
+			if ( ( '.' === $file ) || ( '..' === $file ) || ( 'index.php' === $file ) ) {
 				continue;
 			}
 
 			foreach ( $connected_sites as $connected_site ) {
 
 				$source_data                     = new stdClass();
+				$source_data->media              = new stdClass();
 				$source_data->filename           = $file;
 				$source_data->file_contents      = file_get_contents( $template_dir . '/' . $file );
-				$source_data->source_upload_path = DATA_SYNC_PATH . 'templates/';
+				$source_data->source_upload_path = $template_dir;
 				$source_data->source_upload_url  = DATA_SYNC_URL . 'templates/';
 				$source_data->media->guid        = DATA_SYNC_URL . 'templates/' . $file;
 				$source_data->receiver_site_id   = (int) $connected_site->id;
-				$source_data->start_time         = (string) current_time( 'mysql' );
+				$source_data->start_time         = (string) current_time( 'mysql', 1 );
 
 				$this->push( $connected_site, $source_data );
 			}
 		}
+
+		$receiver_logs = Logs::retrieve_receiver_logs( $source_data->start_time );
+		Logs::save_to_source( $receiver_logs );
 
 		wp_send_json_success();
 
@@ -81,13 +90,10 @@ class TemplateSync {
 		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/templates/sync';
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 
-		$receiver_logs = Logs::retrieve_receiver_logs( $source_data->start_time );
-		Logs::save_to_source( $receiver_logs );
-
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in TemplateSync->push() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
+			return $response;
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
 				if ( get_option( 'show_body_responses' ) ) {
@@ -113,12 +119,7 @@ class TemplateSync {
 	public function sync( $source_data ) {
 
 		$result = File::copy( $source_data, $source_data->file_contents );
-//TODO: FIX RETURN RESULT
-		if ( $result ) {
-			wp_send_json_success( $result );
-		} else {
-			wp_send_json_error( $result );
-		}
+		wp_send_json( $result );
 
 	}
 

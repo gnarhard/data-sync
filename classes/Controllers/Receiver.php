@@ -7,6 +7,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Email;
 use DataSync\Helpers;
 use DataSync\Models\SyncedPost;
+use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_REST_Response;
@@ -97,6 +98,7 @@ class Receiver {
 
 
 		$upload_dir = wp_upload_dir();
+		$template_dir    = DATA_SYNC_PATH . 'templates';
 
 		if ( is_multisite() ) {
 			$blog_ids        = get_sites();
@@ -105,10 +107,18 @@ class Receiver {
 			if ( $network_blog_id !== get_current_blog_id() ) {
 				File::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
 				mkdir( $upload_dir['basedir'], 0755);
+
+				// DELETE TEMPLATES
+				File::delete_media( $template_dir );
+				mkdir( $template_dir, 0755);
 			}
 		} else {
 			File::delete_media( $upload_dir['basedir'] );
 			mkdir( $upload_dir['basedir'], 0755);
+
+			// DELETE TEMPLATES
+			File::delete_media( $template_dir );
+			mkdir( $template_dir, 0755);
 		}
 
 
@@ -122,7 +132,7 @@ class Receiver {
 	 */
 	public static function get_receiver_plugin_versions() {
 
-		$connected_sites = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites = (array) ConnectedSite::get_all();
 
 		$plugin_versions = array();
 
@@ -132,16 +142,10 @@ class Receiver {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			} else {
-//				if ( get_option( 'show_body_responses' ) ) {
-//					if ( get_option( 'show_body_responses' ) ) {
-//						echo 'Receiver';
-//						var_dump( wp_remote_retrieve_body( $response ) );
-//					}
-//				}
 
 				$plugin_versions[] = [
 					'site_id'        => $site->id,
@@ -186,7 +190,7 @@ class Receiver {
 		$log = new Logs( 'SYNC COMPLETE.' );
 		unset( $log );
 
-		wp_send_json_success( 'Receiver parse complete.' );
+		wp_send_json( 'Receiver parse complete.' );
 	}
 
 	/**
@@ -194,43 +198,27 @@ class Receiver {
 	 */
 	private function process( object $source_data ) {
 
-		// STEP 1: GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
-		$receiver_options = (object) Options::receiver()->get_data();
+		// GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
+		$receiver_options = (object) Options::receiver();
 
-		// STEP 2: UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
-		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
-		update_option( 'data_sync_source_site_url', $source_data->url );
-		update_option( 'debug', $source_data->options->debug );
-		update_option( 'show_body_responses', $source_data->options->show_body_responses );
-		update_option( 'overwrite_receiver_post_on_conflict', (bool) $source_data->options->overwrite_receiver_post_on_conflict );
+		// UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
+		$this->update_wp_options( $source_data );
 
-		// STEP 3: ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT.
-		// IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
-		PostTypes::process( $source_data->options->push_enabled_post_types );
-		if ( true === $source_data->options->enable_new_cpts ) {
-			PostTypes::save_options();
-		}
-		$log = new Logs( 'Finished syncing post types.' );
-		unset( $log );
+		// ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT. IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
+		$this->update_post_types( $source_data );
 
-		// STEP 4: ADD AND SAVE ACF FIELDS
+		// ADD AND SAVE ACF FIELDS
 		ACFs::save_acf_fields( $source_data->acf );
 		$log = new Logs( 'Finished syncing ACF fields.' );
 		unset( $log );
 
-		// STEP 5: ADD AND SAVE ALL TAXONOMIES.
-		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
-			SyncedTaxonomies::save( $taxonomy );
-		}
-		$syncedTaxonomies = new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
-		$syncedTaxonomies->register();
-		$log = new Logs( 'Finished syncing custom taxonomies.' );
-		unset( $log );
+		// ADD AND SAVE ALL TAXONOMIES.
+		$this->update_taxonomies( $source_data );
 
 		// SAFEGUARD AGAINST SITES WITHOUT ANY ENABLED POST TYPES.
 		if ( 'string' !== gettype( $receiver_options->enabled_post_types ) ) {
 
-			// STEP 6: START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
+			// START PROCESSING ALL POSTS THAT ARE INCLUDED IN RECEIVER'S ENABLED POST TYPES.
 			foreach ( $receiver_options->enabled_post_types as $post_type_slug ) {
 
 				if ( ! isset( $source_data->posts->$post_type_slug ) ) {
@@ -244,22 +232,54 @@ class Receiver {
 					// LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
 					foreach ( $source_data->posts->$post_type_slug as $post ) {
 
-						// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
-						$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
+						$this->filter_and_sync( $source_data, $post );
 
-						if ( false !== $filtered_post ) {
-							$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
-
-							$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
-
-							$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
-							unset( $log );
-						}
 					}
 				}
 			}
 		}
 
+	}
+
+	private function update_wp_options( $source_data ) {
+		update_option( 'data_sync_receiver_site_id', (int) $source_data->receiver_site_id );
+		update_option( 'data_sync_source_site_url', $source_data->url );
+		update_option( 'debug', $source_data->options->debug );
+		update_option( 'show_body_responses', $source_data->options->show_body_responses );
+		update_option( 'overwrite_receiver_post_on_conflict', (bool) $source_data->options->overwrite_receiver_post_on_conflict );
+	}
+
+	private function update_post_types( $source_data ) {
+		PostTypes::process( $source_data->options->push_enabled_post_types );
+		if ( true === $source_data->options->enable_new_cpts ) {
+			PostTypes::save_options();
+		}
+		$log = new Logs( 'Finished syncing post types.' );
+		unset( $log );
+	}
+
+	private function update_taxonomies( $source_data ) {
+		foreach ( $source_data->custom_taxonomies as $taxonomy ) {
+			SyncedTaxonomies::save( $taxonomy );
+		}
+		$syncedTaxonomies = new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
+		$syncedTaxonomies->register();
+		$log = new Logs( 'Finished syncing custom taxonomies.' );
+		unset( $log );
+	}
+
+	private function filter_and_sync( $source_data, $post ) {
+		// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
+		$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
+
+		if ( false !== $filtered_post ) {
+			$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
+
+			$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+
+			$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
+			unset( $log );
+		}
 	}
 
 }

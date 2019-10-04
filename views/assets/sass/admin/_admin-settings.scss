@@ -1,5 +1,24 @@
 .settings_page_data-sync-options {
 
+  .noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+  }
+
+  #feedback {
+    .error {
+      color: #d9534f;
+    }
+
+    .success {
+      color: #5cb85c;
+    }
+  }
+
   table {
     width: 100%;
   }
@@ -11,11 +30,6 @@
   textarea, select {
     min-height: 300px;
     width: 400px;
-  }
-
-  .display {
-    display: block;
-    position: fixed;
   }
 
   .dashicons-update {

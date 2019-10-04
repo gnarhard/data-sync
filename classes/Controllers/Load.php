@@ -52,7 +52,7 @@ class Load {
 			$network_blog_id = (int) $blog_ids[0]->blog_id;
 
 			if ( $network_blog_id !== get_current_blog_id() ) {
-				$this->include();
+				$this->instantiate();
 				$this->load_once();
 			}
 
@@ -71,7 +71,7 @@ class Load {
 
 		} else {
 			// not a multi-site.
-			$this->include();
+			$this->instantiate();
 			$this->activate();
 			$this->load_once();
 		}
@@ -89,14 +89,14 @@ class Load {
 	}
 
 
-	public function include() {
+	public function instantiate() {
 
 		new ConnectedSites();
 		new SourceData();
 		new Receiver();
 		new SyncedPosts();
-		new TemplateSync();
 		new Media();
+		new TemplateSync();
 		new Posts();
 
 		if ( ! $this->no_site_type_setting ) {

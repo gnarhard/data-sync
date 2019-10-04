@@ -95,15 +95,11 @@ class Options {
 		}
 
 		$options->enable_new_cpts                     = (bool) get_option( 'enable_new_cpts' );
-//		$options->overwrite_yoast                     = (bool) get_option( 'overwrite_yoast' );
 		$options->overwrite_receiver_post_on_conflict = (bool) get_option( 'overwrite_receiver_post_on_conflict' );
 		$options->debug                               = (bool) get_option( 'debug' );
 		$options->show_body_responses                 = (bool) get_option( 'show_body_response' );
 
-		$response = new WP_REST_Response( $options );
-		$response->set_status( 201 );
-
-		return $response;
+		return $options;
 
 	}
 
@@ -113,17 +109,6 @@ class Options {
 			'enabled_post_types',
 		);
 
-		$enabled_post_types = get_option( 'enabled_post_types' );
-		// FOR PERMISSIONS
-//		if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-//			if ( count( $enabled_post_types ) > 0 ) {
-//				foreach ( $enabled_post_types as $post_type ) {
-//					$post_type_object = get_post_type_object( $post_type );
-//					$option_keys[]    = $post_type_object->name . '_perms';
-//				}
-//			}
-//		}
-
 		return Options::get_all( $option_keys );
 	}
 
@@ -131,20 +116,10 @@ class Options {
 		$options = new stdClass();
 
 		foreach ( $option_keys as $key ) {
-			$request = new WP_REST_Request();
-			$request->set_method( 'GET' );
-			$request->set_route( '/' . DATA_SYNC_API_BASE_URL . '/options/' . $key );
-			$request->set_url_params( array( self::$option_key => $key ) );
-			$request->set_query_params( array( 'nonce' => wp_create_nonce( 'data_sync_api' ) ) );
-
-			$response      = rest_do_request( $request );
-			$options->$key = $response->get_data();
+			$options->$key = get_option( $key );
 		}
 
-		$response = new WP_REST_Response( $options );
-		$response->set_status( 201 );
-
-		return $response;
+		return $options;
 	}
 
 	/**
@@ -183,7 +158,7 @@ class Options {
 	}
 
 	public function get_settings_tab_html( WP_REST_Request $request ) {
-		$settings_tab = $request->get_param( 'tab' );
+		$settings_tab     = $request->get_param( 'tab' );
 		$settings_content = new stdClass();
 
 		if ( 'syndicated_posts' === $settings_tab ) {
@@ -195,12 +170,66 @@ class Options {
 		} elseif ( 'enabled_post_types' === $settings_tab ) {
 			require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
 			\DataSync\display_enabled_post_types();
-		} elseif ( 'syndicated_posts_table' === $settings_tab ) {
-			require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
-			\DataSync\display_syndicated_posts_table();
+		} elseif ( 'templates' === $settings_tab ) {
+			require_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
+			\DataSync\display_synced_templates();
 		}
 
 	}
+
+
+	public function create_admin_notice( WP_REST_Request $request ) {
+		$params  = $request->get_params();
+		$output  = '';
+		$success = $params['success'];
+		$topic   = $params['topic'];
+
+		if ( $success ) {
+			$output .= '<div class="notice updated notice-success is-dismissible">';
+
+			if ( 'Enabled post types' === $topic ) {
+				$output .= '<p>' . $topic . ' saved successfully.</p>';
+			} elseif ( 'Connected sites' === $topic ) {
+				if ( ! empty( $params['message'] ) ) {
+					$output .= '<p>' . $params['message'] . '</p>';
+				} else {
+					$output .= '<p>' . $topic . ' saved successfully.</p>';
+				}
+
+			} elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
+				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
+			} elseif ( 'Templates' === $topic ) {
+				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
+			}
+
+
+		} else {
+			$output .= '<div class="notice notice-warning is-dismissible">';
+
+			if ( 'Enabled post types' === $topic ) {
+				$output .= '<p>' . $topic . ' data is identical to saved data.</p>';
+			} elseif ( 'Connected sites' === $topic ) {
+				$output .= '<p>' . $topic . ' not saved.</p>';
+			} elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
+				$output .= '<p>' . $topic . ' not syndicated.</p>';
+			} elseif ( 'Templates' === $topic ) {
+				$output .= '<p>' . $topic . ' not syndicated.</p>';
+			}
+
+			$output .= '<p>' . $params['message'] . '</p>';
+
+		}
+
+		$output .= '<button type="button" class="notice-dismiss">';
+		$output .= '<span class="screen-reader-text">Dismiss this notice.</span>';
+		$output .= '</button>';
+
+		$output .= '</div>';
+
+		wp_send_json_success( $output );
+
+	}
+
 
 	public function register_routes() {
 		$registered = register_rest_route(
@@ -251,14 +280,25 @@ class Options {
 			'/settings_tab/(?P<tab>[a-zA-Z-_]+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_settings_tab_html' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_settings_tab_html' ),
+					'args'     => array(
 						'tab' => array(
 							'description' => 'Tab to get',
 							'type'        => 'string',
 						),
 					),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/admin_notice',
+			array(
+				array(
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'create_admin_notice' ),
 				),
 			)
 		);
@@ -326,20 +366,6 @@ class Options {
 				'data-sync-options',
 				'data_sync_options'
 			);
-
-//			 TODO: Which user permission out of all permissions can edit content
-//
-//			$enabled_post_types = get_option( 'enabled_post_types' );
-//			if ( ( $enabled_post_types ) && ( '' !== $enabled_post_types ) ) {
-//				if ( count( $enabled_post_types ) ) {
-//					foreach ( $enabled_post_types as $post_type ) {
-//						$post_type_object = get_post_type_object( $post_type );
-//
-//						add_settings_field( $post_type_object->name . '_perms', $post_type_object->label . ' Permissions', $this->view_namespace . '\display_post_type_permissions_options', 'data-sync-options', 'data_sync_options', array( $post_type_object ) );
-//						register_setting( 'data_sync_options', $post_type_object->name . '_perms' );
-//					}
-//				}
-//			}
 
 		endif;
 	}

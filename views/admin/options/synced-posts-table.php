@@ -7,18 +7,17 @@ use DataSync\Controllers\Options;
 use DataSync\Controllers\Posts;
 use DataSync\Controllers\PostTypes;
 use DataSync\Controllers\SyncedPosts;
+use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 
 function display_syndicated_posts_table() {
 
-	$source_options              = Options::source()->get_data();
-	$connected_sites_obj         = new ConnectedSites();
-	$connected_sites             = $connected_sites_obj->get_all()->data;
+	$source_options              = Options::source();
+	$connected_sites             = (array) ConnectedSite::get_all();
 	$post_types                  = array_keys( $source_options->push_enabled_post_types );
 	$posts                       = Posts::get_wp_posts( $post_types, true );
 	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
 	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-	$output                      = '';
 	?>
 
     <table id="wp_data_sync_status">
@@ -50,7 +49,7 @@ function display_syndicated_posts_table() {
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
-                    <td class="expand_post_details" data-id="<?php echo $post->ID ?>">+</td>
+                    <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
                 <tr class="post_details" id="post-<?php echo $post->ID ?>">
                     <td class="post_detail_wrap" colspan="5">
@@ -143,7 +142,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 
 					if ( ! $syndication_info->source_version_edited ) {
 						echo '<br>';
-						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</a>';
+						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
 					}
 
 				} else {
@@ -160,7 +159,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 				// NOT SYNCED.
 				echo '<span>Last syndication: Never.';
 				$site_status_icon = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-				$site_status_icon .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</a>';
+				$site_status_icon .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</button>';
 			}
 
 

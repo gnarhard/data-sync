@@ -326,8 +326,6 @@ class Posts {
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified_gmt );
 
-					$receiver_reference_post = null;
-
 					$receiver_post = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
 
 					$receiver_modified_time = strtotime( $receiver_post->post_modified_gmt );
@@ -424,15 +422,10 @@ class Posts {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'Post';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
-
 				$receiver_posts[ $index ]          = new stdClass();
 				$receiver_posts[ $index ]->site_id = (int) $site->id;
 				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
@@ -452,15 +445,10 @@ class Posts {
 		$response       = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 			unset( $log );
+			return $response;
 		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				echo 'Post';
-				print_r( wp_remote_retrieve_body( $response ) );
-			}
-
 			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
 		}
 	}

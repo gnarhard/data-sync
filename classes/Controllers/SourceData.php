@@ -134,7 +134,6 @@ class SourceData {
 
 		$this->prepare_single_overwrite( $request->get_url_params() );
 
-
 		$args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
 		$connected_site = ConnectedSite::get_where( $args );
 		$connected_site = $connected_site[0];
@@ -147,19 +146,12 @@ class SourceData {
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
-		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'SourceData';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
-			}
+			return $response;
 		}
 
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 
 
 	}
@@ -178,61 +170,24 @@ class SourceData {
 			$response                            = wp_remote_post( $url, [ 'body' => $json ] );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
+				return $response;
 			}
 
 		}
 
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 	}
 
 
 	public function create_request_data( $site ) {
 
-		$post_data = new stdClass();
-
-		if ( false !== strpos( $site->url, 'receiver1' ) ) {
-			$xdebug_ide_key = 'RECEIVER1';
-		} elseif ( false !== strpos( $site->url, 'receiver2' ) ) {
-			$xdebug_ide_key = 'RECEIVER2';
-		} elseif ( false !== strpos( $site->url, 'multi' ) ) {
-			$xdebug_ide_key = 'MULTI';
-		}
-
+		$post_data                           = new stdClass();
 		$this->source_data->receiver_site_id = (int) $site->id;
-
-		if ( $this->source_data->options->debug ) {
-//			$post_data->url     = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive?XDEBUG_SESSION_START=' . $xdebug_ide_key;
-			$post_data->url = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-
-			$post_data->cookies = [];
-
-			$xdebug_cookie                     = array(
-				'name'    => 'XDEBUG_SESSION',
-				'value'   => $xdebug_ide_key,
-//				'value' => 'PHPSTORM',
-//				'domain' => $site->url,
-				'expires' => time() + ( 86400 * 30 ),
-				'path'    => '/',
-			);
-			$post_data->cookies[]              = new WP_Http_Cookie( $xdebug_cookie );
-			$this->source_data->xdebug_ide_key = $xdebug_ide_key;
-		} else {
-			$post_data->url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$this->source_data->xdebug_ide_key = '';
-		}
-
-		$auth            = new Auth();
-		$post_data->json = $auth->prepare( $this->source_data, $site->secret_key );
+		$post_data->url                      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+		$auth                                = new Auth();
+		$post_data->json                     = $auth->prepare( $this->source_data, $site->secret_key );
 
 		return $post_data;
 	}
@@ -257,36 +212,31 @@ class SourceData {
 			] );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
+				return $response;
 			}
 
 		}
 
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 
 	}
 
 
 	public function finish_push( $response ) {
 
+		// GET NEW SYNCED POSTS AND LOGS BEFORE MEDIA.
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
+		// DON'T MOVE!!! NEED NEW SYNCED POSTS FOR THIS TO WORK BUG-FREE.
 		new Media( $this->source_data->posts );
 
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		wp_send_json_success( json_decode( wp_remote_retrieve_body( $response ) ) );
+		wp_send_json_success( json_decode( $response ) );
 	}
 
 
@@ -299,7 +249,7 @@ class SourceData {
 
 		global $wpdb;
 		$db               = new DB();
-		$connected_sites  = (array) ConnectedSites::get_all()->get_data();
+		$connected_sites  = (array) ConnectedSite::get_all();
 		$sql_statements   = array();
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
@@ -314,16 +264,9 @@ class SourceData {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
+				return $response;
 			}
 
 		}
@@ -350,9 +293,8 @@ class SourceData {
 	 */
 	private function save_receiver_data() {
 		Logs::save_to_source( $this->receiver_logs );
-		$log = new Logs( 'Synced receiver error logs to source.' );
-
 		SyncedPosts::save_all_to_source( $this->receiver_synced_posts );
+		$log = new Logs( 'Synced receiver error logs to source.' );
 		$log = new Logs( 'Added receiver synced posts to source.' );
 		unset( $log );
 	}
@@ -364,7 +306,7 @@ class SourceData {
 	private function consolidate() {
 
 		$synced_posts = new SyncedPosts();
-		$options      = Options::source()->get_data();
+		$options      = Options::source();
 		$upload_dir   = wp_get_upload_dir();
 
 		$this->source_data                    = new stdClass();
@@ -376,7 +318,7 @@ class SourceData {
 		$this->source_data->acf               = (array) ACFs::get_acf_fields();
 		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		$this->source_data->url               = (string) get_site_url();
-		$this->source_data->connected_sites   = (array) ConnectedSites::get_all()->get_data();
+		$this->source_data->connected_sites   = (array) ConnectedSite::get_all();
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$this->source_data->posts             = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
@@ -397,10 +339,18 @@ class SourceData {
 
 				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
 				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
-				$permalink         = get_permalink( $post->ID );
-				$canonical_link    = str_replace( get_site_url(), $connected_site->url, $permalink );
 
-				$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+
+				if ( ! empty( $connected_site ) ) {
+					$permalink      = get_permalink( $post->ID );
+					$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
+
+					$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+				} else {
+					$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
+					unset( $log );
+				}
+
 			}
 
 		}

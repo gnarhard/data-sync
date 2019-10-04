@@ -1,3 +1,25 @@
+.settings_page_data-sync-options .noselect {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Old versions of Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+}
+
+.settings_page_data-sync-options #feedback .error {
+  color: #d9534f;
+}
+
+.settings_page_data-sync-options #feedback .success {
+  color: #5cb85c;
+}
+
 .settings_page_data-sync-options table {
   width: 100%;
 }
@@ -10,11 +32,6 @@
 .settings_page_data-sync-options select {
   min-height: 300px;
   width: 400px;
-}
-
-.settings_page_data-sync-options .display {
-  display: block;
-  position: fixed;
 }
 
 .settings_page_data-sync-options .dashicons-update {
@@ -60,6 +77,10 @@
 #error_log table tr td {
   min-width: 150px;
   padding: 5px;
+}
+
+#connected_sites {
+  margin-bottom: 20px;
 }
 
 #connected_sites td:first-child,
@@ -127,8 +148,13 @@
   margin: 40px auto;
 }
 
+#connected_sites .lightbox_wrap.display {
+  display: block;
+  position: fixed;
+}
+
 #syndicated_posts .warning {
-  color: orange;
+  color: #ff5400;
 }
 
 #syndicated_posts .danger_button {
@@ -153,9 +179,14 @@
   color: red;
 }
 
+#syndicated_posts #bulk_data_push,
+#syndicated_posts #refresh_syndicated_posts {
+  margin: 20px 20px 20px 0;
+}
+
 #syndicated_posts table {
   width: 100%;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
 }
 
 #syndicated_posts table td:first-of-type {
@@ -327,7 +358,7 @@
 
 #enabled_post_types select {
   width: 100%;
-  min-height: 100px;
+  min-height: 200px;
 }
 
 #enabled_post_types #save_push_enabled_post_types {
