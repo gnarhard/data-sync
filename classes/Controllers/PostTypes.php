@@ -57,7 +57,6 @@ class PostTypes {
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
 
@@ -109,6 +108,7 @@ class PostTypes {
 				if ( is_wp_error( $return ) ) {
 					$log = new Logs( 'Post type was not updated.' . '<br>' . $return->get_error_message(), true );
 					unset( $log );
+					return $response;
 				}
 			}
 		} else {

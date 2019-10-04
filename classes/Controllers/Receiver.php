@@ -142,9 +142,9 @@ class Receiver {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			} else {
 
 				$plugin_versions[] = [

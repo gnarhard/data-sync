@@ -181,7 +181,7 @@
 
 #syndicated_posts #bulk_data_push,
 #syndicated_posts #refresh_syndicated_posts {
-  margin: 20px;
+  margin: 20px 20px 20px 0;
 }
 
 #syndicated_posts table {

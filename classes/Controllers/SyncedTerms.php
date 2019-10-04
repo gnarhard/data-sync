@@ -83,6 +83,7 @@ class SyncedTerms {
 						$registered_taxonomies = get_taxonomies();
 						$log = new Logs( 'Term: ' . $term->slug . ' failed to connect to post. ' . $new_term->get_error_message(), true );
 						unset( $log );
+						return $new_term;
 					}
 				}
 			}

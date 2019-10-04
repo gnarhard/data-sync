@@ -24,13 +24,18 @@ class Success {
     console.log(result)
 
     let data = {}
-    data.result = result.success
 
-    if (typeof result.data !== 'undefined') {
-      data.message = result.data
+    if ( typeof result.code !== 'undefined' ) {
+      data = Success.show_error_message( result, topic );
+    } else {
+      data.success = result.success
+      data.topic = topic
+
+      if (typeof result.data !== 'undefined') {
+        data.message = result.data
+      }
+
     }
-
-    data.topic = topic
 
     AJAX.post(DataSync.api.url + '/admin_notice', data).then(function (result) {
       console.log(result)
@@ -39,6 +44,14 @@ class Success {
       Success.dismiss_button_init()
     })
 
+  }
+
+  static show_error_message( result, topic ) {
+    let data = {};
+    data.success = false;
+    data.message = result.message;
+    data.topic = topic
+    return data;
   }
 
   static dismiss_button_init () {

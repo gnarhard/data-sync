@@ -114,14 +114,9 @@ class SyncedPosts {
 			$response = wp_remote_get( $url, $args );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'SyncedPosts';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
+				return $response;
 			}
 
 			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );
@@ -180,7 +175,6 @@ class SyncedPosts {
 		$response->set_status( 201 );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Failed to get synced posts.', true );
 			unset( $log );
 		}
@@ -273,14 +267,10 @@ class SyncedPosts {
 					$response                      = wp_remote_post( $url, [ 'body' => $json ] );
 
 					if ( is_wp_error( $response ) ) {
-						echo $response->get_error_message();
 						$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 						unset( $log );
+						return $response;
 					} else {
-						if ( get_option( 'show_body_responses' ) ) {
-							echo 'SyncedPosts';
-							print_r( wp_remote_retrieve_body( $response ) );
-						}
 
 						SyncedPost::delete( $synced_post->id );
 					}
@@ -316,9 +306,9 @@ class SyncedPosts {
 				$response                        = wp_remote_post( $url, [ 'body' => $json ] );
 
 				if ( is_wp_error( $response ) ) {
-					echo $response->get_error_message();
 					$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 					unset( $log );
+					return $response;
 				} else {
 
 					if ( get_option( 'show_body_responses' ) ) {

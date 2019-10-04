@@ -422,9 +422,9 @@ class Posts {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			} else {
 				$receiver_posts[ $index ]          = new stdClass();
 				$receiver_posts[ $index ]->site_id = (int) $site->id;
@@ -445,7 +445,6 @@ class Posts {
 		$response       = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 			unset( $log );
 			return $response;

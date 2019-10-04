@@ -82,9 +82,9 @@ class Logs {
 			$response = wp_remote_get( $url, $args );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			}
 
 			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );

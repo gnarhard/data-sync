@@ -91,9 +91,9 @@ class TemplateSync {
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in TemplateSync->push() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
+			return $response;
 		} else {
 			if ( get_option( 'show_body_responses' ) ) {
 				if ( get_option( 'show_body_responses' ) ) {

@@ -101,9 +101,9 @@ class Media {
 				$response               = wp_remote_post( $url, [ 'body' => $json ] );
 
 				if ( is_wp_error( $response ) ) {
-					echo $response->get_error_message();
 					$log = new Logs( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 					unset( $log );
+					return $response;
 				}
 			}
 
@@ -190,6 +190,7 @@ class Media {
 				} else {
 					$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
 					unset( $log );
+					return $attachment_id;
 				}
 
 

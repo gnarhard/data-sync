@@ -146,9 +146,9 @@ class SourceData {
 		$response = wp_remote_post( $url, [ 'body' => $json ] );
 
 		if ( is_wp_error( $response ) ) {
-			echo $response->get_error_message();
 			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
+			return $response;
 		}
 
 		$this->finish_push( wp_remote_retrieve_body( $response ) );
@@ -170,9 +170,9 @@ class SourceData {
 			$response                            = wp_remote_post( $url, [ 'body' => $json ] );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			}
 
 		}
@@ -212,9 +212,9 @@ class SourceData {
 			] );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			}
 
 		}
@@ -264,9 +264,9 @@ class SourceData {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+				return $response;
 			}
 
 		}

@@ -181,7 +181,7 @@ class Options {
 	public function create_admin_notice( WP_REST_Request $request ) {
 		$params  = $request->get_params();
 		$output  = '';
-		$success = $params['result'];
+		$success = $params['success'];
 		$topic   = $params['topic'];
 
 		if ( $success ) {
@@ -215,6 +215,8 @@ class Options {
 			} elseif ( 'Templates' === $topic ) {
 				$output .= '<p>' . $topic . ' not syndicated.</p>';
 			}
+
+			$output .= '<p>' . $params['message'] . '</p>';
 
 		}
 
