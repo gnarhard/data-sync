@@ -134,7 +134,6 @@ class SourceData {
 
 		$this->prepare_single_overwrite( $request->get_url_params() );
 
-
 		$args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
 		$connected_site = ConnectedSite::get_where( $args );
 		$connected_site = $connected_site[0];
@@ -150,16 +149,9 @@ class SourceData {
 			echo $response->get_error_message();
 			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 			unset( $log );
-		} else {
-			if ( get_option( 'show_body_responses' ) ) {
-				if ( get_option( 'show_body_responses' ) ) {
-					echo 'SourceData';
-					print_r( wp_remote_retrieve_body( $response ) );
-				}
-			}
 		}
 
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 
 
 	}
@@ -181,18 +173,11 @@ class SourceData {
 				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
 			}
 
 		}
 
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 	}
 
 
@@ -230,31 +215,28 @@ class SourceData {
 				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
 			}
 
 		}
 
-		// SYNC MEDIA FILES.
-		new Media( $this->source_data->posts );
-
-		$this->finish_push( $response );
+		$this->finish_push( wp_remote_retrieve_body( $response ) );
 
 	}
 
 
 	public function finish_push( $response ) {
 
+		// GET NEW SYNCED POSTS AND LOGS BEFORE MEDIA.
 		$this->get_receiver_data();
 		$this->save_receiver_data();
 
-		return wp_remote_retrieve_body( $response );
+		// DON'T MOVE!!! NEED NEW SYNCED POSTS FOR THIS TO WORK BUG-FREE.
+		new Media( $this->source_data->posts );
+
+		$this->get_receiver_data();
+		$this->save_receiver_data();
+
+		wp_send_json_success( json_decode( $response ) );
 	}
 
 
@@ -285,13 +267,6 @@ class SourceData {
 				echo $response->get_error_message();
 				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
-			} else {
-				if ( get_option( 'show_body_responses' ) ) {
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SourceData';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
-				}
 			}
 
 		}
@@ -318,9 +293,8 @@ class SourceData {
 	 */
 	private function save_receiver_data() {
 		Logs::save_to_source( $this->receiver_logs );
-		$log = new Logs( 'Synced receiver error logs to source.' );
-
 		SyncedPosts::save_all_to_source( $this->receiver_synced_posts );
+		$log = new Logs( 'Synced receiver error logs to source.' );
 		$log = new Logs( 'Added receiver synced posts to source.' );
 		unset( $log );
 	}

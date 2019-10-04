@@ -224,10 +224,10 @@ class Options {
 					$output .= '<p>' . $topic . ' saved successfully.</p>';
 				}
 
-			} elseif ( 'Syndicated posts' === $topic ) {
-				$output .= '<p>' . $topic . ' successfully distributed.</p>';
+			} elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
+				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
 			} elseif ( 'Templates' === $topic ) {
-				$output .= '<p>' . $topic . ' successfully distributed.</p>';
+				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
 			}
 
 
@@ -238,10 +238,10 @@ class Options {
 				$output .= '<p>' . $topic . ' data is identical to saved data.</p>';
 			} elseif ( 'Connected sites' === $topic ) {
 				$output .= '<p>' . $topic . ' not saved.</p>';
-			} elseif ( 'Syndicated posts' === $topic ) {
-				$output .= '<p>' . $topic . ' not distributed.</p>';
+			} elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
+				$output .= '<p>' . $topic . ' not syndicated.</p>';
 			} elseif ( 'Templates' === $topic ) {
-				$output .= '<p>' . $topic . ' not distributed.</p>';
+				$output .= '<p>' . $topic . ' not syndicated.</p>';
 			}
 
 		}

@@ -29,11 +29,11 @@ function data_sync_options_page() {
 			<?php } ?>
 			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
                 <div id="syndicated_posts">
-                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . . This may take several minutes.</span>
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                     <div id="syndicated_posts_wrap"></div>
                 </div>
                 <div id="templates">
-                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . . This may take several minutes.</span>
+                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                     <div id="templates_wrap"></div>
                 </div>
                 <div id="connected_sites">

@@ -8,25 +8,9 @@ use DataSync\Controllers\ConnectedSites;
 function display_syndicated_posts() {
 
 	include_once 'synced-posts-table.php';
-	$connected_sites_obj       = new ConnectedSites();
-	$connected_sites           = $connected_sites_obj->get_all()->data;
-	$connected_site_ids        = '';
-	$i                         = 0;
-	$number_of_sites_connected = count( $connected_sites );
 
 	$status = display_syndicated_posts_table();
-
-	foreach ( $connected_sites as $index => $site ) {
-		$i ++;
-		if ( $i === $number_of_sites_connected ) {
-			$connected_site_ids .= $site->id;
-		} else {
-			$connected_site_ids .= $site->id . ',';
-		}
-	}
 	?>
-
-    <input type="hidden" id="sites_connected_info" data-ids="<?php echo $connected_site_ids ?>"/>
 
     <div id="status_dashboard_button_wrap">
 		<?php
@@ -44,6 +28,5 @@ function display_syndicated_posts() {
 		?>
 
     </div>
-    <div id="status_wrap"></div>
 	<?php
 }

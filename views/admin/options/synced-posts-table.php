@@ -18,7 +18,6 @@ function display_syndicated_posts_table() {
 	$posts                       = Posts::get_wp_posts( $post_types, true );
 	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
 	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-	$output                      = '';
 	?>
 
     <table id="wp_data_sync_status">
@@ -50,7 +49,7 @@ function display_syndicated_posts_table() {
                     </td>
                     <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
-                    <td class="expand_post_details" data-id="<?php echo $post->ID ?>">+</td>
+                    <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
                 <tr class="post_details" id="post-<?php echo $post->ID ?>">
                     <td class="post_detail_wrap" colspan="5">
