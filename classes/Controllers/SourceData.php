@@ -112,10 +112,9 @@ class SourceData {
 	public function prepare_single_overwrite( $url_params ) {
 		$this->consolidate();
 
-		$post      = (object) Posts::get_single( (int) $url_params['source_post_id'] );
+		$post      = (object) Posts::get_single( $url_params['source_post_id'] );
 		$post_type = $post->post_type;
 
-		$this->source_data->single_overwrite                             = true;
 		$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
 		$this->source_data->posts->$post_type                            = [ $post ];
 		$this->source_data->options->overwrite_receiver_post_on_conflict = true;
@@ -158,8 +157,8 @@ class SourceData {
 			return $response;
 		}
 
+//		print_r( wp_remote_retrieve_body( $response ) );
 		$this->finish_push( wp_remote_retrieve_body( $response ) );
-
 
 	}
 
@@ -342,7 +341,6 @@ class SourceData {
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
 		$this->source_data->posts             = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
-		$this->source_data->single_overwrite  = false;
 		$this->source_data->canonical_urls    = array();
 
 	}

@@ -231,7 +231,6 @@ class Posts {
 	}
 
 	public static function get_single( int $id ) {
-
 		$post             = get_post( $id );
 		$post->source_url = get_site_url();
 		$post->post_meta  = get_post_meta( $post->ID );
@@ -241,7 +240,7 @@ class Posts {
 			$post->taxonomies[ $taxonomy ] = get_the_terms( $post->ID, $taxonomy );
 		}
 
-		$post->media = self::get_media( $post->ID );
+		$post->media = self::get_media( $id );
 
 		return $post;
 	}

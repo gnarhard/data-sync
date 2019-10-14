@@ -191,6 +191,7 @@ class Media {
 					require_once ABSPATH . 'wp-admin/includes/image.php';
 					$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
 					$updated_meta    = wp_update_attachment_metadata( $attachment_id, $attachment_data );
+					$source_data->media->diverged = false;
 					SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
 					$this->update_thumbnail_id( $source_data->media, $attachment_id );
 				} else {

@@ -16,6 +16,9 @@ function display_syndicated_posts_table() {
 	$posts                       = Posts::get_wp_posts( $post_types, true );
 	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
 	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
+	$tz                          = date_default_timezone_get();
+	date_default_timezone_set( get_option( 'timezone_string' ) );
+
 	?>
 
     <table id="wp_data_sync_status">
@@ -36,7 +39,7 @@ function display_syndicated_posts_table() {
 			foreach ( $posts as $post ) {
 
 				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
-
+				$post_type_obj    = get_post_type_object( $post->post_type );
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
@@ -45,7 +48,8 @@ function display_syndicated_posts_table() {
                            href="/wp-admin/post.php?post=<?php echo $post->ID; ?>&action=edit"
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
-                    <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
+
+                    <td><?php echo esc_html( $post_type_obj->label ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
                     <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>
@@ -72,7 +76,10 @@ function display_syndicated_posts_table() {
 		<?php
 		if ( get_option( 'show_body_responses' ) ) {
 			?>
-            <button class="disabled" disabled title="Please disable 'Show Body Responses' option in the settings to enable data push." id="bulk_data_push">Sync</button><?php
+            <button class="disabled" disabled
+                    title="Please disable 'Show Body Responses' option in the settings to enable data push."
+                    id="bulk_data_push">Sync
+            </button><?php
 		} else {
 			?>
             <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
@@ -140,9 +147,11 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 
 			if ( ! empty( $connected_site_synced_post ) ) {
 
-				echo '<span>Last syndication: ' . date( 'g:i:s A n/d/Y', strtotime( $connected_site_synced_post->date_modified ) ) . '</span>';
+				$local_timestamp = date( 'g:i:s A n/d/Y', get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $connected_site_synced_post->date_modified ) ), 'U' ) );
 
-				if ( 'diverged' === $syndication_info->status ) {
+				echo '<span>Last syndication: ' . $local_timestamp . '</span>';
+
+				if ( (bool) $connected_site_synced_post->diverged ) {
 
 					$site_status_icon = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
 
@@ -153,7 +162,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 					}
 
 					echo '<br>';
-					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
+					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $connected_site_synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
 
 				} else {
 					// SYNCED.
@@ -179,6 +188,9 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
         </div>
         </div>
 		<?php
+
+
+		date_default_timezone_set( $tz );
 
 	}
 }
