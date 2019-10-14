@@ -9,11 +9,6 @@ import Settings from './Settings.es6';
 class Load {
 
 	constructor() {
-		this.init();
-	}
-
-	init() {
-
 		document.addEventListener( "DOMContentLoaded", function () {
 			$=jQuery;
 			if ( document.getElementById('data_sync_tabs') ) {
@@ -21,16 +16,18 @@ class Load {
 
 				document.querySelector('#data_sync_tabs').classList.remove('hidden');
 
-				new SyndicatedPosts();
-				new SyndicatedTemplates();
-				new ConnectedSites();
-				new EnabledPostTypes();
-				new Logs();
+				if ( DataSync.options.source_site ) {
+					new SyndicatedPosts();
+					new SyndicatedTemplates();
+					new ConnectedSites();
+					new EnabledPostTypes();
+					new Logs();
+				}
+
 				new Settings();
 			}
 
 		})
-
 	}
 
 }

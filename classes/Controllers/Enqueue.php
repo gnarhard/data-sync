@@ -24,8 +24,6 @@ class Enqueue {
 
 		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true );
 
-//		if ( get_option( 'source_site' ) ) {
-
 			wp_localize_script(
 				'data-sync-admin',
 				'DataSync',
@@ -40,13 +38,13 @@ class Enqueue {
 					),
 					'options' => array(
 						'enabled_post_types' => (array) get_option( 'enabled_post_types' ),
+						'source_site' => (bool) get_option( 'source_site' ),
 					),
 				)
 			);
 
 			wp_enqueue_script( 'jquery-ui-tabs' );
 			wp_enqueue_script( 'data-sync-admin' );
-//		}
 	}
 
 	/**
