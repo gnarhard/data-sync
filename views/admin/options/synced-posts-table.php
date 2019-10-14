@@ -59,7 +59,7 @@ function display_syndicated_posts_table() {
                             <h4>Source Info</h4>
 							<?php echo $syndication_info->source_message ?>
                         </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data ); ?></div>
+                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ); ?></div>
                     </td>
                 </tr>
 				<?php
@@ -93,7 +93,7 @@ function display_syndicated_posts_table() {
 }
 
 
-function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data ) {
+function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ) {
 
 	?>
     <div class="connected_site_info">
@@ -151,7 +151,21 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 
 				echo '<span>Last syndication: ' . $local_timestamp . '</span>';
 
-				if ( (bool) $connected_site_synced_post->diverged ) {
+                // NEED TO GET PER-SITE DATA. CAN'T RELY ON DATA FROM $syndication_info BECAUSE THAT IS POST-SPECIFIC, NOT SITE AND POST SPECIFIC.
+				$synced_post_modified_time = strtotime( $connected_site_synced_post->date_modified );
+				$source_post_modified_time = strtotime( $post->post_modified_gmt );
+				$receiver_post             = Posts::find_receiver_post( $receiver_posts, $connected_site_synced_post->receiver_site_id, $connected_site_synced_post->receiver_post_id );
+				$receiver_modified_time    = strtotime( $receiver_post->post_modified_gmt );
+
+				if ( $receiver_modified_time > $synced_post_modified_time ) {
+					$sync_status = 'diverged';
+				} else if ( $source_post_modified_time > $synced_post_modified_time ) {
+					$sync_status = 'diverged';
+				} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
+					$sync_status = 'synced';
+				}
+
+				if ( 'diverged' === $sync_status ) {
 
 					$site_status_icon = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
 

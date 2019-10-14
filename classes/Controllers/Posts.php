@@ -322,12 +322,11 @@ class Posts {
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
 				foreach ( $synced_post_result as $synced_post ) {
 
+					// TODO: correct values have risk of getting overwritten.
 					$synced_post_modified_time = strtotime( $synced_post->date_modified );
 					$source_post_modified_time = strtotime( $post->post_modified_gmt );
-
-					$receiver_post = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
-
-					$receiver_modified_time = strtotime( $receiver_post->post_modified_gmt );
+					$receiver_post             = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_modified_time    = strtotime( $receiver_post->post_modified_gmt );
 
 					if ( $receiver_modified_time > $synced_post_modified_time ) {
 						$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
@@ -398,10 +397,10 @@ class Posts {
 	}
 
 
-	public static function find_receiver_post( array $receiver_posts, $site_id, $receiver_post_id) {
-		foreach( $receiver_posts as $receiver_site_posts ) {
+	public static function find_receiver_post( array $receiver_posts, $site_id, $receiver_post_id ) {
+		foreach ( $receiver_posts as $receiver_site_posts ) {
 			if ( (int) $site_id === $receiver_site_posts->site_id ) {
-				foreach( $receiver_site_posts->posts as $receiver_post ) {
+				foreach ( $receiver_site_posts->posts as $receiver_post ) {
 					if ( (int) $receiver_post_id === $receiver_post->ID ) {
 						return $receiver_post;
 					}
@@ -423,6 +422,7 @@ class Posts {
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			} else {
 				$receiver_posts[ $index ]          = new stdClass();
@@ -446,6 +446,7 @@ class Posts {
 		if ( is_wp_error( $response ) ) {
 			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 			unset( $log );
+
 			return $response;
 		} else {
 			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
