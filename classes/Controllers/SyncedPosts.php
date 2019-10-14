@@ -74,8 +74,6 @@ class SyncedPosts {
 				$synced_modified_timestamp   = strtotime( $synced_post->date_modified );
 				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $synced_post->receiver_post_id, false );
 
-				var_dump($synced_modified_timestamp);
-				var_dump($receiver_modified_timestamp);
 				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS.
 				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
 					return true;
@@ -204,7 +202,7 @@ class SyncedPosts {
 		$data->post_type        = $source_post->post_type;
 		$data->diverged         = $source_post->diverged;
 		$data->date_modified    = current_time( 'mysql', 1 );
-//		print_r($data);die();
+
 		return self::save( $data );
 	}
 
@@ -324,11 +322,6 @@ class SyncedPosts {
 					unset( $log );
 					return $response;
 				} else {
-
-					if ( get_option( 'show_body_responses' ) ) {
-						echo 'SyncedPosts';
-						print_r( wp_remote_retrieve_body( $response ) );
-					}
 
 					$deleted = SyncedPost::delete( $synced_post[0]->id );
 

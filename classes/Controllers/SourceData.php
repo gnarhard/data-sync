@@ -157,7 +157,7 @@ class SourceData {
 			return $response;
 		}
 
-		print_r( wp_remote_retrieve_body( $response ) );die();
+//		print_r( wp_remote_retrieve_body( $response ) );
 		$this->finish_push( wp_remote_retrieve_body( $response ) );
 
 

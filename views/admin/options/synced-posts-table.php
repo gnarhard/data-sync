@@ -151,7 +151,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 
 				echo '<span>Last syndication: ' . $local_timestamp . '</span>';
 
-				if ( 'diverged' === $syndication_info->status ) {
+				if ( (bool) $connected_site_synced_post->diverged ) {
 
 					$site_status_icon = '<span>Status: <i class="dashicons dashicons-editor-unlink"></i></span>';
 
