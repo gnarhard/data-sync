@@ -2,11 +2,9 @@
 
 namespace DataSync;
 
-use DataSync\Controllers\ConnectedSites;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\Posts;
 use DataSync\Controllers\PostTypes;
-use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 
@@ -74,13 +72,12 @@ function display_syndicated_posts_table() {
 		<?php
 		if ( get_option( 'show_body_responses' ) ) {
 			?>
-            <button class="disabled" disabled
-                    title="Please disable 'Show Body Responses' option in the settings to enable data push."
-                    id="bulk_data_push"
-                    href="/wp-json/data-sync/v1/source_data/push">Sync</button><?php
+            <button class="disabled" disabled title="Please disable 'Show Body Responses' option in the settings to enable data push." id="bulk_data_push">Sync</button><?php
 		} else {
-			?><button id="bulk_data_push" class="button button-primary" href="/wp-json/data-sync/v1/source_data/push"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
-			?><button id="refresh_syndicated_posts" class="button button-secondary">Refresh</button><?php
+			?>
+            <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+			?>
+            <button id="refresh_syndicated_posts" class="button button-secondary">Refresh</button><?php
 		}
 		?>
 
@@ -155,10 +152,8 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 						echo '<span class="warning">Receiver post was updated after the last sync.</span>';
 					}
 
-					if ( ! $syndication_info->source_version_edited ) {
-						echo '<br>';
-						echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
-					}
+					echo '<br>';
+					echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $syndication_info->synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
 
 				} else {
 					// SYNCED.
