@@ -36,7 +36,7 @@ function display_syndicated_posts_table() {
 			foreach ( $posts as $post ) {
 
 				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
-
+                $post_type_obj = get_post_type_object( $post->post_type );
 				?>
                 <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
@@ -45,7 +45,8 @@ function display_syndicated_posts_table() {
                            href="/wp-admin/post.php?post=<?php echo $post->ID; ?>&action=edit"
                            target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
                     </td>
-                    <td><?php echo esc_html( ucfirst( $post->post_type ) ); ?></td>
+
+                    <td><?php echo esc_html( $post_type_obj->label ); ?></td>
                     <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
                     <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
                 </tr>

@@ -190,7 +190,7 @@ class Receiver {
 		$log = new Logs( 'SYNC COMPLETE.' );
 		unset( $log );
 
-		wp_send_json( 'Receiver parse complete.' );
+		wp_send_json( 'Receiver processing complete.' );
 	}
 
 	/**

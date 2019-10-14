@@ -241,7 +241,7 @@ class Posts {
 			$post->taxonomies[ $taxonomy ] = get_the_terms( $post->ID, $taxonomy );
 		}
 
-		$post->media = self::get_media( $post->ID );
+		$post->media = self::get_media( $id );
 
 		return $post;
 	}
