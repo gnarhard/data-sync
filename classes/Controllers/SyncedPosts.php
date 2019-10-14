@@ -19,7 +19,7 @@ class SyncedPosts {
 		add_action( 'delete_post', [ $this, 'delete' ], 10 );
 	}
 
-	public static function filter( object $post, $source_options, $synced_posts ) {
+	public static function filter( object $post, $source_data_options, $synced_posts ) {
 
 		$post->diverged = false;
 		$post->synced   = (bool) self::is_synced( $post, $synced_posts );
@@ -36,7 +36,8 @@ class SyncedPosts {
 				$post->diverged = self::check_date_modified( $post, $synced_posts );
 
 				if ( $post->diverged ) {
-					if ( true !== $source_options->overwrite_receiver_post_on_conflict ) {
+
+					if ( true !== $source_data_options->overwrite_receiver_post_on_conflict ) {
 						$log = new Logs( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );
 						unset( $log );
 
@@ -71,9 +72,10 @@ class SyncedPosts {
 		foreach ( $synced_posts as $synced_post ) {
 			if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) get_option( 'data_sync_receiver_site_id' ) === (int) $synced_post->receiver_site_id ) ) {
 				$synced_modified_timestamp   = strtotime( $synced_post->date_modified );
-				$receiver_post               = get_post( $synced_post->receiver_post_id );
-				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $receiver_post, false );
+				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $synced_post->receiver_post_id, false );
 
+				var_dump($synced_modified_timestamp);
+				var_dump($receiver_modified_timestamp);
 				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS.
 				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
 					return true;
@@ -202,7 +204,7 @@ class SyncedPosts {
 		$data->post_type        = $source_post->post_type;
 		$data->diverged         = $source_post->diverged;
 		$data->date_modified    = current_time( 'mysql', 1 );
-
+//		print_r($data);die();
 		return self::save( $data );
 	}
 

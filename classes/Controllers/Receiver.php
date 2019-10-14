@@ -73,7 +73,7 @@ class Receiver {
 	 */
 	public function start_fresh() {
 
-		var_dump(get_current_blog_id() );
+		var_dump( get_current_blog_id() );
 		var_dump( get_site_url() );
 
 		global $wpdb;
@@ -97,8 +97,8 @@ class Receiver {
 		}
 
 
-		$upload_dir = wp_upload_dir();
-		$template_dir    = DATA_SYNC_PATH . 'templates';
+		$upload_dir   = wp_upload_dir();
+		$template_dir = DATA_SYNC_PATH . 'templates';
 
 		if ( is_multisite() ) {
 			$blog_ids        = get_sites();
@@ -106,19 +106,19 @@ class Receiver {
 
 			if ( $network_blog_id !== get_current_blog_id() ) {
 				File::delete_media( $upload_dir['basedir'] ); // DELETE ALL MEDIA.
-				mkdir( $upload_dir['basedir'], 0755);
+				mkdir( $upload_dir['basedir'], 0755 );
 
 				// DELETE TEMPLATES
 				File::delete_media( $template_dir );
-				mkdir( $template_dir, 0755);
+				mkdir( $template_dir, 0755 );
 			}
 		} else {
 			File::delete_media( $upload_dir['basedir'] );
-			mkdir( $upload_dir['basedir'], 0755);
+			mkdir( $upload_dir['basedir'], 0755 );
 
 			// DELETE TEMPLATES
 			File::delete_media( $template_dir );
-			mkdir( $template_dir, 0755);
+			mkdir( $template_dir, 0755 );
 		}
 
 
@@ -144,6 +144,7 @@ class Receiver {
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			} else {
 
@@ -269,13 +270,15 @@ class Receiver {
 	}
 
 	private function filter_and_sync( $source_data, $post ) {
+
 		// FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
 		$filtered_post = SyncedPosts::filter( $post, $source_data->options, $source_data->synced_posts );
 
 		if ( false !== $filtered_post ) {
-			$receiver_post_id = Posts::save( $filtered_post, $source_data->synced_posts );
 
-			$synced_post_result = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
+			$receiver_post_id        = Posts::save( $filtered_post, $source_data->synced_posts );
+			$filtered_post->diverged = 0;
+			$synced_post_result      = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 
 			$log = new Logs( 'Finished syncing: ' . $filtered_post->post_title . ' (' . $filtered_post->post_type . ').' );
 			unset( $log );

@@ -58,11 +58,9 @@ class SyndicatedPosts {
     jQuery(function ($) {
       $('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function () {
 
-        // CHANGE ICON TO SPINNING UPDATE ICON
-        let receiver_site_id = $(this).data('receiver-site-id')
         let source_post_id = $(this).data('source-post-id')
 
-        SyndicatedPosts.push_single_post_to_all_receivers(receiver_site_id, source_post_id)
+        SyndicatedPosts.push_single_post_to_all_receivers(source_post_id)
 
       })
 

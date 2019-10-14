@@ -231,7 +231,6 @@ class Posts {
 	}
 
 	public static function get_single( int $id ) {
-
 		$post             = get_post( $id );
 		$post->source_url = get_site_url();
 		$post->post_meta  = get_post_meta( $post->ID );
