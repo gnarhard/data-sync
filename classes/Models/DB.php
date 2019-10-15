@@ -149,6 +149,22 @@ class DB {
 
 	}
 
+	/**
+	 *
+	 * @return mixed
+	 */
+	public function delete_all() {
+		global $wpdb;
+		$sql    = 'TRUNCATE TABLE ' . $this->table_name;
+		$result = $wpdb->get_results( $sql );
+
+		if ( empty( $result ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public function query( string $sql ) {
 		global $wpdb;
 

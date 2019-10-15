@@ -200,6 +200,8 @@ class Options {
 				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
 			} elseif ( 'Templates' === $topic ) {
 				$output .= '<p>' . $topic . ' successfully syndicated.</p>';
+			} elseif ( 'Logs' === $topic ) {
+				$output .= '<p>' . $topic . ' successfully purged.</p>';
 			}
 
 
@@ -214,6 +216,8 @@ class Options {
 				$output .= '<p>' . $topic . ' not syndicated.</p>';
 			} elseif ( 'Templates' === $topic ) {
 				$output .= '<p>' . $topic . ' not syndicated.</p>';
+			} elseif ( 'Logs' === $topic ) {
+				$output .= '<p>' . $topic . ' not purged.</p>';
 			}
 
 			$output .= '<p>' . $params['message'] . '</p>';

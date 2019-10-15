@@ -1,5 +1,6 @@
 import AJAX from '../../AJAX.es6.js'
 import Success from './Success.es6';
+import Logs from './Logs.es6'
 
 class SyndicatedTemplates {
 
@@ -14,6 +15,8 @@ class SyndicatedTemplates {
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
       Success.show_success_message( result, 'Templates' );
       new SyndicatedTemplates();
+      let logs = new Logs()
+      logs.refresh_log();
     })
 
   }
