@@ -6,6 +6,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
+use DataSync\Controllers\Options;
 use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -133,47 +134,18 @@ class SourceData {
 
 		$this->prepare_single_overwrite( $request->get_url_params() );
 
-		$args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
-		$connected_site = ConnectedSite::get_where( $args );
-		$connected_site = $connected_site[0];
+		if ( ! empty( $this->source_data ) ) {
 
-		$this->source_data->receiver_site_id = (int) $request->get_url_params()['receiver_site_id'];
+			$args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
+			$connected_site = ConnectedSite::get_where( $args );
+			$connected_site = $connected_site[0];
 
-		$auth     = new Auth();
-		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
-		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-		$response = wp_remote_post( $url, [
-			'body'        => $json,
-			'httpversion' => '1.0',
-			'sslverify'   => false,
-			'timeout'     => 10,
-			'blocking'    => true,
-		] );
+			$this->source_data->receiver_site_id = (int) $request->get_url_params()['receiver_site_id'];
 
-		if ( is_wp_error( $response ) ) {
-			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
-			unset( $log );
-
-			return $response;
-		}
-
-//		print_r( wp_remote_retrieve_body( $response ) );
-		$this->finish_push( wp_remote_retrieve_body( $response ) );
-
-	}
-
-
-	public function overwrite_post_on_all_receivers( WP_REST_Request $request ) {
-
-		$this->prepare_single_overwrite( $request->get_url_params() );
-
-		foreach ( $this->source_data->connected_sites as $site ) {
-
-			$this->source_data->receiver_site_id = (int) $site->id;
-			$auth                                = new Auth();
-			$json                                = $auth->prepare( $this->source_data, $site->secret_key );
-			$url                                 = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$response                            = wp_remote_post( $url, [
+			$auth     = new Auth();
+			$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
+			$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
+			$response = wp_remote_post( $url, [
 				'body'        => $json,
 				'httpversion' => '1.0',
 				'sslverify'   => false,
@@ -182,15 +154,53 @@ class SourceData {
 			] );
 
 			if ( is_wp_error( $response ) ) {
-				$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 
 				return $response;
 			}
 
+//		print_r( wp_remote_retrieve_body( $response ) );
+			$this->finish_push( wp_remote_retrieve_body( $response ) );
+
 		}
 
-		$this->finish_push( wp_remote_retrieve_body( $response ) );
+	}
+
+
+	public function overwrite_post_on_all_receivers( WP_REST_Request $request ) {
+
+		$this->prepare_single_overwrite( $request->get_url_params() );
+
+		// COULD BE EMPTY FROM VALIDATION.
+		if ( ! empty( $this->source_data ) ) {
+
+			foreach ( $this->source_data->connected_sites as $site ) {
+
+				$this->source_data->receiver_site_id = (int) $site->id;
+
+				$post_data = $this->create_request_data( $site );
+
+				$response = wp_remote_post( $post_data->url, [
+					'body'        => $post_data->json,
+					'httpversion' => '1.0',
+					'sslverify'   => false,
+					'timeout'     => 10,
+					'blocking'    => true,
+				] );
+
+				if ( is_wp_error( $response ) ) {
+					$log = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+					unset( $log );
+
+					return $response;
+				}
+
+			}
+
+			$this->finish_push( wp_remote_retrieve_body( $response ) );
+
+		}
 	}
 
 
@@ -215,30 +225,35 @@ class SourceData {
 		$this->consolidate();
 		$this->validate();
 		$this->configure_canonical_urls();
-		$this->source_data->posts = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
+		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 
-		foreach ( $this->source_data->connected_sites as $site ) {
+		// COULD BE EMPTY FROM VALIDATION.
+		if ( ! empty( $this->source_data ) ) {
 
-			$post_data = $this->create_request_data( $site );
+			foreach ( $this->source_data->connected_sites as $site ) {
 
-			$response = wp_remote_post( $post_data->url, [
-				'body'        => $post_data->json,
-				'httpversion' => '1.0',
-				'sslverify'   => false,
-				'timeout'     => 10,
-				'blocking'    => true,
-			] );
+				$post_data = $this->create_request_data( $site );
 
-			if ( is_wp_error( $response ) ) {
-				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-				unset( $log );
+				$response = wp_remote_post( $post_data->url, [
+					'body'        => $post_data->json,
+					'httpversion' => '1.0',
+					'sslverify'   => false,
+					'timeout'     => 10,
+					'blocking'    => true,
+				] );
 
-				return $response;
+				if ( is_wp_error( $response ) ) {
+					$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+					unset( $log );
+
+					return $response;
+				}
+
 			}
 
-		}
+			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
-		$this->finish_push( wp_remote_retrieve_body( $response ) );
+		}
 
 	}
 
@@ -399,6 +414,17 @@ class SourceData {
 				}
 			}
 		}
+
+		$connected_sites = (array) ConnectedSite::get_all();
+
+		foreach ( $connected_sites as $site ) {
+			$validated = Options::validate_required_plugins_info( (int) $site->id );
+			if ( ! $validated ) {
+				unset( $this->source_data );
+			}
+		}
+
+		// TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
 
 	}
 
