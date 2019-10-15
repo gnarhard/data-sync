@@ -16,20 +16,43 @@ class Logs {
       document.getElementById('refresh_error_log').onclick = function (e) {
         self.refresh_log()
       }
+
+      document.getElementById('delete_error_log').onclick = function (e) {
+        let confirmed = confirm('Are you sure you want to delete all log entries?')
+        if (confirmed) {
+          self.delete_log()
+        }
+      }
     }
   }
 
   refresh_log () {
 
-    let self = this;
+    let self = this
     document.querySelector('#debug_log').classList.add('hidden') // hide table
     document.querySelector('#debug_log .loading_spinner').classList.remove('hidden') // show spinner
 
     AJAX.get(DataSync.api.url + '/log/get').then(function (result) {
+      document.querySelector('#debug_log .loading_spinner').classList.add('hidden') // hide spinner
       if (JSON.parse(result.html) !== document.getElementById('error_log').innerHTML) {
         document.getElementById('error_log').innerHTML = JSON.parse(result.html)
-        self.init();
+        self.init()
       }
+    })
+  }
+
+  delete_log () {
+
+    let self = this
+    document.querySelector('#debug_log').classList.add('hidden') // hide table
+    document.querySelector('#debug_log .loading_spinner').classList.remove('hidden') // show spinner
+
+    AJAX.delete(DataSync.api.url + '/log/delete').then(function (response) {
+      let result = {}
+      result.success = response
+      self.refresh_log()
+      Success.show_success_message(result, 'Logs')
+      self.init()
     })
   }
 

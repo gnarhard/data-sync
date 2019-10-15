@@ -134,6 +134,12 @@ class Logs {
 		return $data;
 	}
 
+	public function delete_all() {
+		$result = Log::delete_all();
+
+		wp_send_json( $result );
+	}
+
 	public function register_routes() {
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -155,6 +161,17 @@ class Logs {
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'refresh_log' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
+			'/log/delete',
+			array(
+				array(
+					'methods'  => WP_REST_Server::DELETABLE,
+					'callback' => array( $this, 'delete_all' ),
 				),
 			)
 		);
