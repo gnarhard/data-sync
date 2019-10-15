@@ -269,6 +269,9 @@ class Posts {
 	private static function get_media( int $post_id ) {
 		$media        = new stdClass();
 		$media->image = get_attached_media( 'image', $post_id );
+//		if ( has_post_thumbnail( $post_id ) ) {
+//			$media->image[] = get_post( get_post_thumbnail_id( $post_id ) );
+//		}
 		$media->audio = get_attached_media( 'audio', $post_id );
 		$media->video = get_attached_media( 'video', $post_id );
 

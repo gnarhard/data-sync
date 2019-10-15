@@ -110,14 +110,14 @@ class SourceData {
 
 
 	public function prepare_single_overwrite( $url_params ) {
+
 		$this->consolidate();
 
-		$post      = (object) Posts::get_single( $url_params['source_post_id'] );
-		$post_type = $post->post_type;
-
+		$post                                                            = (object) Posts::get_single( $url_params['source_post_id'] );
+		$post_type                                                       = $post->post_type;
+		$this->source_data->options->overwrite_receiver_post_on_conflict = true;
 		$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
 		$this->source_data->posts->$post_type                            = [ $post ];
-		$this->source_data->options->overwrite_receiver_post_on_conflict = true;
 
 		$this->validate();
 		$this->configure_canonical_urls();
@@ -143,12 +143,12 @@ class SourceData {
 		$json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
 		$url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
 		$response = wp_remote_post( $url, [
-			'body' => $json,
+			'body'        => $json,
 			'httpversion' => '1.0',
-			'sslverify' => false,
-			'timeout' => 10,
-			'blocking' => true,
-			] );
+			'sslverify'   => false,
+			'timeout'     => 10,
+			'blocking'    => true,
+		] );
 
 		if ( is_wp_error( $response ) ) {
 			$log = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
@@ -173,12 +173,12 @@ class SourceData {
 			$auth                                = new Auth();
 			$json                                = $auth->prepare( $this->source_data, $site->secret_key );
 			$url                                 = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-			$response = wp_remote_post( $url, [
-				'body' => $json,
+			$response                            = wp_remote_post( $url, [
+				'body'        => $json,
 				'httpversion' => '1.0',
-				'sslverify' => false,
-				'timeout' => 10,
-				'blocking' => true,
+				'sslverify'   => false,
+				'timeout'     => 10,
+				'blocking'    => true,
 			] );
 
 			if ( is_wp_error( $response ) ) {
@@ -215,17 +215,18 @@ class SourceData {
 		$this->consolidate();
 		$this->validate();
 		$this->configure_canonical_urls();
+		$this->source_data->posts = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 
 		foreach ( $this->source_data->connected_sites as $site ) {
 
 			$post_data = $this->create_request_data( $site );
 
 			$response = wp_remote_post( $post_data->url, [
-				'body' => $post_data->json,
+				'body'        => $post_data->json,
 				'httpversion' => '1.0',
-				'sslverify' => false,
-				'timeout' => 10,
-				'blocking' => true,
+				'sslverify'   => false,
+				'timeout'     => 10,
+				'blocking'    => true,
 			] );
 
 			if ( is_wp_error( $response ) ) {
@@ -339,7 +340,6 @@ class SourceData {
 		$this->source_data->url               = (string) get_site_url();
 		$this->source_data->connected_sites   = (array) ConnectedSite::get_all();
 		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->posts             = (object) Posts::get_all( array_keys( $options->push_enabled_post_types ) );
 		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
 		$this->source_data->canonical_urls    = array();
 
