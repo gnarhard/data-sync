@@ -19,9 +19,8 @@ function display_syndicated_posts_table() {
 
 	?>
     <div id="status_dashboard_button_wrap">
-        <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
-		?>
-        <button id="refresh_syndicated_posts" class="button button-secondary">Refresh</button>
+        <button id="refresh_syndicated_posts" class="button button-secondary"><?php _e( 'Refresh', 'data_sync' ); ?></button>
+        <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync All', 'data_sync' ); ?></button>
     </div>
     <table id="wp_data_sync_status">
         <thead>

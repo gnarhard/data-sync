@@ -181,12 +181,20 @@
 
 #syndicated_posts #bulk_data_push,
 #syndicated_posts #refresh_syndicated_posts {
-  margin: 20px 20px 20px 0;
+  margin: 20px 0;
+}
+
+#syndicated_posts #bulk_data_push {
+  float: right;
+}
+
+#syndicated_posts #refresh_syndicated_posts {
+  float: left;
 }
 
 #syndicated_posts table {
   width: 100%;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 #syndicated_posts table td:first-of-type {
