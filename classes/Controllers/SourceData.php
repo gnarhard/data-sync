@@ -377,7 +377,6 @@ class SourceData {
 					$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
 					$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
 
-
 					if ( ! empty( $connected_site ) ) {
 						$permalink      = get_permalink( $post->ID );
 						$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
