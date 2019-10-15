@@ -49,7 +49,8 @@ function data_sync_options_page() {
 						<?php
 						if ( '1' === get_option( 'debug' ) ) {
 							?>
-                            <span id="refresh_error_log">Refresh log</span>
+                            <button id="delete_error_log" class="button button-warning">Purge log</button>
+                            <button class="button button-secondary" id="refresh_error_log">Refresh log</button>
                             <div id="error_log">
 								<?php include_once 'log.php'; ?>
 								<?php echo display_log(); ?>
