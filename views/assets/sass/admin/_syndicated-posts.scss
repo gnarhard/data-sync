@@ -4,12 +4,12 @@
   }
 
   .danger_button {
-    background:#d9534f;
+    background: #d9534f;
     color: white;
   }
 
   .warning_button {
-    background:#f0ad4e;
+    background: #f0ad4e;
     color: white;
   }
 
@@ -26,23 +26,31 @@
   }
 
   #bulk_data_push, #refresh_syndicated_posts {
-    margin: 20px 20px 20px 0;
+    margin: 20px 0;
+  }
+
+  #bulk_data_push {
+    float: right;
+  }
+
+  #refresh_syndicated_posts {
+    float: left;
   }
 
   table {
     width: 100%;
-    margin-bottom: 20px;
+    margin: 20px 0;
 
     td:first-of-type {
       width: 30px;
     }
 
     th:first-of-type {
-      float:left;
+      float: left;
     }
 
     th:last-of-type {
-      float:right;
+      float: right;
     }
 
     .reveal_connected_site_details {
@@ -184,9 +192,9 @@
 
 @keyframes spin {
   from {
-    transform:rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-    transform:rotate(360deg);
+    transform: rotate(360deg);
   }
 }

@@ -269,6 +269,9 @@ class Posts {
 	private static function get_media( int $post_id ) {
 		$media        = new stdClass();
 		$media->image = get_attached_media( 'image', $post_id );
+//		if ( has_post_thumbnail( $post_id ) ) {
+//			$media->image[] = get_post( get_post_thumbnail_id( $post_id ) );
+//		}
 		$media->audio = get_attached_media( 'audio', $post_id );
 		$media->video = get_attached_media( 'video', $post_id );
 
@@ -317,47 +320,57 @@ class Posts {
 			$syndication_info->source_message = '';
 			$syndication_info->icon           = '';
 
-			if ( $sites_syndicating === $number_of_synced_posts_returned ) {
+			if ( $sites_syndicating <= $number_of_synced_posts_returned ) {
 
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
 				foreach ( $synced_post_result as $synced_post ) {
 
-					$synced_post_modified_time = strtotime( $synced_post->date_modified );
-					$source_post_modified_time = strtotime( $post->post_modified_gmt );
-
-					$receiver_post = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
-
-					$receiver_modified_time = strtotime( $receiver_post->post_modified_gmt );
+					$synced_post_modified_time     = strtotime( $synced_post->date_modified );
+					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
+					$receiver_post                 = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
+					$statuses                      = array(); // WILL HOLD DATA OF WHAT IS DIVERGED, UNSYNCED, OR SYNCED FROM RELATED RECEIVER POST AND SYNCED POST DATA.
+					$syndication_info->synced_post = $synced_post;
 
 					if ( $receiver_modified_time > $synced_post_modified_time ) {
 						$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
-						$syndication_info->status                  = 'diverged';
+						$statuses[]                                = 'diverged';
 					} else if ( $source_post_modified_time > $synced_post_modified_time ) {
 						$syndication_info->source_version_edited = true;
-						$syndication_info->status                = 'diverged';
+						$statuses[]                              = 'diverged';
 					} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
-						$syndication_info->status = 'synced';
+						$statuses[] = 'synced';
 					} else if ( 0 === $receiver_modified_time ) {
-						$syndication_info->status = 'unsynced';
+						$statuses[] = 'unsynced';
 					}
 
 				}
 
+				if ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+					// ALL POSTS ARE DIVERGED.
+					$syndication_info->status = 'diverged';
+				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+					// ALL POSTS SYNCED.
+					$syndication_info->status = 'synced';
+				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+					// ALL POSTS UNSYNCED.
+					$syndication_info->status = 'unsynced';
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+					// SOME POSTS ARE DIVERGED, UNSYNCED, AND SYNCED.
+					$syndication_info->status = 'partial';
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+					// SOME POSTS ARE DIVERGED AND SYNCED.
+					$syndication_info->status = 'partial';
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+					// SOME POSTS ARE DIVERGED AND UNSYNCED.
+					$syndication_info->status = 'diverged';
+				}
 
 			} elseif ( 0 === $sites_syndicating ) {
 				$syndication_info->status = 'unsynced';
-			} else if ( ( 0 < $sites_syndicating ) && ( $number_of_synced_posts_returned < $sites_syndicating ) ) {
+			} elseif ( ( 0 < $sites_syndicating ) && ( $number_of_synced_posts_returned < $sites_syndicating ) ) {
 				$syndication_info->status = 'partial';
 			}
-
-			foreach ( $synced_post_result as $synced_post ) {
-				if ( true === (bool) $synced_post->diverged ) {
-					$syndication_info->status = 'diverged';
-				}
-			}
-
-
-			$syndication_info->synced_post = $synced_post;
 
 		}
 
@@ -398,10 +411,10 @@ class Posts {
 	}
 
 
-	public static function find_receiver_post( array $receiver_posts, $site_id, $receiver_post_id) {
-		foreach( $receiver_posts as $receiver_site_posts ) {
+	public static function find_receiver_post( array $receiver_posts, $site_id, $receiver_post_id ) {
+		foreach ( $receiver_posts as $receiver_site_posts ) {
 			if ( (int) $site_id === $receiver_site_posts->site_id ) {
-				foreach( $receiver_site_posts->posts as $receiver_post ) {
+				foreach ( $receiver_site_posts->posts as $receiver_post ) {
 					if ( (int) $receiver_post_id === $receiver_post->ID ) {
 						return $receiver_post;
 					}
@@ -423,6 +436,7 @@ class Posts {
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			} else {
 				$receiver_posts[ $index ]          = new stdClass();
@@ -446,6 +460,7 @@ class Posts {
 		if ( is_wp_error( $response ) ) {
 			$log = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 			unset( $log );
+
 			return $response;
 		} else {
 			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
