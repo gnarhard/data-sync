@@ -317,18 +317,17 @@ class Posts {
 			$syndication_info->source_message = '';
 			$syndication_info->icon           = '';
 
-			if ( $sites_syndicating === $number_of_synced_posts_returned ) {
-
+			if ( $sites_syndicating <= $number_of_synced_posts_returned ) {
 
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
 				foreach ( $synced_post_result as $synced_post ) {
 
-					// TODO: correct values have risk of getting overwritten.
-					$synced_post_modified_time = strtotime( $synced_post->date_modified );
-					$source_post_modified_time = strtotime( $post->post_modified_gmt );
-					$receiver_post             = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
-					$receiver_modified_time    = strtotime( $receiver_post->post_modified_gmt );
-					$statuses                  = array(); // WILL HOLD DATA OF WHAT IS DIVERGED, UNSYNCED, OR SYNCED FROM RELATED RECEIVER POST AND SYNCED POST DATA.
+					$synced_post_modified_time     = strtotime( $synced_post->date_modified );
+					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
+					$receiver_post                 = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
+					$statuses                      = array(); // WILL HOLD DATA OF WHAT IS DIVERGED, UNSYNCED, OR SYNCED FROM RELATED RECEIVER POST AND SYNCED POST DATA.
+					$syndication_info->synced_post = $synced_post;
 
 					if ( $receiver_modified_time > $synced_post_modified_time ) {
 						$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
@@ -364,21 +363,11 @@ class Posts {
 					$syndication_info->status = 'diverged';
 				}
 
-
 			} elseif ( 0 === $sites_syndicating ) {
 				$syndication_info->status = 'unsynced';
-			} else if ( ( 0 < $sites_syndicating ) && ( $number_of_synced_posts_returned < $sites_syndicating ) ) {
+			} elseif ( ( 0 < $sites_syndicating ) && ( $number_of_synced_posts_returned < $sites_syndicating ) ) {
 				$syndication_info->status = 'partial';
 			}
-
-//			foreach ( $synced_post_result as $synced_post ) {
-//				if ( true === (bool) $synced_post->diverged ) {
-//					$syndication_info->status = 'diverged';
-//				}
-//			}
-
-
-			$syndication_info->synced_post = $synced_post;
 
 		}
 

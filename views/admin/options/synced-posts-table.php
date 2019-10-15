@@ -16,11 +16,13 @@ function display_syndicated_posts_table() {
 	$posts                       = Posts::get_wp_posts( $post_types, true );
 	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
 	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-	$tz                          = date_default_timezone_get();
-	date_default_timezone_set( get_option( 'timezone_string' ) );
 
 	?>
-
+    <div id="status_dashboard_button_wrap">
+        <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
+		?>
+        <button id="refresh_syndicated_posts" class="button button-secondary">Refresh</button>
+    </div>
     <table id="wp_data_sync_status">
         <thead>
         <tr>
@@ -72,23 +74,6 @@ function display_syndicated_posts_table() {
 		?>
         </tbody>
     </table>
-    <div id="status_dashboard_button_wrap">
-		<?php
-		if ( get_option( 'show_body_responses' ) ) {
-			?>
-            <button class="disabled" disabled
-                    title="Please disable 'Show Body Responses' option in the settings to enable data push."
-                    id="bulk_data_push">Sync
-            </button><?php
-		} else {
-			?>
-            <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync', 'data_sync' ); ?></button><?php
-			?>
-            <button id="refresh_syndicated_posts" class="button button-secondary">Refresh</button><?php
-		}
-		?>
-
-    </div>
 	<?php
 }
 
@@ -151,7 +136,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 
 				echo '<span>Last syndication: ' . $local_timestamp . '</span>';
 
-                // NEED TO GET PER-SITE DATA. CAN'T RELY ON DATA FROM $syndication_info BECAUSE THAT IS POST-SPECIFIC, NOT SITE AND POST SPECIFIC.
+				// NEED TO GET PER-SITE DATA. CAN'T RELY ON DATA FROM $syndication_info BECAUSE THAT IS POST-SPECIFIC, NOT SITE AND POST SPECIFIC.
 				$synced_post_modified_time = strtotime( $connected_site_synced_post->date_modified );
 				$source_post_modified_time = strtotime( $post->post_modified_gmt );
 				$receiver_post             = Posts::find_receiver_post( $receiver_posts, $connected_site_synced_post->receiver_site_id, $connected_site_synced_post->receiver_post_id );
@@ -202,9 +187,6 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
         </div>
         </div>
 		<?php
-
-
-		date_default_timezone_set( $tz );
 
 	}
 }
