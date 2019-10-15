@@ -2,6 +2,7 @@ import AJAX from '../../AJAX.es6.js';
 import Success from './Success.es6';
 import SyndicatedPosts from './SyndicatedPosts.es6'
 import EnabledPostTypes from './EnabledPostTypes.es6'
+import Logs from './Logs.es6'
 
 class ConnectedSites {
 
@@ -38,6 +39,8 @@ class ConnectedSites {
 
                     new SyndicatedPosts();
                     new EnabledPostTypes();
+                    let logs = new Logs()
+                    logs.refresh_log();
                 }
             });
         }

@@ -158,7 +158,11 @@ class DB {
 		$sql    = 'TRUNCATE TABLE ' . $this->table_name;
 		$result = $wpdb->get_results( $sql );
 
-		return $result;
+		if ( empty( $result ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public function query( string $sql ) {

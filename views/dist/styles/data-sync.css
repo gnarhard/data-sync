@@ -1,3 +1,7 @@
+.settings_page_data-sync-options .loading_spinner {
+  width: 100%;
+}
+
 .settings_page_data-sync-options .noselect {
   -webkit-touch-callout: none;
   /* iOS Safari */
