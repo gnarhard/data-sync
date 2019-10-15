@@ -1,8 +1,10 @@
-.settings_page_data-sync-options .loading_spinner {
+.settings_page_data-sync-options .loading_spinner,
+.toplevel_page_data-sync-options .loading_spinner {
   width: 100%;
 }
 
-.settings_page_data-sync-options .noselect {
+.settings_page_data-sync-options .noselect,
+.toplevel_page_data-sync-options .noselect {
   -webkit-touch-callout: none;
   /* iOS Safari */
   -webkit-user-select: none;
@@ -16,29 +18,36 @@
   /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
 }
 
-.settings_page_data-sync-options #feedback .error {
+.settings_page_data-sync-options #feedback .error,
+.toplevel_page_data-sync-options #feedback .error {
   color: #d9534f;
 }
 
-.settings_page_data-sync-options #feedback .success {
+.settings_page_data-sync-options #feedback .success,
+.toplevel_page_data-sync-options #feedback .success {
   color: #5cb85c;
 }
 
-.settings_page_data-sync-options table {
+.settings_page_data-sync-options table,
+.toplevel_page_data-sync-options table {
   width: 100%;
 }
 
-.settings_page_data-sync-options input[type=text] {
+.settings_page_data-sync-options input[type=text],
+.toplevel_page_data-sync-options input[type=text] {
   width: 400px;
 }
 
 .settings_page_data-sync-options textarea,
-.settings_page_data-sync-options select {
+.settings_page_data-sync-options select,
+.toplevel_page_data-sync-options textarea,
+.toplevel_page_data-sync-options select {
   min-height: 300px;
   width: 400px;
 }
 
-.settings_page_data-sync-options .dashicons-update {
+.settings_page_data-sync-options .dashicons-update,
+.toplevel_page_data-sync-options .dashicons-update {
   -webkit-animation-name: spin;
           animation-name: spin;
   -webkit-animation-duration: 4000ms;
