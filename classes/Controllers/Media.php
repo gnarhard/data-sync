@@ -45,6 +45,15 @@ class Media {
 						$this->send_to_receiver( $image, $connected_sites );
 					}
 
+					$featured_image = (array) $post->media->featured_image;
+					foreach ( $synced_posts as $synced_post ) {
+						if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
+							$featured_image->receiver_post_id = $synced_post->receiver_post_id;
+							$featured_image->featured         = true;
+						}
+					}
+					$this->send_to_receiver( $featured_image, $connected_sites );
+
 					$audio_attachments = (array) $post->media->audio;
 					foreach ( $audio_attachments as $key => $audio ) {
 						foreach ( $synced_posts as $synced_post ) {
@@ -196,7 +205,9 @@ class Media {
 				$updated_meta                 = wp_update_attachment_metadata( $attachment_id, $attachment_data );
 				$source_data->media->diverged = false;
 				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
-				$this->update_thumbnail_id( $source_data->media, $attachment_id );
+				if ( $source_data->media->featured ) {
+					$this->update_thumbnail_id( $source_data->media, $attachment_id );
+				}
 			} else {
 				$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
 				unset( $log );
