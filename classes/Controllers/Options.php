@@ -148,12 +148,13 @@ class Options {
 	 * Add admin menu
 	 */
 	public function admin_menu() {
-		add_options_page(
+		add_menu_page(
 			'Data Sync',
 			'Data Sync',
 			'manage_options',
 			'data-sync-options',
-			$this->view_namespace . '\data_sync_options_page'
+			$this->view_namespace . '\data_sync_options_page',
+			'dashicons-networking'
 		);
 	}
 
