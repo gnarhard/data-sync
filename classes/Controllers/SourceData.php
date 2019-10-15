@@ -6,7 +6,6 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
-use DataSync\Controllers\Options;
 use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -163,6 +162,8 @@ class SourceData {
 //		print_r( wp_remote_retrieve_body( $response ) );
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 
 	}
@@ -200,6 +201,8 @@ class SourceData {
 
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 	}
 
@@ -223,9 +226,9 @@ class SourceData {
 	public function bulk_push() {
 
 		$this->consolidate();
+		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 		$this->validate();
 		$this->configure_canonical_urls();
-		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 
 		// COULD BE EMPTY FROM VALIDATION.
 		if ( ! empty( $this->source_data ) ) {
@@ -253,6 +256,8 @@ class SourceData {
 
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 
 	}
@@ -317,8 +322,8 @@ class SourceData {
 	private function get_receiver_data() {
 		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
 		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
-		$log                         = new Logs( 'Received error logs from receivers.' );
-		$log                         = new Logs( 'Received synced posts from receivers.' );
+		$log                         = new Logs( 'Retrieved error logs from receivers.' );
+		$log                         = new Logs( 'Retrieved synced posts from receivers.' );
 		unset( $log );
 	}
 
@@ -344,19 +349,17 @@ class SourceData {
 		$options      = Options::source();
 		$upload_dir   = wp_get_upload_dir();
 
-		$this->source_data                    = new stdClass();
-		$this->source_data->upload_path       = $upload_dir['path'];
-		$this->source_data->upload_url        = $upload_dir['url'];
-		$this->source_data->start_time        = (string) current_time( 'mysql', 1 );
-		$this->source_data->start_microtime   = (float) microtime( true );
-		$this->source_data->options           = (object) $options;
-		$this->source_data->acf               = (array) ACFs::get_acf_fields();
-		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
-		$this->source_data->url               = (string) get_site_url();
-		$this->source_data->connected_sites   = (array) ConnectedSite::get_all();
-		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
-		$this->source_data->canonical_urls    = array();
+		$this->source_data                  = new stdClass();
+		$this->source_data->upload_path     = $upload_dir['path'];
+		$this->source_data->upload_url      = $upload_dir['url'];
+		$this->source_data->start_time      = (string) current_time( 'mysql', 1 );
+		$this->source_data->start_microtime = (float) microtime( true );
+		$this->source_data->options         = (object) $options;
+		$this->source_data->url             = (string) get_site_url();
+		$this->source_data->connected_sites = (array) ConnectedSite::get_all();
+		$this->source_data->nonce           = (string) wp_create_nonce( 'data_push' );
+		$this->source_data->synced_posts    = (array) $synced_posts->get_all()->get_data();
+		$this->source_data->canonical_urls  = array();
 
 	}
 
@@ -366,27 +369,29 @@ class SourceData {
 	 * Set up canonical urls that point to the permalink set in the canonical site
 	 */
 	private function configure_canonical_urls() {
-		foreach ( $this->source_data->posts as $post_type => $post_data ) {
+		if ( ! empty( $this->source_data ) ) {
+			foreach ( $this->source_data->posts as $post_type => $post_data ) {
 
-			foreach ( $post_data as $key => $post ) {
+				foreach ( $post_data as $key => $post ) {
 
-				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
-				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
+					$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
+					$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
 
+					if ( ! empty( $connected_site ) ) {
+						$permalink      = get_permalink( $post->ID );
+						$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
 
-				if ( ! empty( $connected_site ) ) {
-					$permalink      = get_permalink( $post->ID );
-					$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
+						$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+					} else {
+						$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
+						unset( $log );
+					}
 
-					$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
-				} else {
-					$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
-					unset( $log );
 				}
 
 			}
-
 		}
+
 	}
 
 
@@ -416,12 +421,20 @@ class SourceData {
 		}
 
 		$connected_sites = (array) ConnectedSite::get_all();
+		$plugin_info     = Options::get_required_plugins_info();
 
 		foreach ( $connected_sites as $site ) {
-			$validated = Options::validate_required_plugins_info( (int) $site->id );
+			$validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
 			if ( ! $validated ) {
 				unset( $this->source_data );
+				break;
 			}
+		}
+
+		// NEED TO VALIDATE BEFORE SETTING DEPENDENT PLUGIN DATA.
+		if ( $validated ) {
+			$this->source_data->acf               = (array) ACFs::get_acf_fields();
+			$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		}
 
 		// TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
