@@ -6,7 +6,6 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
-use DataSync\Controllers\Options;
 use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -163,6 +162,8 @@ class SourceData {
 //		print_r( wp_remote_retrieve_body( $response ) );
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 
 	}
@@ -200,6 +201,8 @@ class SourceData {
 
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 	}
 
@@ -223,9 +226,9 @@ class SourceData {
 	public function bulk_push() {
 
 		$this->consolidate();
+		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 		$this->validate();
 		$this->configure_canonical_urls();
-		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 
 		// COULD BE EMPTY FROM VALIDATION.
 		if ( ! empty( $this->source_data ) ) {
@@ -253,6 +256,8 @@ class SourceData {
 
 			$this->finish_push( wp_remote_retrieve_body( $response ) );
 
+		} else {
+			wp_send_json_error( 'Validation failed.' );
 		}
 
 	}
@@ -366,27 +371,30 @@ class SourceData {
 	 * Set up canonical urls that point to the permalink set in the canonical site
 	 */
 	private function configure_canonical_urls() {
-		foreach ( $this->source_data->posts as $post_type => $post_data ) {
+		if ( ! empty( $this->source_data ) ) {
+			foreach ( $this->source_data->posts as $post_type => $post_data ) {
 
-			foreach ( $post_data as $key => $post ) {
+				foreach ( $post_data as $key => $post ) {
 
-				$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
-				$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
+					$canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
+					$connected_site    = ConnectedSite::get( $canonical_site_id )[0];
 
 
-				if ( ! empty( $connected_site ) ) {
-					$permalink      = get_permalink( $post->ID );
-					$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
+					if ( ! empty( $connected_site ) ) {
+						$permalink      = get_permalink( $post->ID );
+						$canonical_link = str_replace( get_site_url(), $connected_site->url, $permalink );
 
-					$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
-				} else {
-					$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
-					unset( $log );
+						$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
+					} else {
+						$log = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
+						unset( $log );
+					}
+
 				}
 
 			}
-
 		}
+
 	}
 
 
