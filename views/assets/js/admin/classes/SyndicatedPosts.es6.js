@@ -1,6 +1,7 @@
 import AJAX from '../../AJAX.es6.js'
 import Success from './Success.es6'
 import EnabledPostTypes from './EnabledPostTypes.es6'
+import Logs from './Logs.es6'
 
 class SyndicatedPosts {
 
@@ -51,6 +52,8 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Posts')
       new EnabledPostTypes()
+      let logs = new Logs()
+      logs.refresh_log();
     })
   }
 
@@ -97,6 +100,8 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
+      let logs = new Logs()
+      logs.refresh_log();
     })
   }
 
@@ -108,6 +113,8 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
+      let logs = new Logs()
+      logs.refresh_log();
     })
   }
 

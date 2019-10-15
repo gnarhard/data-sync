@@ -1,3 +1,7 @@
+.settings_page_data-sync-options .loading_spinner {
+  width: 100%;
+}
+
 .settings_page_data-sync-options .noselect {
   -webkit-touch-callout: none;
   /* iOS Safari */
@@ -72,6 +76,17 @@
 #refresh_error_log {
   cursor: pointer;
   float: right;
+  margin: 20px 0;
+}
+
+#delete_error_log.button-warning {
+  background: #d9534f;
+  color: white;
+  margin: 20px 0;
+}
+
+#error_log table {
+  margin: 20px 0;
 }
 
 #error_log table tr td {

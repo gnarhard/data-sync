@@ -87,6 +87,12 @@ class Log {
 		return $db->delete( $id );
 	}
 
+	public static function delete_all() {
+		$db = new DB( self::$table_name );
+
+		return $db->delete_all();
+	}
+
 	public function create_db_table() {
 		global $wpdb;
 
