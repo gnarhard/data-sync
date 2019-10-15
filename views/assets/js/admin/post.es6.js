@@ -1,8 +1,8 @@
 import Helpers from '../Helpers.es6.js'
 
-window.onload = function (e) {
+document.addEventListener( "DOMContentLoaded", function () {
 
-  if ( DataSync.options.source_data ) {
+  if ( DataSync.options.source_site ) {
 
     if (document.getElementsByClassName('edit-post-header__settings').length) {
       if (document.getElementsByClassName('edit-post-header__settings')[0].getElementsByTagName('button').length) {
@@ -55,4 +55,4 @@ window.onload = function (e) {
 
   }
 
-}
+});
