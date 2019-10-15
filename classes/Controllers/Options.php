@@ -148,6 +148,7 @@ class Options {
 	 * Add admin menu
 	 */
 	public function admin_menu() {
+
 		add_menu_page(
 			'Data Sync',
 			'Data Sync',
@@ -156,6 +157,7 @@ class Options {
 			$this->view_namespace . '\data_sync_options_page',
 			'dashicons-networking'
 		);
+
 	}
 
 	public function get_settings_tab_html( WP_REST_Request $request ) {
