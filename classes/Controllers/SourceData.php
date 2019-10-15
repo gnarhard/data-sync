@@ -322,8 +322,8 @@ class SourceData {
 	private function get_receiver_data() {
 		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
 		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
-		$log                         = new Logs( 'Received error logs from receivers.' );
-		$log                         = new Logs( 'Received synced posts from receivers.' );
+		$log                         = new Logs( 'Retrieved error logs from receivers.' );
+		$log                         = new Logs( 'Retrieved synced posts from receivers.' );
 		unset( $log );
 	}
 
@@ -349,19 +349,17 @@ class SourceData {
 		$options      = Options::source();
 		$upload_dir   = wp_get_upload_dir();
 
-		$this->source_data                    = new stdClass();
-		$this->source_data->upload_path       = $upload_dir['path'];
-		$this->source_data->upload_url        = $upload_dir['url'];
-		$this->source_data->start_time        = (string) current_time( 'mysql', 1 );
-		$this->source_data->start_microtime   = (float) microtime( true );
-		$this->source_data->options           = (object) $options;
-		$this->source_data->acf               = (array) ACFs::get_acf_fields();
-		$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
-		$this->source_data->url               = (string) get_site_url();
-		$this->source_data->connected_sites   = (array) ConnectedSite::get_all();
-		$this->source_data->nonce             = (string) wp_create_nonce( 'data_push' );
-		$this->source_data->synced_posts      = (array) $synced_posts->get_all()->get_data();
-		$this->source_data->canonical_urls    = array();
+		$this->source_data                  = new stdClass();
+		$this->source_data->upload_path     = $upload_dir['path'];
+		$this->source_data->upload_url      = $upload_dir['url'];
+		$this->source_data->start_time      = (string) current_time( 'mysql', 1 );
+		$this->source_data->start_microtime = (float) microtime( true );
+		$this->source_data->options         = (object) $options;
+		$this->source_data->url             = (string) get_site_url();
+		$this->source_data->connected_sites = (array) ConnectedSite::get_all();
+		$this->source_data->nonce           = (string) wp_create_nonce( 'data_push' );
+		$this->source_data->synced_posts    = (array) $synced_posts->get_all()->get_data();
+		$this->source_data->canonical_urls  = array();
 
 	}
 
@@ -424,12 +422,20 @@ class SourceData {
 		}
 
 		$connected_sites = (array) ConnectedSite::get_all();
+		$plugin_info     = Options::get_required_plugins_info();
 
 		foreach ( $connected_sites as $site ) {
-			$validated = Options::validate_required_plugins_info( (int) $site->id );
+			$validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
 			if ( ! $validated ) {
 				unset( $this->source_data );
+				break;
 			}
+		}
+
+		// NEED TO VALIDATE BEFORE SETTING DEPENDENT PLUGIN DATA.
+		if ( $validated ) {
+			$this->source_data->acf               = (array) ACFs::get_acf_fields();
+			$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 		}
 
 		// TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
