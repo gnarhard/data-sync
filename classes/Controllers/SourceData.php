@@ -420,24 +420,26 @@ class SourceData {
 			}
 		}
 
+		// TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
+
 		$connected_sites = (array) ConnectedSite::get_all();
 		$plugin_info     = Options::get_required_plugins_info();
 
-		foreach ( $connected_sites as $site ) {
-			$validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
-			if ( ! $validated ) {
-				unset( $this->source_data );
-				break;
+		if ( ! empty( $plugin_info ) ) {
+			foreach ( $connected_sites as $site ) {
+				$validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
+				if ( ! $validated ) {
+					unset( $this->source_data );
+					break;
+				}
+			}
+
+			// NEED TO VALIDATE BEFORE SETTING DEPENDENT PLUGIN DATA.
+			if ( $validated ) {
+				$this->source_data->acf               = (array) ACFs::get_acf_fields();
+				$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 			}
 		}
-
-		// NEED TO VALIDATE BEFORE SETTING DEPENDENT PLUGIN DATA.
-		if ( $validated ) {
-			$this->source_data->acf               = (array) ACFs::get_acf_fields();
-			$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
-		}
-
-		// TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
 
 	}
 

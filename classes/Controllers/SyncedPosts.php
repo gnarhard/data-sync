@@ -89,16 +89,11 @@ class SyncedPosts {
 
 
 	public static function is_synced( object $post, array $synced_posts ) {
-
 		if ( self::get_receiver_post_id( $post, $synced_posts ) ) {
 			return true;
 		}
 
 		return false;
-
-//		$data = self::get_synced_post_data( $post );
-//
-//		return isset( $data->id );
 	}
 
 	public static function retrieve_from_receiver( $data_sync_start_time ) {

@@ -24,7 +24,7 @@ class Posts {
 			add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
 			add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
 		} elseif ( '0' === get_option( 'source_site' ) ) {
-
+			add_filter( 'pre_render_block', [ $this, 'update_block_id_attrs' ], 10, 2 );
 			add_action( 'rest_api_init', [ $this, 'register_receiver_routes' ] );
 		}
 
@@ -267,16 +267,142 @@ class Posts {
 	}
 
 	private static function get_media( int $post_id ) {
-		$media        = new stdClass();
-		$media->image = get_attached_media( 'image', $post_id );
+		$media = new stdClass();
+
+		$media->image = Posts::get_images( $post_id );
+
 		if ( has_post_thumbnail( $post_id ) ) {
-			$media->featured_image = get_post( get_post_thumbnail_id( $post_id ) );
+			$media->featured_image              = get_post( get_post_thumbnail_id( $post_id ) );
 			$media->featured_image->post_parent = $post_id;
 		}
-		$media->audio = get_attached_media( 'audio', $post_id );
-		$media->video = get_attached_media( 'video', $post_id );
+
+		$media->audio = Posts::get_audio( $post_id );
+		$media->video = Posts::get_video( $post_id );
 
 		return $media;
+	}
+
+	private static function get_images( $post_id ) {
+		$images          = [];
+		$image_ids       = [];
+		$attached_images = get_attached_media( 'image', $post_id );
+
+		foreach ( $attached_images as $attached_image ) {
+			$image_ids[] = $attached_image->ID;
+		}
+
+		// get all the galleries in the post
+		$gallery_image_ids = [];
+		if ( $galleries = get_post_galleries( $post_id, false ) ) {
+
+			foreach ( $galleries as $gallery ) {
+
+				// pull the ids from each gallery
+				if ( ! empty ( $gallery['ids'] ) ) {
+
+					// merge into our final list
+					$image_ids = array_merge( $gallery_image_ids, explode( ',', $gallery['ids'] ) );
+				}
+			}
+		}
+
+
+		$post = get_post( $post_id );
+
+		// GET UNATTACHED POST IMAGES THAT LIVE IN BLOCKS.
+		if ( has_blocks( $post->post_content ) ) {
+			$blocks = parse_blocks( $post->post_content );
+
+			foreach ( $blocks as $block ) {
+				if ( ! empty( $block['attrs'] ) ) {
+					if ( 'core/image' === $block['blockName'] ) {
+						$image_ids[] = $block['attrs']['id'];
+					}
+				}
+			}
+		}
+
+		$unique_image_ids = array_unique( $image_ids );
+
+		foreach ( $unique_image_ids as $image_id ) {
+			$post              = get_post( $image_id );
+			$post->post_parent = $post_id;
+			$images[]          = $post;
+		}
+
+		return $images;
+	}
+
+
+	private static function get_audio( $post_id ) {
+		$audio          = [];
+		$audio_ids      = [];
+		$attached_audio = get_attached_media( 'audio', $post_id );
+
+		foreach ( $attached_audio as $attached_a ) {
+			$audio_ids[] = $attached_a->ID;
+		}
+
+		$post = get_post( $post_id );
+
+		// GET UNATTACHED POST IMAGES THAT LIVE IN BLOCKS.
+		if ( has_blocks( $post->post_content ) ) {
+			$blocks = parse_blocks( $post->post_content );
+
+			foreach ( $blocks as $block ) {
+				if ( ! empty( $block['attrs'] ) ) {
+					if ( 'core/audio' === $block['blockName'] ) {
+						$audio_ids[] = $block['attrs']['id'];
+					}
+				}
+			}
+		}
+
+		$unique_audio_ids = array_unique( $audio_ids );
+
+		foreach ( $unique_audio_ids as $audio_id ) {
+			$post              = get_post( $audio_id );
+			$post->post_parent = $post_id;
+			$audio[]           = $post;
+		}
+
+		return $audio;
+	}
+
+
+	private static function get_video( $post_id ) {
+		$video          = [];
+		$video_ids      = [];
+		$attached_video = get_attached_media( 'video', $post_id );
+
+		foreach ( $attached_video as $attached_a ) {
+			$video_ids[] = $attached_a->ID;
+		}
+
+		$post = get_post( $post_id );
+
+		// GET UNATTACHED POST IMAGES THAT LIVE IN BLOCKS.
+		if ( has_blocks( $post->post_content ) ) {
+			$blocks = parse_blocks( $post->post_content );
+
+			foreach ( $blocks as $block ) {
+				if ( ! empty( $block['attrs'] ) ) {
+					if ( 'core/video' === $block['blockName'] ) {
+						$video_ids[] = $block['attrs']['id'];
+					}
+				}
+			}
+		}
+
+		$unique_video_ids = array_unique( $video_ids );
+
+		foreach ( $unique_video_ids as $video_id ) {
+			$post              = get_post( $video_id );
+			$post->post_parent = $post_id;
+			$video[]           = $post;
+		}
+
+		return $video;
 	}
 
 
@@ -323,6 +449,8 @@ class Posts {
 
 			if ( $sites_syndicating <= $number_of_synced_posts_returned ) {
 
+				$statuses = array(); // WILL HOLD DATA OF WHAT IS DIVERGED, UNSYNCED, OR SYNCED FROM RELATED RECEIVER POST AND SYNCED POST DATA.
+
 				// APPEARS SYNCED, BUT CHECK MODIFIED DATE/TIME.
 				foreach ( $synced_post_result as $synced_post ) {
 
@@ -330,7 +458,6 @@ class Posts {
 					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
 					$receiver_post                 = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
 					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
-					$statuses                      = array(); // WILL HOLD DATA OF WHAT IS DIVERGED, UNSYNCED, OR SYNCED FROM RELATED RECEIVER POST AND SYNCED POST DATA.
 					$syndication_info->synced_post = $synced_post;
 
 					if ( $receiver_modified_time > $synced_post_modified_time ) {
@@ -397,7 +524,7 @@ class Posts {
 
 		} else if ( 'partial' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
-			$syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with a connected site. Please check connected site info or logs for more details.</span>';
+			$syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
 		} else if ( 'unsynced' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
 			$syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
@@ -548,6 +675,27 @@ class Posts {
 			SyncedTerms::save_to_wp( $receiver_post_id, $post->taxonomies );
 
 			return $receiver_post_id;
+		}
+
+	}
+
+
+	public function update_block_id_attrs( $null_block, $block ) {
+
+		// UPDATE BLOCK ID
+		if ( ( ! empty( $block['attrs'] ) ) && ( ! empty ( $block['attrs']['id'] ) ) ) {
+			$args        = array(
+				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+				'source_post_id'   => (int) $block['attrs']['id'],
+			);
+			$synced_post = SyncedPost::get_where( $args );
+			if ( ! empty( $synced_post ) ) {
+				if ( (int) $block['attrs']['id'] !== (int) $synced_post[0]->receiver_post_id ) {
+					$block['attrs']['id'] = (int) $synced_post[0]->receiver_post_id;
+
+					return render_block( $block );
+				}
+			}
 		}
 
 	}
