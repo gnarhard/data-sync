@@ -60,6 +60,17 @@ class SourceData {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
+			'/source_data',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_source_data' ),
+				),
+			)
+		);
+
+		$registered = register_rest_route(
+			DATA_SYNC_API_BASE_URL,
 			'/source_data/start_fresh',
 			array(
 				array(
@@ -440,6 +451,21 @@ class SourceData {
 				$this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
 			}
 		}
+
+	}
+
+	public function get_source_data( WP_REST_Request $request ) {
+		$source_data = new stdClass();
+
+		$source_data->source_options  = Options::source();
+		$source_data->connected_sites = (array) ConnectedSite::get_all();
+		if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
+			$source_data->error_msg = '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+		}
+		$source_data->post_types                  = array_keys( $source_data->source_options->push_enabled_post_types );
+		$source_data->posts                       = Posts::get_wp_posts( $source_data->post_types, true );
+
+		wp_send_json( $source_data );
 
 	}
 

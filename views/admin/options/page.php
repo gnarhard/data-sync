@@ -26,8 +26,30 @@ function data_sync_options_page() {
 			<?php } ?>
 			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
                 <div id="syndicated_posts">
-                    <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
-                    <div id="syndicated_posts_wrap"></div>
+                    <div id="syndicated_posts_wrap">
+                        <div id="status_dashboard_button_wrap">
+                            <button id="refresh_syndicated_posts"
+                                    class="button button-secondary"><?php _e( 'Refresh', 'data_sync' ); ?></button>
+                            <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync All', 'data_sync' ); ?></button>
+                        </div>
+                        <table id="wp_data_sync_status">
+                            <thead>
+                            <tr>
+                                <th><?php _e( 'ID', 'data_sync' ); ?></th>
+                                <th><?php _e( 'TITLE', 'data_sync' ); ?></th>
+                                <th><?php _e( 'TYPE', 'data_sync' ); ?></th>
+                                <th><?php _e( 'STATUS', 'data_sync' ); ?></th>
+                                <th><?php _e( 'DETAILS', 'data_sync' ); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody id="syndicated_posts_data">
+                            <tr class="loading_spinner">
+                                <td colspan="5">
+                                    <i class="dashicons dashicons-update"></i> Loading. . .</tr>
+                                </td>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div id="templates">
                     <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>

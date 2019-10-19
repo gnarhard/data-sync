@@ -14,18 +14,42 @@ class AJAX {
     return await response.json()
   }
 
-  static async get (url) {
+  static async post_html (url, data) {
 
-    let response = await fetch(url, {
-      method: 'GET',
+    const response = await fetch(url, {
+      method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': DataSync.api.nonce,
+        // 'Accept': 'application/json',
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-WP-Nonce': DataSync.api.nonce
       },
+      body: JSON.stringify(data)
     })
+    return await response.text()
+  }
 
-    return await response.json()
+  static async get ( url, local = true ) {
+
+    if ( local ) {
+      let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': DataSync.api.nonce,
+        },
+      })
+      return await response.json()
+    } else {
+      let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+      return await response.json()
+    }
   }
 
   static async get_html (url) {

@@ -34,12 +34,73 @@ class SyndicatedPosts {
   }
 
   static refresh_view () {
-    AJAX.get_html(DataSync.api.url + '/settings_tab/syndicated_posts').then(function (result) {
-      Success.display_html(result, 'syndicated_posts', 'Syndicated posts')
-      document.querySelector('#syndicated_posts_wrap').classList.remove('hidden')
-      SyndicatedPosts.init()
-      SyndicatedPosts.single_post_actions_init()
+
+    let data = {}
+
+    AJAX.get(DataSync.api.url + '/source_data').then(function (source_data) {
+
+      data.source_data = source_data
+      data.receiver_data = {}
+      data.receiver_data.receiver_posts = []
+      data.receiver_data.enabled_post_type_site_data = []
+      let i = 1
+      let connected_site_count = source_data.connected_sites.length
+
+      source_data.connected_sites.forEach((connected_site, index) => {
+        AJAX.get(connected_site.url + '/wp-json/data-sync/v1/posts/all', false).then(function (receiver_posts) {
+          data.receiver_data.receiver_posts[index].posts = receiver_posts
+          data.receiver_data.receiver_posts[index].site_id = parseInt(connected_site.id);
+        })
+
+        AJAX.get(connected_site.url + '/wp-json/data-sync/v1/post_types/check', false).then(function (enabled_post_types) {
+          data.receiver_data.enabled_post_type_site_data[index] = {}
+          data.receiver_data.enabled_post_type_site_data[index].site_id = connected_site.id
+          data.receiver_data.enabled_post_type_site_data[index].enabled_post_types = enabled_post_types
+
+          if (connected_site_count === i) {
+
+            console.log(data)
+
+            let post_count = source_data.posts.length
+            let x = 1
+
+            source_data.posts.forEach( ( post ) => {
+              AJAX.post_html(DataSync.api.url + '/syndicated_post/' + post.ID, data).then(function (syndicated_post_details) {
+
+                // console.log(syndicated_post_details)
+
+                let result_array = syndicated_post_details.split('null')
+                result_array.slice(-1)[0]
+                let html = result_array.join(' ')
+
+                // if (1 === x) {
+                //   document.getElementById('syndicated_posts_data').innerHTML = html
+                // } else {
+                $=jQuery;
+                  $('#syndicated_posts_data').prepend(html)
+                // }
+
+                if ( post_count === x ) {
+                  SyndicatedPosts.finish_refresh();
+                }
+
+                x++
+              })
+            })
+          }
+
+          i++;
+        })
+      })
+
     })
+  }
+
+  static finish_refresh() {
+    document.querySelector('#syndicated_posts_data' + ' .loading_spinner').classList.add('hidden')
+    document.querySelector('#syndicated_posts_wrap').classList.remove('hidden')
+    SyndicatedPosts.init()
+    SyndicatedPosts.single_post_actions_init()
   }
 
   static bulk_push (e) {
@@ -53,7 +114,7 @@ class SyndicatedPosts {
       Success.show_success_message(result, 'Posts')
       new EnabledPostTypes()
       let logs = new Logs()
-      logs.refresh_log();
+      logs.refresh_log()
     })
   }
 
@@ -101,7 +162,7 @@ class SyndicatedPosts {
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
       let logs = new Logs()
-      logs.refresh_log();
+      logs.refresh_log()
     })
   }
 
@@ -114,7 +175,7 @@ class SyndicatedPosts {
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
       let logs = new Logs()
-      logs.refresh_log();
+      logs.refresh_log()
     })
   }
 

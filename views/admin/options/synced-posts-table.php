@@ -5,80 +5,42 @@ namespace DataSync;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\Posts;
 use DataSync\Controllers\PostTypes;
+use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 
-function display_syndicated_posts_table() {
 
+function display_syndicated_post( $post, $connected_sites, $receiver_posts, $enabled_post_type_site_data ) {
+
+    ob_start();
+
+	$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
+	$post_type_obj    = get_post_type_object( $post->post_type );
 	?>
-    <div id="status_dashboard_button_wrap">
-        <button id="refresh_syndicated_posts" class="button button-secondary"><?php _e( 'Refresh', 'data_sync' ); ?></button>
-        <button id="bulk_data_push" class="button button-primary"><?php _e( 'Sync All', 'data_sync' ); ?></button>
-    </div>
-    <table id="wp_data_sync_status">
-        <thead>
-        <tr>
-            <th><?php _e( 'ID', 'data_sync' ); ?></th>
-            <th><?php _e( 'TITLE', 'data_sync' ); ?></th>
-            <th><?php _e( 'TYPE', 'data_sync' ); ?></th>
-            <th><?php _e( 'STATUS', 'data_sync' ); ?></th>
-            <th><?php _e( 'DETAILS', 'data_sync' ); ?></th>
-        </tr>
-        </thead>
-        <tbody>
-		<?php
+    <tr class="top_level_post_detail" data-id="<?php echo $post->ID ?>"
+        id="synced_post-<?php echo $post->ID ?>">
+        <td><?php echo esc_html( $post->ID ); ?></td>
+        <td>
+            <a class="<?php echo $syndication_info->trash_class ?>"
+               href="/wp-admin/post.php?post=<?php echo $post->ID; ?>&action=edit"
+               target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
+        </td>
 
-
-
-		$source_options              = Options::source();
-		$connected_sites             = (array) ConnectedSite::get_all();
-		if ( empty( $source_options->push_enabled_post_types ) ) {
-			return '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
-		}
-		$post_types                  = array_keys( $source_options->push_enabled_post_types );
-		$posts                       = Posts::get_wp_posts( $post_types, true );
-		$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
-		$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-
-		if ( count( $posts ) ) {
-
-			foreach ( $posts as $post ) {
-
-				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
-				$post_type_obj    = get_post_type_object( $post->post_type );
-				?>
-                <tr class="top_level_post_detail" data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
-                    <td><?php echo esc_html( $post->ID ); ?></td>
-                    <td>
-                        <a class="<?php echo $syndication_info->trash_class ?>"
-                           href="/wp-admin/post.php?post=<?php echo $post->ID; ?>&action=edit"
-                           target="_blank"><?php echo esc_html( $post->post_title ); ?></a>
-                    </td>
-
-                    <td><?php echo esc_html( $post_type_obj->label ); ?></td>
-                    <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
-                    <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
-                </tr>
-                <tr class="post_details" id="post-<?php echo $post->ID ?>">
-                    <td class="post_detail_wrap" colspan="5">
-                        <div class="source_details">
-                            <h4>Source Info</h4>
-							<?php echo $syndication_info->source_message ?>
-                        </div>
-                        <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ); ?></div>
-                    </td>
-                </tr>
-				<?php
-			}
-
-		} else {
-			echo '<tr>No posts to sync</tr>';
-		}
-
-		?>
-        </tbody>
-    </table>
+        <td><?php echo esc_html( $post_type_obj->label ); ?></td>
+        <td class="wp_data_synced_post_status_icons"><?php echo $syndication_info->icon; ?></td>
+        <td class="expand_post_details noselect" data-id="<?php echo $post->ID ?>">+</td>
+    </tr>
+    <tr class="post_details" id="post-<?php echo $post->ID ?>">
+        <td class="post_detail_wrap" colspan="5">
+            <div class="source_details">
+                <h4>Source Info</h4>
+				<?php echo $syndication_info->source_message ?>
+            </div>
+            <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ); ?></div>
+        </td>
+    </tr>
 	<?php
+    ob_get_contents();
 }
 
 

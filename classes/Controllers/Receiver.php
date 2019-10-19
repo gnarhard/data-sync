@@ -68,6 +68,19 @@ class Receiver {
 		);
 	}
 
+
+
+	public function get_receiver_data( WP_REST_Request $request ) {
+
+		$request_body = json_decode( $request->get_body() );
+
+		$receiver_data = new \stdClass();
+		$receiver_data->receiver_posts              = Posts::get_all_receiver_posts( $request_body->connected_sites );
+		$receiver_data->enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $request_body->connected_sites );
+
+		wp_send_json( $receiver_data  );
+	}
+
 	/**
 	 *
 	 */

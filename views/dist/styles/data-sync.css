@@ -261,6 +261,10 @@
   color: red;
 }
 
+#syndicated_posts #wp_data_sync_status #syndicated_posts_data .loading_spinner {
+  text-align: center;
+}
+
 #syndicated_posts #wp_data_sync_status .expand_post_details {
   float: right;
   font-size: 30px;
