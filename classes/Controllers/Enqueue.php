@@ -24,27 +24,29 @@ class Enqueue {
 
 		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true );
 
-			wp_localize_script(
-				'data-sync-admin',
-				'DataSync',
-				array(
-					'strings' => array(
-						'saved' => __( 'Options Saved', 'text-domain' ),
-						'error' => __( 'Error', 'text-domain' ),
-					),
-					'api'     => array(
-						'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
-						'nonce' => wp_create_nonce( 'wp_rest' ),
-					),
-					'options' => array(
-						'enabled_post_types' => (array) get_option( 'enabled_post_types' ),
-						'source_site' => (bool) get_option( 'source_site' ),
-					),
-				)
-			);
+		$localized_data = array(
+			'strings' => array(
+				'saved' => __( 'Options Saved', 'text-domain' ),
+				'error' => __( 'Error', 'text-domain' ),
+			),
+			'api'     => array(
+				'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+			),
+			'options' => array(
+				'enabled_post_types' => (array) get_option( 'enabled_post_types' ),
+				'source_site'        => (bool) get_option( 'source_site' ),
+			),
+		);
 
-			wp_enqueue_script( 'jquery-ui-tabs' );
-			wp_enqueue_script( 'data-sync-admin' );
+		wp_localize_script(
+			'data-sync-admin',
+			'DataSync',
+			$localized_data
+		);
+
+		wp_enqueue_script( 'jquery-ui-tabs' );
+		wp_enqueue_script( 'data-sync-admin' );
 	}
 
 	/**

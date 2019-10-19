@@ -22,13 +22,14 @@ class File {
 			$local_file = (string) str_replace( $source_data->source_upload_url, DATA_SYNC_PATH . 'templates/', $source_data->media->guid );
 		} else {
 			// MEDIA FILE.
-			$local_file = $upload_dir['path'] . '/' . $source_data->filename;
-			$local_url = $upload_dir['url'] . '/' . $source_data->filename;
+			$subfolder = explode( 'wp-content/uploads', dirname( $source_data->media->guid ) )[1];
+			$local_file = $upload_dir['basedir'] . $subfolder . '/' . $source_data->filename;
+			$local_url = $upload_dir['baseurl'] . $subfolder . '/' . $source_data->filename;
 		}
 
 		/* Copy the file from source url to server */;
-		if ( !file_exists( $upload_dir['path'] ) ) {
-			mkdir( $upload_dir['path'], 0755, true ); // NECESSARY FOR copy().
+		if ( !file_exists( $upload_dir['basedir'] . $subfolder ) ) {
+			mkdir( $upload_dir['basedir'] . $subfolder, 0755, true ); // NECESSARY FOR copy().
 		}
 		$copied = copy( $source_data->media->guid, $local_file );
 

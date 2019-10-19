@@ -40,9 +40,21 @@ class Media {
 						foreach ( $synced_posts as $synced_post ) {
 							if ( (int) $image->post_parent === (int) $synced_post->source_post_id ) {
 								$image->receiver_post_id = $synced_post->receiver_post_id;
+								$image->featured         = false;
+								$image->type             = 'image';
 							}
 						}
 						$this->send_to_receiver( $image, $connected_sites );
+					}
+
+					$featured_image           = $post->media->featured_image;
+					foreach ( $synced_posts as $synced_post ) {
+						if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
+							$featured_image->receiver_post_id = $synced_post->receiver_post_id;
+						}
+					}
+					if ( ! empty( $featured_image ) ) {
+						$this->send_to_receiver( $featured_image, $connected_sites );
 					}
 
 					$audio_attachments = (array) $post->media->audio;
@@ -50,6 +62,8 @@ class Media {
 						foreach ( $synced_posts as $synced_post ) {
 							if ( (int) $audio->post_parent === (int) $synced_post->source_post_id ) {
 								$audio->receiver_post_id = $synced_post->receiver_post_id;
+								$audio->featured         = false;
+								$audio->type             = 'audio';
 							}
 						}
 						$this->send_to_receiver( $audio, $connected_sites );
@@ -60,6 +74,8 @@ class Media {
 						foreach ( $synced_posts as $synced_post ) {
 							if ( (int) $video->post_parent === (int) $synced_post->source_post_id ) {
 								$video->receiver_post_id = $synced_post->receiver_post_id;
+								$video->featured         = false;
+								$video->type             = 'video';
 							}
 						}
 						$this->send_to_receiver( $video, $connected_sites );
@@ -77,16 +93,10 @@ class Media {
 	 */
 	public function send_to_receiver( $media, $connected_sites ) {
 
-		$synced_posts = new SyncedPosts();
-		$upload_dir   = wp_get_upload_dir();
-		$path         = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
-
+		$path                            = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
 		$data                            = new \stdClass();
 		$data->media                     = $media;
 		$data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
-		$data->source_base_url           = get_site_url();
-		$data->source_upload_path        = $upload_dir['path'];
-		$data->source_upload_url         = $upload_dir['url'];
 		$data->filename                  = basename( $path['path'] );
 
 		foreach ( $connected_sites as $site ) {
@@ -147,17 +157,13 @@ class Media {
 
 
 	/**
-	 * @param string $source_base_url
-	 * @param object $post
-	 * @param array $synced_posts
 	 */
-	public
-	function insert_into_wp(
-		object $source_data
-	) {
+	public function insert_into_wp( object $source_data ) {
 
 		$upload_dir = wp_get_upload_dir();
-		$file_path  = $upload_dir['path'] . '/' . $source_data->filename;
+		$subfolder  = explode( 'wp-content/uploads', dirname( $source_data->media->guid ) )[1];
+		$file_path  = $upload_dir['basedir'] . $subfolder . '/' . $source_data->filename;
+		$file_url   = $upload_dir['baseurl'] . $subfolder . '/' . $source_data->filename;
 
 		$result = File::copy( $source_data );
 
@@ -171,7 +177,7 @@ class Media {
 				'post_title'     => preg_replace( '/\.[^.]+$/', '', $source_data->filename ),
 				'post_content'   => '',
 				'post_status'    => 'inherit',
-				'guid'           => (string) str_replace( $source_data->source_upload_url, $upload_dir['url'], $source_data->media->guid ),
+				'guid'           => (string) $file_url,
 			);
 
 			$args        = array(
@@ -192,11 +198,15 @@ class Media {
 
 			if ( ! is_wp_error( $attachment_id ) ) {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
-				$attachment_data              = wp_generate_attachment_metadata( $attachment_id, $file_path );
-				$updated_meta                 = wp_update_attachment_metadata( $attachment_id, $attachment_data );
+				if ( ( 'audio' !== $source_data->media->type ) && ( 'video' !== $source_data->media->type ) ) {
+					$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
+					$updated_meta    = wp_update_attachment_metadata( $attachment_id, $attachment_data );
+				}
 				$source_data->media->diverged = false;
 				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
-				$this->update_thumbnail_id( $source_data->media, $attachment_id );
+				if ( $source_data->media->featured ) {
+					$this->update_thumbnail_id( $source_data->media, (int) $attachment_id );
+				}
 			} else {
 				$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
 				unset( $log );
@@ -212,17 +222,14 @@ class Media {
 	/**
 	 * This makes sure the parent's thumbnail id to the attached image (featured image) is updated.
 	 */
-	private
-	function update_thumbnail_id(
-		$post, $attachment_id
-	) {
+	private function update_thumbnail_id( $post, $attachment_id ) {
 		$args               = array(
 			'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 			'source_post_id'   => $post->post_parent,
 		);
 		$synced_post_parent = SyncedPost::get_where( $args );
 		if ( $synced_post_parent ) {
-			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+			$updated = update_post_meta( (int) $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
 		} else {
 			$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
 			unset( $log );

@@ -87,10 +87,13 @@ class Logs {
 				return $response;
 			}
 
-			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );
+			$parsed_response = json_decode( wp_remote_retrieve_body( $response ) );
+			if ( ! empty( $parsed_response ) ) {
+				$all_data[] = $parsed_response;
+			}
 		}
 
-		return $all_data;
+		return (array) $all_data;
 
 	}
 

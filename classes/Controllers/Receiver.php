@@ -129,6 +129,7 @@ class Receiver {
 	 */
 	public static function get_receiver_plugin_versions() {
 
+		// TODO: CHECK IF DATA SYNC PLUGIN IS INSTALLED.
 		$connected_sites = (array) ConnectedSite::get_all();
 
 		$plugin_versions = array();

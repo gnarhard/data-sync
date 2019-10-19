@@ -233,6 +233,14 @@
   float: right;
 }
 
+#syndicated_posts table tr:nth-child(4n+1) {
+  background: #efefef;
+}
+
+#syndicated_posts table thead tr {
+  background: silver !important;
+}
+
 #syndicated_posts table .reveal_connected_site_details {
   cursor: pointer;
   float: right;
