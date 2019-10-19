@@ -90,7 +90,7 @@ class Logs {
 			$all_data[] = json_decode( wp_remote_retrieve_body( $response ) );
 		}
 
-		return $all_data;
+		return (array) $all_data;
 
 	}
 

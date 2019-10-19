@@ -10,16 +10,6 @@ use DataSync\Models\SyncedPost;
 
 function display_syndicated_posts_table() {
 
-	$source_options              = Options::source();
-	$connected_sites             = (array) ConnectedSite::get_all();
-	if ( empty( $source_options->push_enabled_post_types ) ) {
-		return '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
-    }
-	$post_types                  = array_keys( $source_options->push_enabled_post_types );
-	$posts                       = Posts::get_wp_posts( $post_types, true );
-	$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
-	$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
-
 	?>
     <div id="status_dashboard_button_wrap">
         <button id="refresh_syndicated_posts" class="button button-secondary"><?php _e( 'Refresh', 'data_sync' ); ?></button>
@@ -37,6 +27,18 @@ function display_syndicated_posts_table() {
         </thead>
         <tbody>
 		<?php
+
+
+
+		$source_options              = Options::source();
+		$connected_sites             = (array) ConnectedSite::get_all();
+		if ( empty( $source_options->push_enabled_post_types ) ) {
+			return '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+		}
+		$post_types                  = array_keys( $source_options->push_enabled_post_types );
+		$posts                       = Posts::get_wp_posts( $post_types, true );
+		$receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
+		$enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
 
 		if ( count( $posts ) ) {
 

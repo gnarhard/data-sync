@@ -456,7 +456,7 @@ class Posts {
 
 					$synced_post_modified_time     = strtotime( $synced_post->date_modified );
 					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
-					$receiver_post                 = Posts::find_receiver_post( $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_post                 = Posts::find_receiver_post( (array) $receiver_posts, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
 					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
 					$syndication_info->synced_post = $synced_post;
 
@@ -634,10 +634,11 @@ class Posts {
 		// Don't change URLs of media that needs to be migrated.
 		if ( 'attachment' !== $post->post_type ) {
 			unset( $post_array['guid'] );
-			foreach ( $post_array as $key => $value ) {
-				$post_array[ $key ] = str_replace( $post_array['source_url'], get_site_url(), $value );
-			}
+			// FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
+			$upload_dir = wp_get_upload_dir();
+			str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array[ 'post_content' ] );
 		}
+
 
 		$receiver_post_id = wp_insert_post( $post_array );
 
@@ -682,18 +683,22 @@ class Posts {
 
 	public function update_block_id_attrs( $null_block, $block ) {
 
-		// UPDATE BLOCK ID
-		if ( ( ! empty( $block['attrs'] ) ) && ( ! empty ( $block['attrs']['id'] ) ) ) {
-			$args        = array(
-				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-				'source_post_id'   => (int) $block['attrs']['id'],
-			);
-			$synced_post = SyncedPost::get_where( $args );
-			if ( ! empty( $synced_post ) ) {
-				if ( (int) $block['attrs']['id'] !== (int) $synced_post[0]->receiver_post_id ) {
-					$block['attrs']['id'] = (int) $synced_post[0]->receiver_post_id;
+		if ( ! get_option('source_site') ) {
+			// UPDATE BLOCK ID
+			if ( ( ! empty( $block['attrs'] ) ) && ( ! empty ( $block['attrs']['id'] ) ) ) {
+				$args        = array(
+					'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+					'source_post_id'   => (int) $block['attrs']['id'],
+				);
+				$synced_post = SyncedPost::get_where( $args );
+				if ( ! empty( $synced_post ) ) {
+					if ( (int) $block['attrs']['id'] !== (int) $synced_post[0]->receiver_post_id ) {
+						$block['attrs']['id'] = (int) $synced_post[0]->receiver_post_id;
+//					$guid = get_post( (int) $synced_post[0]->receiver_post_id )->guid;
+//					preg_replace("~src=[']([^']+)[']~", 'src="' . $guid . '"', $block['innerHTML']);
 
-					return render_block( $block );
+						return render_block( $block );
+					}
 				}
 			}
 		}
