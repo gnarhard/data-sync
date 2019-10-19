@@ -47,7 +47,7 @@ function display_syndicated_posts_table() {
 				$syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
 				$post_type_obj    = get_post_type_object( $post->post_type );
 				?>
-                <tr data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
+                <tr class="top_level_post_detail" data-id="<?php echo $post->ID ?>" id="synced_post-<?php echo $post->ID ?>">
                     <td><?php echo esc_html( $post->ID ); ?></td>
                     <td>
                         <a class="<?php echo $syndication_info->trash_class ?>"
