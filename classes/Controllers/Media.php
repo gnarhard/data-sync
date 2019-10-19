@@ -48,8 +48,6 @@ class Media {
 					}
 
 					$featured_image           = $post->media->featured_image;
-					$featured_image->featured = true;
-					$featured_image->type     = 'image';
 					foreach ( $synced_posts as $synced_post ) {
 						if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
 							$featured_image->receiver_post_id = $synced_post->receiver_post_id;
@@ -207,7 +205,7 @@ class Media {
 				$source_data->media->diverged = false;
 				SyncedPosts::save_to_receiver( $attachment_id, $source_data->media );
 				if ( $source_data->media->featured ) {
-					$this->update_thumbnail_id( $source_data->media, $attachment_id );
+					$this->update_thumbnail_id( $source_data->media, (int) $attachment_id );
 				}
 			} else {
 				$log = new Logs( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
@@ -231,7 +229,7 @@ class Media {
 		);
 		$synced_post_parent = SyncedPost::get_where( $args );
 		if ( $synced_post_parent ) {
-			$updated = update_post_meta( $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+			$updated = update_post_meta( (int) $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
 		} else {
 			$log = new Logs( 'Post thumbnail not updated for ' . $post->post_title, true );
 			unset( $log );

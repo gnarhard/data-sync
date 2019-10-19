@@ -273,6 +273,8 @@ class Posts {
 
 		if ( has_post_thumbnail( $post_id ) ) {
 			$media->featured_image              = get_post( get_post_thumbnail_id( $post_id ) );
+			$media->featured_image->featured    = true;
+			$media->featured_image->type        = 'image';
 			$media->featured_image->post_parent = $post_id;
 		}
 
@@ -636,7 +638,7 @@ class Posts {
 			unset( $post_array['guid'] );
 			// FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
 			$upload_dir = wp_get_upload_dir();
-			str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array[ 'post_content' ] );
+			str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array['post_content'] );
 		}
 
 
@@ -683,7 +685,7 @@ class Posts {
 
 	public function update_block_id_attrs( $null_block, $block ) {
 
-		if ( ! get_option('source_site') ) {
+		if ( ! get_option( 'source_site' ) ) {
 			// UPDATE BLOCK ID
 			if ( ( ! empty( $block['attrs'] ) ) && ( ! empty ( $block['attrs']['id'] ) ) ) {
 				$args        = array(
