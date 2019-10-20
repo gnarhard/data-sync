@@ -2,6 +2,12 @@
 
   .loading_spinner {
     width: 100%;
+    text-align: center;
+    display: block;
+  }
+
+  .loading_spinner.hidden {
+    display: none;
   }
 
   .noselect {

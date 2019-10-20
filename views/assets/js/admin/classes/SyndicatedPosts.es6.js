@@ -25,8 +25,7 @@ class SyndicatedPosts {
 
     if (document.getElementById('refresh_syndicated_posts')) {
       document.getElementById('refresh_syndicated_posts').onclick = function (e) {
-        document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
-        document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+        document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
         SyndicatedPosts.refresh_view()
       }
     }
@@ -34,6 +33,8 @@ class SyndicatedPosts {
   }
 
   static refresh_view () {
+
+    document.getElementById('syndicated_posts_data').innerHTML = '';
 
     let data = {}
 
@@ -48,8 +49,9 @@ class SyndicatedPosts {
 
       source_data.connected_sites.forEach((connected_site, index) => {
         AJAX.get(connected_site.url + '/wp-json/data-sync/v1/posts/all', false).then(function (receiver_posts) {
+          data.receiver_data.receiver_posts[index] = {}
           data.receiver_data.receiver_posts[index].posts = receiver_posts
-          data.receiver_data.receiver_posts[index].site_id = parseInt(connected_site.id);
+          data.receiver_data.receiver_posts[index].site_id = parseInt(connected_site.id)
         })
 
         AJAX.get(connected_site.url + '/wp-json/data-sync/v1/post_types/check', false).then(function (enabled_post_types) {
@@ -64,7 +66,10 @@ class SyndicatedPosts {
             let post_count = source_data.posts.length
             let x = 1
 
-            source_data.posts.forEach( ( post ) => {
+            source_data.posts.forEach((post) => {
+
+              data.post_to_get = post;
+
               AJAX.post_html(DataSync.api.url + '/syndicated_post/' + post.ID, data).then(function (syndicated_post_details) {
 
                 // console.log(syndicated_post_details)
@@ -76,12 +81,12 @@ class SyndicatedPosts {
                 // if (1 === x) {
                 //   document.getElementById('syndicated_posts_data').innerHTML = html
                 // } else {
-                $=jQuery;
-                  $('#syndicated_posts_data').prepend(html)
+                $ = jQuery
+                $('#syndicated_posts_data').prepend(html)
                 // }
 
-                if ( post_count === x ) {
-                  SyndicatedPosts.finish_refresh();
+                if (post_count === x) {
+                  SyndicatedPosts.finish_refresh()
                 }
 
                 x++
@@ -89,16 +94,15 @@ class SyndicatedPosts {
             })
           }
 
-          i++;
+          i++
         })
       })
 
     })
   }
 
-  static finish_refresh() {
-    document.querySelector('#syndicated_posts_data' + ' .loading_spinner').classList.add('hidden')
-    document.querySelector('#syndicated_posts_wrap').classList.remove('hidden')
+  static finish_refresh () {
+    document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.add('hidden')
     SyndicatedPosts.init()
     SyndicatedPosts.single_post_actions_init()
   }

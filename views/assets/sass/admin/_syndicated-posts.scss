@@ -40,6 +40,8 @@
   table {
     width: 100%;
     margin: 20px 0;
+    border-radius: 10px;
+    overflow: hidden;
 
     td:first-of-type {
       width: 30px;
@@ -51,6 +53,10 @@
 
     th:last-of-type {
       float: right;
+    }
+
+    tr td, thead tr th {
+      padding: 5px;
     }
 
     tr:nth-child(4n+1) {
@@ -79,10 +85,6 @@
 
     .trashed {
       color: red;
-    }
-
-    #syndicated_posts_data .loading_spinner {
-      text-align:center;
     }
 
     .expand_post_details {

@@ -14,8 +14,6 @@ use DataSync\Models\ConnectedSite;
 
 class SyncedPosts {
 
-	private $DATA_SYNC_PATH;
-
 	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		add_action( 'delete_post', [ $this, 'delete' ], 10 );
@@ -122,7 +120,7 @@ class SyncedPosts {
 					'methods'  => WP_REST_Server::EDITABLE,
 					'callback' => array( $this, 'display_syndicated_post' ),
 					'args'     => array(
-						'post_id'   => array(
+						'post_id' => array(
 							'description' => 'Post ID',
 							'type'        => 'int',
 						),
@@ -224,6 +222,7 @@ class SyncedPosts {
 			if ( is_wp_error( $response ) ) {
 				$log = new Logs( 'Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 				unset( $log );
+
 				return $response;
 			}
 
@@ -372,17 +371,18 @@ class SyncedPosts {
 					$auth                          = new Auth();
 					$json                          = $auth->prepare( $source_data, $site->secret_key );
 					$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_receiver_post/';
-					$response = wp_remote_post( $url, [
-						'body' => $json,
+					$response                      = wp_remote_post( $url, [
+						'body'        => $json,
 						'httpversion' => '1.0',
-						'sslverify' => false,
-						'timeout' => 10,
-						'blocking' => true,
+						'sslverify'   => false,
+						'timeout'     => 10,
+						'blocking'    => true,
 					] );
 
 					if ( is_wp_error( $response ) ) {
 						$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 						unset( $log );
+
 						return $response;
 					} else {
 
@@ -417,17 +417,18 @@ class SyncedPosts {
 				$auth                            = new Auth();
 				$json                            = $auth->prepare( $receiver_data, get_option( 'secret_key' ) );
 				$url                             = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_synced_post/';
-				$response = wp_remote_post( $url, [
-					'body' => $json,
+				$response                        = wp_remote_post( $url, [
+					'body'        => $json,
 					'httpversion' => '1.0',
-					'sslverify' => false,
-					'timeout' => 10,
-					'blocking' => true,
+					'sslverify'   => false,
+					'timeout'     => 10,
+					'blocking'    => true,
 				] );
 
 				if ( is_wp_error( $response ) ) {
 					$log = new Logs( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
 					unset( $log );
+
 					return $response;
 				} else {
 
@@ -485,17 +486,10 @@ class SyncedPosts {
 	public function display_syndicated_post( WP_REST_Request $request ) {
 
 		$request_body = json_decode( $request->get_body() );
+		$post       = $request_body->post_to_get;
 
-		$url_params = $request->get_url_params();
-		$post_id = (int) $url_params['post_id'];
-
-		foreach( $request_body->source_data->posts as $post ) {
-			if ( $post_id === (int) $post->ID ) {
-				require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
-				\DataSync\display_syndicated_post( $post, $request_body->source_data->connected_sites, $request_body->receiver_data->receiver_posts, $request_body->receiver_data->enabled_post_type_site_data );
-			}
-		}
-
+		require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+		\DataSync\display_syndicated_post( $post, $request_body->source_data->connected_sites, $request_body->receiver_data->receiver_posts, $request_body->receiver_data->enabled_post_type_site_data );
 
 	}
 

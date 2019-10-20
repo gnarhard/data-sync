@@ -208,7 +208,7 @@ class Posts {
 			'post_type'      => $type,
 			'post_status'    => $statuses,
 			'orderby'        => 'post_date',
-			'order'          => 'DESC',
+			'order'          => 'ASC',
 			'posts_per_page' => - 1, // show all posts.
 		);
 

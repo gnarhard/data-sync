@@ -1,6 +1,13 @@
 .settings_page_data-sync-options .loading_spinner,
 .toplevel_page_data-sync-options .loading_spinner {
   width: 100%;
+  text-align: center;
+  display: block;
+}
+
+.settings_page_data-sync-options .loading_spinner.hidden,
+.toplevel_page_data-sync-options .loading_spinner.hidden {
+  display: none;
 }
 
 .settings_page_data-sync-options .noselect,
@@ -219,6 +226,8 @@
 #syndicated_posts table {
   width: 100%;
   margin: 20px 0;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 #syndicated_posts table td:first-of-type {
@@ -231,6 +240,11 @@
 
 #syndicated_posts table th:last-of-type {
   float: right;
+}
+
+#syndicated_posts table tr td,
+#syndicated_posts table thead tr th {
+  padding: 5px;
 }
 
 #syndicated_posts table tr:nth-child(4n+1) {
@@ -259,10 +273,6 @@
 
 #syndicated_posts #wp_data_sync_status .trashed {
   color: red;
-}
-
-#syndicated_posts #wp_data_sync_status #syndicated_posts_data .loading_spinner {
-  text-align: center;
 }
 
 #syndicated_posts #wp_data_sync_status .expand_post_details {

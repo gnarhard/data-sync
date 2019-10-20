@@ -42,13 +42,9 @@ function data_sync_options_page() {
                                 <th><?php _e( 'DETAILS', 'data_sync' ); ?></th>
                             </tr>
                             </thead>
-                            <tbody id="syndicated_posts_data">
-                            <tr class="loading_spinner">
-                                <td colspan="5">
-                                    <i class="dashicons dashicons-update"></i> Loading. . .</tr>
-                                </td>
-                            </tbody>
+                            <tbody id="syndicated_posts_data"></tbody>
                         </table>
+                        <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                     </div>
                 </div>
                 <div id="templates">
