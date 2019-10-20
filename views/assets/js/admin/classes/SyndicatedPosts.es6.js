@@ -110,8 +110,8 @@ class SyndicatedPosts {
   static bulk_push (e) {
     e.preventDefault()
 
-    document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
-    document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+    document.getElementById('syndicated_posts_data').innerHTML = '';
+    document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
     AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function (result) {
       SyndicatedPosts.refresh_view()
