@@ -34,32 +34,32 @@ class SyndicatedPosts {
 
   static refresh_view () {
 
-    document.getElementById('syndicated_posts_data').innerHTML = '';
+    document.getElementById('syndicated_posts_data').innerHTML = ''
 
     let data = {}
 
-    AJAX.get(DataSync.api.url + '/source_data').then(function (source_data) {
+    AJAX.get(DataSync.api.url + '/source_data/load').then(function (source_data) {
 
       data.source_data = source_data
       data.receiver_data = {}
       data.receiver_data.receiver_posts = []
       data.receiver_data.enabled_post_type_site_data = []
       let i = 1
-      let connected_site_count = source_data.connected_sites.length
+      let site_count = source_data.connected_sites.length
 
-      source_data.connected_sites.forEach((connected_site, index) => {
-        AJAX.get(connected_site.url + '/wp-json/data-sync/v1/posts/all', false).then(function (receiver_posts) {
+      source_data.connected_sites.forEach((site, index) => {
+        AJAX.get(site.url + '/wp-json/data-sync/v1/posts/all', false).then(function (receiver_posts) {
           data.receiver_data.receiver_posts[index] = {}
           data.receiver_data.receiver_posts[index].posts = receiver_posts
-          data.receiver_data.receiver_posts[index].site_id = parseInt(connected_site.id)
+          data.receiver_data.receiver_posts[index].site_id = parseInt(site.id)
         })
 
-        AJAX.get(connected_site.url + '/wp-json/data-sync/v1/post_types/check', false).then(function (enabled_post_types) {
+        AJAX.get(site.url + '/wp-json/data-sync/v1/post_types/check', false).then(function (enabled_post_types) {
           data.receiver_data.enabled_post_type_site_data[index] = {}
-          data.receiver_data.enabled_post_type_site_data[index].site_id = connected_site.id
+          data.receiver_data.enabled_post_type_site_data[index].site_id = site.id
           data.receiver_data.enabled_post_type_site_data[index].enabled_post_types = enabled_post_types
 
-          if (connected_site_count === i) {
+          if (site_count === i) {
 
             console.log(data)
 
@@ -68,7 +68,7 @@ class SyndicatedPosts {
 
             source_data.posts.forEach((post) => {
 
-              data.post_to_get = post;
+              data.post_to_get = post
 
               AJAX.post_html(DataSync.api.url + '/syndicated_post/' + post.ID, data).then(function (syndicated_post_details) {
 
@@ -110,27 +110,44 @@ class SyndicatedPosts {
   static bulk_push (e) {
     e.preventDefault()
 
-    document.getElementById('syndicated_posts_data').innerHTML = '';
+    document.getElementById('syndicated_posts_data').innerHTML = ''
     document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
-    AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function (result) {
-      SyndicatedPosts.refresh_view()
-      Success.show_success_message(result, 'Posts')
-      new EnabledPostTypes()
-      let logs = new Logs()
-      logs.refresh_log()
+    let data = {}
+
+    AJAX.get(DataSync.api.url + '/source_data/push').then(function (source_data) {
+
+      data.source_data = source_data
+      let site_iterator = 1
+      let post_iterator = 1
+      let site_count = source_data.connected_sites.length
+      let post_count = source_data.posts.length
+      let data = {}
+      data.overwrite = false
+
+      source_data.connected_sites.forEach((site, index) => {
+        source_data.posts.forEach((post) => {
+
+          AJAX.post(DataSync.api.url + '/source_data/push/' + post.ID + '/' + site.id, data)
+
+          post_iterator++
+        })
+        site_iterator++
+      })
+
     })
+
+    // AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function (result) {
+    //   SyndicatedPosts.refresh_view()
+    //   Success.show_success_message(result, 'Posts')
+    //   new EnabledPostTypes()
+    //   let logs = new Logs()
+    //   logs.refresh_log()
+    // })
   }
 
   static single_post_actions_init () {
     jQuery(function ($) {
-      $('.wp_data_synced_post_status_icons .dashicons-editor-unlink').unbind().click(function () {
-
-        let source_post_id = $(this).data('source-post-id')
-
-        SyndicatedPosts.push_single_post_to_all_receivers(source_post_id)
-
-      })
 
       $('.push_post_now').unbind().click(function (e) {
 
@@ -138,7 +155,7 @@ class SyndicatedPosts {
 
         let source_post_id = $(this).data('source-post-id')
 
-        SyndicatedPosts.push_single_post_to_all_receivers(source_post_id)
+        SyndicatedPosts.push_single_post_to_all_receivers(source_post_id, true)
 
       })
 
@@ -157,11 +174,14 @@ class SyndicatedPosts {
 
   }
 
-  static push_single_post_to_all_receivers (source_post_id) {
+  static push_single_post_to_all_receivers (source_post_id, overwrite) {
     document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
-    AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
+    let data = {}
+    data.overwrite = overwrite
+
+    AJAX.post(DataSync.api.url + '/source_data/push/' + source_post_id, data).then(function (result) {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
@@ -174,7 +194,10 @@ class SyndicatedPosts {
     document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
     document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
-    AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + +receiver_site_id).then(function (result) {
+    let data = {}
+    data.overwrite = overwrite
+
+    AJAX.post(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + receiver_site_id, data).then(function (result) {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()

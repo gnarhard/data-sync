@@ -60,11 +60,17 @@ class SourceData {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/source_data',
+			'/source_data/(?P<action>[a-zA-Z-_]+)',
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_source_data' ),
+					'args'     => array(
+						'action' => array(
+							'description' => 'Action to tell backend which content to provide.',
+							'type'        => 'string',
+						),
+					),
 				),
 			)
 		);
@@ -82,11 +88,11 @@ class SourceData {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/source_data/overwrite/(?P<source_post_id>\d+)',
+			'/source_data/push/(?P<source_post_id>\d+)',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'overwrite_post_on_all_receivers' ),
+					'methods'  => WP_REST_Server::EDITABLE,
+					'callback' => array( $this, 'push_post_to_all_receivers' ),
 					'args'     => array(
 						'source_post_id' => array(
 							'description' => 'Source Post ID',
@@ -99,10 +105,10 @@ class SourceData {
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
-			'/source_data/overwrite/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)',
+			'/source_data/push/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
+					'methods'  => WP_REST_Server::EDITABLE,
 					'callback' => array( $this, 'overwrite_post_on_single_receiver' ),
 					'args'     => array(
 						'source_post_id'   => array(
@@ -117,16 +123,17 @@ class SourceData {
 				),
 			)
 		);
+
 	}
 
 
-	public function prepare_single_overwrite( $url_params ) {
+	public function prepare_single_overwrite( $url_params, $overwrite ) {
 
 		$this->consolidate();
 
 		$post                                                            = (object) Posts::get_single( $url_params['source_post_id'] );
 		$post_type                                                       = $post->post_type;
-		$this->source_data->options->overwrite_receiver_post_on_conflict = true;
+		$this->source_data->options->overwrite_receiver_post_on_conflict = $overwrite;
 		$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
 		$this->source_data->posts->$post_type                            = [ $post ];
 
@@ -180,9 +187,9 @@ class SourceData {
 	}
 
 
-	public function overwrite_post_on_all_receivers( WP_REST_Request $request ) {
+	public function push_post_to_all_receivers( WP_REST_Request $request ) {
 
-		$this->prepare_single_overwrite( $request->get_url_params() );
+		$this->prepare_single_overwrite( $request->get_url_params(), (bool) $request->get_body()['overwrite'] );
 
 		// COULD BE EMPTY FROM VALIDATION.
 		if ( ! empty( $this->source_data ) ) {
@@ -455,18 +462,31 @@ class SourceData {
 	}
 
 	public function get_source_data( WP_REST_Request $request ) {
-		$source_data = new stdClass();
 
-		$source_data->source_options  = Options::source();
-		$source_data->connected_sites = (array) ConnectedSite::get_all();
-		if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
-			$source_data->error_msg = '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+		if ( 'load' === $request->get_url_params()['action'] ) {
+
+			$source_data = new stdClass();
+
+			$source_data->source_options  = Options::source();
+			$source_data->connected_sites = (array) ConnectedSite::get_all();
+			if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
+				$source_data->error_msg = '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+			}
+			$source_data->post_types = array_keys( $source_data->source_options->push_enabled_post_types );
+			$source_data->posts      = Posts::get_wp_posts( $source_data->post_types, true );
+
+		} elseif ( 'push' === $request->get_url_params()['action'] ) {
+
+			$this->consolidate();
+			$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
+			$this->validate();
+			$this->configure_canonical_urls();
+
+			$source_data = $this;
+
 		}
-		$source_data->post_types                  = array_keys( $source_data->source_options->push_enabled_post_types );
-		$source_data->posts                       = Posts::get_wp_posts( $source_data->post_types, true );
 
 		wp_send_json( $source_data );
-
 	}
 
 }
