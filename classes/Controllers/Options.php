@@ -87,8 +87,10 @@ class Options {
 
 			foreach ( get_option( 'push_enabled_post_types' ) as $post_type ) {
 				if ( 'post' === $post_type ) {
+					$options->push_enabled_post_types_array[] = 'post';
 					$options->push_enabled_post_types['post'] = array( 'post' => array() );
 				} else {
+					$options->push_enabled_post_types_array[] = $cpt_data[ $post_type ]['name'];
 					$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
 				}
 			}

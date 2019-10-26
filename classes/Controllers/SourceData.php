@@ -47,16 +47,16 @@ class SourceData {
 	 *
 	 */
 	public function register_routes() {
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/source_data/bulk_push',
-			array(
-				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'bulk_push' ),
-				),
-			)
-		);
+//		$registered = register_rest_route(
+//			DATA_SYNC_API_BASE_URL,
+//			'/source_data/push',
+//			array(
+//				array(
+//					'methods'  => WP_REST_Server::READABLE,
+//					'callback' => array( $this, 'push' ),
+//				),
+//			)
+//		);
 
 		$registered = register_rest_route(
 			DATA_SYNC_API_BASE_URL,
@@ -127,13 +127,15 @@ class SourceData {
 	}
 
 
-	public function prepare_single_overwrite( $url_params, $overwrite ) {
+	public function prepare_single_overwrite( $request ) {
 
 		$this->consolidate();
 
-		$post                                                            = (object) Posts::get_single( $url_params['source_post_id'] );
+		$request_body = json_decode( $request->get_body() );
+
+		$post                                                            = (object) Posts::get_single( $request->get_url_params()['source_post_id'] );
 		$post_type                                                       = $post->post_type;
-		$this->source_data->options->overwrite_receiver_post_on_conflict = $overwrite;
+		$this->source_data->options->overwrite_receiver_post_on_conflict = (bool) $request_body->overwrite;
 		$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
 		$this->source_data->posts->$post_type                            = [ $post ];
 
@@ -149,7 +151,7 @@ class SourceData {
 	 */
 	public function overwrite_post_on_single_receiver( WP_REST_Request $request ) {
 
-		$this->prepare_single_overwrite( $request->get_url_params() );
+		$this->prepare_single_overwrite( $request );
 
 		if ( ! empty( $this->source_data ) ) {
 
@@ -189,7 +191,7 @@ class SourceData {
 
 	public function push_post_to_all_receivers( WP_REST_Request $request ) {
 
-		$this->prepare_single_overwrite( $request->get_url_params(), (bool) $request->get_body()['overwrite'] );
+		$this->prepare_single_overwrite( $request );
 
 		// COULD BE EMPTY FROM VALIDATION.
 		if ( ! empty( $this->source_data ) ) {
@@ -241,12 +243,7 @@ class SourceData {
 	 * Send data to all authorized connected sites
 	 *
 	 */
-	public function bulk_push() {
-
-		$this->consolidate();
-		$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
-		$this->validate();
-		$this->configure_canonical_urls();
+	public function push() {
 
 		// COULD BE EMPTY FROM VALIDATION.
 		if ( ! empty( $this->source_data ) ) {
@@ -264,7 +261,7 @@ class SourceData {
 				] );
 
 				if ( is_wp_error( $response ) ) {
-					$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+					$log = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 					unset( $log );
 
 					return $response;
@@ -321,7 +318,7 @@ class SourceData {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				$log = new Logs( 'Error in SourceData->bulk_push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$log = new Logs( 'Error in SourceData->start_fresh() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 				unset( $log );
 
 				return $response;
@@ -477,12 +474,13 @@ class SourceData {
 
 		} elseif ( 'push' === $request->get_url_params()['action'] ) {
 
+			$source_data = new stdClass();
 			$this->consolidate();
 			$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
 			$this->validate();
 			$this->configure_canonical_urls();
 
-			$source_data = $this;
+			$source_data = $this->source_data;
 
 		}
 

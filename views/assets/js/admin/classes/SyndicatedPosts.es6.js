@@ -77,13 +77,8 @@ class SyndicatedPosts {
                 let result_array = syndicated_post_details.split('null')
                 result_array.slice(-1)[0]
                 let html = result_array.join(' ')
-
-                // if (1 === x) {
-                //   document.getElementById('syndicated_posts_data').innerHTML = html
-                // } else {
                 $ = jQuery
                 $('#syndicated_posts_data').prepend(html)
-                // }
 
                 if (post_count === x) {
                   SyndicatedPosts.finish_refresh()
@@ -113,27 +108,36 @@ class SyndicatedPosts {
     document.getElementById('syndicated_posts_data').innerHTML = ''
     document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
-    let data = {}
-
     AJAX.get(DataSync.api.url + '/source_data/push').then(function (source_data) {
 
-      data.source_data = source_data
-      let site_iterator = 1
-      let post_iterator = 1
-      let site_count = source_data.connected_sites.length
-      let post_count = source_data.posts.length
-      let data = {}
-      data.overwrite = false
+      console.log(source_data);
+      source_data.overwrite = false
+      let postPushes = [];
+      let fetchInit = {
+        method: 'POST',
+        body: JSON.stringify( source_data )
+      }
 
       source_data.connected_sites.forEach((site, index) => {
-        source_data.posts.forEach((post) => {
+        source_data.options.push_enabled_post_types_array.forEach( ( post_type ) => {
+          source_data.posts[post_type].forEach((post, idx) => {
 
-          AJAX.post(DataSync.api.url + '/source_data/push/' + post.ID + '/' + site.id, data)
+            let url = site.url + '/wp-json/data-sync/v1' + '/source_data/push/' + post.ID + '/' + site.id
 
-          post_iterator++
+            postPushes[idx] = fetch(url, fetchInit)
+
+          })
         })
-        site_iterator++
+
       })
+
+      Promise.all(postPushes)
+        .then( response => {
+          console.log(response)
+        })
+        .catch( error => {
+          console.log(error)
+        })
 
     })
 

@@ -106,15 +106,22 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
 				$synced_post_modified_time = strtotime( $connected_site_synced_post->date_modified );
 				$source_post_modified_time = strtotime( $post->post_modified_gmt );
 				$receiver_post             = Posts::find_receiver_post( $receiver_posts, $connected_site_synced_post->receiver_site_id, $connected_site_synced_post->receiver_post_id );
-				$receiver_modified_time    = strtotime( $receiver_post->post_modified_gmt );
+				if ( null === $receiver_post ) {
+					if ( $source_post_modified_time > $synced_post_modified_time ) {
+						$sync_status = 'diverged';
+					}
+                } else {
+					$receiver_modified_time    = strtotime( $receiver_post->post_modified_gmt );
 
-				if ( $receiver_modified_time > $synced_post_modified_time ) {
-					$sync_status = 'diverged';
-				} else if ( $source_post_modified_time > $synced_post_modified_time ) {
-					$sync_status = 'diverged';
-				} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
-					$sync_status = 'synced';
-				}
+					if ( $receiver_modified_time > $synced_post_modified_time ) {
+						$sync_status = 'diverged';
+					} else if ( $source_post_modified_time > $synced_post_modified_time ) {
+						$sync_status = 'diverged';
+					} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
+						$sync_status = 'synced';
+					}
+                }
+
 
 				if ( 'diverged' === $sync_status ) {
 
