@@ -113,11 +113,20 @@ class ConnectedSites
         }
     }
 
-    private function table_exists()
+    public static function check_sync_date($post, $source_data)
     {
-        global $wpdb;
-        $table_name = $wpdb->prefix . ConnectedSite::$table_name;
+        $site_id = (int) get_option('data_sync_receiver_site_id');
 
-        return in_array($table_name, $wpdb->tables);
+        foreach ($source_data->connected_sites as $site) {
+            if ((int) $site->id === $site_id) {
+                $connected_site_sync_date   = strtotime($site->sync_date);
+                $source_modified_date = strtotime($post->post_modified_gmt);
+                if ($source_modified_date > $connected_site_sync_date) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

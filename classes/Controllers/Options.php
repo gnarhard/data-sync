@@ -166,16 +166,16 @@ class Options
         $settings_content = new stdClass();
 
         if ('syndicated_posts' === $settings_tab) {
-            require_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+            include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
             \DataSync\display_syndicated_posts_table();
         } elseif ('connected_sites' === $settings_tab) {
-            require_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
+            include_once DATA_SYNC_PATH . 'views/admin/options/connected-sites.php';
             \DataSync\display_connected_sites();
         } elseif ('enabled_post_types' === $settings_tab) {
-            require_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
+            include_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
             \DataSync\display_enabled_post_types();
         } elseif ('templates' === $settings_tab) {
-            require_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
+            include_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
             \DataSync\display_synced_templates();
         }
     }
