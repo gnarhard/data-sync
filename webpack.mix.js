@@ -6,7 +6,7 @@ let mix = require('laravel-mix');
  */
 const devPath  = 'views/assets';
 
-mix.setPublicPath( 'views/dist' );
+mix.setPublicPath('views/dist');
 
 /*
  * Set Laravel Mix options.
@@ -23,19 +23,13 @@ mix.setPublicPath( 'views/dist' );
 // });
 
 
-const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
+const MomentLocalesPlugin = require('moment');
 
 module.exports = {
-  plugins: [
+    plugins: [
     // To strip all locales except “en”
     new MomentLocalesPlugin(),
-
-    // Or: To strip all locales except “en”, “es-us” and “ru”
-    // (“en” is built into Moment and can’t be removed)
-    // new MomentLocalesPlugin({
-    //   localesToKeep: ['es-us', 'ru'],
-    // }),
-  ],
+    ],
 };
 
 
@@ -67,13 +61,13 @@ mix.version();
 
 // Sass configuration.
 let sassConfig = {
-  outputStyle: 'expanded',
-  indentType: 'tab',
-  indentWidth: 1,
+    outputStyle: 'expanded',
+    indentType: 'tab',
+    indentWidth: 1,
 };
 
 // mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
-mix.sass( `${devPath}/sass/data-sync.scss`, 'styles' );
+mix.sass(`${devPath}/sass/data-sync.scss`, 'styles');
 
 /*
  * Compile JavaScript.
