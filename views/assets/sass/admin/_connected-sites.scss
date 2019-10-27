@@ -9,6 +9,23 @@
     cursor: pointer;
   }
 
+  .orphaned_sites_wrap {
+    margin-top: 40px;
+
+    #orphaned_site_toggle {
+      cursor: pointer;
+    }
+
+    .orphaned_sites {
+      display: none;
+      margin-left: 10px;
+
+      span {
+        display:block;
+      }
+    }
+  }
+
   .lightbox_wrap {
     display: none;
     background: rgba(0, 0, 0, .5);

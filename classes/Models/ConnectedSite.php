@@ -47,6 +47,8 @@ class ConnectedSite
             '%s',
             '%s',
             '%s',
+            '%s',
+            '%s',
         );
 
         $db = new DB(self::$table_name);

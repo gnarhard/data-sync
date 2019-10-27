@@ -129,4 +129,15 @@ class ConnectedSites
 
         return false;
     }
+
+    public static function is_orphaned($post, $site_ids) {
+        $canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
+        if ( in_array( $canonical_site_id, $site_ids ) ) {
+            // SITE ID EXISTS IN ARRAY AND ISN'T ORPHANED.
+            return false;
+        } else {
+            // SITE ID DOESN'T EXIST IN ARRAY AND IS ORPHANED.
+            return true;
+        }
+    }
 }

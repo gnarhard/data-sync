@@ -72,12 +72,19 @@ class ConnectedSites {
         let self = this
         $ = jQuery
 
+        $('#orphaned_site_toggle').unbind().click(() =>{
+            $('.orphaned_sites').slideToggle(() => {
+                $('#orphaned_site_toggle .dashicons').toggleClass('dashicons-arrow-down-alt2');
+                $('#orphaned_site_toggle .dashicons').toggleClass('dashicons-arrow-up-alt2');
+            });
+        })
+
         // ADD SITE
         $('#add_site').unbind().click(
             function (e) {
                 e.preventDefault()
 
-                jQuery('#site_sync_start').datepicker({
+                $('#site_sync_start').datepicker({
                     dateFormat: "yy-mm-dd"
                 })
 

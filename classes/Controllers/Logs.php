@@ -23,7 +23,7 @@ class Logs
     public $error;
     public $log;
 
-    public function __construct($message = false, $error = false)
+    public function __construct($message = false, $error = false, $type = false)
     {
         if (false === $message) {
             add_action('rest_api_init', [ $this, 'register_routes' ]);
@@ -32,6 +32,12 @@ class Logs
             $this->log->url_source = get_site_url();
             $this->log->datetime   = current_time('Y-m-d H:i:s.u');
             $this->error           = $message;
+
+            if ( $type ) {
+                $this->log->type = $type;
+            } else {
+                $this->log->type = '';
+            }
 
             $this->create_log_entry($error);
             $this->log();
@@ -53,18 +59,6 @@ class Logs
         $this->log->log_entry .= '</span>';
     }
 
-    public function save()
-    {
-        $data                  = (object) json_decode(file_get_contents('php://input'));
-        $this->log             = new stdClass();
-        $this->log->log_entry  = $data->log_entry;
-        $this->log->url_source = $data->url_source;
-        $this->log->datetime   = current_time('Y-m-d H:i:s.u');
-        $this->log();
-
-        wp_send_json_success($this->log);
-    }
-
     public function log()
     {
         Log::create($this->log);
@@ -72,9 +66,9 @@ class Logs
 
     public static function retrieve_receiver_logs($data_sync_start_time)
     {
-        $connected_sites             = (array) ConnectedSite::get_all();
+        $connected_sites = (array) ConnectedSite::get_all();
 
-        $all_data        = array();
+        $all_data = array();
 
         foreach ($connected_sites as $site) {
             $url      = Helpers::format_url(trailingslashit($site->url) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/log/fetch_receiver');
@@ -85,6 +79,7 @@ class Logs
 
             if (is_wp_error($response)) {
                 new Logs('Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true);
+
                 return $response;
             }
 
@@ -113,7 +108,7 @@ class Logs
     /**
      * @return mixed
      *
-     * Gets contents from ../error.log
+     *
      */
     public static function get_log(WP_REST_Request $request = null)
     {
@@ -145,50 +140,25 @@ class Logs
 
     public function register_routes()
     {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/log',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'save' ),
-//					'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-                    // TODO: AUTH DOESN'T WORK
-                ),
-            )
-        );
-
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/log/get',
-            array(
+        $registered = register_rest_route(DATA_SYNC_API_BASE_URL, '/log/get', array(
                 array(
                     'methods'  => WP_REST_Server::READABLE,
                     'callback' => array( $this, 'refresh_log' ),
                 ),
-            )
-        );
+            ));
 
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/log/delete',
-            array(
+        $registered = register_rest_route(DATA_SYNC_API_BASE_URL, '/log/delete', array(
                 array(
                     'methods'  => WP_REST_Server::DELETABLE,
                     'callback' => array( $this, 'delete_all' ),
                 ),
-            )
-        );
+            ));
 
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/log/fetch_receiver',
-            array(
+        $registered = register_rest_route(DATA_SYNC_API_BASE_URL, '/log/fetch_receiver', array(
                 array(
                     'methods'  => WP_REST_Server::READABLE,
                     'callback' => array( $this, 'get_log' ),
                 ),
-            )
-        );
+            ));
     }
 }
