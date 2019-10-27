@@ -132,6 +132,19 @@ class ConnectedSites
 
     public static function is_orphaned($post, $site_ids) {
         $canonical_site_id = (int) $post->post_meta['_canonical_site'][0];
+        $excluded_site_ids = unserialize( $post->post_meta['_excluded_sites'][0] ) ;
+
+        foreach( $excluded_site_ids as $key => $excluded_site_id ) {
+            if (! in_array( $excluded_site_id, $site_ids ) ) {
+                unset( $excluded_site_ids[$key]);
+                if ( 0 === count($excluded_site_ids)) {
+                    $excluded_site_ids[0] = 0;
+                }
+                update_post_meta( $post->ID, '_excluded_sites', $excluded_site_ids );
+            }
+        }
+
+
         if ( in_array( $canonical_site_id, $site_ids ) ) {
             // SITE ID EXISTS IN ARRAY AND ISN'T ORPHANED.
             return false;
