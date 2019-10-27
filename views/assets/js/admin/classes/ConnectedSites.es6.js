@@ -11,19 +11,36 @@ class ConnectedSites {
     }
 
     static save () {
+
+        let self = this;
+        console.log('here');
+        var moment = require('moment');
         let data = []
         data[0] = {}
         data[0].name = document.getElementById('site_name').value
         data[0].url = document.getElementById('site_url').value
         data[0].secret_key = document.getElementById('site_secret_key').value
-        data[0].sync_start = new Date(document.getElementById('site_sync_start').value).toUTCString()
 
-        AJAX.post(DataSync.api.url + '/connected_sites', data)
+        let sync_start_date = document.getElementById('site_sync_start').value + ' ' +
+            moment().format('HH:mm') + ':00';
+        data[0].sync_start = moment(sync_start_date).utc().format();
 
-        $ = jQuery
-        $('.settings_page_data-sync-settings .lightbox_wrap').removeClass('display')
+        AJAX.post(DataSync.api.url + '/connected_sites', data).then((result)=>{
 
-        window.location.reload()
+            Success.show_success_message(result, 'Connected site')
+            $ = jQuery
+            $('.settings_page_data-sync-settings .lightbox_wrap').removeClass('display')
+            new ConnectedSites();
+            new EnabledPostTypes()
+            if ( DataSync.options.debug ) {
+                let logs = new Logs()
+                logs.refresh_log();
+            }
+        })
+
+
+
+        // window.location.reload()
     }
 
     static delete (site_id) {
@@ -36,7 +53,7 @@ class ConnectedSites {
             AJAX.delete(DataSync.api.url + '/connected_sites/' + site_id).then(
                 function (response) {
                     if (response.success) {
-                        Success.show_success_message(response, 'Connected sites')
+                        Success.show_success_message(response, 'Connected site')
 
                         new SyndicatedPosts()
                         new EnabledPostTypes()
@@ -60,7 +77,9 @@ class ConnectedSites {
             function (e) {
                 e.preventDefault()
 
-                jQuery('#site_sync_start').datepicker()
+                jQuery('#site_sync_start').datepicker({
+                    dateFormat: "yy-mm-dd"
+                })
 
                 $('.lightbox_wrap').addClass('display')
 
@@ -93,7 +112,7 @@ class ConnectedSites {
         if (document.getElementById('connected_sites_wrap')) {
             AJAX.get_html(DataSync.api.url + '/settings_tab/connected_sites').then(
                 function (result) {
-                    Success.display_html(result, 'connected_sites', 'Connected sites')
+                    Success.display_html(result, 'connected_sites', 'Connected site')
                     self.init()
                 }
             )

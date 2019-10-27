@@ -193,7 +193,7 @@ class Options
 
             if ('Enabled post types' === $topic) {
                 $output .= '<p>' . $topic . ' saved successfully.</p>';
-            } elseif ('Connected sites' === $topic) {
+            } elseif ('Connected site' === $topic) {
                 if (! empty($params['message'])) {
                     $output .= '<p>' . $params['message'] . '</p>';
                 } else {
@@ -211,7 +211,7 @@ class Options
 
             if ('Enabled post types' === $topic) {
                 $output .= '<p>' . $topic . ' data is identical to saved data.</p>';
-            } elseif ('Connected sites' === $topic) {
+            } elseif ('Connected site' === $topic) {
                 $output .= '<p>' . $topic . ' not saved.</p>';
             } elseif (('Post' === $topic) || ('Posts' === $topic)) {
                 $output .= '<p>' . $topic . ' not syndicated.</p>';

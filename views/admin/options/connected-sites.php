@@ -16,7 +16,7 @@ function display_connected_sites() {
             <th>Name</th>
             <th>URL</th>
             <th>Sync Start</th>
-            <th>Remove</th>
+            <th>Actions</th>
         </tr>
         </thead>
 
@@ -24,12 +24,12 @@ function display_connected_sites() {
         <?php
         if ( is_array( $connected_sites ) ) {
             foreach ( $connected_sites as $site ) {
-                $time = strtotime( $site->sync_start ); ?>
+                $local_time = strtotime($site->sync_start) + ((int) get_option('gmt_offset') * 3600); ?>
                 <tr id="site-<?php echo esc_html( $site->id ); ?>">
                     <td id="id"><?php echo esc_html( $site->id ); ?></td>
                     <td id="name"><?php echo esc_html( $site->name ); ?></td>
                     <td id="url"><?php echo esc_url( $site->url ); ?></td>
-                    <td id="sync_start"><?php echo esc_html( date( 'g:i a - F j, Y', $time ) ); ?></td>
+                    <td id="sync_start"><?php echo esc_html( date( 'g:i a - F j, Y', $local_time ) ); ?></td>
                     <td id="site-<?php echo esc_html( $site->id ); ?>">
                         <span class="dashicons dashicons-trash remove_site"></span>
                     </td>

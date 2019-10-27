@@ -93,7 +93,7 @@ class ConnectedSites
             $new_data[] = $data;
         }
 
-        return wp_parse_args($new_data);
+        return wp_send_json_success();
     }
 
     public function delete(WP_REST_Request $request)
