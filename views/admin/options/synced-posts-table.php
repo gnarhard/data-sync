@@ -88,6 +88,8 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
                 'receiver_site_id' => (int) filter_var( $site->id, FILTER_SANITIZE_NUMBER_INT ),
             ) );
 
+        $connected_site_sync_date   = strtotime($site->sync_start);
+        $source_modified_date = strtotime($post->post_modified_gmt);
         $connected_site_synced_post = ( ! empty( $result[0] ) ) ? $result[0] : false; ?>
 
         <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong>
@@ -157,7 +159,12 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
             } elseif ( in_array( (int) $site->id, $excluded_sites ) ) {
                 // NOT SYNCED ON PURPOSE BECAUSE OF EXCLUDED SITE.
                 echo '<span>Last syndication: Never.';
-                $site_status_icon = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
+                $site_status_icon = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
+            } elseif ($source_modified_date < $connected_site_sync_date) {
+                // NOT SYNCED ON PURPOSE BECAUSE OF SYNC START DATE.
+                echo '<span>Last syndication: Never.';
+                echo '<span class="warning">This post hasn\'t been modified after this site\'s sync start date.</span>';
+                $site_status_icon = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
             } else {
                 // NOT SYNCED.
                 echo '<span>Last syndication: Never.';

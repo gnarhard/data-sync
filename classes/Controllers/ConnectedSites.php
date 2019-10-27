@@ -119,7 +119,7 @@ class ConnectedSites
 
         foreach ($source_data->connected_sites as $site) {
             if ((int) $site->id === $site_id) {
-                $connected_site_sync_date   = strtotime($site->sync_date);
+                $connected_site_sync_date   = strtotime($site->sync_start);
                 $source_modified_date = strtotime($post->post_modified_gmt);
                 if ($source_modified_date > $connected_site_sync_date) {
                     return true;

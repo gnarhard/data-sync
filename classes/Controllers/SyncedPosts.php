@@ -31,7 +31,7 @@ class SyncedPosts
 
             $published_before_sync_date = ConnectedSites::check_sync_date( $post, $source_data );
 
-            if (! $published_before_sync_date) {
+            if ((! $published_before_sync_date) && (true !== $source_data->options->overwrite_receiver_post_on_conflict)) {
                 return false;
             }
 
