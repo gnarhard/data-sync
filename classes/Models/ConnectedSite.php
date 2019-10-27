@@ -34,11 +34,13 @@ class ConnectedSite
     public static function create($data)
     {
         $url = Helpers::format_url($data['url']);
+        $local_timestamp = date( 'g:i:s A n/d/Y', get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $data['sync_start'] ) ), 'U' ) );
 
         $args    = array(
-            'name'           => $data['name'],
+            'name'           => sanitize_text_field($data['name']),
             'url'            => esc_url_raw($url),
             'secret_key'     => sanitize_text_field($data['secret_key']),
+            'sync_start'     => $data['sync_start'],
             'date_connected' => current_time('mysql'),
         );
         $sprintf = array(
@@ -58,9 +60,10 @@ class ConnectedSite
 
         $args = array(
             'id'             => $data->id,
-            'name'           => $data->name,
+            'name'           => sanitize_text_field($data->name),
             'url'            => Helpers::format_url($data->url),
             'secret_key'     => sanitize_text_field($data->secret_key),
+            'sync_start'     => $data['sync_start'],
             'date_connected' => current_time('mysql'),
         );
 
@@ -91,6 +94,7 @@ class ConnectedSite
 	        name              VARCHAR(255),
 	        url               VARCHAR(255) NOT NULL,
 	        secret_key        VARCHAR(255) NOT NULL,
+	        sync_start        DATETIME NOT NULL,
 	        date_connected    DATETIME NOT NULL 
 	    );'
         );

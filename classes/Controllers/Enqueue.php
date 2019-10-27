@@ -22,7 +22,7 @@ class Enqueue
     /**
      * Enqueues scripts
      */
-    public function admin_scripts()
+    public function admin_scripts( $hook_suffix )
     {
         wp_register_script('data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true);
 
@@ -44,7 +44,11 @@ class Enqueue
 
         wp_localize_script('data-sync-admin', 'DataSync', $localized_data);
 
-        wp_enqueue_script('jquery-ui-tabs');
+        if ('toplevel_page_data-sync-options' === $hook_suffix) {
+            wp_enqueue_script('jquery-ui-tabs');
+            wp_enqueue_script('jquery-ui-datepicker');
+        }
+
         wp_enqueue_script('data-sync-admin');
     }
 

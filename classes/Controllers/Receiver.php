@@ -264,7 +264,7 @@ class Receiver
     {
 
         // FILTER OUT POSTS THAT SHOULDN'T BE SYNCED.
-        $filtered_post = SyncedPosts::filter($post, $source_data->options, $source_data->synced_posts);
+        $filtered_post = SyncedPosts::filter($post, $source_data, $source_data->synced_posts);
 
         if (false !== $filtered_post) {
 

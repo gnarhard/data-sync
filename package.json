@@ -1,5 +1,9 @@
 {
-  "name": "wp-data-sync",
+  "name": "data-sync",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GraysonE/data-sync"
+  },
   "version": "1.0.0",
   "description": "",
   "main": "index.php",
@@ -45,5 +49,8 @@
     "stylelint": "^11.0.0",
     "stylelint-config-wordpress": "^14.0.0",
     "vue-template-compiler": "^2.6.10"
+  },
+  "dependencies": {
+    "moment": "^2.24.0"
   }
 }

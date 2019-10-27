@@ -20,22 +20,29 @@ class SyncedPosts
         add_action('delete_post', [ $this, 'delete' ], 10);
     }
 
-    public static function filter(object $post, $source_data_options, $synced_posts)
+    public static function filter(object $post, $source_data, $synced_posts)
     {
-        $post->diverged = false;
-        $post->synced   = (bool) self::is_synced($post, $synced_posts);
-
         // THIS WILL RETURN AN ARRAY WITH ONE VALUE OF 0 IF NOTHING IS EXCLUDED.
         $excluded_sites = unserialize($post->post_meta->_excluded_sites[0]);
 
         if (in_array((int) get_option('data_sync_receiver_site_id'), $excluded_sites)) {
             return false;
         } else {
+
+            $published_before_sync_date = ConnectedSites::check_sync_date( $post, $source_data );
+
+            if ((! $published_before_sync_date) && (true !== $source_data->options->overwrite_receiver_post_on_conflict)) {
+                return false;
+            }
+
+            $post->diverged = false;
+            $post->synced   = (bool) self::is_synced($post, $synced_posts);
+
             if ($post->synced) {
                 $post->diverged = self::check_date_modified($post, $synced_posts);
 
                 if ($post->diverged) {
-                    if (true !== $source_data_options->overwrite_receiver_post_on_conflict) {
+                    if (true !== $source_data->options->overwrite_receiver_post_on_conflict) {
                         new Logs('Post ' . $post->post_title . ' was updated more recently on receiver.', true);
 
                         $synced_post = SyncedPost::get_where(
