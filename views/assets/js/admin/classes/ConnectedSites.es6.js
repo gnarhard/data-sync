@@ -39,8 +39,10 @@ class ConnectedSites {
 
                     new SyndicatedPosts();
                     new EnabledPostTypes();
-                    let logs = new Logs()
-                    logs.refresh_log();
+                    if ( DataSync.options.debug ) {
+                        let logs = new Logs()
+                        logs.refresh_log();
+                    }
                 }
             });
         }

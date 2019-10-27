@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
               if (0 === canonical_setting_value) {
                 alert('Please choose a canonical site before proceeding.')
                 e.stopImmediatePropagation()
-                return
+
               } else {
                 let excluded_sites = Helpers.getSelectValues(document.getElementById('excluded_sites'))
                 excluded_sites.forEach((excluded_site) => {
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   if (canonical_setting_value === parseInt(excluded_site)) {
                     alert('The canonical site you set is also excluded. Please choose another site.')
                     e.stopImmediatePropagation()
-                    return
+
                   }
                 })
               }

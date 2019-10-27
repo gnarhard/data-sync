@@ -7,72 +7,65 @@ use DataSync\Helpers;
 use WP_Query;
 use stdClass;
 
+class ACFs
+{
+    public static function get_acf_fields()
+    {
+        $args = array(
+            'post_type'      => 'acf-field-group',
+            'post_status'    => array( 'publish' ),
+            'orderby'        => 'post_date',
+            'order'          => 'DESC',
+            'posts_per_page' => - 1, // show all posts.
+        );
 
-class ACFs {
+        $loop = new WP_Query($args);
 
-	public static function get_acf_fields() {
-		$args = array(
-			'post_type'      => 'acf-field-group',
-			'post_status'    => array( 'publish' ),
-			'orderby'        => 'post_date',
-			'order'          => 'DESC',
-			'posts_per_page' => - 1, // show all posts.
-		);
+        $acf_groups = $loop->posts;
 
-		$loop = new WP_Query( $args );
+        $field_group = array();
 
-		$acf_groups = $loop->posts;
+        foreach ($acf_groups as $field) {
+            $key = $field->post_name;
 
-		$field_group = array();
+            // load field group.
+            $field_group = acf_get_field_group($key);
 
-		foreach ( $acf_groups as $field ) {
+            // validate field group.
+            if (empty($field_group)) {
+                continue;
+            }
 
-			$key = $field->post_name;
+            // load fields.
+            $field_group['fields'] = acf_get_fields($field_group);
 
-			// load field group.
-			$field_group = acf_get_field_group( $key );
+            // prepare for export.
+            $field_group = acf_prepare_field_group_for_export($field_group);
 
-			// validate field group.
-			if ( empty( $field_group ) ) {
-				continue;
-			}
+            // add to json array.
+            $json[] = $field_group;
+        }
 
-			// load fields.
-			$field_group['fields'] = acf_get_fields( $field_group );
-
-			// prepare for export.
-			$field_group = acf_prepare_field_group_for_export( $field_group );
-
-			// add to json array.
-			$json[] = $field_group;
-
-		}
-
-		if ( isset( $json ) ) {
-			return $json;
-		} else {
-			return array();
-		}
-
-
-	}
+        if (isset($json)) {
+            return $json;
+        } else {
+            return array();
+        }
+    }
 
 
-	public static function save_acf_fields( $acf_data ) {
+    public static function save_acf_fields($acf_data)
+    {
+        $acf_group_data_array = Helpers::object_to_array($acf_data);
 
-		$acf_group_data_array = Helpers::object_to_array( $acf_data );
+        foreach ($acf_group_data_array as $source_field_group) {
+            $existing_acf_group = get_page_by_path($source_field_group['key'], ARRAY_A, 'acf-field-group');
 
-		foreach ( $acf_group_data_array as $source_field_group ) {
+            if ($existing_acf_group) {
+                $source_field_group['ID'] = $existing_acf_group['ID'];
+            }
 
-			$existing_acf_group = get_page_by_path( $source_field_group['key'], ARRAY_A, 'acf-field-group' );
-
-			if ( $existing_acf_group ) {
-				$source_field_group['ID'] = $existing_acf_group['ID'];
-			}
-
-			$result = acf_import_field_group( $source_field_group );
-		}
-
-	}
-
+            $result = acf_import_field_group($source_field_group);
+        }
+    }
 }

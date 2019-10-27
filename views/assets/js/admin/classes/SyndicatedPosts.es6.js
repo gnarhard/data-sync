@@ -52,8 +52,10 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Posts')
       new EnabledPostTypes()
-      let logs = new Logs()
-      logs.refresh_log();
+      if ( DataSync.options.debug ) {
+        let logs = new Logs()
+        logs.refresh_log();
+      }
     })
   }
 
@@ -100,8 +102,10 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
-      let logs = new Logs()
-      logs.refresh_log();
+      if ( DataSync.options.debug ) {
+        let logs = new Logs()
+        logs.refresh_log();
+      }
     })
   }
 
@@ -113,8 +117,10 @@ class SyndicatedPosts {
       SyndicatedPosts.refresh_view()
       Success.show_success_message(result, 'Post')
       new EnabledPostTypes()
-      let logs = new Logs()
-      logs.refresh_log();
+      if ( DataSync.options.debug ) {
+        let logs = new Logs()
+        logs.refresh_log();
+      }
     })
   }
 

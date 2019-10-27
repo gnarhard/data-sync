@@ -7,56 +7,55 @@ namespace DataSync\Controllers;
  * Class Enqueue
  * @package DataSync
  */
-class Enqueue {
+class Enqueue
+{
 
-	/**
-	 * Enqueues scripts and styles
-	 */
-	public function __construct() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'admin_styles' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
-	}
+    /**
+     * Enqueues scripts and styles
+     */
+    public function __construct()
+    {
+        add_action('admin_enqueue_scripts', [ $this, 'admin_styles' ]);
+        add_action('admin_enqueue_scripts', [ $this, 'admin_scripts' ]);
+    }
 
-	/**
-	 * Enqueues scripts
-	 */
-	public function admin_scripts() {
+    /**
+     * Enqueues scripts
+     */
+    public function admin_scripts()
+    {
+        wp_register_script('data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true);
 
-		wp_register_script( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true );
+        $localized_data = array(
+            'strings' => array(
+                'saved' => __('Options Saved', 'text-domain'),
+                'error' => __('Error', 'text-domain'),
+            ),
+            'api'     => array(
+                'url'   => esc_url_raw(rest_url(DATA_SYNC_API_BASE_URL)),
+                'nonce' => wp_create_nonce('wp_rest'),
+            ),
+            'options' => array(
+                'enabled_post_types' => (array) get_option('enabled_post_types'),
+                'source_site'        => (bool) get_option('source_site'),
+                'debug'              => (bool) get_option('debug'),
+            ),
+        );
 
-		$localized_data = array(
-			'strings' => array(
-				'saved' => __( 'Options Saved', 'text-domain' ),
-				'error' => __( 'Error', 'text-domain' ),
-			),
-			'api'     => array(
-				'url'   => esc_url_raw( rest_url( DATA_SYNC_API_BASE_URL ) ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
-			),
-			'options' => array(
-				'enabled_post_types' => (array) get_option( 'enabled_post_types' ),
-				'source_site'        => (bool) get_option( 'source_site' ),
-			),
-		);
+        wp_localize_script('data-sync-admin', 'DataSync', $localized_data);
 
-		wp_localize_script(
-			'data-sync-admin',
-			'DataSync',
-			$localized_data
-		);
+        wp_enqueue_script('jquery-ui-tabs');
+        wp_enqueue_script('data-sync-admin');
+    }
 
-		wp_enqueue_script( 'jquery-ui-tabs' );
-		wp_enqueue_script( 'data-sync-admin' );
-	}
+    /**
+     * Enqueues styles
+     */
+    public function admin_styles()
+    {
+        wp_enqueue_style('jquery-ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
 
-	/**
-	 * Enqueues styles
-	 */
-	public function admin_styles() {
-
-		wp_enqueue_style( 'jquery-ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css' );
-
-		wp_register_style( 'data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1 );
-		wp_enqueue_style( 'data-sync-admin' );
-	}
+        wp_register_style('data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1);
+        wp_enqueue_style('data-sync-admin');
+    }
 }

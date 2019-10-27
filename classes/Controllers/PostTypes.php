@@ -13,183 +13,185 @@ use stdClass;
  * Class PostTypes
  * @package DataSync\Controllers
  */
-class PostTypes {
+class PostTypes
+{
 
-	/**
-	 * PostTypes constructor.
-	 * Registers all CTPs
-	 */
-	public function __construct() {
-		add_action( 'init', [ $this, 'register' ] );
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-	}
+    /**
+     * PostTypes constructor.
+     * Registers all CTPs
+     */
+    public function __construct()
+    {
+        add_action('init', [ $this, 'register' ]);
+        add_action('rest_api_init', [ $this, 'register_routes' ]);
+    }
 
-	/**
-	 * @param string $slug
-	 *
-	 * @return mixed
-	 */
-	public static function get_id_from_slug( string $slug ) {
-		$args = [ 'name' => $slug ];
+    /**
+     * @param string $slug
+     *
+     * @return mixed
+     */
+    public static function get_id_from_slug(string $slug)
+    {
+        $args = [ 'name' => $slug ];
 
-		return PostType::get_where( $args );
-	}
-
-
-	public static function get_all_enabled_post_types_from_receivers( $connected_sites ) {
-		$index                       = 0;
-		$enabled_post_type_site_data = array();
-
-		foreach ( $connected_sites as $site ) {
-			$enabled_post_type_site_data[ $index ] = new stdClass();
-			$enabled_post_type_site_data[ $index ]->site_id            = (int) $site->id;
-			$enabled_post_type_site_data[ $index ]->enabled_post_types = self::check_enabled_post_types_on_receiver( $site );
-			$index++;
-		}
-
-		return $enabled_post_type_site_data;
-	}
+        return PostType::get_where($args);
+    }
 
 
-	public static function check_enabled_post_types_on_receiver( object $site ) {
+    public static function get_all_enabled_post_types_from_receivers($connected_sites)
+    {
+        $index                       = 0;
+        $enabled_post_type_site_data = array();
 
-		$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
-		$response = wp_remote_get( $url );
+        foreach ($connected_sites as $site) {
+            $enabled_post_type_site_data[ $index ] = new stdClass();
+            $enabled_post_type_site_data[ $index ]->site_id            = (int) $site->id;
+            $enabled_post_type_site_data[ $index ]->enabled_post_types = self::check_enabled_post_types_on_receiver($site);
+            $index++;
+        }
 
-		if ( is_wp_error( $response ) ) {
-			$log = new Logs( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-			unset( $log );
-
-			return false;
-		} else {
-			return json_decode( wp_remote_retrieve_body( $response ) );
-		}
-	}
-
-	public function check_enabled_post_types() {
-		return Options::receiver()->enabled_post_types;
-	}
-
-	/**
-	 * Saves all Custom Post Types to database table
-	 * DB Table: data_sync_custom_post_types
-	 *
-	 * @param object $post_types
-	 */
-	public static function process( object $post_types ) {
-		foreach ( $post_types as $post_type => $post_type_data ) :
-
-			if ( 'post' === $post_type ) {
-				continue;
-			}
-
-			self::save( $post_type_data );
-
-		endforeach;
-	}
+        return $enabled_post_type_site_data;
+    }
 
 
-	/**
-	 * @param object $data
-	 *
-	 * Saves all custom post types to database
-	 * DB Table Name: data_sync_custom_post_types
-	 *
-	 * @return mixed
-	 */
-	static function save( object $data ) {
+    public static function check_enabled_post_types_on_receiver(object $site)
+    {
+        $url      = trailingslashit($site->url) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
+        $response = wp_remote_get($url);
 
-		$existing_post_types = (array) self::get_id_from_slug( $data->name );
+        if (is_wp_error($response)) {
+            new Logs('Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true);
 
-		if ( count( $existing_post_types ) ) {
-			foreach ( $existing_post_types as $post_type ) {
-				$data->id = $post_type->id;
-				$return   = PostType::update( $data );
-				if ( is_wp_error( $return ) ) {
-					$log = new Logs( 'Post type was not updated.' . '<br>' . $return->get_error_message(), true );
-					unset( $log );
-					return $response;
-				}
-			}
-		} else {
-			$new_id = PostType::create( $data );
-			if ( is_numeric( $new_id ) ) {
-				$data->id = $new_id;
-			}
-		}
+            return false;
+        } else {
+            return json_decode(wp_remote_retrieve_body($response));
+        }
+    }
 
-		$new_data[] = $data;
+    public function check_enabled_post_types()
+    {
+        return Options::receiver()->enabled_post_types;
+    }
 
-		return wp_parse_args( $new_data );
-	}
+    /**
+     * Saves all Custom Post Types to database table
+     * DB Table: data_sync_custom_post_types
+     *
+     * @param object $post_types
+     */
+    public static function process(object $post_types)
+    {
+        foreach ($post_types as $post_type => $post_type_data) :
 
-	/**
-	 *
-	 * Saves enabled custom post types for plugin option
-	 *
-	 */
-	public static function save_options() {
-		$enabled_post_types              = (array) get_option( 'enabled_post_types' );
-		$synced_custom_post_types        = PostType::get_all();
-		$synced_custom_post_types_to_add = array();
+            if ('post' === $post_type) {
+                continue;
+            }
 
-		foreach ( $synced_custom_post_types as $cpt ) {
-			if ( '' !== $cpt->name ) {
-				$synced_custom_post_types_to_add[] = $cpt->name;
-			}
-		}
+        self::save($post_type_data);
 
-		foreach ( $enabled_post_types as $key => $enabled_post_type ) {
-			if ( '' === $enabled_post_type ) {
-				unset( $enabled_post_types[ $key ] );
-			}
-		}
+        endforeach;
+    }
 
-		$merged_post_types   = array_merge( $enabled_post_types, $synced_custom_post_types_to_add );
-		$merged_post_types[] = 'post'; // NOT INCLUDED IF IT'S A BRAND NEW RECEIVER SITE, THEY HAVEN'T ENABLED ANY POST TYPES, AND THE SETTING TO OVERWRITE ENABLED POST TYPES WAS SET.
-		$unique_post_types   = array_unique( $merged_post_types );
 
-		update_option( 'enabled_post_types', $unique_post_types );
-	}
+    /**
+     * @param object $data
+     *
+     * Saves all custom post types to database
+     * DB Table Name: data_sync_custom_post_types
+     *
+     * @return mixed
+     */
+    public static function save(object $data)
+    {
+        $existing_post_types = (array) self::get_id_from_slug($data->name);
 
-	/**
-	 * Registers CTPs on plugin load
-	 *
-	 */
-	public function register() {
+        if (count($existing_post_types)) {
+            foreach ($existing_post_types as $post_type) {
+                $data->id = $post_type->id;
+                $return   = PostType::update($data);
+                if (is_wp_error($return)) {
+                    new Logs('Post type was not updated.' . '<br>' . $return->get_error_message(), true);
+                    return $response;
+                }
+            }
+        } else {
+            $new_id = PostType::create($data);
+            if (is_numeric($new_id)) {
+                $data->id = $new_id;
+            }
+        }
 
-		$synced_custom_post_types = PostType::get_all();
+        $new_data[] = $data;
 
-		foreach ( $synced_custom_post_types as $post_type ) {
-			$args = (array) json_decode( $post_type->data );
+        return wp_parse_args($new_data);
+    }
 
-			foreach ( $args as $key => $value ) {
-				if ( ( 'true' === $value ) || ( 'false' === $value ) ) {
-					$args[ $key ] = ( 'true' === $value );
-				}
-			}
+    /**
+     *
+     * Saves enabled custom post types for plugin option
+     *
+     */
+    public static function save_options()
+    {
+        $enabled_post_types              = (array) get_option('enabled_post_types');
+        $synced_custom_post_types        = PostType::get_all();
+        $synced_custom_post_types_to_add = array();
 
-			$args['labels']    = array( 'menu_name' => $args['label'] );
-			$args['menu_icon'] = ( '' === $args['menu_icon'] ) ? 'dashicons-admin-post' : $args['menu_icon'];
+        foreach ($synced_custom_post_types as $cpt) {
+            if ('' !== $cpt->name) {
+                $synced_custom_post_types_to_add[] = $cpt->name;
+            }
+        }
 
-			$result = register_post_type( $post_type->name, $args );
-		}
+        foreach ($enabled_post_types as $key => $enabled_post_type) {
+            if ('' === $enabled_post_type) {
+                unset($enabled_post_types[ $key ]);
+            }
+        }
 
-	}
+        $merged_post_types   = array_merge($enabled_post_types, $synced_custom_post_types_to_add);
+        $merged_post_types[] = 'post'; // NOT INCLUDED IF IT'S A BRAND NEW RECEIVER SITE, THEY HAVEN'T ENABLED ANY POST TYPES, AND THE SETTING TO OVERWRITE ENABLED POST TYPES WAS SET.
+        $unique_post_types   = array_unique($merged_post_types);
 
-	public function register_routes() {
+        update_option('enabled_post_types', $unique_post_types);
+    }
 
-		$registered = register_rest_route(
-			DATA_SYNC_API_BASE_URL,
-			'/post_types/check',
-			array(
-				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'check_enabled_post_types' ),
-				),
-			)
-		);
+    /**
+     * Registers CTPs on plugin load
+     *
+     */
+    public function register()
+    {
+        $synced_custom_post_types = PostType::get_all();
 
-	}
+        foreach ($synced_custom_post_types as $post_type) {
+            $args = (array) json_decode($post_type->data);
 
+            foreach ($args as $key => $value) {
+                if (('true' === $value) || ('false' === $value)) {
+                    $args[ $key ] = ('true' === $value);
+                }
+            }
+
+            $args['labels']    = array( 'menu_name' => $args['label'] );
+            $args['menu_icon'] = ('' === $args['menu_icon']) ? 'dashicons-admin-post' : $args['menu_icon'];
+
+            $result = register_post_type($post_type->name, $args);
+        }
+    }
+
+    public function register_routes()
+    {
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/post_types/check',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::READABLE,
+                    'callback' => array( $this, 'check_enabled_post_types' ),
+                ),
+            )
+        );
+    }
 }
