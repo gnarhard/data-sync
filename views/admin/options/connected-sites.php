@@ -3,6 +3,7 @@
 namespace DataSync;
 
 use DataSync\Models\ConnectedSite;
+use DataSync\Models\Log;
 
 /**
  *
@@ -41,8 +42,8 @@ function display_connected_sites() {
     </table>
     <button class="btn button-primary" id="add_site">Add Site</button>
     <?php
-    include_once DATA_SYNC_PATH . 'views/admin/options/connected-sites.php';
-    \DataSync\display_connected_sites_modal();
+    display_connected_sites_modal();
+    display_orphaned_sites();
 }
 
 
@@ -76,6 +77,27 @@ function display_connected_sites_modal() {
                     <input type="submit" name="submit_site" id="submit_site" class="button button-primary" value="Add Site">
                 </p>
             </form>
+        </div>
+    </div>
+    <?php
+}
+
+function display_orphaned_sites() {
+
+    $args = [
+            'type' => 'orphaned_site'
+    ];
+    $orphaned_site_logs = Log::get_where( $args );
+
+    ?>
+    <div class="orphaned_sites_wrap">
+        <span id="orphaned_site_toggle">Orphaned site IDs <span class="dashicons dashicons-arrow-down-alt2"></span></span>
+        <div class="orphaned_sites">
+            <?php
+            foreach( $orphaned_site_logs as $orphaned_site_log ) {
+                echo '<span>' . $orphaned_site_log->log_entry . '</span>';
+            }
+            ?>
         </div>
     </div>
     <?php

@@ -32,14 +32,16 @@ function display_syndicated_posts_table() {
         $source_options  = Options::source();
         $connected_sites = (array) ConnectedSite::get_all();
         if ( empty( $source_options->push_enabled_post_types ) ) {
-            return '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+            echo '<tr><td colspan="5" class="data_error">Required plugins not installed. Please turn on debugging and view error log for more details.</td></tr>';
         }
         $post_types                  = array_keys( $source_options->push_enabled_post_types );
         $posts                       = Posts::get_wp_posts( $post_types, true );
-        $receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
-        $enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
 
         if ( count( $posts ) ) {
+
+            $receiver_posts              = Posts::get_all_receiver_posts( $connected_sites );
+            $enabled_post_type_site_data = PostTypes::get_all_enabled_post_types_from_receivers( $connected_sites );
+
             foreach ( $posts as $post ) {
                 $syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
                 $post_type_obj    = get_post_type_object( $post->post_type ); ?>
@@ -68,7 +70,7 @@ function display_syndicated_posts_table() {
                 <?php
             }
         } else {
-            echo '<tr>No posts to sync</tr>';
+            echo '<tr><td colspan="5" class="data_error">No posts.</td></tr>';
         } ?>
         </tbody>
     </table>
