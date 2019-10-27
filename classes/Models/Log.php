@@ -6,107 +6,111 @@ namespace DataSync\Models;
 use DataSync\Models\DB;
 use DataSync\Helpers;
 
-class Log {
+class Log
+{
+    public static $table_name = 'data_sync_log';
 
-	public static $table_name = 'data_sync_log';
+    public function __construct()
+    {
+        $this->create_db_table();
+    }
 
-	public function __construct() {
-		$this->create_db_table();
-	}
+    public static function get(int $id)
+    {
+        $db = new DB(self::$table_name);
 
-	public static function get( int $id ) {
-		$db = new DB( self::$table_name );
+        return $db->get($id);
+    }
 
-		return $db->get( $id );
-	}
+    public static function get_where(array $args)
+    {
+        $db = new DB(self::$table_name);
 
-	public static function get_where( array $args ) {
-		$db = new DB( self::$table_name );
+        return $db->get_where($args);
+    }
 
-		return $db->get_where( $args );
-	}
-
-	public static function get_all_and_sort( $sortby, $data_sync_start_time = false ) {
-
-		global $wpdb;
-		$column = array_key_first( $sortby );
-		$order  = $sortby[ $column ];
-		$limit = 50;
+    public static function get_all_and_sort($sortby, $data_sync_start_time = false)
+    {
+        global $wpdb;
+        $column = array_key_first($sortby);
+        $order  = $sortby[ $column ];
+        $limit = 50;
 
 
-		if ( $data_sync_start_time ) {
-			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE datetime > "' . $data_sync_start_time . '" ORDER BY ' . $column . ' ' . $order;
-		} else {
-//			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT ' . $limit;
-			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order;
-		}
+        if ($data_sync_start_time) {
+            $sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' WHERE datetime > "' . $data_sync_start_time . '" ORDER BY ' . $column . ' ' . $order;
+        } else {
+            //			$sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order . ' LIMIT ' . $limit;
+            $sql = 'SELECT * FROM ' . $wpdb->prefix . self::$table_name . ' ORDER BY ' . $column . ' ' . $order;
+        }
 
-		$db  = new DB( self::$table_name );
+        $db  = new DB(self::$table_name);
 
-		return $db->query( $sql );
-	}
+        return $db->query($sql);
+    }
 
-	public static function create( object $data ) {
+    public static function create(object $data)
+    {
+        $args    = array(
+            'log_entry'  => $data->log_entry,
+            'url_source' => $data->url_source,
+            'datetime'   => $data->datetime,
+        );
+        $sprintf = array(
+            '%s',
+            '%s',
+            '%s',
+        );
 
-		$args    = array(
-			'log_entry'  => $data->log_entry,
-			'url_source' => $data->url_source,
-			'datetime'   => $data->datetime,
-		);
-		$sprintf = array(
-			'%s',
-			'%s',
-			'%s',
-		);
+        $db = new DB(self::$table_name);
 
-		$db = new DB( self::$table_name );
+        return $db->create($args, $sprintf);
+    }
 
-		return $db->create( $args, $sprintf );
+    public static function update(object $data)
+    {
+        $args = array(
+            'id'         => $data->id,
+            'log_entry'  => $data->log_entry,
+            'url_source' => Helpers::format_url($data->url_source),
+            'datetime'   => current_time('mysql', 1),
+        );
 
-	}
+        $where = [ 'id' => $data->id ];
 
-	public static function update( object $data ) {
+        $db = new DB(self::$table_name);
 
-		$args = array(
-			'id'         => $data->id,
-			'log_entry'  => $data->log_entry,
-			'url_source' => Helpers::format_url( $data->url_source ),
-			'datetime'   => current_time( 'mysql', 1 ),
-		);
+        return $db->update($args, $where);
+    }
 
-		$where = [ 'id' => $data->id ];
+    public static function delete($id)
+    {
+        $db = new DB(self::$table_name);
 
-		$db = new DB( self::$table_name );
+        return $db->delete($id);
+    }
 
-		return $db->update( $args, $where );
-	}
+    public static function delete_all()
+    {
+        $db = new DB(self::$table_name);
 
-	public static function delete( $id ) {
-		$db = new DB( self::$table_name );
+        return $db->delete_all();
+    }
 
-		return $db->delete( $id );
-	}
+    public function create_db_table()
+    {
+        global $wpdb;
 
-	public static function delete_all() {
-		$db = new DB( self::$table_name );
+        $charset_collate = preg_replace('/DEFAULT /', '', $wpdb->get_charset_collate());
 
-		return $db->delete_all();
-	}
-
-	public function create_db_table() {
-		global $wpdb;
-
-		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
-
-		$result = $wpdb->query(
-			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
+        $result = $wpdb->query(
+            'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        log_entry              longtext,
 	        url_source               VARCHAR(255) NOT NULL,
 	        datetime    datetime NOT NULL 
 	    );'
-		);
-	}
-
+        );
+    }
 }

@@ -15,8 +15,10 @@ class SyndicatedTemplates {
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
       Success.show_success_message( result, 'Templates' );
       new SyndicatedTemplates();
-      let logs = new Logs()
-      logs.refresh_log();
+      if ( DataSync.options.debug ) {
+        let logs = new Logs()
+        logs.refresh_log();
+      }
     })
 
   }

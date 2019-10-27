@@ -6,81 +6,86 @@ namespace DataSync\Models;
 use DataSync\Models\DB;
 use DataSync\Helpers;
 
-class ConnectedSite {
+class ConnectedSite
+{
+    public static $table_name = 'data_sync_connected_sites';
 
-	public static $table_name = 'data_sync_connected_sites';
+    public static function get(int $id)
+    {
+        $db = new DB(self::$table_name);
 
-	public static function get( int $id ) {
-		$db = new DB( self::$table_name );
+        return $db->get($id);
+    }
 
-		return $db->get( $id );
-	}
+    public static function get_all()
+    {
+        $db = new DB(self::$table_name);
 
-	public static function get_all() {
-		$db = new DB( self::$table_name );
+        return $db->get_all();
+    }
 
-		return $db->get_all();
-	}
+    public static function get_where(array $args)
+    {
+        $db = new DB(self::$table_name);
 
-	public static function get_where( array $args ) {
-		$db = new DB( self::$table_name );
+        return $db->get_where($args);
+    }
 
-		return $db->get_where( $args );
-	}
+    public static function create($data)
+    {
+        $url = Helpers::format_url($data['url']);
 
-	public static function create( $data ) {
-		$url = Helpers::format_url( $data['url'] );
+        $args    = array(
+            'name'           => $data['name'],
+            'url'            => esc_url_raw($url),
+            'secret_key'     => sanitize_text_field($data['secret_key']),
+            'date_connected' => current_time('mysql'),
+        );
+        $sprintf = array(
+            '%s',
+            '%s',
+            '%s',
+        );
 
-		$args    = array(
-			'name'           => $data['name'],
-			'url'            => esc_url_raw( $url ),
-			'secret_key'     => sanitize_text_field( $data['secret_key'] ),
-			'date_connected' => current_time( 'mysql' ),
-		);
-		$sprintf = array(
-			'%s',
-			'%s',
-			'%s',
-		);
+        $db = new DB(self::$table_name);
 
-		$db = new DB( self::$table_name );
+        return $db->create($args, $sprintf);
+    }
 
-		return $db->create( $args, $sprintf );
+    public static function update(object $data)
+    {
+        $url = Helpers::format_url($data['url']);
 
-	}
+        $args = array(
+            'id'             => $data->id,
+            'name'           => $data->name,
+            'url'            => Helpers::format_url($data->url),
+            'secret_key'     => sanitize_text_field($data->secret_key),
+            'date_connected' => current_time('mysql'),
+        );
 
-	public static function update( object $data ) {
+        $where = [ 'id' => $data->id ];
 
-		$url = Helpers::format_url( $data['url'] );
+        $db = new DB(self::$table_name);
 
-		$args = array(
-			'id'             => $data->id,
-			'name'           => $data->name,
-			'url'            => Helpers::format_url( $data->url ),
-			'secret_key'     => sanitize_text_field( $data->secret_key ),
-			'date_connected' => current_time( 'mysql' ),
-		);
+        return $db->update($args, $where);
+    }
 
-		$where = [ 'id' => $data->id ];
+    public static function delete($id)
+    {
+        $db = new DB(self::$table_name);
 
-		$db = new DB( self::$table_name );
+        return $db->delete($id);
+    }
 
-		return $db->update( $args, $where );
-	}
+    public function create_db_table()
+    {
+        global $wpdb;
 
-	public static function delete( $id ) {
-		$db = new DB( self::$table_name );
+        $charset_collate = preg_replace('/DEFAULT /', '', $wpdb->get_charset_collate());
 
-		return $db->delete( $id );
-	}
-
-	public function create_db_table() {
-		global $wpdb;
-
-		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
-
-		$result = $wpdb->query(
-			'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
+        $result = $wpdb->query(
+            'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
@@ -88,19 +93,19 @@ class ConnectedSite {
 	        secret_key        VARCHAR(255) NOT NULL,
 	        date_connected    DATETIME NOT NULL 
 	    );'
-		);
+        );
 
-		$this->add_foreign_key_restraints();
-	}
+        $this->add_foreign_key_restraints();
+    }
 
-	private function add_foreign_key_restraints() {
-		global $wpdb;
+    private function add_foreign_key_restraints()
+    {
+        global $wpdb;
 
-		$charset_collate = preg_replace( '/DEFAULT /', '', $wpdb->get_charset_collate() );
-		$result          = $wpdb->query(
-			'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
+        $charset_collate = preg_replace('/DEFAULT /', '', $wpdb->get_charset_collate());
+        $result          = $wpdb->query(
+            'ALTER TABLE ' . $wpdb->prefix . self::$table_name . '
 			CONVERT TO ' . $charset_collate . ';'
-		);
-	}
-
+        );
+    }
 }
