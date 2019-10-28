@@ -123,6 +123,23 @@
   cursor: pointer;
 }
 
+#connected_sites .orphaned_sites_wrap {
+  margin-top: 40px;
+}
+
+#connected_sites .orphaned_sites_wrap #orphaned_site_toggle {
+  cursor: pointer;
+}
+
+#connected_sites .orphaned_sites_wrap .orphaned_sites {
+  display: none;
+  margin-left: 10px;
+}
+
+#connected_sites .orphaned_sites_wrap .orphaned_sites span {
+  display: block;
+}
+
 #connected_sites .lightbox_wrap {
   display: none;
   background: rgba(0, 0, 0, 0.5);
@@ -264,6 +281,10 @@
 #syndicated_posts table .connected_site_details {
   padding: 10px;
   margin: 10px 0 10px 0;
+}
+
+#syndicated_posts table .data_error {
+  text-align: center;
 }
 
 #syndicated_posts #wp_data_sync_status {

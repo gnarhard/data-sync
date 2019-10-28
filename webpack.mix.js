@@ -6,7 +6,7 @@ let mix = require('laravel-mix');
  */
 const devPath  = 'views/assets';
 
-mix.setPublicPath( 'views/dist' );
+mix.setPublicPath('views/dist');
 
 /*
  * Set Laravel Mix options.
@@ -21,6 +21,16 @@ mix.setPublicPath( 'views/dist' );
 //     }) ],
 //   processCssUrls: false
 // });
+
+
+const MomentLocalesPlugin = require('moment');
+
+module.exports = {
+    plugins: [
+    // To strip all locales except “en”
+    new MomentLocalesPlugin(),
+    ],
+};
 
 
 /*
@@ -51,13 +61,13 @@ mix.version();
 
 // Sass configuration.
 let sassConfig = {
-  outputStyle: 'expanded',
-  indentType: 'tab',
-  indentWidth: 1,
+    outputStyle: 'expanded',
+    indentType: 'tab',
+    indentWidth: 1,
 };
 
 // mix.sass( `${devPath}/sass/data-sync.scss`, 'styles', sassConfig );
-mix.sass( `${devPath}/sass/data-sync.scss`, 'styles' );
+mix.sass(`${devPath}/sass/data-sync.scss`, 'styles');
 
 /*
  * Compile JavaScript.

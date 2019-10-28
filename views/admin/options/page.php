@@ -6,13 +6,13 @@ use DataSync\Controllers\TemplateSync;
 /**
  * Outputs HTML for settings page
  */
-function data_sync_options_page() {
-
-	?>
+function data_sync_options_page()
+{
+    ?>
     <div class="wrap">
         <h2>DATA SYNC</h2>
         <div id="data_sync_tabs" class="hidden">
-			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
+			<?php if ('1' === get_option('source_site')) { ?>
                 <ul>
                     <li><a href="#syndicated_posts">Posts</a></li>
                     <li><a href="#templates">Templates</a></li>
@@ -24,7 +24,7 @@ function data_sync_options_page() {
 			<?php } else { ?>
                 <h3>Settings</h3>
 			<?php } ?>
-			<?php if ( '1' === get_option( 'source_site' ) ) { ?>
+			<?php if ('1' === get_option('source_site')) { ?>
                 <div id="syndicated_posts">
                     <div id="syndicated_posts_wrap">
                         <div id="status_dashboard_button_wrap">
@@ -62,11 +62,11 @@ function data_sync_options_page() {
                 <div id="debug_log">
                     <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
 					<?php
-					if ( get_option( 'source_site' ) ) {
-						?>
+                    if (get_option('source_site')) {
+                        ?>
 						<?php
-						if ( '1' === get_option( 'debug' ) ) {
-							?>
+                        if ('1' === get_option('debug')) {
+                            ?>
                             <div id="log_buttons_wrap">
                                 <button id="delete_error_log" class="button button-warning">Purge log</button>
                                 <button class="button button-secondary" id="refresh_error_log">Refresh log</button>
@@ -76,12 +76,11 @@ function data_sync_options_page() {
 								<?php echo display_log(); ?>
                             </div>
 							<?php
-						} else {
-							?><span>Enable debugging on the settings page. Debugging decreases settings page performance.</span><?php
-						}
-
-					}
-					?>
+                        } else {
+                            ?><span>Enable debugging on the settings page. Debugging decreases settings page performance.</span><?php
+                        }
+                    }
+                    ?>
                 </div>
 
 			<?php } ?>
@@ -89,10 +88,9 @@ function data_sync_options_page() {
                 <span class="loading_spinner"><i class="dashicons dashicons-update"></i> Loading. . .</span>
                 <form method="POST" action="options.php">
 					<?php
-					settings_fields( 'data_sync_options' );
-					do_settings_sections( 'data-sync-options' );
-					submit_button();
-					?>
+                    settings_fields('data_sync_options');
+    do_settings_sections('data-sync-options');
+    submit_button(); ?>
                 </form>
             </div>
         </div>
