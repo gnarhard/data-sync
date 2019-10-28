@@ -9,11 +9,11 @@ use DataSync\Controllers\SyncedPosts;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 
-function display_syndicated_post( $post, $connected_sites, $receiver_posts, $enabled_post_type_site_data ) {
+function display_post( $post, $connected_sites, $receiver_data ) {
 
     ob_start();
 
-    $syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_posts );
+    $syndication_info = Posts::get_syndication_info_of_post( $post, $connected_sites, $receiver_data );
     $post_type_obj    = get_post_type_object( $post->post_type );
     ?>
     <tr class="top_level_post_detail" data-id="<?php echo $post->ID ?>"
@@ -35,7 +35,7 @@ function display_syndicated_post( $post, $connected_sites, $receiver_posts, $ena
                 <h4>Source Info</h4>
                 <?php echo $syndication_info->source_message ?>
             </div>
-            <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ); ?></div>
+            <div class="detail_wrap"><?php echo display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $receiver_data ); ?></div>
         </td>
     </tr>
     <?php
@@ -43,7 +43,7 @@ function display_syndicated_post( $post, $connected_sites, $receiver_posts, $ena
 }
 
 
-function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $enabled_post_type_site_data, $receiver_posts ) {
+function display_post_syndication_details_per_site( $syndication_info, $connected_sites, $post, $receiver_data ) {
     ?>
     <div class="connected_site_info">
     <h4>Connected Site Info</h4>
@@ -74,9 +74,9 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
                 }
             }
 
-            foreach ( $enabled_post_type_site_data as $enabled_post_type_site_datum ) {
-                if ( (int) $site->id === $enabled_post_type_site_datum->site_id ) {
-                    $enabled_post_types = $enabled_post_type_site_datum->enabled_post_types;
+            foreach ( $receiver_data as $receiver ) {
+                if ( (int) $site->id === $receiver->site_id ) {
+                    $enabled_post_types = $receiver->enabled_post_types;
                     break;
                 }
             }
@@ -99,7 +99,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
                 // NEED TO GET PER-SITE DATA. CAN'T RELY ON DATA FROM $syndication_info BECAUSE THAT IS POST-SPECIFIC, NOT SITE AND POST SPECIFIC.
                 $synced_post_modified_time = strtotime( $connected_site_synced_post->date_modified );
                 $source_post_modified_time = strtotime( $post->post_modified_gmt );
-                $receiver_post             = Posts::find_receiver_post( $receiver_posts, $connected_site_synced_post->receiver_site_id, $connected_site_synced_post->receiver_post_id );
+                $receiver_post             = Posts::find_receiver_post( $receiver_data, $connected_site_synced_post->receiver_site_id, $connected_site_synced_post->receiver_post_id );
                 if ( null === $receiver_post ) {
                     if ( $source_post_modified_time > $synced_post_modified_time ) {
                         $sync_status = 'diverged';

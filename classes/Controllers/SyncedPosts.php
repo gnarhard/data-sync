@@ -357,11 +357,11 @@ class SyncedPosts
         }
     }
 
-    public function display_syndicated_post( WP_REST_Request $request ) {
+    public function display_post( WP_REST_Request $request ) {
         $request_body = json_decode( $request->get_body() );
         $post       = $request_body->post_to_get;
         include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
-        \DataSync\display_syndicated_post( $post, $request_body->source_data->connected_sites, $request_body->receiver_data->receiver_posts, $request_body->receiver_data->enabled_post_type_site_data );
+        \DataSync\display_post( $post, $request_body->source_data->connected_sites, (array) $request_body->receiver_data );
     }
 
 
@@ -455,7 +455,7 @@ class SyncedPosts
             array(
                 array(
                     'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'display_syndicated_post' ),
+                    'callback' => array( $this, 'display_post' ),
                     'args'     => array(
                         'post_id' => array(
                             'description' => 'Post ID',

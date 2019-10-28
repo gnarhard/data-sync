@@ -69,7 +69,7 @@ class PostTypes
         }
     }
 
-    public function check_enabled_post_types()
+    public function get_enabled_post_types()
     {
         return Options::receiver()->enabled_post_types;
     }
@@ -189,7 +189,7 @@ class PostTypes
             array(
                 array(
                     'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'check_enabled_post_types' ),
+                    'callback' => array( $this, 'get_enabled_post_types' ),
                 ),
             )
         );
