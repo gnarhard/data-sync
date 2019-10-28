@@ -6,6 +6,7 @@ import Logs from './Logs.es6'
 class SyndicatedPosts {
 
     constructor () {
+        console.log('here');
         SyndicatedPosts.refresh_view()
     }
 
@@ -48,6 +49,7 @@ class SyndicatedPosts {
             let site_count = source_data.connected_sites.length
 
             source_data.connected_sites.forEach((site, index) => {
+                console.log(index);
                 AJAX.get(site.url + '/wp-json/data-sync/v1/posts/all', false).then(function (receiver_posts) {
                     data.receiver_data.receiver_posts[index] = {}
                     data.receiver_data.receiver_posts[index].posts = receiver_posts

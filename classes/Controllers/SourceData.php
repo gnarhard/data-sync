@@ -47,66 +47,56 @@ class SourceData {
      *
      */
     public function register_routes() {
-//		$registered = register_rest_route(
-//			DATA_SYNC_API_BASE_URL,
-//			'/source_data/push',
-//			array(
-//				array(
-//					'methods'  => WP_REST_Server::READABLE,
-//					'callback' => array( $this, 'push' ),
-//				),
-//			)
-//		);
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)', array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_source_data' ),
-                    'args'     => array(
-                        'action' => array(
-                            'description' => 'Action to tell backend which content to provide.',
-                            'type'        => 'string',
-                        ),
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'get_source_data' ),
+                'args'     => array(
+                    'action' => array(
+                        'description' => 'Action to tell backend which content to provide.',
+                        'type'        => 'string',
                     ),
                 ),
-            ) );
+            ),
+        ) );
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/start_fresh', array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'start_fresh' ),
-                ),
-            ) );
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'start_fresh' ),
+            ),
+        ) );
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/push/(?P<source_post_id>\d+)', array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'push_post_to_all_receivers' ),
-                    'args'     => array(
-                        'source_post_id' => array(
-                            'description' => 'Source Post ID',
-                            'type'        => 'int',
-                        ),
+            array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array( $this, 'push_post_to_all_receivers' ),
+                'args'     => array(
+                    'source_post_id' => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
                     ),
                 ),
-            ) );
+            ),
+        ) );
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/push/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'overwrite_post_on_single_receiver' ),
-                    'args'     => array(
-                        'source_post_id'   => array(
-                            'description' => 'Source Post ID',
-                            'type'        => 'int',
-                        ),
-                        'receiver_site_id' => array(
-                            'description' => 'Receiver Site ID',
-                            'type'        => 'int',
-                        ),
+            array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array( $this, 'overwrite_post_on_single_receiver' ),
+                'args'     => array(
+                    'source_post_id'   => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
+                    ),
+                    'receiver_site_id' => array(
+                        'description' => 'Receiver Site ID',
+                        'type'        => 'int',
                     ),
                 ),
-            ) );
+            ),
+        ) );
 
     }
 
@@ -470,7 +460,6 @@ class SourceData {
 
         } elseif ( 'push' === $request->get_url_params()['action'] ) {
 
-            $source_data = new stdClass();
             $this->consolidate();
             $this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
             $this->validate();

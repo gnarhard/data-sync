@@ -31,57 +31,6 @@ class Posts
         }
     }
 
-    public function register_routes()
-    {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/post_meta/(?P<id>\d+)',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_custom_post_meta' ),
-                    'args'     => array(
-                        'id' => array(
-                            'description'       => 'ID of post',
-                            'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
-                        ),
-                    ),
-                ),
-            )
-        );
-    }
-
-    public function register_receiver_routes()
-    {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/posts/(?P<id>\d+)',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_post' ),
-                    'args'     => array(
-                        'id' => array(
-                            'description' => 'ID of post',
-                            'type'        => 'int',
-                        ),
-                    ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/posts/all',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_all_posts' ),
-                ),
-            )
-        );
-    }
-
     public function display_admin_notices()
     {
         $errors = get_option('my_admin_errors');
@@ -464,16 +413,26 @@ class Posts
                     $receiver_modified_time        = strtotime($receiver_post->post_modified_gmt);
                     $syndication_info->synced_post = $synced_post;
 
-                    if ($receiver_modified_time > $synced_post_modified_time) {
-                        $syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
-                        $statuses[]                                = 'diverged';
-                    } elseif ($source_post_modified_time > $synced_post_modified_time) {
-                        $syndication_info->source_version_edited = true;
-                        $statuses[]                              = 'diverged';
-                    } elseif ($synced_post_modified_time >= $receiver_modified_time) {
-                        $statuses[] = 'synced';
-                    } elseif (0 === $receiver_modified_time) {
-                        $statuses[] = 'unsynced';
+                    if ( null !== $receiver_post ) {
+                        $receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
+                        if ( $receiver_modified_time > $synced_post_modified_time ) {
+                            $syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
+                            $statuses[]                                = 'diverged';
+                        } else if ( $source_post_modified_time > $synced_post_modified_time ) {
+                            $syndication_info->source_version_edited = true;
+                            $statuses[]                              = 'diverged';
+                        } else if ( $synced_post_modified_time >= $receiver_modified_time ) {
+                            $statuses[] = 'synced';
+                        } else if ( 0 === $receiver_modified_time ) {
+                            $statuses[] = 'unsynced';
+                        }
+                    } else {
+                        if ( $source_post_modified_time > $synced_post_modified_time ) {
+                            $syndication_info->source_version_edited = true;
+                            $statuses[]                              = 'diverged';
+                        } else {
+                            $statuses[] = 'unsynced';
+                        }
                     }
                 }
 
@@ -604,7 +563,7 @@ class Posts
             'post_type'      => 'any',
             'post_status'    => $statuses,
             'orderby'        => 'post_date',
-            'order'          => 'DESC',
+            'order'          => 'ASC',
             'posts_per_page' => - 1, // show all posts.
         );
 
@@ -693,5 +652,69 @@ class Posts
                 }
             }
         }
+    }
+
+    public function register_routes() {
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/post_meta/(?P<id>\d+)',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::READABLE,
+                    'callback' => array( $this, 'get_custom_post_meta' ),
+                    'args'     => array(
+                        'id' => array(
+                            'description'       => 'ID of post',
+                            'type'              => 'int',
+                            'validate_callback' => 'is_numeric',
+                        ),
+                    ),
+                ),
+            )
+        );
+    }
+    public function register_receiver_routes() {
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/posts/(?P<id>\d+)',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::READABLE,
+                    'callback' => array( $this, 'get_post' ),
+                    'args'     => array(
+                        'id' => array(
+                            'description' => 'ID of post',
+                            'type'        => 'int',
+                        ),
+                    ),
+                ),
+            )
+        );
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/posts/all',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::READABLE,
+                    'callback' => array( $this, 'get_all_posts' ),
+                ),
+            )
+        );
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/status_data/(?P<post_id>\d+)',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::EDITABLE,
+                    'callback' => array( $this, 'get_syndicated_post_status_data' ),
+                    'args'     => array(
+                        'post_id' => array(
+                            'description' => 'ID of post',
+                            'type'        => 'int',
+                        ),
+                    ),
+                ),
+            )
+        );
     }
 }

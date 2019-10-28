@@ -94,8 +94,12 @@ function display_orphaned_sites() {
         <span id="orphaned_site_toggle">Orphaned site IDs <span class="dashicons dashicons-arrow-down-alt2"></span></span>
         <div class="orphaned_sites">
             <?php
-            foreach( $orphaned_site_logs as $orphaned_site_log ) {
-                echo '<span>' . $orphaned_site_log->log_entry . '</span>';
+            if ( ! empty( $orphaned_site_logs ) ) {
+                foreach( $orphaned_site_logs as $orphaned_site_log ) {
+                    echo '<span>' . $orphaned_site_log->log_entry . '</span>';
+                }
+            } else {
+                echo '<span>No orphaned sites.</span>';
             }
             ?>
         </div>

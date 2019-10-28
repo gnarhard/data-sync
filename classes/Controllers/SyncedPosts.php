@@ -357,9 +357,15 @@ class SyncedPosts
         }
     }
 
+    public function display_syndicated_post( WP_REST_Request $request ) {
+        $request_body = json_decode( $request->get_body() );
+        $post       = $request_body->post_to_get;
+        include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+        \DataSync\display_syndicated_post( $post, $request_body->source_data->connected_sites, $request_body->receiver_data->receiver_posts, $request_body->receiver_data->enabled_post_type_site_data );
+    }
 
-    public function register_routes()
-    {
+
+    public function register_routes() {
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/sync_post/',
@@ -371,7 +377,6 @@ class SyncedPosts
                 ),
             )
         );
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/',
@@ -382,7 +387,6 @@ class SyncedPosts
                 ),
             )
         );
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/all',
@@ -393,7 +397,6 @@ class SyncedPosts
                 ),
             )
         );
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/retrieve_from_receiver',
@@ -404,7 +407,6 @@ class SyncedPosts
                 ),
             )
         );
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/delete_receiver_post/',
@@ -416,7 +418,6 @@ class SyncedPosts
                 ),
             )
         );
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/delete_synced_post/',
@@ -428,8 +429,6 @@ class SyncedPosts
                 ),
             )
         );
-
-
         $registered = register_rest_route(
             DATA_SYNC_API_BASE_URL,
             '/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
@@ -444,6 +443,22 @@ class SyncedPosts
                         ),
                         'receiver_site_id' => array(
                             'description' => 'Receiver Site ID',
+                            'type'        => 'int',
+                        ),
+                    ),
+                ),
+            )
+        );
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/syndicated_post/(?P<post_id>\d+)',
+            array(
+                array(
+                    'methods'  => WP_REST_Server::EDITABLE,
+                    'callback' => array( $this, 'display_syndicated_post' ),
+                    'args'     => array(
+                        'post_id' => array(
+                            'description' => 'Post ID',
                             'type'        => 'int',
                         ),
                     ),
