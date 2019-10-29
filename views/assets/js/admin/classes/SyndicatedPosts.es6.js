@@ -8,7 +8,7 @@ class SyndicatedPosts {
 
     constructor () {
         this.refresh_view()
-        // this.init()
+        // this.init() // so you don't have to wait for load to test bulk push
     }
 
     init () {
