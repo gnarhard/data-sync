@@ -35,13 +35,22 @@ class Receiver {
      *
      */
     public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receive', array(
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/sync', array(
             array(
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'receive' ),
+                'callback'            => array( $this, 'sync' ),
                 'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
             ),
         ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/overwrite', array(
+            array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => array( $this, 'sync' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+            ),
+        ) );
+
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/start_fresh', array(
             array(
                 'methods'  => WP_REST_Server::READABLE,
@@ -164,7 +173,7 @@ class Receiver {
     /**
      *
      */
-    public function receive() {
+    public function sync() {
         $source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
         $this->process( $source_data );

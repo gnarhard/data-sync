@@ -104,6 +104,7 @@ class Auth
             return true;
         } else {
             if ($request->get_param('nonce')) {
+                // TODO: THIS WON'T WORK WITH CORS.
                 return wp_verify_nonce($request->get_param('nonce'), 'data_sync_api');
             }
         }

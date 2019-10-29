@@ -68,6 +68,31 @@ class SourceData {
             ),
         ) );
 
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
+            array(
+                'methods'          => WP_REST_Server::READABLE,
+                'callback'         => array( $this, 'prep' ),
+                'args'             => array(
+                    'source_post_id' => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
+                    ),
+                ),
+                'receiver_site_id' => array(
+                    'description' => 'Receiver Site ID',
+                    'type'        => 'int',
+                ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'prevalidate' ),
+            ),
+        ) );
+
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/push/(?P<source_post_id>\d+)', array(
             array(
                 'methods'  => WP_REST_Server::EDITABLE,
@@ -108,13 +133,44 @@ class SourceData {
         $request_body = json_decode( $request->get_body() );
 
         $post                                                            = (object) Posts::get_single( $request->get_url_params()['source_post_id'] );
-        $post_type                                                       = $post->post_type;
         $this->source_data->options->overwrite_receiver_post_on_conflict = (bool) $request_body->overwrite;
         $this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
-        $this->source_data->posts->$post_type                            = [ $post ];
+        $this->source_data->posts->$post->post_type                      = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
 
         $this->validate();
         $this->configure_canonical_urls();
+    }
+
+    public function prep( WP_REST_Request $request ) {
+
+        $this->consolidate();
+
+        $post_id = (int) $request->get_url_params()['source_post_id'];
+
+        if ( 0 !== $post_id ) {
+            // NOT BULK PACKAGE, CLEAR AND SET FOR ONE POST.
+            $post                                 = (object) Posts::get_single( $post_id );
+            $post_type                            = $post->post_type;
+            $this->source_data->posts             = new stdClass(); // CLEAR ALL OTHER POSTS.
+            $this->source_data->posts->$post_type = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
+        } else {
+            // LOAD ALL POSTS DUE TO BULK REQUEST.
+            $this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
+        }
+
+        $this->validate();
+        $this->configure_canonical_urls();
+
+
+        $this->source_data->receiver_site_id = (int) $request->get_url_params()['receiver_site_id'];
+        $args                                = [ 'id' => $this->source_data->receiver_site_id ];
+        $connected_site                      = ConnectedSite::get_where( $args );
+        $connected_site                      = $connected_site[0];
+
+        $auth = new Auth();
+        $json = $auth->prepare( $this->source_data, $connected_site->secret_key );
+
+        return $json;
     }
 
 
@@ -347,6 +403,10 @@ class SourceData {
         $this->source_data->synced_posts    = (array) $synced_posts->get_all()->get_data();
         $this->source_data->canonical_urls  = array();
 
+        // PLUGINS ARE CHECKED TO EXIST BY AJAX PREVALIDATION.
+        $this->source_data->acf               = (array) ACFs::get_acf_fields();
+        $this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
+
     }
 
 
@@ -381,65 +441,69 @@ class SourceData {
     }
 
 
+    public function prevalidate() {
+
+
+        // TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
+
+        $connected_sites = (array) ConnectedSite::get_all();
+        $plugin_info     = Options::get_required_plugins_info();
+
+        if ( ! empty( $plugin_info ) ) {
+            foreach ( $connected_sites as $site ) {
+                $validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
+                if ( ! $validated ) {
+                    wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
+                }
+            }
+            wp_send_json_success();
+        } else {
+            wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
+        }
+
+    }
+
+
     /**
      *
      * Validate specific settings before sending to receiver
      * Unset posts if they don't meet the criteria and send error
      */
     private function validate() {
-
-        // TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
-
         $connected_sites = (array) ConnectedSite::get_all();
-        $plugin_info     = Options::get_required_plugins_info();
         $site_ids        = [];
 
-        if ( ! empty( $plugin_info ) ) {
-            foreach ( $connected_sites as $site ) {
+        foreach ( $connected_sites as $site ) {
+            $site_ids[] = (int) $site->id;
+        }
 
-                $validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
-                if ( ! $validated ) {
-                    unset( $this->source_data );
-                    break;
-                }
+        foreach ( $this->source_data->options->push_enabled_post_types_array as $post_type_slug ) {
+            if ( ( ! isset( $this->source_data->posts->$post_type_slug ) ) || ( empty( $this->source_data->posts->$post_type_slug ) ) ) {
+                continue; // SKIPS EMPTY DATA.
+            } else {
+                // LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
+                foreach ( $this->source_data->posts->$post_type_slug as $key => $post ) {
 
-                $site_ids[] = (int) $site->id;
-            }
-
-            foreach ( $this->source_data->options->push_enabled_post_types_array as $post_type_slug ) {
-                if ( ( ! isset( $this->source_data->posts->$post_type_slug ) ) || ( empty( $this->source_data->posts->$post_type_slug ) ) ) {
-                    continue; // SKIPS EMPTY DATA.
-                } else {
-                    // LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
-                    foreach ( $this->source_data->posts->$post_type_slug as $key => $post ) {
-
-                        // VALIDATE IF CANONICAL SETTING IS SET.
-                        if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
+                    // VALIDATE IF CANONICAL SETTING IS SET.
+                    if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
+                        unset( $this->source_data->posts->$post_type_slug[ $key ] );
+                        new Logs( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
+                    } else {
+                        // VALIDATE CANONICAL SITE ID CORRELATES TO EXISTING SITE.
+                        $orphaned = ConnectedSites::is_orphaned( $post, $site_ids );
+                        if ( $orphaned ) {
+                            // REMOVE POST FROM SYNDICATION BECAUSE IT HAS FAULTY DATA.
                             unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                            new Logs( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
-                        } else {
-                            // VALIDATE CANONICAL SITE ID CORRELATES TO EXISTING SITE.
-                            $orphaned = ConnectedSites::is_orphaned( $post, $site_ids );
-                            if ( $orphaned ) {
-                                // REMOVE POST FROM SYNDICATION BECAUSE IT HAS FAULTY DATA.
-                                unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                                new Logs( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.', true, 'orphaned_site' );
-                            }
-                        }
-
-                        // VALIDATE IF EXCLUDED SITES HAVE BEEN SAVED.
-                        if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
-                            unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                            new Logs( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
+                            new Logs( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.', true, 'orphaned_site' );
                         }
                     }
-                }
-            }
 
-            // NEED TO VALIDATE BEFORE SETTING DEPENDENT PLUGIN DATA.
-            if ( $validated ) {
-                $this->source_data->acf               = (array) ACFs::get_acf_fields();
-                $this->source_data->custom_taxonomies = (array) cptui_get_taxonomy_data();
+                    // VALIDATE IF EXCLUDED SITES HAVE BEEN SAVED.
+                    if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
+                        unset( $this->source_data->posts->$post_type_slug[ $key ] );
+                        new Logs( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
+                    }
+                }
             }
         }
     }

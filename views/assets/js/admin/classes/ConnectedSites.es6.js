@@ -10,10 +10,18 @@ class ConnectedSites {
         this.refresh_view()
     }
 
+    static async get_all() {
+        const response = await fetch(DataSync.api.url + '/connected_sites', {
+            headers: {
+                'X-WP-Nonce': DataSync.api.nonce
+            },
+        })
+        return await response.json()
+    }
+
     static save () {
 
         let self = this;
-        console.log('here');
         var moment = require('moment');
         let data = []
         data[0] = {}
