@@ -103,8 +103,19 @@ function display_notified_users()
 }
 
 
+function awareness_messages() {
+    ?>
+    <div id="awareness_message_wrap">
+        <div id="awareness_message">
+            <span class="loading_spinner plugin_versions"><i class="dashicons dashicons-update"></i> Getting plugin versions. . .</span>
+        </div>
+    </div>
+    <?php
+}
+
 function display_awareness_messages()
 {
+
     if (! is_plugin_active('advanced-custom-fields-pro/acf.php')) {
         ?>
 		<span style="color: red">ACF needs to be installed or activated on this site.</span><br>

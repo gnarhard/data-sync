@@ -147,21 +147,24 @@ class Options {
     }
 
     public function get_settings_tab_html( WP_REST_Request $request ) {
-        $settings_tab     = $request->get_param( 'tab' );
+        $settings_request     = $request->get_param( 'tab' );
         $settings_content = new stdClass();
 
-        if ( 'syndicated_posts' === $settings_tab ) {
+        if ( 'syndicated_posts' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
             \DataSync\display_syndicated_posts_table();
-        } elseif ( 'connected_sites' === $settings_tab ) {
+        } elseif ( 'connected_sites' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/connected-sites.php';
             \DataSync\display_connected_sites();
-        } elseif ( 'enabled_post_types' === $settings_tab ) {
+        } elseif ( 'enabled_post_types' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
             \DataSync\display_enabled_post_types();
-        } elseif ( 'templates' === $settings_tab ) {
+        } elseif ( 'templates' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
             \DataSync\display_synced_templates();
+        } elseif ('awareness_messages' === $settings_request ) {
+            include_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
+            \DataSync\display_awareness_messages();
         }
     }
 
@@ -203,6 +206,8 @@ class Options {
                 $output .= '<p>' . $topic . ' not syndicated.</p>';
             } elseif ( 'Logs' === $topic ) {
                 $output .= '<p>' . $topic . ' not purged.</p>';
+            } elseif ( 'Prevalidation' === $topic ) {
+                $output .= '<p>Prevalidation failed. See logs.</p>';
             }
 
             $output .= '<p>' . $params['message'] . '</p>';
@@ -374,7 +379,7 @@ class Options {
 
         register_setting( 'data_sync_options', 'debug' );
 
-        add_settings_field( 'awareness_messages', '', $this->view_namespace . '\display_awareness_messages', 'data-sync-options', 'data_sync_options' );
+        add_settings_field( 'awareness_messages', '', $this->view_namespace . '\awareness_messages', 'data-sync-options', 'data_sync_options' );
 
         $source = get_option( 'source_site' );
 

@@ -7,8 +7,8 @@ import ConnectedSites from './ConnectedSites.es6'
 class SyndicatedPosts {
 
     constructor () {
-        this.refresh_view()
-        // this.init() // so you don't have to wait for load to test bulk push
+        // this.refresh_view()
+        this.init() // so you don't have to wait for load to test bulk push
     }
 
     init () {
@@ -114,52 +114,63 @@ class SyndicatedPosts {
         return await response.json()
     }
 
+    handle_error (message) {
+        console.log(message)
+
+        let result = {}
+        result.success = false
+        return result
+    }
+
     bulk_push (e) {
         e.preventDefault()
 
         document.getElementById('syndicated_posts_data').innerHTML = ''
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
-        this.prevalidate().then(prevalidation => {
-            if (!prevalidation.success) {
-                alert('Prevalidation failed. See logs.')
-                return
-            } else {
-                // PREVALIDATED.
-                this.get_all_posts()
-                    .then(posts => {this.posts = posts})
-                    .then(() => ConnectedSites.get_all())
-                    .then(connected_sites => {this.connected_sites = connected_sites })
-                    .then(() => this.prepare_packages(connected_sites, true)) // prep requests for creating bulk packages to send to receivers
-                    .then(requests => Promise.all(requests))// send all requests for package
-                    .then(responses => {return responses}) // all responses are resolved successfully
-                    .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-                    .then(prepped_sources => prepped_sources.forEach(prepped_source_data => this.create_send_requests(prepped_source_data))) // create send requests with packages
-                    .then(requests => Promise.all(requests))// send all packages to receivers
-                    .then(responses => {return responses}) // all responses are resolved successfully
-                    .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-                    .then(() => {
-                        this.refresh_view()
-                        Success.show_success_message(result, 'Posts')
-                        new EnabledPostTypes()
-                        if (DataSync.options.debug) {
-                            let logs = new Logs()
-                            logs.refresh_log()
-                        }
-                    })
-                    .catch(message => console.log(message))
-            }
-        })
+        this.prevalidate()
+            .catch(message => this.handle_error(message))
+            .then(prevalidation => {
+                if (!prevalidation.success) {
+                    Success.show_success_message(prevalidation.success, 'Prevalidation')
+                } else {
+                    // PREVALIDATED.
+                    this.get_all_posts()
+                        .then(posts => {this.posts = posts})
+                        .then(() => ConnectedSites.get_all())
+                        .then(connected_sites => {this.connected_sites = connected_sites })
+                        .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
+                        .then(requests => Promise.all(requests))// send all requests for package
+                        .then(responses => {return responses}) // all responses are resolved successfully
+                        .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        .then(prepped_sources => prepped_sources.forEach(prepped_source_data => this.create_send_requests(prepped_source_data))) // create send requests with packages
+                        .then((requests) => console.log(requests))
+                        // .then(requests => Promise.all(requests))// send all packages to receivers
+                        // .then(responses => {return responses}) // all responses are resolved successfully
+                        // .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        .then(receiver_responses => {
+                            console.log(receiver_responses)
+                            // this.refresh_view()
+                            // Success.show_success_message(result, 'Posts')
+                            // new EnabledPostTypes()
+                            // if (DataSync.options.debug) {
+                            //     let logs = new Logs()
+                            //     logs.refresh_log()
+                            // }
+                        })
+                        .catch(message => this.handle_error(message))
+                }
+            })
 
         // TODO: SEND MEDIA, GET LOGS, GET SYNCED POSTS
 
     }
 
-    prepare_packages (connected_sites, bulk) {
+    prepare_packages (bulk) {
 
         let requests = []
 
-        for (const site of connected_sites) {
+        for (const site of this.connected_sites) {
             if (bulk) {
                 requests.push(fetch(DataSync.api.url + '/source_data/prep/0/' + site.id))
             } else {
@@ -177,12 +188,9 @@ class SyndicatedPosts {
         return await response.json()
     }
 
-    async prep (post, site) {
-        const response = await fetch(DataSync.api.url + '/source_data/prep/' + post.ID + '/' + site.id)
-        return await response.json()
-    }
-
     async create_send_requests (prepped_source_data) {
+
+        console.log(prepped_source_data)
 
         let requests = []
 

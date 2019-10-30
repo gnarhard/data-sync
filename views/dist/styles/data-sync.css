@@ -5,6 +5,11 @@
   display: block;
 }
 
+.settings_page_data-sync-options .loading_spinner.plugin_versions,
+.toplevel_page_data-sync-options .loading_spinner.plugin_versions {
+  text-align: left;
+}
+
 .settings_page_data-sync-options .loading_spinner.hidden,
 .toplevel_page_data-sync-options .loading_spinner.hidden {
   display: none;

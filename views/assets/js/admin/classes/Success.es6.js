@@ -11,8 +11,8 @@ class Success {
     result_array.slice(-1)[0]
     let html = result_array.join(' ')
 
-    document.getElementById(selector + '_wrap').innerHTML = html
     document.querySelector('#' + selector + ' .loading_spinner').classList.add('hidden')
+    document.getElementById(selector + '_wrap').innerHTML = html
 
     if (typeof result.success !== 'undefined') {
       Success.show_success_message(result, topic)
