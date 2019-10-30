@@ -54,9 +54,9 @@ class Email
             $sent = wp_mail($to, $subject, $message, $headers);
 
             if ($sent) {
-                new Logs('Finished emailing notified users.');
+                $logs = new Logs('Finished emailing notified users.');
             } else {
-                new Logs('Email not sent.', true);
+                $logs = new Logs('Email not sent.', true);
             }
         }
     }

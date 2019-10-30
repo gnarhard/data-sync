@@ -96,7 +96,7 @@ class Load
         new Posts();
 
         if (! $this->no_site_type_setting) {
-            new Logs();
+            $logs = new Logs();
             new Log();
             $this->create_db_tables();
         }

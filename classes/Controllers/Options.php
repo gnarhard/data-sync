@@ -134,7 +134,8 @@ class Options {
         if ( $success ) {
             wp_send_json_success( $data );
         } else {
-            new Logs( 'ERROR: Options not saved.', true );
+            $logs = new Logs( 'ERROR: Options not saved.', true );
+            unset( $logs );
             wp_send_json_error();
         }
     }
@@ -272,28 +273,28 @@ class Options {
 
     public static function validate_required_plugins_info( $site_id, $plugin_info ) {
         if ( ! $plugin_info->source->acf ) {
-            new Logs( 'ACF needs to be installed or activated on this site.', true );
-
+            $logs = new Logs( 'ACF needs to be installed or activated on this site.', true );
+            unset($logs);
             return false;
         }
 
         if ( ! $plugin_info->source->cptui ) {
-            new Logs( 'CPTUI needs to be installed or activated on this site.', true );
-
+            $logs = new Logs( 'CPTUI needs to be installed or activated on this site.', true );
+            unset($logs);
             return false;
         }
 
         foreach ( $plugin_info->receiver as $receiver_plugin_info ) {
             if ( $site_id === $receiver_plugin_info->site_id ) {
                 if ( ! $receiver_plugin_info->cptui_version_synced ) {
-                    new Logs( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
-
+                    $logs = new Logs( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+                    unset($logs);
                     return false;
                 }
 
                 if ( ! $receiver_plugin_info->acf_version_synced ) {
-                    new Logs( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
-
+                    $logs = new Logs( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+                    unset($logs);
                     return false;
                 }
             }

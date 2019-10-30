@@ -115,10 +115,16 @@ class SyndicatedPosts {
     }
 
     handle_error (message) {
-        console.log(message)
-
         let result = {}
         result.success = false
+
+        if (message === 'SyntaxError: Unexpected token < in JSON at position 0') {
+            result.data = 'Server errors encountered.'
+        } else {
+            result.data = message
+        }
+
+        console.log(result)
         return result
     }
 
@@ -129,25 +135,31 @@ class SyndicatedPosts {
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
         this.prevalidate()
-            .catch(message => this.handle_error(message))
             .then(prevalidation => {
                 if (!prevalidation.success) {
-                    Success.show_success_message(prevalidation.success, 'Prevalidation')
+                    Success.show_success_message(prevalidation, 'Prevalidation')
+                    if (DataSync.options.debug) {
+                        let logs = new Logs()
+                        logs.refresh_log()
+                    }
                 } else {
                     // PREVALIDATED.
                     this.get_all_posts()
                         .then(posts => {this.posts = posts})
+
                         .then(() => ConnectedSites.get_all())
                         .then(connected_sites => {this.connected_sites = connected_sites })
+
                         .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
                         .then(requests => Promise.all(requests))// send all requests for package
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-                        .then(prepped_sources => prepped_sources.forEach(prepped_source_data => this.create_send_requests(prepped_source_data))) // create send requests with packages
-                        .then((requests) => console.log(requests))
-                        // .then(requests => Promise.all(requests))// send all packages to receivers
-                        // .then(responses => {return responses}) // all responses are resolved successfully
-                        // .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+
+                        .then(prepped_source_packages => prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package, false))) // create send requests with packages
+                        .then(requests => Promise.all(requests))// send all packages to receivers
+                        .then(responses => {return responses}) // all responses are resolved successfully
+                        .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+
                         .then(receiver_responses => {
                             console.log(receiver_responses)
                             // this.refresh_view()
@@ -169,6 +181,7 @@ class SyndicatedPosts {
     prepare_packages (bulk) {
 
         let requests = []
+        this.receiver_sync_requests = [] // will be compiled in create_send_requests().
 
         for (const site of this.connected_sites) {
             if (bulk) {
@@ -188,24 +201,17 @@ class SyndicatedPosts {
         return await response.json()
     }
 
-    async create_send_requests (prepped_source_data) {
+    create_remote_request (prepped_source_package, options_and_meta) {
 
-        console.log(prepped_source_data)
+        let source_package = JSON.parse(prepped_source_package)
+        // source_package.options_and_meta = options_and_meta;
 
-        let requests = []
-
-        for (const source_data of prepped_source_data) {
-            for (const site of this.connected_sites) {
-                requests.push(
-                    fetch(site.url + '/wp-json/data-sync/v1/sync', {
-                        method: 'POST',
-                        body: JSON.stringify(source_data)
-                    })
-                )
-            }
-        }
-
-        return requests
+        this.receiver_sync_requests.push(
+            fetch(source_package.receiver_site_url + '/wp-json/data-sync/v1/sync', {
+                method: 'POST',
+                body: JSON.stringify(source_package)
+            })
+        )
     }
 
     static single_post_actions_init () {

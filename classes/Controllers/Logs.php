@@ -28,6 +28,7 @@ class Logs
         if (false === $message) {
             add_action('rest_api_init', [ $this, 'register_routes' ]);
         } else {
+            return;
             $this->log             = new stdClass();
             $this->log->url_source = get_site_url();
             $this->log->datetime   = current_time('Y-m-d H:i:s.u');
@@ -78,7 +79,7 @@ class Logs
             $response = wp_remote_get($url, $args);
 
             if (is_wp_error($response)) {
-                new Logs('Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true);
+                $logs = new Logs('Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true);
 
                 return $response;
             }
@@ -100,7 +101,7 @@ class Logs
                     $result = Log::create($log);
                 }
             } else {
-                new Logs('No logs pulled from site.', true);
+                $logs = new Logs('No logs pulled from site.', true);
             }
         }
     }

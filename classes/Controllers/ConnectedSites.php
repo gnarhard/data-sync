@@ -104,11 +104,13 @@ class ConnectedSites
             if ($response) {
                 wp_send_json_success('Connected site deleted.');
             } else {
-                new Logs('Connected site was not deleted.', true);
+                $logs = new Logs('Connected site was not deleted.', true);
+                unset( $logs );
                 return new WP_Error('database_error', 'DB Logs: Connected site was not deleted.', array( 'status' => 501 ));
             }
         } else {
-            new Logs('Connected site was not deleted. No ID present in URL.', true);
+            $logs = new Logs('Connected site was not deleted. No ID present in URL.', true);
+            unset( $logs );
             return new WP_Error('database_error', 'DB Logs: Connected site was not deleted. No ID in URL.', array( 'status' => 501 ));
         }
     }

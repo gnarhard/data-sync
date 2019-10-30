@@ -480,8 +480,8 @@ class Posts {
             $response = wp_remote_get( $url );
 
             if ( is_wp_error( $response ) ) {
-                new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-
+                $logs = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+                unset( $logs );
                 return $response;
             } else {
                 $receiver_posts[ $index ]          = new stdClass();
@@ -501,8 +501,8 @@ class Posts {
         $response       = wp_remote_get( $url );
 
         if ( is_wp_error( $response ) ) {
-            new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-
+            $logs = new Logs( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+            unset( $logs );
             return $response;
         } else {
             return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
@@ -555,8 +555,8 @@ class Posts {
         $receiver_post_id = wp_insert_post( $post_array );
 
         if ( is_wp_error( $receiver_post_id ) ) {
-            new Logs( $receiver_post_id->get_error_message(), true );
-
+            $logs = new Logs( $receiver_post_id->get_error_message(), true );
+            unset( $logs );
             return false;
         } elseif ( $receiver_post_id ) {
             $receiver_post_id = (int) $receiver_post_id;

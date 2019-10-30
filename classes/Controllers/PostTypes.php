@@ -61,8 +61,8 @@ class PostTypes
         $response = wp_remote_get($url);
 
         if (is_wp_error($response)) {
-            new Logs('Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true);
-
+            $logs = new Logs('Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true);
+            unset( $logs );
             return false;
         } else {
             return json_decode(wp_remote_retrieve_body($response));
@@ -111,8 +111,9 @@ class PostTypes
                 $data->id = $post_type->id;
                 $return   = PostType::update($data);
                 if (is_wp_error($return)) {
-                    new Logs('Post type was not updated.' . '<br>' . $return->get_error_message(), true);
-                    return $response;
+                    $logs = new Logs('Post type was not updated.' . '<br>' . $return->get_error_message(), true);
+                    unset( $logs );
+                    return $return;
                 }
             }
         } else {
