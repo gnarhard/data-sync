@@ -76,7 +76,7 @@ class Logs {
 
 
     async save(logs) {
-        const response = await fetch(site.url + '/log/create', {
+        const response = await fetch(DataSync.api.url + '/log/create', {
             method: 'POST',
             headers: {
                 'X-WP-Nonce': DataSync.api.nonce

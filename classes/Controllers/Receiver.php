@@ -189,22 +189,35 @@ class Receiver {
     public function sync() {
         $this->source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
-        $this->sync_options_and_meta();
-        $logs = new Logs();
-        $logs->('OPTIONS AND META SYNCED.');
-
-        $this->sync_posts();
-
-        //		$email = new Email();
-        //		unset( $email );
-
-        $logs = new Logs();
-        $logs->set( 'POSTS SYNCED.' );
-
         $response               = new \stdClass();
-        $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
-        $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
-        $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
+
+        if ( $this->source_data->media_package ) {
+            $media = new Media();
+            foreach( $this->source_data->media as $media_item ) {
+                $media->update($media_item);
+            }
+
+            $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
+            $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
+            $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
+
+        } else {
+            $this->sync_options_and_meta();
+            $logs = new Logs();
+            $logs->set('OPTIONS AND META SYNCED.');
+
+            $this->sync_posts();
+
+            //		$email = new Email();
+            //		unset( $email );
+
+            $logs = new Logs();
+            $logs->set( 'POSTS SYNCED.' );
+
+            $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
+            $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
+            $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
+        }
 
         wp_send_json_success( $response );
 

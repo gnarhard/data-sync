@@ -40,7 +40,6 @@ class Logs {
 
         $this->create_log_entry( $error );
         $this->log();
-        unset( $this );
     }
 
     public function create_log_entry( $error ) {
@@ -58,7 +57,13 @@ class Logs {
     }
 
     public function log() {
-        Log::create( $this->log );
+        $result = Log::create( $this->log );
+
+        if ( is_wp_error($result) ) {
+            $logs       = new Logs();
+            $logs->set($result->get_error_message(), true);
+        }
+
     }
 
     public static function retrieve_receiver_logs( $data_sync_start_time ) {

@@ -203,6 +203,10 @@ class Options {
                 $output .= '<p>All data from source ready to be sent, sending now. . .</p>';
             } elseif ( 'Receiver post response' === $topic ) {
                 $output .= '<p>Posts, metadata, and Data Sync options have been syndicated. Gathering logs. . .</p>';
+            } elseif ( 'Receiver logs' === $topic ) {
+                $output .= '<p>Receiver logs retrieved and saved to source. Saving receiver synced posts. . .</p>';
+            } elseif ( 'Receiver post response' === $topic ) {
+                $output .= '<p>Receiver synced posts saved to source. Packaging media items. . .</p>';
             }
 
         } else {
@@ -230,6 +234,10 @@ class Options {
                 $output .= '<p>Posts, metadata, and Data Sync options failed to syndicate.</p>';
             } elseif ( 'Error' === $topic ) {
                 $output .= '<p>An error occurred.</p>';
+            } elseif ( 'Receiver logs' === $topic ) {
+                $output .= '<p>No logs returned.</p>';
+            } elseif ( 'Receiver post response' === $topic ) {
+                $output .= '<p>No synced posts returned.</p>';
             }
 
             $output .= '<p>' . $params['message'] . '</p>';
