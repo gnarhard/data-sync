@@ -193,7 +193,18 @@ class Options {
                 $output .= '<p>' . $topic . ' successfully syndicated.</p>';
             } elseif ( 'Logs' === $topic ) {
                 $output .= '<p>' . $topic . ' successfully purged.</p>';
+            } elseif ( 'Prevalidation' === $topic ) {
+                $output .= '<p>Prevalidation successful. Gathering source posts. . .</p>';
+            } elseif ( 'Source posts' === $topic ) {
+                $output .= '<p>Source posts consolidated. Gathering connected sites. . .</p>';
+            } elseif ( 'Connected sites for sync' === $topic ) {
+                $output .= '<p>Connected sites consolidated. Prepping data packages. . .</p>';
+            } elseif ( 'Package prep' === $topic ) {
+                $output .= '<p>All data from source ready to be sent, sending now. . .</p>';
+            } elseif ( 'Receiver post response' === $topic ) {
+                $output .= '<p>Posts, metadata, and Data Sync options have been syndicated. Gathering logs. . .</p>';
             }
+
         } else {
             $output .= '<div class="notice notice-warning is-dismissible">';
 
@@ -208,7 +219,15 @@ class Options {
             } elseif ( 'Logs' === $topic ) {
                 $output .= '<p>' . $topic . ' not purged.</p>';
             } elseif ( 'Prevalidation' === $topic ) {
-                $output .= '<p>Prevalidation failed. See logs.</p>';
+                $output .= '<p>Prevalidation failed.</p>';
+            } elseif ( 'Source posts' === $topic ) {
+                $output .= '<p>Source posts failed to consolidate.</p>';
+            } elseif ( 'Connected sites for sync' === $topic ) {
+                $output .= '<p>Connected sites failed to consolidate.</p>';
+            } elseif ( 'Package prep' === $topic ) {
+                $output .= '<p>All data from source failed to prep.</p>';
+            } elseif ( 'Receiver post response' === $topic ) {
+                $output .= '<p>Posts, metadata, and Data Sync options failed to syndicate.</p>';
             }
 
             $output .= '<p>' . $params['message'] . '</p>';

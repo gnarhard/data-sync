@@ -222,6 +222,12 @@ class SyncedPosts
         }
     }
 
+    public function save_to_source(WP_REST_Request $request ) {
+        $receiver_synced_posts = json_decode( $request->get_body() );
+        self::save_all_to_source( $receiver_synced_posts );
+        wp_json_send_success();
+    }
+
     public static function save_all_to_source(array $receiver_synced_posts)
     {
         foreach ($receiver_synced_posts as $site_synced_posts) {
@@ -372,7 +378,7 @@ class SyncedPosts
             array(
                 array(
                     'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'save_to_sync_table' ),
+                    'callback'            => array( $this, 'save_to_source' ),
                     'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
                 ),
             )

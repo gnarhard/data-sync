@@ -144,31 +144,109 @@ class SyndicatedPosts {
                     }
                 } else {
                     // PREVALIDATED.
+                    Success.show_success_message(prevalidation, 'Prevalidation')
+
+                    // GET ALL POSTS
                     this.get_all_posts()
-                        .then(posts => {this.posts = posts})
+                        .then(posts => {
+                            this.posts = posts
+                            let admin_message = {};
+                            if ( posts.length > 0 ) {
+                                admin_message.success= true;
+                                Success.show_success_message(admin_message, 'Source posts')
+                            } else {
+                                admin_message.success= false;
+                                Success.show_success_message(post_admin_message, 'Source posts')
+                            }
+                        })
 
+                        // GET ALL SITES
                         .then(() => ConnectedSites.get_all())
-                        .then(connected_sites => {this.connected_sites = connected_sites })
+                        .then(connected_sites => {
+                            this.connected_sites = connected_sites
+                            let admin_message = {};
+                            if ( connected_sites.length > 0 ) {
+                                admin_message.success= true;
+                                Success.show_success_message(admin_message, 'Connected sites for sync')
+                            } else {
+                                admin_message.success= false;
+                                Success.show_success_message(admin_message, 'Connected sites for sync')
+                            }
 
+                        })
+
+                        // PREPARE AND CONSOLIDATE SOURCE PACKAGES
                         .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
                         .then(requests => Promise.all(requests))// send all requests for package
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        .then(prepped_source_packages => {
+                            let admin_message = {};
+                            if ( prepped_source_packages.length > 0 ) {
+                                admin_message.success= true;
+                                Success.show_success_message(admin_message, 'Package prep')
+                            } else {
+                                admin_message.success= false;
+                                Success.show_success_message(admin_message, 'Package prep')
+                            }
+                            return prepped_source_packages;
+                        })
 
+                        // SEND SOURCE PACKAGES TO RECEIVER
                         .then(prepped_source_packages => prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package, false))) // create send requests with packages
-                        .then(requests => Promise.all(requests))// send all packages to receivers
+                        .then(() => Promise.all(this.receiver_sync_requests))// send all packages to receivers
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        .then(receiver_data => {
+                            this.receiver_data = receiver_data
+
+                            let admin_message = {};
+                            if ( receiver_data.length > 0 ) {
+                                admin_message.success= true;
+                                Success.show_success_message(admin_message, 'Receiver post response')
+                            } else {
+                                admin_message.success= false;
+                                Success.show_success_message(admin_message, 'Receiver post response')
+                            }
+                        })
+
+                        // SAVE RECEIVER POST, META, AND OPTIONS LOGS TO SOURCE
+                        .then(() => {
+                            let logs = new Logs();
+                            logs.save(this.receiver_data.data.logs)
+                        })
+
+                        // SAVE RECEIVER SYNCED POSTS TO SOURCE
+                        .then(() => this.save_receiver_synced_posts(this.receiver_data.data.synced_posts))
+
+                        // SEND MEDIA
+                        // .then(() => this.create_(this.connected_sites, )) // prep requests for creating bulk packages to send to receivers
+                        // .then(requests => Promise.all(requests))// send all requests for package
+                        // .then(responses => {return responses}) // all responses are resolved successfully
+                        // .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        //
+                        // // SAVE MEDIA LOG FEEDBACK AND SYNCED POSTS TO SOURCE
+                        // .then(() => this.create_(this.connected_sites, )) // prep requests for creating bulk packages to send to receivers
+                        // .then(requests => Promise.all(requests))// send all requests for package
+                        // .then(responses => {return responses}) // all responses are resolved successfully
+                        // .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+                        // .then(receiver_data => { this.receiver_data = receiver_data }) // make returned data reusable
+                        //
+                        // // SAVE RECEIVER MEDIA LOGS TO SOURCE
+                        // .then(() => Logs.save(this.receiver_data.data.logs))
+                        //
+                        // // SAVE RECEIVER SYNCED MEDIA POSTS TO SOURCE
+                        // .then(() => this.save_receiver_synced_posts(this.receiver_data.data.synced_posts))
 
                         .then(receiver_responses => {
                             console.log(receiver_responses)
-                            // this.refresh_view()
-                            // Success.show_success_message(result, 'Posts')
-                            // new EnabledPostTypes()
-                            // if (DataSync.options.debug) {
-                            //     let logs = new Logs()
-                            //     logs.refresh_log()
-                            // }
+                            this.refresh_view()
+                            Success.show_success_message(result, 'Posts')
+                            new EnabledPostTypes()
+                            if (DataSync.options.debug) {
+                                let logs = new Logs()
+                                logs.refresh_log()
+                            }
                         })
                         .catch(message => this.handle_error(message))
                 }
@@ -194,6 +272,17 @@ class SyndicatedPosts {
         }
 
         return requests
+    }
+
+    async save_receiver_synced_posts( synced_posts ) {
+        const response = await fetch(DataSync.api.url + '/synced_posts', {
+            method: 'POST',
+            headers: {
+                'X-WP-Nonce': DataSync.api.nonce
+            },
+            body: JSON.stringify(synced_posts)
+        })
+        return await response.json()
     }
 
     async prevalidate () {

@@ -9,6 +9,7 @@ use DataSync\Models\SyncedPost;
 use stdClass;
 use WP_REST_Server;
 use DataSync\Models\ConnectedSite;
+use DataSync\Models\Log;
 
 /**
  * Class Media
@@ -83,7 +84,20 @@ class Media
                 }
             }
         }
+
     }
+
+
+    public function sync(\WP_REST_Request $request ) {
+        $posts = json_decode( $request->get_body() );
+        new self( $this->source_data->posts );
+
+        // RETURN THIS STUFF TOO
+
+//        $this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
+//        $this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
+    }
+
 
     /**
      * @param $media
@@ -243,6 +257,17 @@ class Media
                     'methods'             => WP_REST_Server::EDITABLE,
                     'callback'            => array( $this, 'update' ),
                     'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+                ),
+            )
+        );
+
+        $registered = register_rest_route(
+            DATA_SYNC_API_BASE_URL,
+            '/media/sync',
+            array(
+                array(
+                    'methods'             => WP_REST_Server::EDITABLE,
+                    'callback'            => array( $this, 'sync' ),
                 ),
             )
         );

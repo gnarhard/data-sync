@@ -13,6 +13,7 @@ use WP_REST_Response;
 use DataSync\Models\DB;
 use DataSync\Controllers\Users;
 use WP_HTTP_Response;
+use DataSync\Models\Log;
 
 /**
  * Class Receiver
@@ -188,17 +189,9 @@ class Receiver {
     public function sync() {
         $this->source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
-//        if ( $this->source_data->options_and_meta ) {
-
         $this->sync_options_and_meta();
-
-        //		$email = new Email();
-        //		unset( $email );
-
         $logs = new Logs( 'OPTIONS AND META SYNCED.' );
         unset( $logs );
-//            wp_send_json( 'Receiver options and meta synced to receiver.' );
-//        } else {
 
         $this->sync_posts();
 
@@ -207,11 +200,13 @@ class Receiver {
 
         $logs = new Logs( 'POSTS SYNCED.' );
         unset( $logs );
-//            wp_send_json( 'Posts synced to receiver.' );
 
-        wp_send_json_success('Source data synced to ' . $this->source_data->receiver_site_url );
+        $response = new \stdClass();
+        $response->synced_posts = SyncedPost::get_all_and_sort([ 'datetime' => 'DESC' ], $this->source_data->start_time);
+        $response->logs = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
+        $response->message = 'Source data synced to ' . $this->source_data->receiver_site_url;
 
-//        }
+        wp_send_json_success($response);
 
     }
 
