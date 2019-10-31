@@ -204,8 +204,8 @@ class SourceData {
             ] );
 
             if ( is_wp_error( $response ) ) {
-                $logs = new Logs( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
-                unset( $logs );
+                $logs = new Logs();
+                $logs->set( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
 
                 return $response;
             }
@@ -242,8 +242,8 @@ class SourceData {
                 ] );
 
                 if ( is_wp_error( $response ) ) {
-                    $logs = new Logs( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-                    unset( $logs );
+                    $logs = new Logs();
+                    $logs->set( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
                     return $response;
                 }
@@ -292,8 +292,8 @@ class SourceData {
                 ] );
 
                 if ( is_wp_error( $response ) ) {
-                    $logs = new Logs( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-                    unset( $logs );
+                    $logs = new Logs();
+                    $logs->set( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
                     return $response;
                 }
@@ -349,8 +349,8 @@ class SourceData {
             $response = wp_remote_get( $url );
 
             if ( is_wp_error( $response ) ) {
-                $logs = new Logs( 'Error in SourceData->start_fresh() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-                unset( $logs );
+                $logs = new Logs();
+                $logs->set( 'Error in SourceData->start_fresh() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
                 return $response;
             }
@@ -377,9 +377,9 @@ class SourceData {
     private function save_receiver_data() {
         Logs::save_to_source( $this->receiver_logs );
         SyncedPosts::save_all_to_source( $this->receiver_synced_posts );
-        $logs = new Logs( 'Synced receiver error logs to source.' );
-        $logs = new Logs( 'Added receiver synced posts to source.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->set( 'Synced receiver error logs to source.' );
+        $logs->set( 'Added receiver synced posts to source.' );
     }
 
     /**
@@ -431,8 +431,8 @@ class SourceData {
 
                         $post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
                     } else {
-                        $logs = new Logs( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
-                        unset( $logs );
+                        $logs = new Logs();
+                        $logs->set( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
                     }
 
                 }
@@ -444,7 +444,6 @@ class SourceData {
 
 
     public function prevalidate() {
-
 
         // TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
 
@@ -489,21 +488,24 @@ class SourceData {
                     // VALIDATE IF CANONICAL SETTING IS SET.
                     if ( ! isset( $post->post_meta['_canonical_site'] ) ) {
                         unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                        $logs = new Logs( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
+                        $logs = new Logs();
+                        $logs->set( 'SKIPPING: Canonical site not set in post: ' . $post->post_title, true );
                     } else {
                         // VALIDATE CANONICAL SITE ID CORRELATES TO EXISTING SITE.
                         $orphaned = ConnectedSites::is_orphaned( $post, $site_ids );
                         if ( $orphaned ) {
                             // REMOVE POST FROM SYNDICATION BECAUSE IT HAS FAULTY DATA.
                             unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                            $logs = new Logs( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.', true, 'orphaned_site' );
+                            $logs = new Logs();
+                            $logs->set( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.', true, 'orphaned_site' );
                         }
                     }
 
                     // VALIDATE IF EXCLUDED SITES HAVE BEEN SAVED.
                     if ( ! isset( $post->post_meta['_excluded_sites'] ) ) {
                         unset( $this->source_data->posts->$post_type_slug[ $key ] );
-                        $logs = new Logs( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
+                        $logs = new Logs();
+                        $logs->set( 'SKIPPING: Excluded sites not set in post: ' . $post->post_title, true );
                     }
                 }
             }

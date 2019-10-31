@@ -31,7 +31,8 @@ class Helpers
         $exploded_url = explode('.', $url);
 
         if (! isset($exploded_url[1])) {
-            $logs = new Logs('ERROR: Connected site url could not be processed.', true);
+            $logs = new Logs();
+            $logs->set('ERROR: Connected site url could not be processed.', true);
 
             return new WP_Error('database_error', 'DB Logs: Connected site was not saved.', array( 'status' => 501 ));
         }

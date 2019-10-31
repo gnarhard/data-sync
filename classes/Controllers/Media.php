@@ -128,8 +128,8 @@ class Media
                 ]);
 
                 if (is_wp_error($response)) {
-                    $logs = new Logs('Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true);
-                    unset( $logs );
+                    $logs = new Logs();
+                    $logs->set('Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
                     return $response;
                 }
             }
@@ -217,8 +217,8 @@ class Media
                     $this->update_thumbnail_id($source_data->media, (int) $attachment_id);
                 }
             } else {
-                $logs = new Logs('Post not uploaded and attached to ' . $source_data->media->post_title, true);
-                unset( $logs );
+                $logs = new Logs();
+                $logs->set( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
                 return $attachment_id;
             }
         }
@@ -238,8 +238,8 @@ class Media
         if ($synced_post_parent) {
             $updated = update_post_meta((int) $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id);
         } else {
-            $logs = new Logs('Post thumbnail not updated for ' . $post->post_title, true);
-            unset( $logs );
+            $logs = new Logs();
+            $logs->set( 'Post thumbnail not updated for ' . $post->post_title, true );
         }
     }
 

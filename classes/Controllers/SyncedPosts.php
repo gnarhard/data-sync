@@ -43,7 +43,8 @@ class SyncedPosts
 
                 if ($post->diverged) {
                     if (true !== $source_data->options->overwrite_receiver_post_on_conflict) {
-                        $logs = new Logs('Post ' . $post->post_title . ' was updated more recently on receiver.', true);
+                        $logs = new Logs();
+                        $logs->set('Post ' . $post->post_title . ' was updated more recently on receiver.', true);
 
                         $synced_post = SyncedPost::get_where(
                             array(
@@ -112,7 +113,8 @@ class SyncedPosts
             $response = wp_remote_get($url, $args);
 
             if (is_wp_error($response)) {
-                $logs = new Logs('Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true);
+                $logs = new Logs();
+                $logs->set( 'Error in SyncedPosts::retrieve_from_receiver received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
                 return $response;
             }
 
@@ -143,7 +145,8 @@ class SyncedPosts
         $response = wp_remote_get($url);
 
         if (is_wp_error($response)) {
-            $logs = new Logs('SyncedPosts: ' . $response->get_error_message(), true);
+            $logs = new Logs();
+            $logs->set('SyncedPosts: ' . $response->get_error_message(), true);
 
             return false;
         }
@@ -172,7 +175,8 @@ class SyncedPosts
         $response->set_status(201);
 
         if (is_wp_error($response)) {
-            $logs = new Logs('Failed to get synced posts.', true);
+            $logs = new Logs();
+            $logs->set('Failed to get synced posts.', true);
         }
 
         return $response;
@@ -249,7 +253,8 @@ class SyncedPosts
             $post = get_post($post_id);
 
             foreach ($connected_sites as $site) {
-                $logs = new Logs('STARTING BULK DELETE FOR ' . $site->url);
+                $logs = new Logs();
+                $logs->set('STARTING BULK DELETE FOR ' . $site->url);
 
                 $args        = array(
                     'receiver_site_id' => (int) $site->id,
@@ -277,13 +282,15 @@ class SyncedPosts
                     ]);
 
                     if (is_wp_error($response)) {
-                        $logs = new Logs('Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true);
+                        $logs = new Logs();
+                        $logs->set('Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true);
                         return $response;
                     } else {
                         SyncedPost::delete($synced_post->id);
                     }
 
-                    $logs = new Logs('Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . $site->url);
+                    $logs = new Logs();
+                    $logs->set('Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . $site->url);
                 }
             }
         } else {
@@ -315,12 +322,14 @@ class SyncedPosts
                 ]);
 
                 if (is_wp_error($response)) {
-                    $logs = new Logs('Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true);
+                    $logs = new Logs();
+                    $logs->set('Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true);
                     return $response;
                 } else {
                     $deleted = SyncedPost::delete($synced_post[0]->id);
 
-                    $logs = new Logs('Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url());
+                    $logs = new Logs();
+                    $logs->set('Finished deleting post: ' . $post->post_title . '(' . $post->post_type . ') on ' . get_site_url());
                 }
             }
         }
@@ -329,7 +338,8 @@ class SyncedPosts
     public function delete_post()
     {
         $data = (object) json_decode(file_get_contents('php://input'));
-        $log  = $logs = new Logs('Received delete request for post: ' . wp_json_encode($data));
+        $logs = new Logs();
+        $logs->set('Received delete request for post: ' . wp_json_encode($data));
 
         // MUST TRASH BEFORE DELETION TO PERMANENTLY DELETE.
         wp_trash_post($data->receiver_post_id);
@@ -346,7 +356,8 @@ class SyncedPosts
     {
         if (! $data_from_source) {
             $source_data = (object) json_decode(file_get_contents('php://input'));
-            $logs = new Logs('Received delete request for post: ' . wp_json_encode($source_data));
+            $logs = new Logs();
+            $logs->set('Received delete request for post: ' . wp_json_encode($source_data));
             $data = $source_data;
         } else {
             $data = $data_from_receiver;

@@ -125,6 +125,8 @@ class SyndicatedPosts {
         }
 
         console.log(result)
+
+        Success.set_admin_message([], 'Error')
         return result
     }
 
@@ -150,29 +152,14 @@ class SyndicatedPosts {
                     this.get_all_posts()
                         .then(posts => {
                             this.posts = posts
-                            let admin_message = {};
-                            if ( posts.length > 0 ) {
-                                admin_message.success= true;
-                                Success.show_success_message(admin_message, 'Source posts')
-                            } else {
-                                admin_message.success= false;
-                                Success.show_success_message(post_admin_message, 'Source posts')
-                            }
+                            Success.set_admin_message(posts, 'Source posts')
                         })
 
                         // GET ALL SITES
                         .then(() => ConnectedSites.get_all())
                         .then(connected_sites => {
-                            this.connected_sites = connected_sites
-                            let admin_message = {};
-                            if ( connected_sites.length > 0 ) {
-                                admin_message.success= true;
-                                Success.show_success_message(admin_message, 'Connected sites for sync')
-                            } else {
-                                admin_message.success= false;
-                                Success.show_success_message(admin_message, 'Connected sites for sync')
-                            }
-
+                            this.connected_sites = connected_sites;
+                            Success.set_admin_message(connected_sites, 'Connected sites for sync')
                         })
 
                         // PREPARE AND CONSOLIDATE SOURCE PACKAGES
@@ -180,17 +167,7 @@ class SyndicatedPosts {
                         .then(requests => Promise.all(requests))// send all requests for package
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-                        .then(prepped_source_packages => {
-                            let admin_message = {};
-                            if ( prepped_source_packages.length > 0 ) {
-                                admin_message.success= true;
-                                Success.show_success_message(admin_message, 'Package prep')
-                            } else {
-                                admin_message.success= false;
-                                Success.show_success_message(admin_message, 'Package prep')
-                            }
-                            return prepped_source_packages;
-                        })
+                        .then(prepped_source_packages => Success.set_admin_message(prepped_source_packages, 'Package prep'))
 
                         // SEND SOURCE PACKAGES TO RECEIVER
                         .then(prepped_source_packages => prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package, false))) // create send requests with packages
@@ -199,21 +176,14 @@ class SyndicatedPosts {
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
                         .then(receiver_data => {
                             this.receiver_data = receiver_data
-
-                            let admin_message = {};
-                            if ( receiver_data.length > 0 ) {
-                                admin_message.success= true;
-                                Success.show_success_message(admin_message, 'Receiver post response')
-                            } else {
-                                admin_message.success= false;
-                                Success.show_success_message(admin_message, 'Receiver post response')
-                            }
+                            Success.set_admin_message(receiver_data, 'Receiver post response')
                         })
 
                         // SAVE RECEIVER POST, META, AND OPTIONS LOGS TO SOURCE
                         .then(() => {
+                            console.log(this.receiver_data);
                             let logs = new Logs();
-                            logs.save(this.receiver_data.data.logs)
+                            this.receiver_data.forEach(single_receiver_data => logs.save(single_receiver_data.data.logs))
                         })
 
                         // SAVE RECEIVER SYNCED POSTS TO SOURCE

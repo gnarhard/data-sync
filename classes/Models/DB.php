@@ -100,8 +100,8 @@ class DB
         //		echo $wpdb->last_query;
         if (false === $created) {
             $error_msg = 'DB insert failed: ' . $wpdb->last_error;
-            $log       = new Logs($error_msg, true);
-            unset( $logs );
+            $logs       = new Logs();
+            $logs->set($error_msg, true);
             return new WP_Error(503, __($error_msg, 'data-sync'));
         } else {
             return $created;
@@ -122,8 +122,9 @@ class DB
 
         if (false === $updated) {
             $error_msg = 'Database failed to update: ' . $wpdb->last_error;
-            $log       = new Logs($error_msg, true);
-            unset( $logs );
+            $logs       = new Logs();
+            $logs->set($error_msg, true);
+
             return new WP_Error(503, __($error_msg, 'data-sync'));
         } else {
             return $updated;

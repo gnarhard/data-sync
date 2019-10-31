@@ -134,8 +134,8 @@ class Options {
         if ( $success ) {
             wp_send_json_success( $data );
         } else {
-            $logs = new Logs( 'ERROR: Options not saved.', true );
-            unset( $logs );
+            $logs = new Logs();
+            $logs->set( 'ERROR: Options not saved.', true );
             wp_send_json_error();
         }
     }
@@ -228,6 +228,8 @@ class Options {
                 $output .= '<p>All data from source failed to prep.</p>';
             } elseif ( 'Receiver post response' === $topic ) {
                 $output .= '<p>Posts, metadata, and Data Sync options failed to syndicate.</p>';
+            } elseif ( 'Error' === $topic ) {
+                $output .= '<p>An error occurred.</p>';
             }
 
             $output .= '<p>' . $params['message'] . '</p>';
@@ -292,28 +294,28 @@ class Options {
 
     public static function validate_required_plugins_info( $site_id, $plugin_info ) {
         if ( ! $plugin_info->source->acf ) {
-            $logs = new Logs( 'ACF needs to be installed or activated on this site.', true );
-            unset($logs);
+            $logs = new Logs();
+            $logs->set( 'ACF needs to be installed or activated on this site.', true );
             return false;
         }
 
         if ( ! $plugin_info->source->cptui ) {
-            $logs = new Logs( 'CPTUI needs to be installed or activated on this site.', true );
-            unset($logs);
+            $logs = new Logs();
+            $logs->set( 'CPTUI needs to be installed or activated on this site.', true );
             return false;
         }
 
         foreach ( $plugin_info->receiver as $receiver_plugin_info ) {
             if ( $site_id === $receiver_plugin_info->site_id ) {
                 if ( ! $receiver_plugin_info->cptui_version_synced ) {
-                    $logs = new Logs( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
-                    unset($logs);
+                    $logs = new Logs();
+                    $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
                     return false;
                 }
 
                 if ( ! $receiver_plugin_info->acf_version_synced ) {
-                    $logs = new Logs( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
-                    unset($logs);
+                    $logs = new Logs();
+                    $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
                     return false;
                 }
             }

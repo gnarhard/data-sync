@@ -31,15 +31,15 @@ class Receiver {
      */
     public function __construct() {
         add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-        if ( '0' === get_option('source_site') ) {
-            add_action( 'rest_pre_dispatch', [$this,'authorize_source_cors_http_header']);
+        if ( '0' === get_option( 'source_site' ) ) {
+            add_action( 'rest_pre_dispatch', [ $this, 'authorize_source_cors_http_header' ] );
         }
     }
 
 
     public function authorize_source_cors_http_header() {
-        if ( get_option('data_sync_source_site_url') ) {
-            header("Access-Control-Allow-Origin: " . get_option('data_sync_source_site_url'));
+        if ( get_option( 'data_sync_source_site_url' ) ) {
+            header( "Access-Control-Allow-Origin: " . get_option( 'data_sync_source_site_url' ) );
         }
     }
 
@@ -153,8 +153,8 @@ class Receiver {
             $response = wp_remote_get( $url );
 
             if ( is_wp_error( $response ) ) {
-                $logs = new Logs( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-                unset( $logs );
+                $logs = new Logs();
+                $log->set('Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true);
 
                 return $response;
             } else {
@@ -190,25 +190,26 @@ class Receiver {
         $this->source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
         $this->sync_options_and_meta();
-        $logs = new Logs( 'OPTIONS AND META SYNCED.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->('OPTIONS AND META SYNCED.');
 
         $this->sync_posts();
 
         //		$email = new Email();
         //		unset( $email );
 
-        $logs = new Logs( 'POSTS SYNCED.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->set( 'POSTS SYNCED.' );
 
-        $response = new \stdClass();
-        $response->synced_posts = SyncedPost::get_all_and_sort([ 'datetime' => 'DESC' ], $this->source_data->start_time);
-        $response->logs = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
-        $response->message = 'Source data synced to ' . $this->source_data->receiver_site_url;
+        $response               = new \stdClass();
+        $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
+        $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
+        $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
 
-        wp_send_json_success($response);
+        wp_send_json_success( $response );
 
     }
+
 
     /**
      */
@@ -227,8 +228,8 @@ class Receiver {
                 }
 
                 if ( empty( $this->source_data->posts->$post_type_slug ) ) {
-                    $logs = new Logs( 'No posts in source data.', true );
-                    unset( $logs );
+                    $logs = new Logs();
+                    $logs->set( 'No posts in source data.', true );
                 } else {
                     // LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
                     foreach ( $this->source_data->posts->$post_type_slug as $post ) {
@@ -249,8 +250,8 @@ class Receiver {
 
         // ADD AND SAVE ACF FIELDS
         ACFs::save_acf_fields( $this->source_data->acf );
-        $logs = new Logs( 'ACF fields synced.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->set( 'ACF fields synced.' );
 
         // ADD AND SAVE ALL TAXONOMIES.
         $this->update_taxonomies( $this->source_data );
@@ -269,8 +270,8 @@ class Receiver {
         if ( true === $this->source_data->options->enable_new_cpts ) {
             PostTypes::save_options();
         }
-        $logs = new Logs( 'Post types synced.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->set( 'Post types synced.' );
     }
 
     private function update_taxonomies() {
@@ -279,8 +280,8 @@ class Receiver {
         }
         $syncedTaxonomies = new SyncedTaxonomies(); // REGISTERS NEW TAXONOMIES.
         $syncedTaxonomies->register();
-        $logs = new Logs( 'Custom taxonomies synced.' );
-        unset( $logs );
+        $logs = new Logs();
+        $logs->set( 'Custom taxonomies synced.' );
     }
 
     private function filter_and_sync( $post ) {
@@ -297,8 +298,8 @@ class Receiver {
             $filtered_post->diverged = 0;
             $synced_post_result      = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 
-            $logs = new Logs( $filtered_post->post_title . ' (' . $filtered_post->post_type . ') synced.' );
-            unset( $logs );
+            $logs = new Logs();
+            $logs->set( $filtered_post->post_title . ' (' . $filtered_post->post_type . ') synced.' );
         }
     }
 

@@ -16,7 +16,8 @@ class Users
                     if (! is_wp_error($receiver_user_id)) {
                         return $receiver_user_id;
                     } else {
-                        $logs = new Logs('New user was not created.', true);
+                        $logs = new Logs();
+                        $logs->set('New user was not created.', true);
                     }
                 } else {
                     return $receiver_user->ID;

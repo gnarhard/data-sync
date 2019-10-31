@@ -82,8 +82,8 @@ class SyncedTerms
                         $new_synced_term = SyncedTerms::save($term);
                     } else {
                         $registered_taxonomies = get_taxonomies();
-                        $logs = new Logs('Term: ' . $term->slug . ' failed to connect to post. ' . $new_term->get_error_message(), true);
-                        unset($logs);
+                        $logs = new Logs();
+                        $logs->set('Term: ' . $term->slug . ' failed to connect to post. ' . $new_term->get_error_message(), true);
                         return $new_term;
                     }
                 }

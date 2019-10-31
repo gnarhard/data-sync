@@ -36,7 +36,8 @@ class File
 
         /* Add notice for success/failure */
         if (! $copied) {
-            $logs = new Logs('Failed to copy ' . $source_data->media->guid . '.', true);
+            $logs = new Logs();
+            $logs->set('Failed to copy ' . $source_data->media->guid . '.', true);
 
             return false;
         }

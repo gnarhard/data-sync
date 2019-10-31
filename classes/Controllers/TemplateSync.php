@@ -97,7 +97,8 @@ class TemplateSync
         ]);
 
         if (is_wp_error($response)) {
-            $logs = new Logs('Error in TemplateSync->push() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true);
+            $logs = new Logs();
+            $logs->set('Error in TemplateSync->push() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true);
             return $response;
         } else {
             if (get_option('show_body_responses')) {
@@ -115,7 +116,8 @@ class TemplateSync
 
         $this->sync($source_data);
 
-        $logs = new Logs('Template sync complete.');
+        $logs = new Logs();
+        $logs->set('Template sync complete.');
     }
 
     public function sync($source_data)

@@ -22,25 +22,25 @@ class Logs {
     public $error;
     public $log;
 
-    public function __construct( $message = false, $error = false, $type = false ) {
-        if ( false === $message ) {
-            add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+    public function __construct() {
+        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+    }
+
+    public function set( $message = false, $error = false, $type = false ) {
+        $this->log             = new stdClass();
+        $this->log->url_source = get_site_url();
+        $this->log->datetime   = current_time( 'Y-m-d H:i:s.u' );
+        $this->error           = $message;
+
+        if ( $type ) {
+            $this->log->type = $type;
         } else {
-            return;
-            $this->log             = new stdClass();
-            $this->log->url_source = get_site_url();
-            $this->log->datetime   = current_time( 'Y-m-d H:i:s.u' );
-            $this->error           = $message;
-
-            if ( $type ) {
-                $this->log->type = $type;
-            } else {
-                $this->log->type = '';
-            }
-
-            $this->create_log_entry( $error );
-            $this->log();
+            $this->log->type = '';
         }
+
+        $this->create_log_entry( $error );
+        $this->log();
+        unset( $this );
     }
 
     public function create_log_entry( $error ) {
@@ -74,7 +74,8 @@ class Logs {
             $response = wp_remote_get( $url, $args );
 
             if ( is_wp_error( $response ) ) {
-                $logs = new Logs( 'Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+                $logs = new Logs();
+                $logs->set( 'Error in Logs::retrieve_receiver_logs received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
 
                 return $response;
             }
@@ -95,7 +96,8 @@ class Logs {
                     $result = Log::create( $log );
                 }
             } else {
-                $logs = new Logs( 'No logs pulled from site.', true );
+                $logs = new Logs();
+                $logs->set( 'No logs pulled from site.', true );
             }
         }
     }
