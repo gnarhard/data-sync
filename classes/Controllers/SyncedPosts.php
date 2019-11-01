@@ -390,7 +390,7 @@ class SyncedPosts
                 array(
                     'methods'             => WP_REST_Server::EDITABLE,
                     'callback'            => array( $this, 'save_to_source' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
                 ),
             )
         );

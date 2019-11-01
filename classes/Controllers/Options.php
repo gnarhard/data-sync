@@ -177,9 +177,11 @@ class Options {
 
         if ( $success ) {
             $output .= '<div class="notice updated notice-success is-dismissible">';
-            $output .= '<p>' . $params['message'] . '</p>';
         } else {
             $output .= '<div class="notice notice-warning is-dismissible">';
+        }
+
+        if ( ! empty( $params['message'] ) ) {
             $output .= '<p>' . $params['message'] . '</p>';
         }
 

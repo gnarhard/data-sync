@@ -1,5 +1,5 @@
 import AJAX from '../../AJAX.es6'
-import Success from './Success.es6'
+import Message from './Message.es6.js'
 
 class Settings {
 
@@ -19,7 +19,7 @@ class Settings {
                         result = '<span>Plugins up to date on all receivers.</span>' + result
                     }
 
-                    Success.display_html(result, 'awareness_message', 'Awareness messages')
+                    Message.display_html(result, 'awareness_message', 'Awareness messages')
                     self.init()
                 }
             )

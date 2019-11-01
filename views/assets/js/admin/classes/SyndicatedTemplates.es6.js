@@ -1,5 +1,5 @@
 import AJAX from '../../AJAX.es6.js'
-import Success from './Success.es6';
+import Message from './Message.es6.js';
 import Logs from './Logs.es6'
 
 class SyndicatedTemplates {
@@ -13,7 +13,7 @@ class SyndicatedTemplates {
     e.preventDefault()
 
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
-      Success.show_success_message( result, 'Templates' );
+      Message.show_success_message( result, 'Templates' );
       new SyndicatedTemplates();
       if ( DataSync.options.debug ) {
         let logs = new Logs()
@@ -44,7 +44,7 @@ class SyndicatedTemplates {
     // LOAD TEMPLATE LIST
     if (document.getElementById('templates_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/templates' ).then(function( result) {
-        Success.display_html( result, 'templates', 'Templates' )
+        Message.display_html( result, 'templates', 'Templates' )
         document.querySelector('#templates_wrap').classList.remove('hidden');
         self.init();
       });

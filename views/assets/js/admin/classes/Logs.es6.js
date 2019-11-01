@@ -1,5 +1,5 @@
 import AJAX from '../../AJAX.es6'
-import Success from './Success.es6'
+import Message from './Message.es6.js'
 
 class Logs {
     constructor () {
@@ -51,7 +51,7 @@ class Logs {
             let result = {}
             result.success = response
             self.refresh_log()
-            Success.show_success_message(result, 'Logs')
+            Message.show_success_message(result, 'Logs')
             self.init()
         })
     }

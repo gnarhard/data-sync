@@ -1,6 +1,6 @@
 import AJAX from '../../AJAX.es6.js'
 import Helpers from '../../Helpers.es6.js'
-import Success from './Success.es6'
+import Message from './Message.es6.js'
 
 class EnabledPostTypes {
   constructor () {
@@ -21,7 +21,7 @@ class EnabledPostTypes {
         data = Helpers.getSelectValues(document.getElementById('push_enabled_post_types'))
         // console.log(data);
         AJAX.post(DataSync.api.url + '/options/push_enabled_post_types', data).then(function( result ) {
-          Success.show_success_message( result, 'Enabled post types')
+          Message.show_success_message( result, 'Enabled post types')
         });
 
 
@@ -34,7 +34,7 @@ class EnabledPostTypes {
     let self = this;
     if (document.getElementById('enabled_post_types_wrap')) {
       AJAX.get_html(DataSync.api.url + '/settings_tab/enabled_post_types').then(function (result) {
-        Success.display_html(result, 'enabled_post_types', 'Enabled post types');
+        Message.display_html(result, 'enabled_post_types', 'Enabled post types');
         self.init();
       })
     }

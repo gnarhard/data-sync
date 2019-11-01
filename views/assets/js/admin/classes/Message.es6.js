@@ -1,6 +1,6 @@
 import AJAX from '../../AJAX.es6.js'
 
-class Success {
+class Message {
 
     constructor () {
 
@@ -15,40 +15,31 @@ class Success {
         document.getElementById(selector + '_wrap').innerHTML = html
 
         if (typeof result.success !== 'undefined') {
-            Success.show_success_message(result, topic)
+            Message.show_success_message(result, topic)
         }
     }
 
     static show_message (result) {
 
-        let data = {}
-
-        if (typeof result.code !== 'undefined') {
-            data = Success.show_error_message(result, topic)
-        } else {
-            data.success = result.success
-            data.topic = topic
-
-            if (typeof result.data !== 'undefined') {
-                data.message = result.message // used to be .data
-            }
-
-        }
-
-        AJAX.post(DataSync.api.url + '/admin_notice', data).then(function (result) {
+        AJAX.post(DataSync.api.url + '/admin_notice', result)
+            .then(result => {
             let node = document.createRange().createContextualFragment(result.data)
             document.querySelector('#wpbody-content').prepend(node)
-            Success.dismiss_button_init()
+            Message.dismiss_button_init()
         })
 
     }
 
-    static show_error_message (result, topic) {
-        let data = {}
-        data.success = false
-        data.message = result.message
-        data.topic = topic
-        return data
+    static handle_error (error) {
+        let result = {}
+        result.success = false
+        result.message = error.message
+
+        console.log(result)
+
+        Message.show_message(result);
+
+        return result
     }
 
     static dismiss_button_init () {
@@ -59,4 +50,4 @@ class Success {
     }
 }
 
-export default Success
+export default Message

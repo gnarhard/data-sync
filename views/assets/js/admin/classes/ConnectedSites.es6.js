@@ -1,5 +1,5 @@
 import AJAX from '../../AJAX.es6.js'
-import Success from './Success.es6'
+import Message from './Message.es6.js'
 import SyndicatedPosts from './SyndicatedPosts.es6'
 import EnabledPostTypes from './EnabledPostTypes.es6'
 import Logs from './Logs.es6'
@@ -35,7 +35,7 @@ class ConnectedSites {
 
         AJAX.post(DataSync.api.url + '/connected_sites', data).then((result)=>{
 
-            Success.show_success_message(result, 'Connected site')
+            Message.show_success_message(result, 'Connected site')
             $ = jQuery
             $('.settings_page_data-sync-settings .lightbox_wrap').removeClass('display')
             new ConnectedSites();
@@ -61,7 +61,7 @@ class ConnectedSites {
             AJAX.delete(DataSync.api.url + '/connected_sites/' + site_id).then(
                 function (response) {
                     if (response.success) {
-                        Success.show_success_message(response, 'Connected site')
+                        Message.show_success_message(response, 'Connected site')
 
                         new SyndicatedPosts()
                         new EnabledPostTypes()
@@ -127,7 +127,7 @@ class ConnectedSites {
         if (document.getElementById('connected_sites_wrap')) {
             AJAX.get_html(DataSync.api.url + '/settings_tab/connected_sites').then(
                 function (result) {
-                    Success.display_html(result, 'connected_sites', 'Connected site')
+                    Message.display_html(result, 'connected_sites', 'Connected site')
                     self.init()
                 }
             )
