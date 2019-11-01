@@ -154,7 +154,7 @@ class Receiver {
 
             if ( is_wp_error( $response ) ) {
                 $logs = new Logs();
-                $log->set('Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true);
+                $log->set( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
                 return $response;
             } else {
@@ -189,12 +189,12 @@ class Receiver {
     public function sync() {
         $this->source_data = (object) json_decode( file_get_contents( 'php://input' ) );
 
-        $response               = new \stdClass();
+        $response = new \stdClass();
 
         if ( $this->source_data->media_package ) {
             $media = new Media();
-            foreach( $this->source_data->media as $media_item ) {
-                $media->update($media_item);
+            foreach ( $this->source_data->media as $media_item ) {
+                $media->update( $media_item );
             }
 
             $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
@@ -204,7 +204,7 @@ class Receiver {
         } else {
             $this->sync_options_and_meta();
             $logs = new Logs();
-            $logs->set('OPTIONS AND META SYNCED.');
+            $logs->set( 'OPTIONS AND META SYNCED.' );
 
             $this->sync_posts();
 

@@ -19,19 +19,7 @@ class Success {
         }
     }
 
-    static set_admin_message (data, topic) {
-        let admin_message = {}
-        if (data.length > 0) {
-            admin_message.success = true
-            Success.show_success_message(admin_message, topic)
-        } else {
-            admin_message.success = false
-            Success.show_success_message(admin_message, topic)
-        }
-        return data
-    }
-
-    static show_success_message (result, topic) {
+    static show_message (result) {
 
         let data = {}
 
@@ -42,13 +30,12 @@ class Success {
             data.topic = topic
 
             if (typeof result.data !== 'undefined') {
-                data.message = result.data
+                data.message = result.message // used to be .data
             }
 
         }
 
         AJAX.post(DataSync.api.url + '/admin_notice', data).then(function (result) {
-            console.log(result)
             let node = document.createRange().createContextualFragment(result.data)
             document.querySelector('#wpbody-content').prepend(node)
             Success.dismiss_button_init()

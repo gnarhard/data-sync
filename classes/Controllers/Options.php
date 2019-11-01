@@ -174,72 +174,12 @@ class Options {
         $params  = $request->get_params();
         $output  = '';
         $success = $params['success'];
-        $topic   = $params['topic'];
 
         if ( $success ) {
             $output .= '<div class="notice updated notice-success is-dismissible">';
-
-            if ( 'Enabled post types' === $topic ) {
-                $output .= '<p>' . $topic . ' saved successfully.</p>';
-            } elseif ( 'Connected site' === $topic ) {
-                if ( ! empty( $params['message'] ) ) {
-                    $output .= '<p>' . $params['message'] . '</p>';
-                } else {
-                    $output .= '<p>' . $topic . ' saved successfully.</p>';
-                }
-            } elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
-                $output .= '<p>' . $topic . ' successfully syndicated.</p>';
-            } elseif ( 'Templates' === $topic ) {
-                $output .= '<p>' . $topic . ' successfully syndicated.</p>';
-            } elseif ( 'Logs' === $topic ) {
-                $output .= '<p>' . $topic . ' successfully purged.</p>';
-            } elseif ( 'Prevalidation' === $topic ) {
-                $output .= '<p>Prevalidation successful. Gathering source posts. . .</p>';
-            } elseif ( 'Source posts' === $topic ) {
-                $output .= '<p>Source posts consolidated. Gathering connected sites. . .</p>';
-            } elseif ( 'Connected sites for sync' === $topic ) {
-                $output .= '<p>Connected sites consolidated. Prepping data packages. . .</p>';
-            } elseif ( 'Package prep' === $topic ) {
-                $output .= '<p>All data from source ready to be sent, sending now. . .</p>';
-            } elseif ( 'Receiver post response' === $topic ) {
-                $output .= '<p>Posts, metadata, and Data Sync options have been syndicated. Gathering logs. . .</p>';
-            } elseif ( 'Receiver logs' === $topic ) {
-                $output .= '<p>Receiver logs retrieved and saved to source. Saving receiver synced posts. . .</p>';
-            } elseif ( 'Receiver post response' === $topic ) {
-                $output .= '<p>Receiver synced posts saved to source. Packaging media items. . .</p>';
-            }
-
+            $output .= '<p>' . $params['message'] . '</p>';
         } else {
             $output .= '<div class="notice notice-warning is-dismissible">';
-
-            if ( 'Enabled post types' === $topic ) {
-                $output .= '<p>' . $topic . ' data is identical to saved data.</p>';
-            } elseif ( 'Connected site' === $topic ) {
-                $output .= '<p>' . $topic . ' not saved.</p>';
-            } elseif ( ( 'Post' === $topic ) || ( 'Posts' === $topic ) ) {
-                $output .= '<p>' . $topic . ' not syndicated.</p>';
-            } elseif ( 'Templates' === $topic ) {
-                $output .= '<p>' . $topic . ' not syndicated.</p>';
-            } elseif ( 'Logs' === $topic ) {
-                $output .= '<p>' . $topic . ' not purged.</p>';
-            } elseif ( 'Prevalidation' === $topic ) {
-                $output .= '<p>Prevalidation failed.</p>';
-            } elseif ( 'Source posts' === $topic ) {
-                $output .= '<p>Source posts failed to consolidate.</p>';
-            } elseif ( 'Connected sites for sync' === $topic ) {
-                $output .= '<p>Connected sites failed to consolidate.</p>';
-            } elseif ( 'Package prep' === $topic ) {
-                $output .= '<p>All data from source failed to prep.</p>';
-            } elseif ( 'Receiver post response' === $topic ) {
-                $output .= '<p>Posts, metadata, and Data Sync options failed to syndicate.</p>';
-            } elseif ( 'Error' === $topic ) {
-                $output .= '<p>An error occurred.</p>';
-            } elseif ( 'Receiver logs' === $topic ) {
-                $output .= '<p>No logs returned.</p>';
-            } elseif ( 'Receiver post response' === $topic ) {
-                $output .= '<p>No synced posts returned.</p>';
-            }
-
             $output .= '<p>' . $params['message'] . '</p>';
         }
 
@@ -251,6 +191,7 @@ class Options {
 
         wp_send_json_success( $output );
     }
+
 
     public static function get_required_plugins_info() {
         $plugin_info         = new stdClass();
@@ -387,11 +328,11 @@ class Options {
             ) );
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/admin_notice', array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'create_admin_notice' ),
-                ),
-            ) );
+            array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array( $this, 'create_admin_notice' ),
+            ),
+        ) );
     }
 
     /**
