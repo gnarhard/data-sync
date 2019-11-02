@@ -29,7 +29,7 @@ class Logs {
     public function set( $message = false, $error = false, $type = false ) {
         $this->log             = new stdClass();
         $this->log->url_source = get_site_url();
-        $this->log->datetime   = current_time( 'Y-m-d H:i:s.u' );
+        $this->log->datetime   = current_time( 'mysql', 1 );
         $this->error           = $message;
 
         if ( $type ) {

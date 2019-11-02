@@ -75,6 +75,29 @@ class Logs {
     // }
 
 
+    static process_receiver_logs(receiver_data) {
+            console.log(receiver_data)
+
+            let receiver_logs = []
+            receiver_data.forEach(single_receiver_data => receiver_logs.push(single_receiver_data.data.logs))
+
+            let logs = new Logs()
+            return logs.save(receiver_logs)
+                .then(() => {
+                    // REFRESH LOGS
+                    if (DataSync.options.debug) {
+                        let logs = new Logs()
+                        logs.refresh_log()
+                    }
+
+                    let admin_message = {}
+                    admin_message.success = true
+                    admin_message.message = 'Receiver logs retrieved and saved to source. Saving receiver synced posts. . .'
+                    Message.admin_message(admin_message)
+                })
+    }
+
+
     async save(logs) {
         const response = await fetch(DataSync.api.url + '/log/create', {
             method: 'POST',

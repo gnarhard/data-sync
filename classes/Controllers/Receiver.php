@@ -199,7 +199,7 @@ class Receiver {
 
             $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
             $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
-            $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
+            $response->message      = 'Source media data synced to ' . $this->source_data->receiver_site_url;
 
         } else {
             $this->sync_options_and_meta();
@@ -216,7 +216,7 @@ class Receiver {
 
             $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
             $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
-            $response->message      = 'Source data synced to ' . $this->source_data->receiver_site_url;
+            $response->message      = 'Source post data synced to ' . $this->source_data->receiver_site_url;
         }
 
         wp_send_json_success( $response );

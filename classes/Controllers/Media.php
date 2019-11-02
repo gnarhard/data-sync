@@ -115,10 +115,7 @@ class Media {
 
         }
 
-        $return_data = new stdClass();
-        $return_data->success = true;
-        $return_data->data = $this->json;
-        return wp_json_encode( $return_data );
+        return $this->json;
 
     }
 

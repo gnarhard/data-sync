@@ -229,7 +229,9 @@ class SyncedPosts
     public function save_to_source(WP_REST_Request $request ) {
         $receiver_synced_posts = json_decode( $request->get_body() );
         self::save_all_to_source( $receiver_synced_posts );
-        wp_json_send_success();
+        $return_data = new stdClass();
+        $return_data->message = 'All receiver synced posts saved to source.';
+        wp_send_json_success($return_data);
     }
 
     public static function save_all_to_source(array $receiver_synced_posts)
