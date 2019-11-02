@@ -50,20 +50,19 @@ class Media {
                             $this->media[]           = $image;
                         }
                     }
-//                    $this->send_to_receiver( $image, $connected_sites );
                 }
 
-                $featured_image = $post->media->featured_image;
-                foreach ( $synced_posts as $synced_post ) {
-                    if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
-                        $featured_image->receiver_post_id = $synced_post->receiver_post_id;
+                if ( has_post_thumbnail( $post->ID ) ) {
+                    $featured_image = $post->media->featured_image;
+                    foreach ( $synced_posts as $synced_post ) {
+                        if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
+                            $featured_image->receiver_post_id = $synced_post->receiver_post_id;
 
-                        $this->media[] = $featured_image;
+                            $this->media[] = $featured_image;
+                        }
                     }
                 }
-                if ( ! empty( $featured_image ) ) {
-//                    $this->send_to_receiver( $featured_image, $connected_sites );
-                }
+
 
                 $audio_attachments = (array) $post->media->audio;
                 foreach ( $audio_attachments as $key => $audio ) {
@@ -75,7 +74,6 @@ class Media {
                             $this->media[]           = $audio;
                         }
                     }
-//                    $this->send_to_receiver( $audio, $connected_sites );
                 }
 
                 $video_attachments = (array) $post->media->video;
@@ -88,7 +86,6 @@ class Media {
                             $this->media[]           = $video;
                         }
                     }
-//                    $this->send_to_receiver( $video, $connected_sites );
                 }
             }
         }
@@ -118,8 +115,11 @@ class Media {
 
         }
 
+        $return_data = new stdClass();
+        $return_data->success = true;
+        $return_data->data = $this->json;
+        return wp_json_encode( $return_data );
 
-        wp_send_json_success( $this->json );
     }
 
 

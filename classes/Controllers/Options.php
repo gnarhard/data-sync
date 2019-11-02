@@ -148,7 +148,7 @@ class Options {
     }
 
     public function get_settings_tab_html( WP_REST_Request $request ) {
-        $settings_request     = $request->get_param( 'tab' );
+        $settings_request = $request->get_param( 'tab' );
         $settings_content = new stdClass();
 
         if ( 'syndicated_posts' === $settings_request ) {
@@ -163,35 +163,10 @@ class Options {
         } elseif ( 'templates' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
             \DataSync\display_synced_templates();
-        } elseif ('awareness_messages' === $settings_request ) {
+        } elseif ( 'awareness_messages' === $settings_request ) {
             include_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
             \DataSync\display_awareness_messages();
         }
-    }
-
-
-    public function create_admin_notice( WP_REST_Request $request ) {
-        $params  = $request->get_params();
-        $output  = '';
-        $success = $params['success'];
-
-        if ( $success ) {
-            $output .= '<div class="notice updated notice-success is-dismissible">';
-        } else {
-            $output .= '<div class="notice notice-warning is-dismissible">';
-        }
-
-        if ( ! empty( $params['message'] ) ) {
-            $output .= '<p>' . $params['message'] . '</p>';
-        }
-
-        $output .= '<button type="button" class="notice-dismiss">';
-        $output .= '<span class="screen-reader-text">Dismiss this notice.</span>';
-        $output .= '</button>';
-
-        $output .= '</div>';
-
-        wp_send_json_success( $output );
     }
 
 
@@ -247,12 +222,14 @@ class Options {
         if ( ! $plugin_info->source->acf ) {
             $logs = new Logs();
             $logs->set( 'ACF needs to be installed or activated on this site.', true );
+
             return false;
         }
 
         if ( ! $plugin_info->source->cptui ) {
             $logs = new Logs();
             $logs->set( 'CPTUI needs to be installed or activated on this site.', true );
+
             return false;
         }
 
@@ -261,12 +238,14 @@ class Options {
                 if ( ! $receiver_plugin_info->cptui_version_synced ) {
                     $logs = new Logs();
                     $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+
                     return false;
                 }
 
                 if ( ! $receiver_plugin_info->acf_version_synced ) {
                     $logs = new Logs();
                     $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+
                     return false;
                 }
             }
@@ -278,63 +257,57 @@ class Options {
 
     public function register_routes() {
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/options/(?P<option>[a-zA-Z-_]+)', array(
-                array(
-                    'methods'             => WP_REST_Server::READABLE,
-                    'callback'            => array( $this, 'get' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                    'args'                => array(
-                        'option' => array(
-                            'description' => 'Option key',
-                            'type'        => 'string',
-                        ),
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array( $this, 'get' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+                'args'                => array(
+                    'option' => array(
+                        'description' => 'Option key',
+                        'type'        => 'string',
                     ),
                 ),
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'save' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                    'args'                => array(
-                        'option' => array(
-                            'description' => 'Option key',
-                            'type'        => 'string',
-                        ),
+            ),
+            array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => array( $this, 'save' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+                'args'                => array(
+                    'option' => array(
+                        'description' => 'Option key',
+                        'type'        => 'string',
                     ),
                 ),
-                array(
-                    'methods'             => WP_REST_Server::DELETABLE,
-                    'callback'            => array( $this, 'delete' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                    'args'                => array(
-                        'option' => array(
-                            'description' => 'Option key',
-                            'type'        => 'string',
+            ),
+            array(
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => array( $this, 'delete' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
+                'args'                => array(
+                    'option' => array(
+                        'description' => 'Option key',
+                        'type'        => 'string',
 //							'validate_callback' => function ( $param, $request, $key ) {
 //								return true;
 //							},
-                        ),
                     ),
                 ),
-            ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/settings_tab/(?P<tab>[a-zA-Z-_]+)', array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_settings_tab_html' ),
-                    'args'     => array(
-                        'tab' => array(
-                            'description' => 'Tab to get',
-                            'type'        => 'string',
-                        ),
-                    ),
-                ),
-            ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/admin_notice', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'create_admin_notice' ),
             ),
         ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/settings_tab/(?P<tab>[a-zA-Z-_]+)', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'get_settings_tab_html' ),
+                'args'     => array(
+                    'tab' => array(
+                        'description' => 'Tab to get',
+                        'type'        => 'string',
+                    ),
+                ),
+            ),
+        ) );
+
     }
 
     /**

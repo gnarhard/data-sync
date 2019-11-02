@@ -8,6 +8,17 @@ use DataSync\Controllers\TemplateSync;
  */
 function data_sync_options_page() {
     ?>
+
+    <div class="notice is-dismissible data_sync_messages">
+        <button type="button" class="show_more noselect">
+            <i class="dashicons dashicons-arrow-down-alt2"></i>
+        </button>
+        <div class="message"></div>
+        <button type="button" class="notice-dismiss noselect">
+            <span class="screen-reader-text">Dismiss this notice.</span>
+        </button>
+    </div>
+
     <div class="wrap">
         <h2>DATA SYNC</h2>
         <div id="data_sync_tabs" class="hidden">

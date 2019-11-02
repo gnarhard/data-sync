@@ -28,8 +28,8 @@ class SyndicatedPosts {
 
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Prevalidating data and receiver site compatibility.'
-                Message.show_message(admin_message)
+                admin_message.message = '-- STARTING SYNC -- '
+                Message.admin_message(admin_message)
 
                 self.bulk_push()
             }
@@ -126,12 +126,17 @@ class SyndicatedPosts {
         document.getElementById('syndicated_posts_data').innerHTML = ''
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Prevalidating receiver site compatibility.'
+        Message.admin_message(admin_message)
+
         this.prevalidate()
             .then(prevalidation => {
                 if (!prevalidation.success) {
                     prevalidation.message = 'Prevalidation failed.'
 
-                    Message.show_message(prevalidation)
+                    Message.admin_message(prevalidation)
                     if (DataSync.options.debug) {
                         let logs = new Logs()
                         logs.refresh_log()
@@ -139,7 +144,7 @@ class SyndicatedPosts {
                 } else {
                     // PREVALIDATED.
                     prevalidation.message = 'Prevalidation successful. Gathering source posts. . .'
-                    Message.show_message(prevalidation)
+                    Message.admin_message(prevalidation)
 
                     // GET ALL POSTS
                     this.get_all_posts()
@@ -148,7 +153,7 @@ class SyndicatedPosts {
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'Source posts consolidated. Gathering connected sites. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
 
                         })
 
@@ -159,22 +164,25 @@ class SyndicatedPosts {
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'Connected sites consolidated. Prepping data packages. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
                         })
 
                         // PREPARE AND CONSOLIDATE SOURCE PACKAGES
                         .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
-                        .then(requests => {console.log(requests); return requests})
+                        .then(requests => {
+                            console.log(requests)
+                            return requests
+                        })
                         .then(requests => Promise.all(requests))// send all requests for package
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
                         .then(prepped_source_packages => {
-                            this.prepped_source_packages = prepped_source_packages;
+                            this.prepped_source_packages = prepped_source_packages
 
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'All data from source ready to be sent, sending now. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
                         })
 
                         // SEND SOURCE PACKAGES TO RECEIVER
@@ -187,7 +195,7 @@ class SyndicatedPosts {
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'Posts, metadata, and Data Sync options have been syndicated. Gathering logs. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
 
                         })
 
@@ -205,7 +213,7 @@ class SyndicatedPosts {
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'Receiver logs retrieved and saved to source. Saving receiver synced posts. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
                         })
 
                         // SAVE RECEIVER SYNCED POSTS TO SOURCE
@@ -219,7 +227,7 @@ class SyndicatedPosts {
                             let admin_message = {}
                             admin_message.success = true
                             admin_message.message = 'Receiver synced posts saved to source. Packaging media items. . .'
-                            Message.show_message(admin_message)
+                            Message.admin_message(admin_message)
                         })
 
                         // PREP MEDIA
@@ -227,11 +235,17 @@ class SyndicatedPosts {
                         .then(requests => Promise.all(requests))// send all requests for package
                         .then(responses => {return responses}) // all responses are resolved successfully
                         .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-                        .then(prepped_source_packages => Message.set_admin_message(prepped_source_packages, 'Package prep'))
+                        .then(prepped_source_packages => {
+                            let admin_message = {}
+                            admin_message.success = true
+                            admin_message.message = 'Prepped media packages. Sending to receivers. . .'
+                            Message.admin_message(admin_message)
+                            return prepped_source_packages;
+                        })
 
                         // SEND MEDIA PACKAGES TO RECEIVER
-                        .then(prepped_source_packages => prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package))) // create send requests with packages
-                        .then(packages => console.log(packages))
+                        // .then(prepped_source_packages => prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package))) // create send requests with packages
+                        // .then(packages => console.log(packages) return packages)
                         // .then(() => this.send_media_packages())// send packages one by one
                         //
                         // .then(receiver_data => {
@@ -265,7 +279,7 @@ class SyndicatedPosts {
                         // .then(receiver_responses => {
                         //     console.log(receiver_responses)
                         //     this.refresh_view()
-                        //     Message.show_message(result, 'Posts')
+                        //     Message.admin_message(result, 'Posts')
                         //     new EnabledPostTypes()
                         //     if (DataSync.options.debug) {
                         //         let logs = new Logs()
@@ -298,19 +312,28 @@ class SyndicatedPosts {
         return requests
     }
 
-    async prepare_media_packages (site) {
+    async prepare_media_packages () {
 
         let data = {}
-        data.site = site
-        data.posts = this.prepped_source_packages.posts
         let requests = []
         this.receiver_sync_media_requests = [] // will be compiled in create_send_requests().
 
         for (const site of this.connected_sites) {
-            requests.push(fetch(DataSync.api.url + '/media/prep', {
-                method: 'POST',
-                body: JSON.stringify(data)
-            }))
+
+            this.prepped_source_packages.forEach(prepped_source_package => {
+                let decoded_package = JSON.parse(prepped_source_package)
+                console.log(decoded_package);
+                if (parseInt(site.id) === parseInt(decoded_package.receiver_site_id)) {
+                    data.site = site
+                    data.posts = decoded_package.posts
+                    console.log(data)
+                    requests.push(fetch(DataSync.api.url + '/media/prep', {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    }))
+                }
+            })
+
         }
 
         return requests
@@ -395,7 +418,7 @@ class SyndicatedPosts {
         AJAX.post(DataSync.api.url + '/source_data/push/' + source_post_id, data).then(
             function (result) {
                 SyndicatedPosts.refresh_view()
-                Message.show_message(result, 'Post')
+                Message.admin_message(result, 'Post')
                 new EnabledPostTypes()
                 if (DataSync.options.debug) {
                     let logs = new Logs()
@@ -415,7 +438,7 @@ class SyndicatedPosts {
         AJAX.post(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + receiver_site_id, data).then(
             function (result) {
                 SyndicatedPosts.refresh_view()
-                Message.show_message(result, 'Post')
+                Message.admin_message(result, 'Post')
                 new EnabledPostTypes()
                 if (DataSync.options.debug) {
                     let logs = new Logs()

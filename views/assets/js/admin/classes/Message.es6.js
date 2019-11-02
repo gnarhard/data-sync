@@ -19,14 +19,31 @@ class Message {
         }
     }
 
-    static show_message (result) {
+    static admin_message (result) {
 
-        AJAX.post(DataSync.api.url + '/admin_notice', result)
-            .then(result => {
-            let node = document.createRange().createContextualFragment(result.data)
-            document.querySelector('#wpbody-content').prepend(node)
-            Message.dismiss_button_init()
-        })
+        if (document.querySelector('#wpbody-content .notice')) {
+            Message.update_message(result)
+        }
+    }
+
+    static update_message (result) {
+
+        let html = ''
+
+        if (result.success) {
+            html = '<div class="notice updated notice-success">'
+        } else {
+            html = '<div class="notice notice-warning">'
+        }
+
+        html += result.message
+
+        html += '</div'
+
+        $ = jQuery
+        $('#wpbody-content .notice .message').prepend(html)
+        document.querySelector('#wpbody-content .notice').style.visibility = 'visible'
+        Message.buttons_init()
 
     }
 
@@ -37,15 +54,21 @@ class Message {
 
         console.log(result)
 
-        Message.show_message(result);
+        Message.admin_message(result)
 
         return result
     }
 
-    static dismiss_button_init () {
+    static buttons_init () {
         $ = jQuery
         $('.notice-dismiss').unbind().click(function () {
-            $(this).parent().remove()
+            document.querySelector('#wpbody-content .notice').style.visibility = 'hidden'
+        })
+
+        $('.show_more').unbind().click(function () {
+            $(this).parent().toggleClass('expand')
+            $('.show_more .dashicons').toggleClass('dashicons-arrow-down-alt2')
+            $('.show_more .dashicons').toggleClass('dashicons-arrow-up-alt2')
         })
     }
 }
