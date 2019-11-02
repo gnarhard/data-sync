@@ -63,6 +63,7 @@ class Message {
         $ = jQuery
         $('.notice-dismiss').unbind().click(function () {
             document.querySelector('#wpbody-content .notice').style.visibility = 'hidden'
+            $(this).parent().removeClass('expand')
         })
 
         $('.show_more').unbind().click(function () {

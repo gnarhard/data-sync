@@ -484,6 +484,7 @@
   float: left;
   margin-right: 10px;
   margin-top: 5px;
+  cursor: pointer;
 }
 
 .settings_page_data-sync-options .data_sync_messages .message,

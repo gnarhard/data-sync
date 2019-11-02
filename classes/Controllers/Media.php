@@ -47,9 +47,9 @@ class Media {
                             $image->receiver_post_id = $synced_post->receiver_post_id;
                             $image->featured         = false;
                             $image->type             = 'image';
-                            $this->media[]           = $image;
                         }
                     }
+                    $this->media[] = $image;
                 }
 
                 if ( has_post_thumbnail( $post->ID ) ) {
@@ -57,10 +57,9 @@ class Media {
                     foreach ( $synced_posts as $synced_post ) {
                         if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
                             $featured_image->receiver_post_id = $synced_post->receiver_post_id;
-
-                            $this->media[] = $featured_image;
                         }
                     }
+                    $this->media[] = $featured_image;
                 }
 
 
@@ -71,9 +70,9 @@ class Media {
                             $audio->receiver_post_id = $synced_post->receiver_post_id;
                             $audio->featured         = false;
                             $audio->type             = 'audio';
-                            $this->media[]           = $audio;
                         }
                     }
+                    $this->media[] = $audio;
                 }
 
                 $video_attachments = (array) $post->media->video;
@@ -83,9 +82,9 @@ class Media {
                             $video->receiver_post_id = $synced_post->receiver_post_id;
                             $video->featured         = false;
                             $video->type             = 'video';
-                            $this->media[]           = $video;
                         }
                     }
+                    $this->media[] = $video;
                 }
             }
         }
@@ -100,9 +99,9 @@ class Media {
             $data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
             $data->filename                  = basename( $path['path'] );
             $data->receiver_site_id          = (int) $site->id;
-            $data->receiver_site_url          = $site->url;
+            $data->receiver_site_url         = $site->url;
             $data->start_time                = (string) current_time( 'mysql', 1 );
-            $data->start_microtime           = (float) microtime( true );
+//            $data->start_microtime           = (float) microtime( true );
 
             $excluded = $this->check_parent_isnt_excluded( $data, $site );
 
@@ -117,44 +116,6 @@ class Media {
 
         return $this->json;
 
-    }
-
-
-    /**
-     * @param $media
-     * @param $connected_sites
-     */
-    public function send_to_receiver( $media, $connected_sites ) {
-        $path                            = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
-        $data                            = new stdClass();
-        $data->media                     = $media;
-        $data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
-        $data->filename                  = basename( $path['path'] );
-
-        foreach ( $connected_sites as $site ) {
-            $excluded = $this->check_parent_isnt_excluded( $data, $site );
-
-            if ( ! $excluded ) {
-                $data->receiver_site_id = (int) $site->id;
-                $auth                   = new Auth();
-                $json                   = $auth->prepare( $data, $site->secret_key );
-                $url                    = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/media/update';
-                $response               = wp_remote_post( $url, [
-                    'body'        => $json,
-                    'httpversion' => '1.0',
-                    'sslverify'   => false,
-                    'timeout'     => 10,
-                    'blocking'    => true,
-                ] );
-
-                if ( is_wp_error( $response ) ) {
-                    $logs = new Logs();
-                    $logs->set( 'Error in Media->update() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-
-                    return $response;
-                }
-            }
-        }
     }
 
 

@@ -390,11 +390,10 @@ class SourceData {
         $this->source_data->upload_path     = $upload_dir['path'];
         $this->source_data->upload_url      = $upload_dir['url'];
         $this->source_data->start_time      = (string) current_time( 'mysql', 1 );
-        $this->source_data->start_microtime = (float) microtime( true );
+//        $this->source_data->start_microtime = (float) microtime( true );
         $this->source_data->options         = (object) $options;
         $this->source_data->url             = (string) get_site_url();
         $this->source_data->connected_sites = (array) ConnectedSite::get_all();
-        $this->source_data->nonce           = (string) wp_create_nonce( 'data_push' );
         $this->source_data->synced_posts    = (array) $synced_posts->get_all()->get_data();
         $this->source_data->canonical_urls  = array();
         $this->source_data->users           = get_users();

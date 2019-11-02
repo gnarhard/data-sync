@@ -28,7 +28,7 @@ class SyndicatedPosts {
 
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = '-- STARTING SYNC -- '
+                admin_message.message = '<i class="dashicons dashicons-networking"></i> SYNDICATING'
                 Message.admin_message(admin_message)
 
                 self.bulk_push()
@@ -112,8 +112,6 @@ class SyndicatedPosts {
             this.data.receiver_data[index] = await response.json()
         }
 
-        console.log(this)
-
     }
 
     async get_all_posts () {
@@ -150,7 +148,7 @@ class SyndicatedPosts {
                         .then(() => Logs.process_receiver_logs(this.receiver_data))
                         .then(() => this.process_receiver_synced_posts())
                         .then(() => this.consolidate_media())
-                        .then((prepped_source_packages) => this.send_media_to_receivers(prepped_source_packages))
+                        .then((prepared_site_packages) => this.send_media_to_receivers(prepared_site_packages))
 
                         //
                         // // SAVE RECEIVER LOGS ASSOCIATED WITH: POST, META, AND OPTIONS TO SOURCE
@@ -218,7 +216,7 @@ class SyndicatedPosts {
             // PREPARE AND CONSOLIDATE SOURCE PACKAGES
             .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
             .then(requests => {
-                console.log(requests)
+                // console.log('Prepared post, options, and meta packages: ',requests)
                 return requests
             })
             .then(requests => Promise.all(requests))// send all requests for package
@@ -245,12 +243,12 @@ class SyndicatedPosts {
             .then(requests => Promise.all(requests))// send all requests for package
             .then(responses => {return responses}) // all responses are resolved successfully
             .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
-            .then(prepped_source_packages => {
+            .then(prepared_site_packages => {
                 let admin_message = {}
                 admin_message.success = true
                 admin_message.message = 'Media packages ready. Sending to receivers. . .'
                 Message.admin_message(admin_message)
-                return prepped_source_packages
+                return prepared_site_packages
             })
     }
 
@@ -272,20 +270,17 @@ class SyndicatedPosts {
 
     }
 
-    send_media_to_receivers (prepped_source_packages) {
-        // SEND MEDIA PACKAGES TO RECEIVER
-        prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package)) // create send requests with packages
-            .then(packages => {
-                console.log(packages)
-                return packages
-            })
+    send_media_to_receivers (prepared_site_packages) {
 
-        // .then(() => this.send_media_packages())// send packages one by one
-        //
-        // .then(receiver_data => {
-        //     this.receiver_data = receiver_data
-        //     Message.set_admin_message(receiver_data, 'Receiver post response')
-        // })
+        console.log('prepped media source packages: ', prepared_site_packages)
+
+        prepared_site_packages.forEach(prepared_site_package => {
+            prepared_site_package.forEach(media_package => {
+                this.create_remote_request(media_package)
+            })
+        }) // create send requests with packages
+        // return this.send_media_packages() // creates a ton of requests that bogs down the browser
+
     }
 
     prepare_packages (bulk) {
@@ -310,13 +305,13 @@ class SyndicatedPosts {
 
         let data = {}
         let requests = []
-        this.receiver_sync_media_requests = [] // will be compiled in create_send_requests().
+        this.receiver_sync_requests = [] // will be compiled in create_send_requests().
 
         for (const site of this.connected_sites) {
 
             this.prepped_source_packages.forEach(prepped_source_package => {
                 let decoded_package = JSON.parse(prepped_source_package)
-                // console.log(decoded_package)
+                // console.log('Prepared media source packages: ',decoded_package)
                 if (parseInt(site.id) === parseInt(decoded_package.receiver_site_id)) {
                     data.site = site
                     data.posts = decoded_package.posts
@@ -333,14 +328,14 @@ class SyndicatedPosts {
     }
 
     send_media_packages () {
-        return this.receiver_sync_media_requests.reduce((p, media) => {
-            return p.then(() => this.send_media_packages(media))
+        return this.receiver_sync_requests.reduce((p, media_package) => {
+            return p.then(() => this.send_media_packages(media_package))
         }, Promise.resolve()) // initial
     }
 
     process_receiver_synced_posts () {
         let receiver_synced_posts = []
-        console.log(this.receiver_data)
+        // console.log('receiver_data for processing synced posts: ',this.receiver_data)
         this.receiver_data.forEach(single_receiver_data => receiver_synced_posts.push(single_receiver_data.data.synced_posts))
         return this.save_receiver_synced_posts(receiver_synced_posts)
             .then(synced_posts_response => {
@@ -371,8 +366,7 @@ class SyndicatedPosts {
 
         // DON'T ADD ANYTHING TO THIS FROM HERE ON OR IT WILL TRIP THE AUTH SIG CHECK.
         let source_package = JSON.parse(prepped_source_package)
-
-        console.log(source_package)
+        console.log('Source package before create_remote_request(): ',source_package)
 
         this.receiver_sync_requests.push(
             fetch(source_package.receiver_site_url + '/wp-json/data-sync/v1/sync', {

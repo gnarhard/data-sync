@@ -242,7 +242,7 @@ class Receiver {
 
                 if ( empty( $this->source_data->posts->$post_type_slug ) ) {
                     $logs = new Logs();
-                    $logs->set( 'No posts in source data.', true );
+                    $logs->set( 'No posts received in ' . $post_type_slug . '.', true );
                 } else {
                     // LOOP THROUGH ALL POSTS THAT ARE IN A SPECIFIC POST TYPE.
                     foreach ( $this->source_data->posts->$post_type_slug as $post ) {
