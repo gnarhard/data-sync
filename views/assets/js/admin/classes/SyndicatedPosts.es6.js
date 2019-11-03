@@ -50,10 +50,17 @@ class SyndicatedPosts {
 
         this.data = {}
 
+
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Refreshing syndicated posts.'
+        Message.admin_message(admin_message)
+
         this.get_source_data()
             .then(() => this.get_receiver_data())
             .then(() => this.show_posts())
             .then(() => this.finish_refresh())
+            .catch(message => Message.handle_error(message))
 
     }
 
@@ -64,6 +71,11 @@ class SyndicatedPosts {
     }
 
     async show_posts () {
+
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Building posts table. . .'
+        Message.admin_message(admin_message)
 
         for (const [index, post] of this.data.source_data.posts.entries()) {
             this.post = post
@@ -97,11 +109,20 @@ class SyndicatedPosts {
     }
 
     async get_source_data () {
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Getting data from source. . .'
+        Message.admin_message(admin_message)
         const response = await fetch(DataSync.api.url + '/source_data/load')
         this.data.source_data = await response.json()
     }
 
     async get_receiver_data () {
+
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Getting data from receivers. . .'
+        Message.admin_message(admin_message)
 
         this.data.receiver_data = []
 

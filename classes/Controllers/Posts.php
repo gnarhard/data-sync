@@ -458,11 +458,9 @@ class Posts {
     public static function find_receiver_post( array $receiver_data, $site_id, $receiver_post_id ) {
         foreach ( $receiver_data as $receiver ) {
             if ( (int) $site_id === $receiver->site_id ) {
-                foreach ( $receiver->posts as $receiver_site_posts ) {
-                    foreach ( $receiver_site_posts->posts as $receiver_post ) {
-                        if ( (int) $receiver_post_id === $receiver_post->ID ) {
-                            return $receiver_post;
-                        }
+                foreach ( $receiver->posts as $receiver_post ) {
+                    if ( (int) $receiver_post_id === $receiver_post->ID ) {
+                        return $receiver_post;
                     }
                 }
             }
@@ -481,7 +479,8 @@ class Posts {
 
             if ( is_wp_error( $response ) ) {
                 $logs = new Logs();
-                $logs->set('Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+                $logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+
                 return $response;
             } else {
                 $receiver_posts[ $index ]          = new stdClass();
@@ -502,7 +501,8 @@ class Posts {
 
         if ( is_wp_error( $response ) ) {
             $logs = new Logs();
-            $logs->set(  'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true  );
+            $logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+
             return $response;
         } else {
             return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
@@ -557,6 +557,7 @@ class Posts {
         if ( is_wp_error( $receiver_post_id ) ) {
             $logs = new Logs();
             $logs->set( $receiver_post_id->get_error_message(), true );
+
             return false;
         } elseif ( $receiver_post_id ) {
             $receiver_post_id = (int) $receiver_post_id;
@@ -611,18 +612,18 @@ class Posts {
 
     public function register_routes() {
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/post_meta/(?P<id>\d+)', array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_custom_post_meta' ),
-                    'args'     => array(
-                        'id' => array(
-                            'description'       => 'ID of post',
-                            'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
-                        ),
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'get_custom_post_meta' ),
+                'args'     => array(
+                    'id' => array(
+                        'description'       => 'ID of post',
+                        'type'              => 'int',
+                        'validate_callback' => 'is_numeric',
                     ),
                 ),
-            ) );
+            ),
+        ) );
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/posts/(?P<id>\d+)', array(
             array(
                 'methods'  => WP_REST_Server::READABLE,
