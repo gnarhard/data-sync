@@ -342,10 +342,6 @@
   text-align: center;
 }
 
-#syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-editor-unlink {
-  cursor: pointer;
-}
-
 #syndicated_posts #wp_data_sync_status .wp_data_synced_post_status_icons .dashicons-yes {
   color: green;
 }
