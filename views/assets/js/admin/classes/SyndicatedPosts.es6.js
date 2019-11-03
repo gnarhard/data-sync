@@ -68,6 +68,10 @@ class SyndicatedPosts {
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.add('hidden')
         this.init()
         SyndicatedPosts.single_post_actions_init()
+        let admin_message = {}
+        admin_message.success = true
+        admin_message.message = 'Ready.'
+        Message.admin_message(admin_message)
     }
 
     async show_posts () {
@@ -250,7 +254,7 @@ class SyndicatedPosts {
             .then(consolidated_packages => {
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending to receivers. . .'
+                admin_message.message = 'Media packages ready. Sending out ' . consolidated_packages.length + ' media sync requests. Please be patient.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
