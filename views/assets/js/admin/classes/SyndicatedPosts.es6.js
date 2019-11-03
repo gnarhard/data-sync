@@ -15,13 +15,6 @@ class SyndicatedPosts {
         $ = jQuery
         let self = this
 
-        $('.expand_post_details').unbind().click(
-            function () {
-                let id = $(this).data('id')
-                $('#post-' + id).toggle()
-            }
-        )
-
         if (document.getElementById('bulk_data_push')) {
             document.getElementById('bulk_data_push').onclick = function (e) {
                 e.preventDefault()
@@ -67,7 +60,6 @@ class SyndicatedPosts {
     finish_refresh () {
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.add('hidden')
         this.init()
-        SyndicatedPosts.single_post_actions_init()
         let admin_message = {}
         admin_message.success = true
         admin_message.message = 'Ready.'
@@ -110,6 +102,7 @@ class SyndicatedPosts {
         let html = result_array.join(' ')
         $ = jQuery
         $('#syndicated_posts_data').append(html)
+        SyndicatedPosts.single_post_actions_init()
     }
 
     async get_source_data () {
@@ -398,6 +391,13 @@ class SyndicatedPosts {
     static single_post_actions_init () {
         jQuery(
             function ($) {
+
+                $('.expand_post_details').unbind().click(
+                    function () {
+                        let id = $(this).data('id')
+                        $('#post-' + id).toggle()
+                    }
+                )
 
                 $('.push_post_now').unbind().click(
                     function (e) {
