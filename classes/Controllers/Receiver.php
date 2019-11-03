@@ -3,16 +3,12 @@
 
 namespace DataSync\Controllers;
 
-use DataSync\Controllers\Email;
-use DataSync\Helpers;
 use DataSync\Models\SyncedPost;
 use DataSync\Models\ConnectedSite;
 use WP_REST_Request;
 use WP_REST_Server;
-use WP_REST_Response;
 use DataSync\Models\DB;
 use DataSync\Controllers\Users;
-use WP_HTTP_Response;
 use DataSync\Models\Log;
 
 /**
@@ -154,7 +150,7 @@ class Receiver {
 
             if ( is_wp_error( $response ) ) {
                 $logs = new Logs();
-                $log->set( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+                $logs->set( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
                 return $response;
             } else {
@@ -193,15 +189,13 @@ class Receiver {
 
         if ( $this->source_data->media_package ) {
             $media = new Media();
-            foreach ( $this->source_data->media as $media_item ) {
-                $media->update( $media_item );
-            }
+            $media->update( $this->source_data );
 
             $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
             $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
-            $response->message      = 'Source media data synced to ' . $this->source_data->receiver_site_url;
+            $response->message      = $this->source_data->filename . ' synced to ' . $this->source_data->receiver_site_url;
 
-        } else {
+        } elseif ( false === $this->source_data->media_package ) {
             $this->sync_options_and_meta();
             $logs = new Logs();
             $logs->set( 'OPTIONS AND META SYNCED.' );
@@ -217,6 +211,8 @@ class Receiver {
             $response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
             $response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
             $response->message      = 'Source post data synced to ' . $this->source_data->receiver_site_url;
+        } else {
+            $response->message = 'Missing media package boolean in ' . $this->source_data->receiver_site_url . ' sync request.';
         }
 
         wp_send_json_success( $response );

@@ -91,15 +91,18 @@ class Media {
 
 
         $this->json = array();
+        $url        = get_site_url();
 
         foreach ( $this->media as $media ) {
             $path                            = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
             $data                            = new stdClass();
             $data->media                     = $media;
+            $data->media_package             = true;
             $data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
             $data->filename                  = basename( $path['path'] );
             $data->receiver_site_id          = (int) $site->id;
             $data->receiver_site_url         = $site->url;
+            $data->url                       = $url;
             $data->start_time                = (string) current_time( 'mysql', 1 );
 //            $data->start_microtime           = (float) microtime( true );
 
@@ -197,7 +200,7 @@ class Media {
                 $logs = new Logs();
                 $logs->set( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
 
-                return $attachment_id;
+//                return $attachment_id;
             }
         }
     }
