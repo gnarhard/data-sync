@@ -14,9 +14,6 @@ class Message {
         document.querySelector('#' + selector + ' .loading_spinner').classList.add('hidden')
         document.getElementById(selector + '_wrap').innerHTML = html
 
-        if (typeof result.success !== 'undefined') {
-            Message.show_success_message(result, topic)
-        }
     }
 
     static admin_message (result) {

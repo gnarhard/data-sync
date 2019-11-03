@@ -51,6 +51,7 @@ function display_connected_sites() {
  *
  */
 function display_connected_sites_modal() {
+    $default_date = date('Y-m-d', strtotime('-30 days'));
     ?>
     <div class="lightbox_wrap">
         <div class="add_site_modal">
@@ -71,7 +72,7 @@ function display_connected_sites_modal() {
                 </div>
                 <div class="input_wrap">
                     <label for="sync_start">Sync Start</label>
-                    <input name="sync_start" id="site_sync_start" value=""/>
+                    <input name="sync_start" id="site_sync_start" value="<?php echo $default_date ?>"/>
                 </div>
                 <p class="submit">
                     <input type="submit" name="submit_site" id="submit_site" class="button button-primary" value="Add Site">

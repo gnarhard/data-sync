@@ -21,7 +21,15 @@ class EnabledPostTypes {
         data = Helpers.getSelectValues(document.getElementById('push_enabled_post_types'))
         // console.log(data);
         AJAX.post(DataSync.api.url + '/options/push_enabled_post_types', data).then(function( result ) {
-          Message.show_success_message( result, 'Enabled post types')
+          let admin_message = {}
+          admin_message.success = result
+          if ( result ) {
+            admin_message.message = 'Enabled post types saved.'
+          } else {
+            admin_message.message = 'No data changed or there was an error.'
+          }
+
+          Message.admin_message(admin_message)
         });
 
 
