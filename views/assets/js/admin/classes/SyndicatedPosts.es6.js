@@ -264,7 +264,7 @@ class SyndicatedPosts {
             .then(consolidated_packages => {
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending out '.consolidated_packages.length + ' media sync requests. Please be patient.'
+                admin_message.message = 'Media packages ready. Sending out '+consolidated_packages.length + ' media sync requests. Please be patient.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
