@@ -13,7 +13,12 @@ class SyndicatedTemplates {
     e.preventDefault()
 
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
-      Message.show_success_message( result, 'Templates' );
+
+      let admin_message = {}
+      admin_message.success = true
+      admin_message.message = 'Templates pushed.'
+      Message.admin_message(admin_message)
+
       new SyndicatedTemplates();
       if ( DataSync.options.debug ) {
         let logs = new Logs()

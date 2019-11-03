@@ -51,7 +51,12 @@ class Logs {
             let result = {}
             result.success = response
             self.refresh_log()
-            Message.show_success_message(result, 'Logs')
+
+            let admin_message = {}
+            admin_message.success = true
+            admin_message.message = 'Logs purged.'
+            Message.admin_message(admin_message)
+
             self.init()
         })
     }

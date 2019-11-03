@@ -35,7 +35,11 @@ class ConnectedSites {
 
         AJAX.post(DataSync.api.url + '/connected_sites', data).then((result)=>{
 
-            Message.show_success_message(result, 'Connected site')
+            let admin_message = {}
+            admin_message.success = true
+            admin_message.message = 'Site connected.'
+            Message.admin_message(admin_message)
+
             $ = jQuery
             $('.settings_page_data-sync-settings .lightbox_wrap').removeClass('display')
             new ConnectedSites();
@@ -61,10 +65,15 @@ class ConnectedSites {
             AJAX.delete(DataSync.api.url + '/connected_sites/' + site_id).then(
                 function (response) {
                     if (response.success) {
-                        Message.show_success_message(response, 'Connected site')
+
+                        let admin_message = {}
+                        admin_message.success = true
+                        admin_message.message = 'Site deleted.'
+                        Message.admin_message(admin_message)
 
                         new SyndicatedPosts()
                         new EnabledPostTypes()
+                        new Settings();
                         if (DataSync.options.debug) {
                             let logs = new Logs()
                             logs.refresh_log()

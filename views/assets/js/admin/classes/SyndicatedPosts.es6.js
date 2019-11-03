@@ -3,6 +3,7 @@ import Message from './Message.es6.js'
 import EnabledPostTypes from './EnabledPostTypes.es6'
 import Logs from './Logs.es6'
 import ConnectedSites from './ConnectedSites.es6'
+import Settings from './Settings.es6'
 
 class SyndicatedPosts {
 
@@ -153,6 +154,7 @@ class SyndicatedPosts {
                     prevalidation.message = 'Prevalidation failed.'
 
                     Message.admin_message(prevalidation)
+                    new Settings();
                     if (DataSync.options.debug) {
                         let logs = new Logs()
                         logs.refresh_log()
