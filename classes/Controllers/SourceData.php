@@ -48,14 +48,18 @@ class SourceData {
      */
     public function register_routes() {
 
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)', array(
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
             array(
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array( $this, 'get_source_data' ),
                 'args'     => array(
-                    'action' => array(
+                    'action'         => array(
                         'description' => 'Action to tell backend which content to provide.',
                         'type'        => 'string',
+                    ),
+                    'source_post_id' => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
                     ),
                 ),
             ),
@@ -64,45 +68,8 @@ class SourceData {
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
             array(
-                'methods'          => WP_REST_Server::READABLE,
-                'callback'         => array( $this, 'prep' ),
-                'args'             => array(
-                    'source_post_id' => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                ),
-                'receiver_site_id' => array(
-                    'description' => 'Receiver Site ID',
-                    'type'        => 'int',
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
-            array(
                 'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'prevalidate' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/push/(?P<source_post_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'push_post_to_all_receivers' ),
-                'args'     => array(
-                    'source_post_id' => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/push/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'overwrite_post_on_single_receiver' ),
+                'callback' => array( $this, 'prep' ),
                 'args'     => array(
                     'source_post_id'   => array(
                         'description' => 'Source Post ID',
@@ -113,6 +80,13 @@ class SourceData {
                         'type'        => 'int',
                     ),
                 ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'prevalidate' ),
             ),
         ) );
 
@@ -385,11 +359,11 @@ class SourceData {
         $options      = Options::source();
         $upload_dir   = wp_get_upload_dir();
 
-        $this->source_data                  = new stdClass();
-        $this->source_data->media_package   = false;
-        $this->source_data->upload_path     = $upload_dir['path'];
-        $this->source_data->upload_url      = $upload_dir['url'];
-        $this->source_data->start_time      = (string) current_time( 'mysql', 1 );
+        $this->source_data                = new stdClass();
+        $this->source_data->media_package = false;
+        $this->source_data->upload_path   = $upload_dir['path'];
+        $this->source_data->upload_url    = $upload_dir['url'];
+        $this->source_data->start_time    = (string) current_time( 'mysql', 1 );
 //        $this->source_data->start_microtime = (float) microtime( true );
         $this->source_data->options         = (object) $options;
         $this->source_data->url             = (string) get_site_url();
@@ -516,8 +490,19 @@ class SourceData {
             if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
                 $source_data->error_msg = '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
             }
-            $source_data->post_types = array_keys( $source_data->source_options->push_enabled_post_types );
-            $source_data->posts      = Posts::get_wp_posts( $source_data->post_types, true );
+
+            $post_id = (int) $request->get_url_params()['source_post_id'];
+
+            if ( 0 === $post_id ) {
+                // GET BULK
+                $source_data->post_types = array_keys( $source_data->source_options->push_enabled_post_types );
+                $source_data->posts      = Posts::get_wp_posts( $source_data->post_types, true );
+            } else {
+                // GET SINGLE
+                $source_data->post_types = array_keys( $source_data->source_options->push_enabled_post_types );
+                $source_data->posts[]    = (object) Posts::get_single( $post_id );
+            }
+
 
         } elseif ( 'push' === $request->get_url_params()['action'] ) {
 
@@ -528,7 +513,8 @@ class SourceData {
 
             $source_data = $this->source_data;
 
-        } if ( 'start_fresh' === $request->get_url_params()['action'] ) {
+        }
+        if ( 'start_fresh' === $request->get_url_params()['action'] ) {
             $this->start_fresh();
         }
 

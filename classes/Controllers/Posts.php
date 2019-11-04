@@ -441,6 +441,7 @@ class Posts {
         } elseif ( 'partial' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
             $syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
+            $syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
         } elseif ( 'unsynced' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
             $syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';

@@ -67,6 +67,22 @@
       background: silver !important;
     }
 
+    tr.loading {
+      background: linear-gradient(270deg, #aeb5b4, #8e1b30);
+      background-size: 400% 400%;
+
+      -webkit-animation: AnimationName 4s ease infinite;
+      -moz-animation: AnimationName 4s ease infinite;
+      animation: AnimationName 4s ease infinite;
+    }
+
+    .flash_success {
+      -webkit-animation-name: flash_success;
+      -webkit-animation-duration: 900ms;
+      -webkit-animation-iteration-count: 1;
+      -webkit-animation-timing-function: ease-in-out;
+    }
+
     .reveal_connected_site_details {
       cursor: pointer;
       float: right;
@@ -210,5 +226,36 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes AnimationName {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@-moz-keyframes AnimationName {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@keyframes AnimationName {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@-webkit-keyframes flash_success {
+  0% {
+    background-color: #00ff21;
+    opacity:1;
+  }
+  22% {
+    background-color: #6fff8e;
+  }
+  77% {
+    background-color: #a2ffbf;
+  }
+  100% {
+    background-color: inherit;
   }
 }

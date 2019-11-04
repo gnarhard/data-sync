@@ -43,7 +43,7 @@ class Media {
                 $image_attachments = (array) $post->media->image;
                 foreach ( $image_attachments as $key => $image ) {
                     foreach ( $synced_posts as $synced_post ) {
-                        if ( (int) $image->post_parent === (int) $synced_post->source_post_id ) {
+                        if ( ( (int) $image->post_parent === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
                             $image->receiver_post_id = $synced_post->receiver_post_id;
                             $image->featured         = false;
                             $image->type             = 'image';
@@ -55,8 +55,9 @@ class Media {
                 if ( has_post_thumbnail( $post->ID ) ) {
                     $featured_image = $post->media->featured_image;
                     foreach ( $synced_posts as $synced_post ) {
-                        if ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) {
-                            $featured_image->receiver_post_id = $synced_post->receiver_post_id;
+                        if ( ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
+                                $featured_image->receiver_post_id = $synced_post->receiver_post_id;
+
                         }
                     }
                     $this->media[] = $featured_image;
@@ -66,7 +67,7 @@ class Media {
                 $audio_attachments = (array) $post->media->audio;
                 foreach ( $audio_attachments as $key => $audio ) {
                     foreach ( $synced_posts as $synced_post ) {
-                        if ( (int) $audio->post_parent === (int) $synced_post->source_post_id ) {
+                        if ( ( (int) $audio->post_parent === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
                             $audio->receiver_post_id = $synced_post->receiver_post_id;
                             $audio->featured         = false;
                             $audio->type             = 'audio';
@@ -78,7 +79,7 @@ class Media {
                 $video_attachments = (array) $post->media->video;
                 foreach ( $video_attachments as $key => $video ) {
                     foreach ( $synced_posts as $synced_post ) {
-                        if ( (int) $video->post_parent === (int) $synced_post->source_post_id ) {
+                        if ( ( (int) $video->post_parent === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
                             $video->receiver_post_id = $synced_post->receiver_post_id;
                             $video->featured         = false;
                             $video->type             = 'video';

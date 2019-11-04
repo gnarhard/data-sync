@@ -8,8 +8,10 @@ import Settings from './Settings.es6'
 class SyndicatedPosts {
 
     constructor () {
+        this.source_post_id = false
+        this.receiver_site_id = false
+        this.process_running = false
         this.refresh_view()
-        // this.init() // so you don't have to wait for load to test bulk push
     }
 
     init () {
@@ -25,13 +27,15 @@ class SyndicatedPosts {
                 admin_message.message = '<i class="dashicons dashicons-networking"></i> SYNDICATING'
                 Message.admin_message(admin_message)
 
-                self.bulk_push()
+                self.sync(false, false)
             }
         }
 
         if (document.getElementById('refresh_syndicated_posts')) {
             document.getElementById('refresh_syndicated_posts').onclick = function (e) {
                 document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+                self.source_post_id = false;
+                self.receiver_site_id = false;
                 self.refresh_view()
             }
         }
@@ -40,10 +44,11 @@ class SyndicatedPosts {
 
     refresh_view () {
 
-        document.getElementById('syndicated_posts_data').innerHTML = ''
+        if (false === this.source_post_id) {
+            document.getElementById('syndicated_posts_data').innerHTML = ''
+        }
 
         this.data = {}
-
 
         let admin_message = {}
         admin_message.success = true
@@ -74,6 +79,7 @@ class SyndicatedPosts {
         admin_message.message = 'Building posts table. . .'
         Message.admin_message(admin_message)
 
+        // BULK REFRESH
         for (const [index, post] of this.data.source_data.posts.entries()) {
             this.post = post
             this.index = index
@@ -81,6 +87,7 @@ class SyndicatedPosts {
             await this.get_syndicated_post_details()
                 .then(retrieved_post => this.display_refreshed_post(retrieved_post))
         }
+
     }
 
     async get_syndicated_post_details () {
@@ -102,8 +109,20 @@ class SyndicatedPosts {
         result_array.slice(-1)[0]
         let html = result_array.join(' ')
         $ = jQuery
-        $('#syndicated_posts_data').append(html)
-        SyndicatedPosts.single_post_actions_init()
+
+        if ( (false === this.source_post_id) || ( this.process_running )) {
+            // BULK LOAD ALL
+            $('#syndicated_posts_data').append(html)
+        } else {
+            // REFRESH SINGLE POST
+            if (!this.process_running) {
+                $('#post-' + this.source_post_id).remove()
+                $('#synced_post-' + this.source_post_id).replaceWith(html)
+                $('#synced_post-' + this.source_post_id).addClass('flash_success');
+            }
+        }
+
+        this.single_post_actions_init()
     }
 
     async get_source_data () {
@@ -111,7 +130,15 @@ class SyndicatedPosts {
         admin_message.success = true
         admin_message.message = 'Getting data from source. . .'
         Message.admin_message(admin_message)
-        const response = await fetch(DataSync.api.url + '/source_data/load')
+
+        let response = {}
+
+        if (false === this.source_post_id) {
+            response = await fetch(DataSync.api.url + '/source_data/load/0') // LOAD BULK
+        } else {
+            response = await fetch(DataSync.api.url + '/source_data/load/' + this.source_post_id)
+        }
+
         this.data.source_data = await response.json()
     }
 
@@ -133,15 +160,30 @@ class SyndicatedPosts {
 
     }
 
-    async get_all_posts () {
-        const response = await fetch(DataSync.api.url + '/posts/all')
-        return await response.json()
+    async get_posts () {
+        if (false === this.source_post_id) {
+            const response = await fetch(DataSync.api.url + '/posts/all')
+            return await response.json()
+        } else {
+            const response = await fetch(DataSync.api.url + '/posts/' + this.source_post_id)
+            return await response.json()
+        }
     }
 
-    bulk_push () {
+    sync (receiver_site_id, source_post_id) {
 
-        document.getElementById('syndicated_posts_data').innerHTML = ''
-        document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+        // FOR SINGLE OVERWRITE SCENARIOS
+        this.receiver_site_id = receiver_site_id
+        this.source_post_id = source_post_id
+
+        this.process_running = true
+
+        if (false === this.source_post_id) {
+            document.getElementById('syndicated_posts_data').innerHTML = ''
+            document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+        } else {
+
+        }
 
         let admin_message = {}
         admin_message.success = true
@@ -154,7 +196,7 @@ class SyndicatedPosts {
                     prevalidation.message = 'Prevalidation failed.'
 
                     Message.admin_message(prevalidation)
-                    new Settings();
+                    new Settings()
                     if (DataSync.options.debug) {
                         let logs = new Logs()
                         logs.refresh_log()
@@ -172,6 +214,7 @@ class SyndicatedPosts {
                         .then(() => Logs.process_receiver_logs(this.media_sync_responses))
                         .then(() => this.process_receiver_synced_posts())
                         .then(() => {
+                            this.process_running = false
                             this.refresh_view()
                             new EnabledPostTypes()
                             let admin_message = {}
@@ -189,12 +232,16 @@ class SyndicatedPosts {
     }
 
     consolidate () {
-        return this.get_all_posts()
+        return this.get_posts()
             .then(posts => {
                 this.posts = posts
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Source posts consolidated. Gathering connected sites. . .'
+                if (false === this.source_post_id) {
+                    admin_message.message = 'Source posts consolidated. Gathering connected sites. . .'
+                } else {
+                    admin_message.message = 'Source post consolidated. Gathering connected sites. . .'
+                }
                 Message.admin_message(admin_message)
 
             })
@@ -249,7 +296,7 @@ class SyndicatedPosts {
             .then(consolidated_packages => {
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending out ' . consolidated_packages.length + ' media sync requests. Please be patient.'
+                admin_message.message = 'Media packages ready. Sending out ' + consolidated_packages.length + ' media sync requests. Please be patient.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
@@ -273,19 +320,21 @@ class SyndicatedPosts {
 
     }
 
-    prepare_packages (bulk) {
+    prepare_packages () {
 
         let requests = []
         this.receiver_sync_requests = [] // will be compiled in create_send_requests().
 
-        for (const site of this.connected_sites) {
-            if (bulk) {
-                requests.push(fetch(DataSync.api.url + '/source_data/prep/0/' + site.id))
-            } else {
-                // TODO: IMPORT POST SOMEHOW
-                // requests.push(fetch(DataSync.api.url + '/source_data/prep/' + post.ID + '/' + site.id))
+        if (false === this.receiver_site_id) {
+            for (const site of this.connected_sites) {
+                if (false === this.source_post_id) {
+                    requests.push(fetch(DataSync.api.url + '/source_data/prep/0/' + site.id))
+                } else {
+                    requests.push(fetch(DataSync.api.url + '/source_data/prep/' + this.source_post_id + '/' + site.id))
+                }
             }
-
+        } else {
+            requests.push(fetch(DataSync.api.url + '/source_data/prep/' + this.source_post_id + '/' + this.receiver_site_id))
         }
 
         return requests
@@ -299,18 +348,21 @@ class SyndicatedPosts {
 
         for (const site of this.connected_sites) {
 
-            this.prepped_source_packages.forEach(prepped_source_package => {
-                let decoded_package = JSON.parse(prepped_source_package)
-                // console.log('Prepared media source packages: ',decoded_package)
-                if (parseInt(site.id) === parseInt(decoded_package.receiver_site_id)) {
-                    data.site = site
-                    data.posts = decoded_package.posts
-                    requests.push(fetch(DataSync.api.url + '/media/prep', {
-                        method: 'POST',
-                        body: JSON.stringify(data)
-                    }))
-                }
-            })
+            if ((false === this.receiver_site_id) || (parseInt(site.id) === this.receiver_site_id)) {
+
+                this.prepped_source_packages.forEach(prepped_source_package => {
+                    let decoded_package = JSON.parse(prepped_source_package)
+                    // console.log('Prepared media source packages: ',decoded_package)
+                    if (parseInt(site.id) === parseInt(decoded_package.receiver_site_id)) {
+                        data.site = site
+                        data.posts = decoded_package.posts
+                        requests.push(fetch(DataSync.api.url + '/media/prep', {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        }))
+                    }
+                })
+            }
 
         }
 
@@ -390,85 +442,28 @@ class SyndicatedPosts {
         )
     }
 
-    static single_post_actions_init () {
-        jQuery(
-            function ($) {
+    single_post_actions_init () {
+        let self = this
+        $ = jQuery
 
-                $('.expand_post_details').unbind().click(
-                    function () {
-                        let id = $(this).data('id')
-                        $('#post-' + id).toggle()
-                    }
-                )
+        $('.expand_post_details').unbind().click(e => $('#post-' + e.target.dataset.id).toggle())
 
-                $('.push_post_now').unbind().click(
-                    function (e) {
-
-                        e.preventDefault()
-
-                        let source_post_id = $(this).data('source-post-id')
-
-                        SyndicatedPosts.push_single_post_to_all_receivers(source_post_id, true)
-
-                    }
-                )
-
-                $('.overwrite_single_receiver').unbind().click(
-                    function (e) {
-
-                        e.preventDefault()
-
-                        let receiver_site_id = $(this).data('receiver-site-id')
-                        let source_post_id = $(this).data('source-post-id')
-
-                        SyndicatedPosts.push_single_post_to_single_receiver(receiver_site_id, source_post_id)
-
-                    }
-                )
-
+        $('.push_post_now').unbind().click(e => {
+                e.preventDefault()
+                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
+                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
+                self.sync(false, parseInt(e.target.dataset.sourcePostId))
             }
         )
 
-    }
-
-    static push_single_post_to_all_receivers (source_post_id, overwrite) {
-        document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
-        document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
-
-        let data = {}
-        data.overwrite = overwrite
-
-        AJAX.post(DataSync.api.url + '/source_data/push/' + source_post_id, data).then(
-            function (result) {
-                SyndicatedPosts.refresh_view()
-                Message.admin_message(result, 'Post')
-                new EnabledPostTypes()
-                if (DataSync.options.debug) {
-                    let logs = new Logs()
-                    logs.refresh_log()
-                }
+        $('.overwrite_single_receiver').unbind().click(e => {
+                e.preventDefault()
+                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
+                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
+                self.sync(parseInt(e.target.dataset.receiverSiteId), parseInt(e.target.dataset.sourcePostId))
             }
         )
-    }
 
-    static push_single_post_to_single_receiver (receiver_site_id, source_post_id) {
-        document.getElementById('syndicated_posts_wrap').classList.add('hidden') // REMOVE TABLE FOR LOADING.
-        document.querySelector('#syndicated_posts .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
-
-        let data = {}
-        data.overwrite = overwrite
-
-        AJAX.post(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + receiver_site_id, data).then(
-            function (result) {
-                SyndicatedPosts.refresh_view()
-                Message.admin_message(result, 'Post')
-                new EnabledPostTypes()
-                if (DataSync.options.debug) {
-                    let logs = new Logs()
-                    logs.refresh_log()
-                }
-            }
-        )
     }
 
 }
