@@ -8,8 +8,10 @@ import Settings from './Settings.es6'
 class SyndicatedPosts {
 
     constructor () {
+        this.source_post_id = false
+        this.receiver_site_id = false
+        this.process_running = false
         this.refresh_view()
-        // this.init() // so you don't have to wait for load to test bulk push
     }
 
     init () {
@@ -32,6 +34,8 @@ class SyndicatedPosts {
         if (document.getElementById('refresh_syndicated_posts')) {
             document.getElementById('refresh_syndicated_posts').onclick = function (e) {
                 document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+                self.source_post_id = false;
+                self.receiver_site_id = false;
                 self.refresh_view()
             }
         }
@@ -40,7 +44,9 @@ class SyndicatedPosts {
 
     refresh_view () {
 
-        document.getElementById('syndicated_posts_data').innerHTML = ''
+        if (false === this.source_post_id) {
+            document.getElementById('syndicated_posts_data').innerHTML = ''
+        }
 
         this.data = {}
 
@@ -73,6 +79,7 @@ class SyndicatedPosts {
         admin_message.message = 'Building posts table. . .'
         Message.admin_message(admin_message)
 
+        // BULK REFRESH
         for (const [index, post] of this.data.source_data.posts.entries()) {
             this.post = post
             this.index = index
@@ -80,6 +87,7 @@ class SyndicatedPosts {
             await this.get_syndicated_post_details()
                 .then(retrieved_post => this.display_refreshed_post(retrieved_post))
         }
+
     }
 
     async get_syndicated_post_details () {
@@ -101,7 +109,19 @@ class SyndicatedPosts {
         result_array.slice(-1)[0]
         let html = result_array.join(' ')
         $ = jQuery
-        $('#syndicated_posts_data').append(html)
+
+        if ( (false === this.source_post_id) || ( this.process_running )) {
+            // BULK LOAD ALL
+            $('#syndicated_posts_data').append(html)
+        } else {
+            // REFRESH SINGLE POST
+            if (!this.process_running) {
+                $('#post-' + this.source_post_id).remove()
+                $('#synced_post-' + this.source_post_id).replaceWith(html)
+                $('#synced_post-' + this.source_post_id).addClass('flash_success');
+            }
+        }
+
         this.single_post_actions_init()
     }
 
@@ -110,7 +130,15 @@ class SyndicatedPosts {
         admin_message.success = true
         admin_message.message = 'Getting data from source. . .'
         Message.admin_message(admin_message)
-        const response = await fetch(DataSync.api.url + '/source_data/load')
+
+        let response = {}
+
+        if (false === this.source_post_id) {
+            response = await fetch(DataSync.api.url + '/source_data/load/0') // LOAD BULK
+        } else {
+            response = await fetch(DataSync.api.url + '/source_data/load/' + this.source_post_id)
+        }
+
         this.data.source_data = await response.json()
     }
 
@@ -148,11 +176,14 @@ class SyndicatedPosts {
         this.receiver_site_id = receiver_site_id
         this.source_post_id = source_post_id
 
-        if (false === this.source_post_id ) {
+        this.process_running = true
+
+        if (false === this.source_post_id) {
             document.getElementById('syndicated_posts_data').innerHTML = ''
             document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
-        }
+        } else {
 
+        }
 
         let admin_message = {}
         admin_message.success = true
@@ -183,6 +214,7 @@ class SyndicatedPosts {
                         .then(() => Logs.process_receiver_logs(this.media_sync_responses))
                         .then(() => this.process_receiver_synced_posts())
                         .then(() => {
+                            this.process_running = false
                             this.refresh_view()
                             new EnabledPostTypes()
                             let admin_message = {}
@@ -264,7 +296,7 @@ class SyndicatedPosts {
             .then(consolidated_packages => {
                 let admin_message = {}
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending out '+consolidated_packages.length + ' media sync requests. Please be patient.'
+                admin_message.message = 'Media packages ready. Sending out ' + consolidated_packages.length + ' media sync requests. Please be patient.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
@@ -314,8 +346,10 @@ class SyndicatedPosts {
         let requests = []
         this.receiver_sync_requests = [] // will be compiled in create_send_requests().
 
-        if (false === this.receiver_site_id) {
-            for (const site of this.connected_sites) {
+        for (const site of this.connected_sites) {
+
+            if ((false === this.receiver_site_id) || (parseInt(site.id) === this.receiver_site_id)) {
+
                 this.prepped_source_packages.forEach(prepped_source_package => {
                     let decoded_package = JSON.parse(prepped_source_package)
                     // console.log('Prepared media source packages: ',decoded_package)
@@ -328,21 +362,8 @@ class SyndicatedPosts {
                         }))
                     }
                 })
-
             }
-        } else {
-            this.prepped_source_packages.forEach(prepped_source_package => {
-                let decoded_package = JSON.parse(prepped_source_package)
-                // console.log('Prepared media source packages: ',decoded_package)
-                if (parseInt(this.receiver_site_id) === parseInt(decoded_package.receiver_site_id)) {
-                    data.site = this.receiver_site_id
-                    data.posts = decoded_package.posts
-                    requests.push(fetch(DataSync.api.url + '/media/prep', {
-                        method: 'POST',
-                        body: JSON.stringify(data)
-                    }))
-                }
-            })
+
         }
 
         return requests
@@ -429,12 +450,16 @@ class SyndicatedPosts {
 
         $('.push_post_now').unbind().click(e => {
                 e.preventDefault()
+                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
+                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
                 self.sync(false, parseInt(e.target.dataset.sourcePostId))
             }
         )
 
         $('.overwrite_single_receiver').unbind().click(e => {
                 e.preventDefault()
+                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
+                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
                 self.sync(parseInt(e.target.dataset.receiverSiteId), parseInt(e.target.dataset.sourcePostId))
             }
         )
