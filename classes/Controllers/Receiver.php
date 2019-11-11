@@ -227,6 +227,8 @@ class Receiver {
         // GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
         $receiver_options = (object) Options::receiver();
 
+        $this->source_data->synced_posts = (array) $this->source_data->synced_posts;
+
         // SAFEGUARD AGAINST SITES WITHOUT ANY ENABLED POST TYPES.
         if ( 'string' !== gettype( $receiver_options->enabled_post_types ) ) {
 
@@ -303,7 +305,7 @@ class Receiver {
             // UPDATE POST AUTHOR
             $filtered_post->post_author = Users::get_receiver_user_id( $post->post_author, $this->source_data->users );
 
-            $receiver_post_id        = Posts::save( $filtered_post, (array) $this->source_data->synced_posts );
+            $receiver_post_id        = Posts::save( $filtered_post, $this->source_data->synced_posts );
             $filtered_post->diverged = 0;
             $synced_post_result      = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 

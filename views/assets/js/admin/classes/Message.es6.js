@@ -28,11 +28,12 @@ class Message {
         let html = ''
 
         if (result.success) {
-            html = '<div class="notice updated notice-success">'
+            html = '<div class="notice updated notice-success process_' + result.process_id + '">'
         } else {
-            html = '<div class="notice notice-warning">'
+            html = '<div class="notice notice-error process_' + result.process_id + '">'
         }
 
+        html += result.topic + ': '
         html += result.message
 
         html += '</div'
@@ -44,10 +45,15 @@ class Message {
 
     }
 
-    static handle_error (error) {
+    static handle_error (error, topic) {
         let result = {}
         result.success = false
         result.message = error.message
+        result.topic = topic
+
+        if ('Unexpected token < in JSON at position 0' === result.message) {
+            result.message = 'Server error encountered.'
+        }
 
         console.log(result)
 

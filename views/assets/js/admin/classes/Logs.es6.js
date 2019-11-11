@@ -54,7 +54,9 @@ class Logs {
 
             let admin_message = {}
             admin_message.success = true
-            admin_message.message = 'Logs purged.'
+            admin_message.process_id = btoa(Math.random().toString())
+            admin_message.topic = 'Logs'
+            admin_message.message = 'purged.'
             Message.admin_message(admin_message)
 
             self.init()
@@ -80,7 +82,7 @@ class Logs {
     // }
 
 
-    static process_receiver_logs(receiver_data) {
+    static process_receiver_logs(receiver_data, process_id, topic) {
             console.log(receiver_data)
 
             let receiver_logs = []
@@ -97,6 +99,8 @@ class Logs {
 
                     let admin_message = {}
                     admin_message.success = true
+                    admin_message.process_id = process_id
+                    admin_message.topic = topic
                     admin_message.message = 'Receiver logs retrieved and saved to source. Saving receiver synced posts. . .'
                     Message.admin_message(admin_message)
                 })

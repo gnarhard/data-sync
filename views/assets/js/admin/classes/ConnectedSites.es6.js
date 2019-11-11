@@ -68,7 +68,9 @@ class ConnectedSites {
 
                         let admin_message = {}
                         admin_message.success = true
-                        admin_message.message = 'Site deleted.'
+                        admin_message.process_id = btoa(site_id.toString())
+                        admin_message.topic = 'Connected site'
+                        admin_message.message = 'deleted.'
                         Message.admin_message(admin_message)
 
                         new SyndicatedPosts()
