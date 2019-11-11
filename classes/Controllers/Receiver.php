@@ -303,7 +303,7 @@ class Receiver {
             // UPDATE POST AUTHOR
             $filtered_post->post_author = Users::get_receiver_user_id( $post->post_author, $this->source_data->users );
 
-            $receiver_post_id        = Posts::save( $filtered_post, $this->source_data->synced_posts );
+            $receiver_post_id        = Posts::save( $filtered_post, (array) $this->source_data->synced_posts );
             $filtered_post->diverged = 0;
             $synced_post_result      = SyncedPosts::save_to_receiver( $receiver_post_id, $filtered_post );
 
