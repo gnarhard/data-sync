@@ -185,7 +185,7 @@ function display_show_body_responses_checkbox()
 function display_start_fresh_link()
 {
     ?>
-    <span><a href="/wp-json/data-sync/v1/source_data/start_fresh" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
+    <span><a href="/wp-json/data-sync/v1/source/start_fresh" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
     <ol>
         <li><code>data_sync_custom_post_types</code></li>
         <li><code>data_sync_custom_taxonomies</code></li>

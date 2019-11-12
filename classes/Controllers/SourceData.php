@@ -65,6 +65,13 @@ class SourceData {
             ),
         ) );
 
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source/start_fresh', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'start_fresh' ),
+            ),
+        ) );
+
 
         $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
             array(
@@ -512,9 +519,6 @@ class SourceData {
 
             $source_data = $this->source_data;
 
-        }
-        if ( 'start_fresh' === $request->get_url_params()['action'] ) {
-            $this->start_fresh();
         }
 
         wp_send_json( $source_data );
