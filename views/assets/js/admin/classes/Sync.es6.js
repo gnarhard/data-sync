@@ -4,7 +4,6 @@ import Logs from './Logs.es6'
 import ConnectedSites from './ConnectedSites.es6'
 import Settings from './Settings.es6'
 import SyndicatedPosts from './SyndicatedPosts.es6'
-import Constants from '../../Constants.es6'
 import Processes from './Processes.es6'
 
 class Sync {
@@ -73,10 +72,10 @@ class Sync {
             response = await fetch(DataSync.api.url + '/source_data/load/' + process.source_post_id)
         }
 
-        data.source_data = await response.json()
+        return await response.json()
     }
 
-    async get_receiver_data (process_id) {
+    get_receiver_data (process_id) {
 
         let admin_message = {}
         admin_message.process_id = process_id
@@ -87,19 +86,22 @@ class Sync {
         admin_message.message = 'Getting data from receivers. . .'
         Message.admin_message(admin_message)
 
-        let data = {}
-        data.receiver_data = []
+        let receiver_data_requests = []
 
         for (const [index, site] of process.data.source_data.connected_sites.entries()) {
-            const response = await fetch(site.url + '/wp-json/data-sync/v1/receiver/get_data')
-            data.receiver_data[index] = await response.json()
+            receiver_data_requests.push(fetch(site.url + '/wp-json/data-sync/v1/receiver/get_data'))
         }
 
+        return Promise.all(receiver_data_requests) // send all requests for package
+            .then(responses => {return responses}) // all responses are resolved successfully
+            .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+            .then(receiver_packages => {return receiver_packages})
     }
 
     async get_posts (process_id) {
 
         let process = Processes.get(process_id)
+        console.log(process)
 
         if (false === process.source_post_id) {
             const response = await fetch(DataSync.api.url + '/posts/all')
@@ -114,8 +116,8 @@ class Sync {
 
         let process = Processes.get(process_id)
 
-        process.process_running = true
-        Processes.set(process);
+        process.running = true
+        Processes.set(process)
 
         let admin_message = {}
         admin_message.process_id = process.id
@@ -149,22 +151,27 @@ class Sync {
                     prevalidation.topic = process.topic
                     Message.admin_message(prevalidation)
 
-                    this.consolidate()
-                        .then(() => this.send_posts_to_receivers())
-                        .then(() => Logs.process_receiver_logs(this.receiver_data, process.id, process.topic))
-                        .then(() => this.process_receiver_synced_posts())
-                        .then(() => this.consolidate_media())
-                        .then((consolidated_media_packages) => this.send_media_to_receivers(consolidated_media_packages))
-                        .then(() => Logs.process_receiver_logs(this.media_sync_responses, process.id, process.topic))
-                        .then(() => this.process_receiver_synced_posts())
+                    this.consolidate(process.id)
+                        .then(() => this.send_posts_to_receivers(process.id))
+                        .then(() => {return Processes.get(process.id)}) // refresh data
+                        .then((process) => Logs.process_receiver_logs(process.receiver_data, process.id, process.topic))
+                        .then(() => this.process_receiver_synced_posts(process.id))
+                        .then(() => this.consolidate_media(process.id))
+                        .then((consolidated_media_packages) => this.send_media_to_receivers(consolidated_media_packages, process.id))
+                        .then(() => {return Processes.get(process.id)}) // refresh data
+                        .then((process) => Logs.process_receiver_logs(process.media_sync_responses, process.id, process.topic))
+                        .then(() => this.process_receiver_synced_posts(process.id))
                         .then(() => {
-                            this.process_running = false
+                            process.running = false
+                            Processes.set(process)
+
                             let syndicated_posts = new SyndicatedPosts()
                             syndicated_posts.refresh_view(process.id)
+
                             new EnabledPostTypes()
+
                             let admin_message = {}
                             admin_message.process_id = process.id
-
                             admin_message.topic = process.topic
                             admin_message.success = true
                             admin_message.message = '<span class="dashicons dashicons-yes-alt"></span> Syndication complete!'
@@ -177,16 +184,20 @@ class Sync {
 
     }
 
-    consolidate () {
-        return this.get_posts()
-            .then(posts => {
-                this.posts = posts
-                let admin_message = {}
-                admin_message.process_id = this.process_id
+    consolidate (process_id) {
 
-                admin_message.topic = this.topic
+        let process = Processes.get(process_id)
+
+        return this.get_posts(process_id)
+            .then(posts => {
+
+                Processes.set(process)
+
+                let admin_message = {}
+                admin_message.process_id = process.id
+                admin_message.topic = process.topic
                 admin_message.success = true
-                if (false === this.source_post_id) {
+                if (false === process.source_post_id) {
                     admin_message.message = 'Source posts consolidated. Gathering connected sites. . .'
                 } else {
                     admin_message.message = 'Source post consolidated. Gathering connected sites. . .'
@@ -198,18 +209,19 @@ class Sync {
             // GET ALL SITES
             .then(() => ConnectedSites.get_all())
             .then(connected_sites => {
-                this.connected_sites = connected_sites
-                let admin_message = {}
-                admin_message.process_id = this.process_id
+                process.connected_sites = connected_sites
+                Processes.set(process)
 
-                admin_message.topic = this.topic
+                let admin_message = {}
+                admin_message.process_id = process.id
+                admin_message.topic = process.topic
                 admin_message.success = true
                 admin_message.message = 'Connected sites consolidated. Preparing data packages. . .'
                 Message.admin_message(admin_message)
             })
 
             // PREPARE AND CONSOLIDATE SOURCE PACKAGES
-            .then(() => this.prepare_packages(true)) // prep requests for creating bulk packages to send to receivers
+            .then(() => this.prepare_packages(process.id)) // prep requests for creating bulk packages to send to receivers
             .then(requests => {
                 // console.log('Prepared post, options, and meta packages: ',requests)
                 return requests
@@ -218,29 +230,31 @@ class Sync {
             .then(responses => {return responses}) // all responses are resolved successfully
             .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
             .then(prepped_source_packages => {
-                this.prepped_source_packages = prepped_source_packages
+                process.prepped_source_packages = prepped_source_packages
+                Processes.set(process)
 
                 let admin_message = {}
-                admin_message.process_id = this.process_id
-
-                admin_message.topic = this.topic
+                admin_message.process_id = process.id
+                admin_message.topic = process.topic
                 admin_message.success = true
                 admin_message.message = 'All data from source ready to be sent, sending now. . .'
                 Message.admin_message(admin_message)
             })
     }
 
-    consolidate_media () {
+    consolidate_media (process_id) {
+
+        let process = Processes.get(process_id)
 
         let admin_message = {}
-        admin_message.process_id = this.process_id
+        admin_message.process_id = process.id
 
-        admin_message.topic = this.topic
+        admin_message.topic = process.topic
         admin_message.success = true
         admin_message.message = 'Preparing media items. . .'
         Message.admin_message(admin_message)
 
-        let requests = this.prepare_media_packages() // prep requests for creating bulk packages to send to receivers
+        let requests = this.prepare_media_packages(process_id) // prep requests for creating bulk packages to send to receivers
         return Promise.all(requests) // send all requests for package
             .then(responses => {return responses}) // all responses are resolved successfully
             .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
@@ -253,9 +267,9 @@ class Sync {
             })
             .then(consolidated_packages => {
                 let admin_message = {}
-                admin_message.process_id = this.process_id
+                admin_message.process_id = process.id
 
-                admin_message.topic = this.topic
+                admin_message.topic = process.topic
                 admin_message.success = true
                 admin_message.message = 'Media packages ready. Sending out ' + consolidated_packages.length + ' media sync requests. Please be patient.'
                 Message.admin_message(admin_message)
@@ -263,19 +277,25 @@ class Sync {
             })
     }
 
-    send_posts_to_receivers () {
-        this.prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package)) // create send requests with packages
+    send_posts_to_receivers (process_id) {
 
-        return Promise.all(this.receiver_sync_requests)// send all packages to receivers
+        let process = Processes.get(process_id)
+        process.prepped_source_packages.forEach(prepped_source_package => this.create_remote_request(prepped_source_package, process_id)) // create send requests with packages
+
+        process = Processes.get(process_id) // get new data
+
+        return Promise.all(process.receiver_sync_requests)// send all packages to receivers
             .then(responses => { return responses}) // all responses are resolved successfully
             .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
             .then(receiver_data => {
-                this.receiver_data = receiver_data
-                this.receiver_data.forEach(single_receiver_data => {
-                    let admin_message = {}
-                    admin_message.process_id = this.process_id
+                process.receiver_data = receiver_data
+                Processes.set(process)
 
-                    admin_message.topic = this.topic
+                process.receiver_data.forEach(single_receiver_data => {
+                    let admin_message = {}
+                    admin_message.process_id = process.id
+
+                    admin_message.topic = process.topic
                     admin_message.success = true
                     admin_message.message = single_receiver_data.data.message
                     Message.admin_message(admin_message)
@@ -284,37 +304,42 @@ class Sync {
 
     }
 
-    prepare_packages () {
+    prepare_packages (process_id) {
+
+
+        let process = Processes.get(process_id)
 
         let requests = []
-        this.receiver_sync_requests = [] // will be compiled in create_send_requests().
+        process.receiver_sync_requests = [] // will be compiled in create_send_requests().
+        Processes.set(process)
 
-        if (false === this.receiver_site_id) {
-            for (const site of this.connected_sites) {
-                if (false === this.source_post_id) {
+        if (false === process.receiver_site_id) {
+            for (const site of process.connected_sites) {
+                if (false === process.source_post_id) {
                     requests.push(fetch(DataSync.api.url + '/source_data/prep/0/' + site.id))
                 } else {
-                    requests.push(fetch(DataSync.api.url + '/source_data/prep/' + this.source_post_id + '/' + site.id))
+                    requests.push(fetch(DataSync.api.url + '/source_data/prep/' + process.source_post_id + '/' + site.id))
                 }
             }
         } else {
-            requests.push(fetch(DataSync.api.url + '/source_data/prep/' + this.source_post_id + '/' + this.receiver_site_id))
+            requests.push(fetch(DataSync.api.url + '/source_data/prep/' + process.source_post_id + '/' + process.receiver_site_id))
         }
 
         return requests
     }
 
-    prepare_media_packages () {
+    prepare_media_packages (process_id) {
 
+        let process = Processes.get(process_id)
         let data = {}
         let requests = []
-        this.receiver_sync_requests = [] // will be compiled in create_send_requests().
+        process.receiver_sync_requests = [] // will be compiled in create_send_requests().
 
-        for (const site of this.connected_sites) {
+        for (const site of process.connected_sites) {
 
-            if ((false === this.receiver_site_id) || (parseInt(site.id) === this.receiver_site_id)) {
+            if ((false === process.receiver_site_id) || (parseInt(site.id) === process.receiver_site_id)) {
 
-                this.prepped_source_packages.forEach(prepped_source_package => {
+                process.prepped_source_packages.forEach(prepped_source_package => {
                     let decoded_package = JSON.parse(prepped_source_package)
                     // console.log('Prepared media source packages: ',decoded_package)
                     if (parseInt(site.id) === parseInt(decoded_package.receiver_site_id)) {
@@ -333,22 +358,25 @@ class Sync {
         return requests
     }
 
-    async send_media_to_receivers (prepared_media_packages) {
+    async send_media_to_receivers (prepared_media_packages, process_id) {
 
-        this.media_sync_responses = []
+        let process = Processes.get(process_id)
+
+        process.media_sync_responses = []
 
         for (const media_package of prepared_media_packages) {
             await this.send_media(media_package)
                 .then(media_sync_response => {
-                    this.media_sync_responses.push(media_sync_response)
+                    process.media_sync_responses.push(media_sync_response)
+                    Processes.set(process)
                 })
                 .catch(message => Message.handle_error(message))
         }
 
         let admin_message = {}
-        admin_message.process_id = this.process_id
+        admin_message.process_id = process.id
 
-        admin_message.topic = this.topic
+        admin_message.topic = process.topic
         admin_message.success = true
         admin_message.message = 'Media synced.'
         Message.admin_message(admin_message)
@@ -366,16 +394,19 @@ class Sync {
         return await response.json()
     }
 
-    process_receiver_synced_posts () {
+    process_receiver_synced_posts (process_id) {
+
+        let process = Processes.get(process_id)
         let receiver_synced_posts = []
+
         // console.log('receiver_data for processing synced posts: ',this.receiver_data)
-        this.receiver_data.forEach(single_receiver_data => receiver_synced_posts.push(single_receiver_data.data.synced_posts))
+        process.receiver_data.forEach(single_receiver_data => receiver_synced_posts.push(single_receiver_data.data.synced_posts))
         return this.save_receiver_synced_posts(receiver_synced_posts)
             .then(synced_posts_response => {
                 let admin_message = {}
-                admin_message.process_id = this.process_id
+                admin_message.process_id = process.id
 
-                admin_message.topic = this.topic
+                admin_message.topic = process.topic
                 admin_message.success = true
                 admin_message.message = synced_posts_response.data.message
                 Message.admin_message(admin_message)
@@ -398,18 +429,21 @@ class Sync {
         return await response.json()
     }
 
-    create_remote_request (prepped_source_package) {
+    create_remote_request (prepped_source_package, process_id) {
+
+        let process = Processes.get(process_id)
 
         // DON'T ADD ANYTHING TO THIS FROM HERE ON OR IT WILL TRIP THE AUTH SIG CHECK.
         let source_package = JSON.parse(prepped_source_package)
-        // console.log('Source package before create_remote_request(): ',source_package)
 
-        this.receiver_sync_requests.push(
+        process.receiver_sync_requests.push(
             fetch(source_package.receiver_site_url + '/wp-json/data-sync/v1/sync', {
                 method: 'POST',
                 body: JSON.stringify(source_package)
             })
         )
+
+        Processes.set(process)
     }
 
 }

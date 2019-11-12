@@ -1,6 +1,5 @@
 import Message from './Message.es6.js'
 import Sync from './Sync.es6.js'
-import Constants from '../../Constants.es6'
 import Processes from './Processes.es6'
 
 class SyndicatedPosts {
@@ -12,7 +11,6 @@ class SyndicatedPosts {
     init () {
         $ = jQuery
         let self = this
-        this.process_running = false
 
         if (document.getElementById('bulk_data_push')) {
             document.getElementById('bulk_data_push').onclick = function (e) {
@@ -26,7 +24,7 @@ class SyndicatedPosts {
                     source_post_id: false,
                     receiver_site_id: false,
                     topic: 'Bulk push',
-                    process_running: true,
+                    running: true,
                 }
                 Processes.create(process)
 
@@ -46,15 +44,15 @@ class SyndicatedPosts {
 
     refresh_view (process_id = false) {
 
-        let process = false;
+        let process = false
 
         if (false === process_id) {
             process = {
                 id: btoa(Math.random().toString()),
                 source_post_id: false,
                 receiver_site_id: false,
-                topic: 'Refresh',
-                process_running: false,
+                topic: 'Loading',
+                running: false,
             }
             Processes.create(process)
         } else {
@@ -77,13 +75,17 @@ class SyndicatedPosts {
 
         sync.get_source_data(process.id)
             .then(source_data => {
-                Processes.add(process.id, source_data)
-                sync.get_receiver_data(process.id)
+                process.data = {}
+                process.data.source_data = source_data
+                Processes.set(process)
             })
+            .then(() => sync.get_receiver_data(process.id))
             .then(receiver_data => {
-                Processes.add(process.id, receiver_data)
-                sync.show_posts(process.id)
+                console.log(receiver_data)
+                process.data.receiver_data = receiver_data
+                Processes.set(process)
             })
+            .then(() => sync.show_posts(process.id))
             .then(() => this.finish_refresh(process.id))
             .catch(message => Message.handle_error(message))
 
@@ -91,7 +93,6 @@ class SyndicatedPosts {
 
     finish_refresh (process_id) {
         document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.add('hidden')
-
 
         let process = Processes.get(process_id)
 
@@ -111,7 +112,7 @@ class SyndicatedPosts {
         let html = result_array.join(' ')
         $ = jQuery
 
-        let process = Processes.get(process_id);
+        let process = Processes.get(process_id)
 
         if (false === process.source_post_id) {
             // BULK LOAD ALL
@@ -138,11 +139,11 @@ class SyndicatedPosts {
                 $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
 
                 let process = {
-                    id: self.get_process_id(parseInt(e.target.dataset.sourcePostId)),
+                    id: btoa(e.target.dataset.sourcePostId),
                     source_post_id: parseInt(e.target.dataset.sourcePostId),
                     receiver_site_id: false,
                     topic: 'Post ' + parseInt(e.target.dataset.sourcePostId),
-                    process_running: true,
+                    running: true,
                 }
                 Processes.create(process)
 
@@ -158,11 +159,11 @@ class SyndicatedPosts {
                 $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
 
                 let process = {
-                    id: self.get_process_id(parseInt(e.target.dataset.sourcePostId)),
+                    id: btoa(e.target.dataset.sourcePostId),
                     source_post_id: parseInt(e.target.dataset.sourcePostId),
                     receiver_site_id: parseInt(e.target.dataset.receiverSiteId),
                     topic: 'Post ' + parseInt(e.target.dataset.sourcePostId),
-                    process_running: true,
+                    running: true,
                 }
                 Processes.create(process)
 
