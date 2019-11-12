@@ -1,6 +1,7 @@
 import AJAX from '../../AJAX.es6.js'
 import Message from './Message.es6.js';
 import Logs from './Logs.es6'
+import Processes from './Processes.es6'
 
 class SyndicatedTemplates {
 
@@ -14,8 +15,17 @@ class SyndicatedTemplates {
 
     AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
 
+      let process = {
+        id: btoa(Math.random().toString()),
+        topic: 'Templates',
+        running: true,
+      }
+      Processes.create(process)
+
       let admin_message = {}
+      admin_message.process_id = process.id
       admin_message.success = true
+      admin_message.topic = process.topic
       admin_message.message = 'Templates pushed.'
       Message.admin_message(admin_message)
 

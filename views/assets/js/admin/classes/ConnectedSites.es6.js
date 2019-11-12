@@ -3,6 +3,7 @@ import Message from './Message.es6.js'
 import SyndicatedPosts from './SyndicatedPosts.es6'
 import EnabledPostTypes from './EnabledPostTypes.es6'
 import Logs from './Logs.es6'
+import Processes from './Processes.es6'
 
 class ConnectedSites {
 
@@ -35,9 +36,18 @@ class ConnectedSites {
 
         AJAX.post(DataSync.api.url + '/connected_sites', data).then((result)=>{
 
+            let process = {
+                id: btoa(Math.random().toString()),
+                topic: 'Connected sites',
+                running: true,
+            }
+            Processes.create(process)
+
             let admin_message = {}
+            admin_message.process_id = process.id
             admin_message.success = true
-            admin_message.message = 'Site connected.'
+            admin_message.topic = process.topic
+            admin_message.message = 'site connected.'
             Message.admin_message(admin_message)
 
             $ = jQuery
@@ -66,10 +76,17 @@ class ConnectedSites {
                 function (response) {
                     if (response.success) {
 
+                        let process = {
+                            id: btoa(Math.random().toString()),
+                            topic: 'Connected sites',
+                            running: true,
+                        }
+                        Processes.create(process)
+
                         let admin_message = {}
+                        admin_message.process_id = process.id
                         admin_message.success = true
-                        admin_message.process_id = btoa(site_id.toString())
-                        admin_message.topic = 'Connected site'
+                        admin_message.topic = process.topic
                         admin_message.message = 'deleted.'
                         Message.admin_message(admin_message)
 

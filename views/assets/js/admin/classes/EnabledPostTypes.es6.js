@@ -1,6 +1,7 @@
 import AJAX from '../../AJAX.es6.js'
 import Helpers from '../../Helpers.es6.js'
 import Message from './Message.es6.js'
+import Processes from './Processes.es6'
 
 class EnabledPostTypes {
     constructor () {
@@ -21,13 +22,21 @@ class EnabledPostTypes {
                 data = Helpers.getSelectValues(document.getElementById('push_enabled_post_types'))
                 // console.log(data);
                 AJAX.post(DataSync.api.url + '/options/push_enabled_post_types', data).then(function (result) {
+
+                    let process = {
+                        id: btoa(Math.random().toString()),
+                        topic: 'Push-enabled post types',
+                        running: true,
+                    }
+                    Processes.create(process)
+
                     let admin_message = {}
-                    admin_message.success = result
-                    admin_message.process_id = btoa(Math.random().toString())
-                    admin_message.topic = 'Enabled Post Types'
+                    admin_message.process_id = process.id
+                    admin_message.success = true
+                    admin_message.topic = process.topic
 
                     if (result) {
-                        admin_message.message = 'Enabled post types saved.'
+                        admin_message.message = 'saved.'
                     } else {
                         admin_message.message = 'No data changed or there was an error.'
                     }
