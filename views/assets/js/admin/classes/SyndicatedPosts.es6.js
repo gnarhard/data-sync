@@ -102,7 +102,7 @@ class SyndicatedPosts {
 
         admin_message.topic = process.topic
         admin_message.success = true
-        admin_message.message = 'Ready.'
+        admin_message.message = 'Done.'
         Message.admin_message(admin_message)
     }
 
