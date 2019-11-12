@@ -227,6 +227,8 @@ class Receiver {
         // GET ALL CUSTOM RECEIVER OPTIONS THAT WOULD BE IN THE PLUGIN SETTINGS.
         $receiver_options = (object) Options::receiver();
 
+        $this->source_data->synced_posts = (array) $this->source_data->synced_posts;
+
         // SAFEGUARD AGAINST SITES WITHOUT ANY ENABLED POST TYPES.
         if ( 'string' !== gettype( $receiver_options->enabled_post_types ) ) {
 
