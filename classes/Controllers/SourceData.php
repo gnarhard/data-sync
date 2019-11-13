@@ -123,10 +123,11 @@ class SourceData {
 
         if ( 0 !== $post_id ) {
             // NOT BULK PACKAGE, CLEAR AND SET FOR ONE POST.
-            $post                                 = (object) Posts::get_single( $post_id );
-            $post_type                            = $post->post_type;
-            $this->source_data->posts             = new stdClass(); // CLEAR ALL OTHER POSTS.
-            $this->source_data->posts->$post_type = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
+            $post                                                            = (object) Posts::get_single( $post_id );
+            $post_type                                                       = $post->post_type;
+            $this->source_data->options->overwrite_receiver_post_on_conflict = true;
+            $this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
+            $this->source_data->posts->$post_type                            = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
         } else {
             // LOAD ALL POSTS DUE TO BULK REQUEST.
             $this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
