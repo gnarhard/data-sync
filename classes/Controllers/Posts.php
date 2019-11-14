@@ -550,7 +550,7 @@ class Posts {
             unset( $post_array['guid'] );
             // FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
             $upload_dir = wp_get_upload_dir();
-            str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array['post_content'] );
+            $post_array['post_content'] = str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array['post_content'] );
         }
 
         $receiver_post_id = wp_insert_post( $post_array );
