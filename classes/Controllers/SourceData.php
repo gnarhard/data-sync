@@ -99,22 +99,6 @@ class SourceData {
 
     }
 
-
-    public function prepare_single_overwrite( $request ) {
-
-        $this->consolidate();
-
-        $request_body = json_decode( $request->get_body() );
-
-        $post                                                            = (object) Posts::get_single( $request->get_url_params()['source_post_id'] );
-        $this->source_data->options->overwrite_receiver_post_on_conflict = (bool) $request_body->overwrite;
-        $this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
-        $this->source_data->posts->$post->post_type                      = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
-
-        $this->validate();
-        $this->configure_canonical_urls();
-    }
-
     public function prep( WP_REST_Request $request ) {
 
         $this->consolidate();
@@ -147,89 +131,6 @@ class SourceData {
         $json = $auth->prepare( $this->source_data, $connected_site->secret_key );
 
         return $json;
-    }
-
-
-    /**
-     * Manually overwrite receiver post via API call
-     *
-     * @param WP_REST_Request $request
-     */
-    public function overwrite_post_on_single_receiver( WP_REST_Request $request ) {
-
-        $this->prepare_single_overwrite( $request );
-
-        if ( ! empty( $this->source_data ) ) {
-
-            $args           = [ 'id' => (int) $request->get_url_params()['receiver_site_id'] ];
-            $connected_site = ConnectedSite::get_where( $args );
-            $connected_site = $connected_site[0];
-
-            $this->source_data->receiver_site_id = (int) $request->get_url_params()['receiver_site_id'];
-
-            $auth     = new Auth();
-            $json     = $auth->prepare( $this->source_data, $connected_site->secret_key );
-            $url      = trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-            $response = wp_remote_post( $url, [
-                'body'        => $json,
-                'httpversion' => '1.0',
-                'sslverify'   => false,
-                'timeout'     => 10,
-                'blocking'    => true,
-            ] );
-
-            if ( is_wp_error( $response ) ) {
-                $logs = new Logs();
-                $logs->set( 'Error in SourceData->overwrite_post_on_single_receiver() received from ' . $connected_site->url . '. ' . $response->get_error_message(), true );
-
-                return $response;
-            }
-
-//		print_r( wp_remote_retrieve_body( $response ) );
-            $this->finish_push( wp_remote_retrieve_body( $response ) );
-
-        } else {
-            wp_send_json_error( 'Validation failed.' );
-        }
-
-    }
-
-
-    public function push_post_to_all_receivers( WP_REST_Request $request ) {
-
-        $this->prepare_single_overwrite( $request );
-
-        // COULD BE EMPTY FROM VALIDATION.
-        if ( ! empty( $this->source_data ) ) {
-
-            foreach ( $this->source_data->connected_sites as $site ) {
-
-                $this->source_data->receiver_site_id = (int) $site->id;
-
-                $post_data = $this->create_request_data( $site );
-
-                $response = wp_remote_post( $post_data->url, [
-                    'body'        => $post_data->json,
-                    'httpversion' => '1.0',
-                    'sslverify'   => false,
-                    'timeout'     => 10,
-                    'blocking'    => true,
-                ] );
-
-                if ( is_wp_error( $response ) ) {
-                    $logs = new Logs();
-                    $logs->set( 'Error in SourceData->overwrite_post_on_all_receivers() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-
-                    return $response;
-                }
-
-            }
-
-            $this->finish_push( wp_remote_retrieve_body( $response ) );
-
-        } else {
-            wp_send_json_error( 'Validation failed.' );
-        }
     }
 
 

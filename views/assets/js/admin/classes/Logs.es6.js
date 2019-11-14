@@ -63,24 +63,6 @@ class Logs {
         })
     }
 
-    // async static get_receiver_logs (connected_sites, data_sync_start_time) {
-    //
-    //     let requests = []
-    //     let body = []
-    //     body['datetime'] = data_sync_start_time
-    //
-    //     for (const site of connected_sites) {
-    //             requests.push(fetch(site.url + '/log/fetch_receiver', {
-    //                 method: 'POST',
-    //                 body: body
-    //             }))
-    //
-    //     }
-    //
-    //     return requests
-    //
-    // }
-
 
     static process_receiver_logs(receiver_data, process_id, topic) {
             console.log(receiver_data)
