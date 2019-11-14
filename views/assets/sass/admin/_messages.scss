@@ -19,6 +19,15 @@
       .notice {
         box-shadow: none;
         min-height: 23px;
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+      }
+
+      @media screen and (max-width: 782px) {
+        .notice {
+          margin: 5px 0 10px;
+        }
       }
     }
 
