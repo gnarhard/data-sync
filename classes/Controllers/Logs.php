@@ -111,6 +111,7 @@ class Logs {
     public function create( WP_REST_Request $request ) {
         $receiver_logs = json_decode( $request->get_body() );
         self::save_to_source( $receiver_logs );
+        wp_send_json_success();
     }
 
     /**
