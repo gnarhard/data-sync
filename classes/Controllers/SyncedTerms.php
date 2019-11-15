@@ -66,8 +66,6 @@ class SyncedTerms
 
     public static function save_to_wp(int $post_id, object $taxonomies)
     {
-        //		$current_terms = wp_get_post_terms( $post_id );
-
 
         foreach ($taxonomies as $taxonomy_slug => $taxonomy_data) {
             if (false !== $taxonomy_data) {
@@ -89,6 +87,13 @@ class SyncedTerms
                 }
             }
         }
+
+        SyncedTerms::update();
+
+    }
+
+
+    public static function update() {
 
         $synced_terms = SyncedTerm::get_all();
 
@@ -113,6 +118,7 @@ class SyncedTerms
                 wp_update_term((int) $synced_term->receiver_term_id, $receiver_term->taxonomy, $args);
             }
         }
+
     }
 
 

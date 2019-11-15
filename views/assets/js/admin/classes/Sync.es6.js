@@ -168,6 +168,13 @@ class Sync {
                             let syndicated_posts = new SyndicatedPosts()
                             syndicated_posts.refresh_view(process.id)
 
+                            $ = jQuery;
+
+                            if ( false === process.source_post_id ) {
+                                $('#' + process.button_id).removeAttr('disabled');
+                                // $('#' + process.button_id).removeClass('loading');
+                            }
+
                             new EnabledPostTypes()
 
                             let admin_message = {}
