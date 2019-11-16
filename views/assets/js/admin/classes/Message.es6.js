@@ -45,6 +45,11 @@ class Message {
 
     }
 
+    static update_status_count (process) {
+        let current_count = parseInt(document.getElementById('process_' + process.id).innerText)
+        document.getElementById('process_' + process.id).innerText = current_count + 1
+    }
+
     static handle_error (error, topic) {
         let result = {}
         result.success = false

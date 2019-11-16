@@ -278,7 +278,7 @@ class Sync {
 
                 admin_message.topic = process.topic
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending out ' + consolidated_packages.length + ' media sync requests. Please be patient.'
+                admin_message.message = 'Media packages ready. <span id="process_' + process.id + '">0</span>/' + consolidated_packages.length + ' media items synced.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
@@ -376,6 +376,7 @@ class Sync {
                 .then(media_sync_response => {
                     process.media_sync_responses.push(media_sync_response)
                     Processes.set(process)
+                    Message.update_status_count(process);
                 })
                 .catch(message => Message.handle_error(message))
         }
