@@ -68,7 +68,7 @@
     }
 
     tr.loading {
-      background: linear-gradient(270deg, #aeb5b4, #8e1b30);
+      background: linear-gradient(270deg, #aeb5b4, #007cba);
       background-size: 400% 400%;
 
       -webkit-animation: AnimationName 4s ease infinite;
@@ -78,6 +78,13 @@
 
     .flash_success {
       -webkit-animation-name: flash_success;
+      -webkit-animation-duration: 900ms;
+      -webkit-animation-iteration-count: 1;
+      -webkit-animation-timing-function: ease-in-out;
+    }
+
+    .flash_error {
+      -webkit-animation-name: flash_error;
       -webkit-animation-duration: 900ms;
       -webkit-animation-iteration-count: 1;
       -webkit-animation-timing-function: ease-in-out;
@@ -254,6 +261,22 @@
   }
   77% {
     background-color: #a2ffbf;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
+
+@-webkit-keyframes flash_error {
+  0% {
+    background-color: #8e1b30;
+    opacity:1;
+  }
+  22% {
+    background-color: #ff1b3e;
+  }
+  77% {
+    background-color: #ff9c2f;
   }
   100% {
     background-color: inherit;

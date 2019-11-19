@@ -136,7 +136,7 @@ class Sync {
             .then(prevalidation => {
                 if (!prevalidation.success) {
                     prevalidation.topic = process.topic
-                    prevalidation.message = 'pre-validation failed.'
+                    prevalidation.message = 'Pre-validation failed.'
                     prevalidation.process_id = process.id
 
                     Message.admin_message(prevalidation)
@@ -146,7 +146,7 @@ class Sync {
                         logs.refresh_log()
                     }
                 } else {
-                    prevalidation.message = 'pre-validation successful. Gathering source posts. . .'
+                    prevalidation.message = 'Pre-validation successful. Gathering source posts. . .'
                     prevalidation.process_id = process.id
                     prevalidation.topic = process.topic
                     Message.admin_message(prevalidation)
@@ -168,6 +168,13 @@ class Sync {
                             let syndicated_posts = new SyndicatedPosts()
                             syndicated_posts.refresh_view(process.id)
 
+                            $ = jQuery
+
+                            if (false === process.source_post_id) {
+                                $('#' + process.button_id).removeAttr('disabled')
+                                // $('#' + process.button_id).removeClass('loading');
+                            }
+
                             new EnabledPostTypes()
 
                             let admin_message = {}
@@ -177,10 +184,10 @@ class Sync {
                             admin_message.message = '<span class="dashicons dashicons-yes-alt"></span> Syndication complete!'
                             Message.admin_message(admin_message)
                         })
-                        .catch(message => Message.handle_error(message, process.topic))
+                        .catch(message => Message.handle_error(message, process))
                 }
             })
-            .catch(message => Message.handle_error(message, process.topic))
+            .catch(message => Message.handle_error(message, process))
 
     }
 
@@ -271,7 +278,7 @@ class Sync {
 
                 admin_message.topic = process.topic
                 admin_message.success = true
-                admin_message.message = 'Media packages ready. Sending out ' + consolidated_packages.length + ' media sync requests. Please be patient.'
+                admin_message.message = 'Media packages ready. <span id="process_' + process.id + '">0</span>/' + consolidated_packages.length + ' media items synced.'
                 Message.admin_message(admin_message)
                 return consolidated_packages
             })
@@ -305,7 +312,6 @@ class Sync {
     }
 
     prepare_packages (process_id) {
-
 
         let process = Processes.get(process_id)
 
@@ -369,6 +375,7 @@ class Sync {
                 .then(media_sync_response => {
                     process.media_sync_responses.push(media_sync_response)
                     Processes.set(process)
+                    Message.update_status_count(process)
                 })
                 .catch(message => Message.handle_error(message))
         }

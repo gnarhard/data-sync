@@ -1,6 +1,7 @@
 import Message from './Message.es6.js'
 import Sync from './Sync.es6.js'
 import Processes from './Processes.es6'
+import Constants from '../../Constants.es6'
 
 class SyndicatedPosts {
 
@@ -19,12 +20,16 @@ class SyndicatedPosts {
                 document.getElementById('syndicated_posts_data').innerHTML = ''
                 document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
 
+                $('#bulk_data_push').attr('disabled', 'disabled')
+                $('#bulk_data_push').addClass('loading')
+
                 let process = {
                     id: btoa(Math.random().toString()),
                     source_post_id: false,
                     receiver_site_id: false,
                     topic: 'Bulk push',
                     running: true,
+                    button_id: 'bulk_data_push'
                 }
                 Processes.create(process)
 
@@ -135,40 +140,84 @@ class SyndicatedPosts {
 
         $('.push_post_now').unbind().click(e => {
                 e.preventDefault()
-                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
-                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
 
-                let process = {
-                    id: btoa(e.target.dataset.sourcePostId),
-                    source_post_id: parseInt(e.target.dataset.sourcePostId),
-                    receiver_site_id: false,
-                    topic: 'Post ' + parseInt(e.target.dataset.sourcePostId),
-                    running: true,
+                let processes = _store.get(Constants.PROCESS)
+
+                let source_post_id = parseInt(e.target.dataset.sourcePostId)
+                let create_new_process = true
+
+                processes.forEach(process => {
+                    if (source_post_id === parseInt(process.source_post_id)) {
+                        let admin_message = {}
+                        admin_message.process_id = process.id
+                        admin_message.success = false
+                        admin_message.message = 'Please wait for previous sync on this post to finish.'
+                        Message.handle_error(admin_message, 'Post ' + source_post_id + ', all receivers')
+                        create_new_process = false
+                    }
+                })
+
+                if (create_new_process) {
+                    $('#' + 'push_post_now_' + source_post_id).attr('disabled', 'disabled')
+                    $('#synced_post-' + source_post_id).addClass('loading')
+                    $('#post-' + source_post_id).addClass('loading')
+
+                    let process = {
+                        id: btoa(e.target.dataset.sourcePostId),
+                        source_post_id: source_post_id,
+                        receiver_site_id: false,
+                        topic: 'Post ' + source_post_id + ', all receivers',
+                        running: true,
+                        button_id: 'push_post_now_' + source_post_id
+                    }
+                    Processes.create(process)
+
+                    let sync = new Sync()
+                    sync.start(process.id)
                 }
-                Processes.create(process)
-
-                let sync = new Sync()
-                sync.start(process.id)
 
             }
         )
 
         $('.overwrite_single_receiver').unbind().click(e => {
                 e.preventDefault()
-                $('#synced_post-' + e.target.dataset.sourcePostId).addClass('loading')
-                $('#post-' + e.target.dataset.sourcePostId).addClass('loading')
 
-                let process = {
-                    id: btoa(e.target.dataset.sourcePostId),
-                    source_post_id: parseInt(e.target.dataset.sourcePostId),
-                    receiver_site_id: parseInt(e.target.dataset.receiverSiteId),
-                    topic: 'Post ' + parseInt(e.target.dataset.sourcePostId),
-                    running: true,
+                let processes = _store.get(Constants.PROCESS)
+
+                let source_post_id = parseInt(e.target.dataset.sourcePostId)
+                let receiver_site_id = parseInt(e.target.dataset.receiverSiteId)
+                let create_new_process = true
+
+                processes.forEach(process => {
+                    if (source_post_id === parseInt(process.source_post_id)) {
+                        if ('push_post_now_' + source_post_id === process.button_id) {
+                            let admin_message = {}
+                            admin_message.process_id = process.id
+                            admin_message.success = false
+                            admin_message.message = 'Please wait for previous sync on this post to finish.'
+                            Message.handle_error(admin_message, 'Post ' + source_post_id + ', Receiver ' + receiver_site_id)
+                            create_new_process = false
+                        }
+                    }
+                })
+
+                if (create_new_process) {
+                    $('#synced_post-' + source_post_id).addClass('loading')
+                    $('#post-' + source_post_id).addClass('loading')
+
+                    let process = {
+                        id: btoa(e.target.dataset.sourcePostId),
+                        source_post_id: source_post_id,
+                        receiver_site_id: receiver_site_id,
+                        topic: 'Post ' + source_post_id + ', Receiver ' + receiver_site_id,
+                        running: true,
+                        button_id: 'overwrite_single_receiver_' + source_post_id
+                    }
+                    Processes.create(process)
+
+                    let sync = new Sync()
+                    sync.start(process.id)
                 }
-                Processes.create(process)
-
-                let sync = new Sync()
-                sync.start(process.id)
 
             }
         )

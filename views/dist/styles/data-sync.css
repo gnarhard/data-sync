@@ -278,8 +278,8 @@
 }
 
 #syndicated_posts table tr.loading {
-  background: -webkit-gradient(linear, right top, left top, from(#aeb5b4), to(#8e1b30));
-  background: linear-gradient(270deg, #aeb5b4, #8e1b30);
+  background: -webkit-gradient(linear, right top, left top, from(#aeb5b4), to(#007cba));
+  background: linear-gradient(270deg, #aeb5b4, #007cba);
   background-size: 400% 400%;
   -webkit-animation: AnimationName 4s ease infinite;
   animation: AnimationName 4s ease infinite;
@@ -287,6 +287,13 @@
 
 #syndicated_posts table .flash_success {
   -webkit-animation-name: flash_success;
+  -webkit-animation-duration: 900ms;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-timing-function: ease-in-out;
+}
+
+#syndicated_posts table .flash_error {
+  -webkit-animation-name: flash_error;
   -webkit-animation-duration: 900ms;
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: ease-in-out;
@@ -494,6 +501,25 @@
   }
 }
 
+@-webkit-keyframes flash_error {
+  0% {
+    background-color: #8e1b30;
+    opacity: 1;
+  }
+
+  22% {
+    background-color: #ff1b3e;
+  }
+
+  77% {
+    background-color: #ff9c2f;
+  }
+
+  100% {
+    background-color: inherit;
+  }
+}
+
 #enabled_post_types select {
   width: 100%;
   min-height: 200px;
@@ -554,7 +580,8 @@
 .toplevel_page_data-sync-options .data_sync_messages .message .notice {
   -webkit-box-shadow: none;
           box-shadow: none;
-  min-height: 23px;
+  line-height: 1rem;
+  padding: 5px 10px;
   border-top: none;
   border-right: none;
   border-bottom: none;

@@ -126,7 +126,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
                     }
 
                     echo '<br>';
-                    echo '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $connected_site_synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
+                    echo '<button class="button danger_button overwrite_single_receiver" id="overwrite_single_receiver_' . $post->ID . '_' . $connected_site_synced_post->receiver_site_id . '" data-receiver-site-id="' . $connected_site_synced_post->receiver_site_id . '" data-source-post-id="' . $syndication_info->synced_post->source_post_id . '">Overwrite this receiver</button>';
                 } else {
                     // SYNCED.
                     $site_status_icon = '<span>Status: <i class="dashicons dashicons-yes" title="Synced on this connected site."></i></span>';
@@ -144,7 +144,7 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
                 // NOT SYNCED.
                 echo '<span>Last syndication: Never.';
                 $site_status_icon = '<span>Status: <i class="dashicons dashicons-warning warning" title="Not synced."></i></span>';
-                $site_status_icon .= '<button class="button danger_button overwrite_single_receiver" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</button>';
+                $site_status_icon .= '<button class="button danger_button overwrite_single_receiver" id="overwrite_single_receiver_' . $post->ID . '_' . $site->id . '" data-receiver-site-id="' . $site->id . '" data-source-post-id="' . $post->ID . '">Overwrite this receiver</button>';
             }
 
 

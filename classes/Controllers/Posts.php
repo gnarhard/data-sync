@@ -437,15 +437,15 @@ class Posts {
             }
 
             $syndication_info->icon           = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
-            $syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
+            $syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
         } elseif ( 'partial' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
             $syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
-            $syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
+            $syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
         } elseif ( 'unsynced' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
             $syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
-            $syndication_info->source_message .= '<button class="button danger_button push_post_now" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
+            $syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
         } elseif ( 'trashed' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
             $syndication_info->source_message = '<span class="warning">This post is in the trash, but is still on receiver sites (if it was previously synced). Please delete from trash/permanent delete) to remove from receiver sites.</span>';
