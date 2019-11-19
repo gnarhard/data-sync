@@ -68,12 +68,14 @@ class SyncedTerms
     {
 
         foreach ($taxonomies as $taxonomy_slug => $taxonomy_data) {
+
+            // REMOVE ALL TERMS FROM POST IMMEDIATELY.
+            wp_set_object_terms($post_id, null, $taxonomy_slug);
+
             if (false !== $taxonomy_data) {
 
-                // REMOVE ALL TERMS FROM POST.
-                wp_set_object_terms($post_id, null, $taxonomy_slug);
-
                 foreach ($taxonomy_data as $term) {
+                    // TODO: use wp_set_post_terms instead. For some reason it errors out if you just change it.
                     $new_term = wp_set_object_terms($post_id, $term->name, $taxonomy_slug, true);
 
                     if (! is_wp_error($new_term)) {

@@ -50,17 +50,22 @@ class Message {
         document.getElementById('process_' + process.id).innerText = current_count + 1
     }
 
-    static handle_error (error, topic) {
+    static handle_error (error, process) {
         let result = {}
         result.success = false
         result.message = error.message
-        result.topic = topic
+        result.topic = process.topic
 
         if ('Unexpected token < in JSON at position 0' === result.message) {
             result.message = 'Server error encountered.'
         }
 
         console.log(result)
+
+        $=jQuery
+        $('#synced_post-' + process.source_post_id).removeClass('loading')
+        $('#synced_post-' + process.source_post_id).addClass('flash_error')
+        $('#post-189').toggle()
 
         Message.admin_message(result)
 

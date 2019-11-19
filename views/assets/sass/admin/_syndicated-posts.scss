@@ -83,6 +83,13 @@
       -webkit-animation-timing-function: ease-in-out;
     }
 
+    .flash_error {
+      -webkit-animation-name: flash_error;
+      -webkit-animation-duration: 900ms;
+      -webkit-animation-iteration-count: 1;
+      -webkit-animation-timing-function: ease-in-out;
+    }
+
     .reveal_connected_site_details {
       cursor: pointer;
       float: right;
@@ -254,6 +261,22 @@
   }
   77% {
     background-color: #a2ffbf;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
+
+@-webkit-keyframes flash_error {
+  0% {
+    background-color: #8e1b30;
+    opacity:1;
+  }
+  22% {
+    background-color: #ff1b3e;
+  }
+  77% {
+    background-color: #ff9c2f;
   }
   100% {
     background-color: inherit;
