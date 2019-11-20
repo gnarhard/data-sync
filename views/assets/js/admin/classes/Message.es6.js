@@ -60,7 +60,7 @@ class Message {
             result.message = 'Server error encountered.'
         }
 
-        console.log(result)
+        // console.log(result)
 
         $=jQuery
         $('#synced_post-' + process.source_post_id).removeClass('loading')

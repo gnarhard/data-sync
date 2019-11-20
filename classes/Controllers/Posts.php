@@ -234,6 +234,11 @@ class Posts {
                     if ( 'core/image' === $block['blockName'] ) {
                         $image_ids[] = $block['attrs']['id'];
                     }
+                    if ( 'core/gallery' === $block['blockName'] ) {
+                        foreach ( $block['attrs']['ids'] as $id ) {
+                            $image_ids[] = $id;
+                        }
+                    }
                 }
             }
         }
@@ -550,7 +555,11 @@ class Posts {
             unset( $post_array['guid'] );
             // FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
             $upload_dir = wp_get_upload_dir();
+            // FIX IMAGES CORRECTLY WITH UPLOAD DIR
             $post_array['post_content'] = str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array['post_content'] );
+            // FIX EVERYTHING ELSE
+            $post_array['post_content'] = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $post_array['post_content'] );
+
         }
 
         $receiver_post_id = wp_insert_post( $post_array );

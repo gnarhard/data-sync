@@ -192,30 +192,38 @@ class Options {
         $source_acf_version       = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
         $source_cptui_version     = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
         $receiver_plugin_versions = Receiver::get_receiver_plugin_versions();
-        $plugin_info->receiver    = array();
-        $index                    = 0;
 
-        foreach ( $receiver_plugin_versions as $site_plugin_data ) {
-            $plugin_info->receiver[ $index ]          = new stdClass();
-            $plugin_info->receiver[ $index ]->site_id = (int) $site_plugin_data['site_id'];
-            $plugin_info->receiver[ $index ]->data    = $site_plugin_data;
+        if ( ! is_wp_error( $receiver_plugin_versions ) ) {
+            $plugin_info->receiver = array();
+            $index                 = 0;
 
-            if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
-                $plugin_info->receiver[ $index ]->acf_version_synced = false;
-            } else {
-                $plugin_info->receiver[ $index ]->acf_version_synced = true;
+            foreach ( $receiver_plugin_versions as $site_plugin_data ) {
+                $plugin_info->receiver[ $index ]          = new stdClass();
+                $plugin_info->receiver[ $index ]->site_id = (int) $site_plugin_data['site_id'];
+                $plugin_info->receiver[ $index ]->data    = $site_plugin_data;
+
+                if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
+                    $plugin_info->receiver[ $index ]->acf_version_synced = false;
+                } else {
+                    $plugin_info->receiver[ $index ]->acf_version_synced = true;
+                }
+
+                if ( $source_cptui_version !== $site_plugin_data['versions']->cptui ) {
+                    $plugin_info->receiver[ $index ]->cptui_version_synced = false;
+                } else {
+                    $plugin_info->receiver[ $index ]->cptui_version_synced = true;
+                }
+
+                $index ++;
             }
 
-            if ( $source_cptui_version !== $site_plugin_data['versions']->cptui ) {
-                $plugin_info->receiver[ $index ]->cptui_version_synced = false;
-            } else {
-                $plugin_info->receiver[ $index ]->cptui_version_synced = true;
-            }
-
-            $index ++;
+            return $plugin_info;
+        } else {
+            $logs = new Logs();
+            $logs->set( $receiver_plugin_versions->get_error_message(), true );
+            wp_send_json_error( $receiver_plugin_versions->get_error_message() );
         }
 
-        return $plugin_info;
     }
 
     public static function validate_required_plugins_info( $site_id, $plugin_info ) {
