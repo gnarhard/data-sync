@@ -152,7 +152,7 @@ class SyndicatedPosts {
                         admin_message.process_id = process.id
                         admin_message.success = false
                         admin_message.message = 'Please wait for previous sync on this post to finish.'
-                        Message.handle_error(admin_message, 'Post ' + source_post_id + ', all receivers')
+                        Message.handle_error(admin_message, 'Post ' + source_post_id + ', All receivers')
                         create_new_process = false
                     }
                 })
@@ -166,7 +166,7 @@ class SyndicatedPosts {
                         id: btoa(e.target.dataset.sourcePostId),
                         source_post_id: source_post_id,
                         receiver_site_id: false,
-                        topic: 'Post ' + source_post_id + ', all receivers',
+                        topic: 'Post ' + source_post_id + ', All receivers',
                         running: true,
                         button_id: 'push_post_now_' + source_post_id
                     }
