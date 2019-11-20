@@ -101,7 +101,7 @@ class Sync {
     async get_posts (process_id) {
 
         let process = Processes.get(process_id)
-        console.log(process)
+        // console.log(process)
 
         if (false === process.source_post_id) {
             const response = await fetch(DataSync.api.url + '/posts/all')

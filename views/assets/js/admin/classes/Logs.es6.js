@@ -65,7 +65,7 @@ class Logs {
 
 
     static process_receiver_logs(receiver_data, process_id, topic) {
-            console.log(receiver_data)
+            // console.log(receiver_data)
 
             let receiver_logs = []
             receiver_data.forEach(single_receiver_data => receiver_logs.push(single_receiver_data.data.logs))
