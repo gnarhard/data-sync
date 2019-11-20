@@ -189,7 +189,7 @@ class SyndicatedPosts {
                 let create_new_process = true
 
                 processes.forEach(process => {
-                    if (source_post_id === parseInt(process.source_post_id)) {
+                    if ((source_post_id === parseInt(process.source_post_id)) && (receiver_site_id === parseInt(process.receiver_site_id))) {
                         if ('push_post_now_' + source_post_id === process.button_id) {
                             let admin_message = {}
                             admin_message.process_id = process.id
