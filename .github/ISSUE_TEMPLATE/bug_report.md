@@ -17,6 +17,11 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
+**Buggy Post**
+Link to existing post where this issue appeared: 
+
+**Testing that was occurring before this test**
+
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
