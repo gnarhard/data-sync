@@ -20,6 +20,8 @@ Steps to reproduce the behavior:
 **Buggy Post**
 Link to existing post where this issue appeared: 
 
+**Which receiver?**
+
 **Testing that was occurring before this test**
 
 **Expected behavior**
