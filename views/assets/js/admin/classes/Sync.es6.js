@@ -132,7 +132,8 @@ class Sync {
         admin_message.message = 'Pre-validating receiver site compatibility.'
         Message.admin_message(admin_message)
 
-        this.prevalidate()
+        this.consolidate(process.id)
+            .then(() => this.prevalidate(process))
             .then(prevalidation => {
                 if (!prevalidation.success) {
                     prevalidation.topic = process.topic
@@ -151,8 +152,7 @@ class Sync {
                     prevalidation.topic = process.topic
                     Message.admin_message(prevalidation)
 
-                    this.consolidate(process.id)
-                        .then(() => this.send_posts_to_receivers(process.id))
+                    this.send_posts_to_receivers(process.id)
                         .then(() => {return Processes.get(process.id)}) // refresh data
                         .then((process) => Logs.process_receiver_logs(process.receiver_data, process.id, process.topic))
                         .then(() => this.process_receiver_synced_posts(process.id))
@@ -431,9 +431,43 @@ class Sync {
         return await response.json()
     }
 
-    async prevalidate () {
-        const response = await fetch(DataSync.api.url + '/prevalidate')
+    async prevalidate (process) {
+
+        return this.prevalidate_receivers(process)
+            .then(receiver_prevalidation_data => {
+                process.receiver_prevalidation_data = receiver_prevalidation_data
+                Processes.set(process)
+
+                return this.verify_prevalidation(process)
+            })
+            .catch(message => Message.handle_error(message, process))
+
+    }
+
+    async verify_prevalidation (process) {
+        const response = await fetch(DataSync.api.url + '/prevalidate', {
+            method: 'POST',
+            data: JSON.stringify(process)
+        })
         return await response.json()
+    }
+
+    prevalidate_receivers (process) {
+
+        let receiver_prevalidation_requests = []
+
+        for (const [index, site] of process.data.source_data.connected_sites.entries()) {
+            receiver_prevalidation_requests.push(fetch(site.url + '/wp-json/data-sync/v1/receiver/prevalidate'))
+        }
+
+        return Promise.all(receiver_prevalidation_requests) // send all requests for package
+            .then(responses => {return responses}) // all responses are resolved successfully
+            .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
+            .then(receiver_packages => {return receiver_packages})
+    }
+
+    verify_validation (process) {
+
     }
 
     create_remote_request (prepped_source_package, process_id) {

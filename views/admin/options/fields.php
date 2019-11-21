@@ -128,28 +128,28 @@ function display_awareness_messages()
 		<?php
     }
 
-    if ('1' === get_option('source_site')) {
-        $plugins = get_plugins();
-
-        $source_acf_version = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
-        $source_cptui_version = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
-
-        $receiver_plugin_versions = Receiver::get_receiver_plugin_versions();
-
-        foreach ($receiver_plugin_versions as $site_plugin_data) {
-            if ($source_acf_version !== $site_plugin_data['versions']->acf) {
-                ?>
-                <span style="color: red">ACF's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
-				<?php
-            }
-
-            if ($source_cptui_version !== $site_plugin_data['versions']->cptui) {
-                ?>
-                <span style="color: red">CPT UI's plugin version is different on <a target="_blank" href="<?php echo $site_plugin_data['site_admin_url']; ?>"><?php echo $site_plugin_data['site_name']?></a>.</span><br>
-				<?php
-            }
-        }
-    }
+//    if ('1' === get_option('source_site')) {
+//        $plugins = get_plugins();
+//
+//        $source_acf_version = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
+//        $source_cptui_version = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+//
+//        $receiver_plugin_versions = Receiver::get_receiver_plugin_versions();
+//
+//        foreach ($receiver_plugin_versions as $site_plugin_data) {
+//            if ($source_acf_version !== $site_plugin_data['versions']->acf) {
+//                ?>
+<!--                <span style="color: red">ACF's plugin version is different on <a target="_blank" href="--><?php //echo $site_plugin_data['site_admin_url']; ?><!--">--><?php //echo $site_plugin_data['site_name']?><!--</a>.</span><br>-->
+<!--				--><?php
+//            }
+//
+//            if ($source_cptui_version !== $site_plugin_data['versions']->cptui) {
+//                ?>
+<!--                <span style="color: red">CPT UI's plugin version is different on <a target="_blank" href="--><?php //echo $site_plugin_data['site_admin_url']; ?><!--">--><?php //echo $site_plugin_data['site_name']?><!--</a>.</span><br>-->
+<!--				--><?php
+//            }
+//        }
+//    }
 }
 
 function display_debug_checkbox()

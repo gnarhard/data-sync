@@ -318,16 +318,15 @@ class SourceData {
     }
 
 
-    public function prevalidate() {
+    public function prevalidate(WP_REST_Request $request) {
 
-        // TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
-
+        $process = $request->get_body();
+        $process->source_prevalidation_data = Options::get_required_plugins_info();
         $connected_sites = (array) ConnectedSite::get_all();
-        $plugin_info     = Options::get_required_plugins_info();
 
-        if ( ! empty( $plugin_info ) ) {
+        if ( ! empty( $process->source_prevalidation_data ) ) {
             foreach ( $connected_sites as $site ) {
-                $validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
+                $validated = Options::validate_required_plugins_info( (int) $site->id, $process );
                 if ( ! $validated ) {
                     wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
                 }
@@ -336,7 +335,6 @@ class SourceData {
         } else {
             wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
         }
-
     }
 
 

@@ -170,7 +170,7 @@ class Options {
     }
 
 
-    public static function get_required_plugins_info() {
+    public static function get_required_plugins_info( $site, $process ) {
         $plugin_info         = new stdClass();
         $plugin_info->source = new stdClass();
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -191,7 +191,8 @@ class Options {
 
         $source_acf_version       = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
         $source_cptui_version     = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
-        $receiver_plugin_versions = Receiver::get_receiver_plugin_versions();
+        $source_wp_version        = bloginfo( 'version' );
+        $receiver_plugin_versions = $process->receiver_prevalidation_data;
 
         if ( ! is_wp_error( $receiver_plugin_versions ) ) {
             $plugin_info->receiver = array();
@@ -201,6 +202,12 @@ class Options {
                 $plugin_info->receiver[ $index ]          = new stdClass();
                 $plugin_info->receiver[ $index ]->site_id = (int) $site_plugin_data['site_id'];
                 $plugin_info->receiver[ $index ]->data    = $site_plugin_data;
+
+                if ( $source_wp_version !== $site_plugin_data['versions']->wp ) {
+                    $plugin_info->receiver[ $index ]->wp_version_synced = false;
+                } else {
+                    $plugin_info->receiver[ $index ]->wp_version_synced = true;
+                }
 
                 if ( $source_acf_version !== $site_plugin_data['versions']->acf ) {
                     $plugin_info->receiver[ $index ]->acf_version_synced = false;
@@ -226,7 +233,7 @@ class Options {
 
     }
 
-    public static function validate_required_plugins_info( $site_id, $plugin_info ) {
+    public static function validate_required_plugins_info( $site, $plugin_info ) {
         if ( ! $plugin_info->source->acf ) {
             $logs = new Logs();
             $logs->set( 'ACF needs to be installed or activated on this site.', true );
@@ -242,17 +249,24 @@ class Options {
         }
 
         foreach ( $plugin_info->receiver as $receiver_plugin_info ) {
-            if ( $site_id === $receiver_plugin_info->site_id ) {
+            if ( (int) $site->id === $receiver_plugin_info->site_id ) {
                 if ( ! $receiver_plugin_info->cptui_version_synced ) {
                     $logs = new Logs();
-                    $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+                    $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $site->name . '</a>.', true );
 
                     return false;
                 }
 
                 if ( ! $receiver_plugin_info->acf_version_synced ) {
                     $logs = new Logs();
-                    $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $receiver_plugin_info->data['site_name'] . '</a>.', true );
+                    $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $site->name . '</a>.', true );
+
+                    return false;
+                }
+
+                if ( ! $receiver_plugin_info->wp_version_synced ) {
+                    $logs = new Logs();
+                    $logs->set( 'The WordPress core version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $site->name . '</a>.', true );
 
                     return false;
                 }

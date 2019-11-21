@@ -42,47 +42,6 @@ class Receiver {
     /**
      *
      */
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/sync', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'sync' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/overwrite', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'sync' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/start_fresh', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'start_fresh' ),
-            ),
-        ) );
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/plugin_versions', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_plugin_versions' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receiver/get_data', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'give_receiver_data' ),
-            ),
-        ) );
-    }
-
-    /**
-     *
-     */
     public function start_fresh() {
         global $wpdb;
         $db               = new DB();
@@ -133,50 +92,21 @@ class Receiver {
         wp_send_json_success( 'Receiver table truncation completed.' );
     }
 
-
-    /**
-     * Source side that initiates request for receiver plugin versions.
-     */
-    public static function get_receiver_plugin_versions() {
-
-        // TODO: CHECK IF DATA SYNC PLUGIN IS INSTALLED.
-        $connected_sites = (array) ConnectedSite::get_all();
-
-        $plugin_versions = array();
-
-        foreach ( $connected_sites as $site ) {
-            $url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/plugin_versions';
-            $response = wp_remote_get( $url );
-
-            if ( is_wp_error( $response ) ) {
-                $logs = new Logs();
-                $logs->set( 'Error in Receiver->get_receiver_plugin_versions() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-
-                return $response;
-            } else {
-                $plugin_versions[] = [
-                    'site_id'        => $site->id,
-                    'site_name'      => $site->name,
-                    'site_admin_url' => $site->url . '/wp-admin/plugins.php',
-                    'versions'       => json_decode( wp_remote_retrieve_body( $response ) )->data,
-                ];
-            }
-        }
-
-        return $plugin_versions;
-    }
-
     /**
      * @return mixed
      */
-    public function get_plugin_versions() {
+    public function prevalidate() {
         $plugins = get_plugins();
 
-        $versions          = array();
-        $versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
-        $versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+        $prevalidation_data                    = new \stdClass();
+        $prevalidation_data->site_id           = (int) get_option( 'data_sync_receiver_site_id' );
+        $prevalidation_data->site_admin_url    = get_site_url() . '/wp-admin/plugins.php';
+        $prevalidation_data->versions          = array();
+        $prevalidation_data->versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
+        $prevalidation_data->versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+        $prevalidation_data->versions['wp']    = bloginfo( 'version' );
 
-        return wp_send_json_success( $versions );
+        return wp_json_encode( $prevalidation_data );
     }
 
     /**
@@ -325,4 +255,48 @@ class Receiver {
 
         return $receiver_data;
     }
+
+
+    /**
+     *
+     */
+    public function register_routes() {
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/sync', array(
+            array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => array( $this, 'sync' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/overwrite', array(
+            array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => array( $this, 'sync' ),
+                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/start_fresh', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'start_fresh' ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receiver/get_data', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'give_receiver_data' ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receiver/prevalidate', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'prevalidate' ),
+            ),
+        ) );
+    }
+
 }

@@ -232,9 +232,10 @@ class Posts {
             foreach ( $blocks as $block ) {
                 if ( ! empty( $block['attrs'] ) ) {
                     if ( 'core/image' === $block['blockName'] ) {
-                        $image_ids[] = $block['attrs']['id'];
-                    }
-                    if ( 'core/gallery' === $block['blockName'] ) {
+                        if ( isset( $block['attrs']['id'] ) ) {
+                            $image_ids[] = $block['attrs']['id'];
+                        }
+                    } elseif ( 'core/gallery' === $block['blockName'] ) {
                         foreach ( $block['attrs']['ids'] as $id ) {
                             $image_ids[] = $id;
                         }
