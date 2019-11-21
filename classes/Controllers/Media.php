@@ -56,7 +56,7 @@ class Media {
                     $featured_image = $post->media->featured_image;
                     foreach ( $synced_posts as $synced_post ) {
                         if ( ( (int) $featured_image->post_parent === (int) $synced_post->source_post_id ) && ( (int) $site->id === (int) $synced_post->receiver_site_id ) ) {
-                                $featured_image->receiver_post_id = $synced_post->receiver_post_id;
+                            $featured_image->receiver_post_id = $synced_post->receiver_post_id;
 
                         }
                     }
@@ -211,6 +211,7 @@ class Media {
      * This makes sure the parent's thumbnail id to the attached image (featured image) is updated.
      */
     private function update_thumbnail_id( $post, $attachment_id ) {
+
         $args               = array(
             'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
             'source_post_id'   => $post->post_parent,
