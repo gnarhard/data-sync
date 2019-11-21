@@ -573,6 +573,13 @@ class Posts {
             $receiver_post_id = (int) $receiver_post_id;
 
             if ( 'attachment' !== $post->post_type ) {
+
+                if ( has_post_thumbnail( $receiver_post_id ) ) {
+                    // Before changing feat. image metadata, delete any feat.
+                    // img metadata just in case it was deleted at source.
+                    update_post_meta( $receiver_post_id, '_thumbnail_id', false );
+                }
+
                 $override_post_yoast = (bool) $post->post_meta->_override_post_yoast[0];
                 $yoast_meta_prefix   = WPSEO_Meta::$meta_prefix;
 
