@@ -105,7 +105,6 @@ class Media {
             $data->receiver_site_url         = $site->url;
             $data->url                       = $url;
             $data->start_time                = (string) current_time( 'mysql', 1 );
-//            $data->start_microtime           = (float) microtime( true );
 
             $excluded = $this->check_parent_isnt_excluded( $data, $site );
 
@@ -200,8 +199,6 @@ class Media {
             } else {
                 $logs = new Logs();
                 $logs->set( 'Post not uploaded and attached to ' . $source_data->media->post_title, true );
-
-//                return $attachment_id;
             }
         }
     }

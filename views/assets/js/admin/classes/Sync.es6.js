@@ -147,7 +147,7 @@ class Sync {
                     let admin_message = {}
                     admin_message.process_id = process.id
                     admin_message.topic = process.topic
-                    admin_message.success = false
+                    admin_message.success = true
                     admin_message.message = 'Pre-validation successful. Gathering source posts. . .'
 
                     Message.admin_message(admin_message)
