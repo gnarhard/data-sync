@@ -104,9 +104,9 @@ class Receiver {
         $prevalidation_data->versions          = array();
         $prevalidation_data->versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
         $prevalidation_data->versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
-        $prevalidation_data->versions['wp']    = bloginfo( 'version' );
+        $prevalidation_data->versions['wp']    = get_bloginfo( 'version' );
 
-        return wp_json_encode( $prevalidation_data );
+        return $prevalidation_data;
     }
 
     /**

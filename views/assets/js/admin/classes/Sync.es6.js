@@ -126,31 +126,31 @@ class Sync {
         admin_message.message = '<i class="dashicons dashicons-networking"></i> SYNDICATING'
         Message.admin_message(admin_message)
 
-        admin_message.process_id = process.id
-        admin_message.topic = process.topic
-        admin_message.success = true
-        admin_message.message = 'Pre-validating receiver site compatibility.'
-        Message.admin_message(admin_message)
-
         this.consolidate(process.id)
             .then(() => this.prevalidate(process))
             .then(prevalidation => {
                 if (!prevalidation.success) {
-                    prevalidation.topic = process.topic
-                    prevalidation.message = 'Pre-validation failed.'
-                    prevalidation.process_id = process.id
+                    let admin_message = {}
+                    admin_message.process_id = process.id
+                    admin_message.topic = process.topic
+                    admin_message.success = false
+                    admin_message.message = prevalidation.data
 
-                    Message.admin_message(prevalidation)
+                    Message.handle_error(admin_message, process)
                     new Settings()
                     if (DataSync.options.debug) {
                         let logs = new Logs()
                         logs.refresh_log()
                     }
                 } else {
-                    prevalidation.message = 'Pre-validation successful. Gathering source posts. . .'
-                    prevalidation.process_id = process.id
-                    prevalidation.topic = process.topic
-                    Message.admin_message(prevalidation)
+
+                    let admin_message = {}
+                    admin_message.process_id = process.id
+                    admin_message.topic = process.topic
+                    admin_message.success = false
+                    admin_message.message = 'Pre-validation successful. Gathering source posts. . .'
+
+                    Message.admin_message(admin_message)
 
                     this.send_posts_to_receivers(process.id)
                         .then(() => {return Processes.get(process.id)}) // refresh data
@@ -433,13 +433,20 @@ class Sync {
 
     async prevalidate (process) {
 
+        let admin_message = {}
+        admin_message.process_id = process.id
+        admin_message.topic = process.topic
+        admin_message.success = true
+        admin_message.message = 'Pre-validating receiver site compatibility.'
+        Message.admin_message(admin_message)
+
         return this.prevalidate_receivers(process)
             .then(receiver_prevalidation_data => {
                 process.receiver_prevalidation_data = receiver_prevalidation_data
                 Processes.set(process)
-
-                return this.verify_prevalidation(process)
+                return process;
             })
+            .then((process) => this.verify_prevalidation(process))
             .catch(message => Message.handle_error(message, process))
 
     }
@@ -447,7 +454,7 @@ class Sync {
     async verify_prevalidation (process) {
         const response = await fetch(DataSync.api.url + '/prevalidate', {
             method: 'POST',
-            data: JSON.stringify(process)
+            body: JSON.stringify(process)
         })
         return await response.json()
     }
@@ -456,7 +463,7 @@ class Sync {
 
         let receiver_prevalidation_requests = []
 
-        for (const [index, site] of process.data.source_data.connected_sites.entries()) {
+        for (const [index, site] of process.connected_sites.entries()) {
             receiver_prevalidation_requests.push(fetch(site.url + '/wp-json/data-sync/v1/receiver/prevalidate'))
         }
 
@@ -464,10 +471,6 @@ class Sync {
             .then(responses => {return responses}) // all responses are resolved successfully
             .then(responses => Promise.all(responses.map(r => r.json())))// map array of responses into array of response.json() to read their content
             .then(receiver_packages => {return receiver_packages})
-    }
-
-    verify_validation (process) {
-
     }
 
     create_remote_request (prepped_source_package, process_id) {
