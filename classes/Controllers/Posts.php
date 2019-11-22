@@ -454,7 +454,7 @@ class Posts {
             $syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
         } elseif ( 'trashed' === $syndication_info->status ) {
             $syndication_info->icon           = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
-            $syndication_info->source_message = '<span class="warning">This post is in the trash, but is still on receiver sites (if it was previously synced). Please delete from trash/permanent delete) to remove from receiver sites.</span>';
+            $syndication_info->source_message = '<span class="warning">This post is in the trash, but is still on receiver sites (if it was previously synced). Please delete from trash/permanent delete to remove from receiver sites.</span>';
         }
 
 
