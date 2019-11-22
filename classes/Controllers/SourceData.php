@@ -42,62 +42,6 @@ class SourceData {
         add_action( 'rest_api_init', [ $this, 'register_routes' ] );
     }
 
-    /**
-     * Register RESTful routes for Data Sync API
-     *
-     */
-    public function register_routes() {
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_source_data' ),
-                'args'     => array(
-                    'action'         => array(
-                        'description' => 'Action to tell backend which content to provide.',
-                        'type'        => 'string',
-                    ),
-                    'source_post_id' => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source/start_fresh', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'start_fresh' ),
-            ),
-        ) );
-
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'prep' ),
-                'args'     => array(
-                    'source_post_id'   => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                    'receiver_site_id' => array(
-                        'description' => 'Receiver Site ID',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'prevalidate' ),
-            ),
-        ) );
-
-    }
 
     public function prep( WP_REST_Request $request ) {
 
@@ -318,25 +262,21 @@ class SourceData {
     }
 
 
-    public function prevalidate() {
+    public function prevalidate(WP_REST_Request $request) {
 
-        // TODO: CHECK IF DATA SYNC PLUGIN ITSELF IS OUT OF DATE BEFORE SYNC.
-
+        $process = json_decode( $request->get_body() );
+        $receiver_prevalidation_data = $process->receiver_prevalidation_data;
+        $prevalidation_data = Options::prevalidate($receiver_prevalidation_data);
         $connected_sites = (array) ConnectedSite::get_all();
-        $plugin_info     = Options::get_required_plugins_info();
 
-        if ( ! empty( $plugin_info ) ) {
+        if ( ! empty( $prevalidation_data ) ) {
             foreach ( $connected_sites as $site ) {
-                $validated = Options::validate_required_plugins_info( (int) $site->id, $plugin_info );
-                if ( ! $validated ) {
-                    wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
-                }
+                Options::validate_required_plugins_info( $site, $prevalidation_data );
             }
             wp_send_json_success();
         } else {
-            wp_send_json_error( 'Required plugins are out of date or missing. Please check source and receiver sites.' );
+            wp_send_json_error( 'Required plugins are out of date or missing or WP versions are out of sync. Please check source and receiver sites. Logs will be helpful to look at.' );
         }
-
     }
 
 
@@ -424,6 +364,63 @@ class SourceData {
         }
 
         wp_send_json( $source_data );
+    }
+
+    /**
+     * Register RESTful routes for Data Sync API
+     *
+     */
+    public function register_routes() {
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'get_source_data' ),
+                'args'     => array(
+                    'action'         => array(
+                        'description' => 'Action to tell backend which content to provide.',
+                        'type'        => 'string',
+                    ),
+                    'source_post_id' => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
+                    ),
+                ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source/start_fresh', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'start_fresh' ),
+            ),
+        ) );
+
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
+            array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array( $this, 'prep' ),
+                'args'     => array(
+                    'source_post_id'   => array(
+                        'description' => 'Source Post ID',
+                        'type'        => 'int',
+                    ),
+                    'receiver_site_id' => array(
+                        'description' => 'Receiver Site ID',
+                        'type'        => 'int',
+                    ),
+                ),
+            ),
+        ) );
+
+        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
+            array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array( $this, 'prevalidate' ),
+            ),
+        ) );
+
     }
 
 }

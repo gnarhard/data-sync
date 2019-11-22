@@ -1,4 +1,5 @@
-import AJAX from '../../AJAX.es6.js'
+import SyndicatedPosts from './SyndicatedPosts.es6'
+import Processes from './Processes.es6'
 
 class Message {
 
@@ -68,6 +69,9 @@ class Message {
         $('#post-189').toggle()
 
         Message.admin_message(result)
+
+        $('#' + 'push_post_now_' + process.source_post_id).attr('disabled', false)
+        Processes.delete(process.id);
 
         return result
     }

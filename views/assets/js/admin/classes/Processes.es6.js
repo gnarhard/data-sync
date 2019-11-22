@@ -43,8 +43,8 @@ class Processes {
 
         processes.forEach((process, i) => {
             if (id === process.id) {
-                // processes[i].splice(0, 1) // not tested!
-                // _store.set(Constants.PROCESS, processes)
+                processes.splice(i, 1) // not tested!
+                _store.set(Constants.PROCESS, processes)
             }
         })
     }
