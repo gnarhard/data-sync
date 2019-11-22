@@ -251,23 +251,23 @@ class Options {
             if ( (int) $site->id === $receiver_plugin_info->site_id ) {
                 if ( ! $receiver_plugin_info->cptui_version_synced ) {
                     $logs = new Logs();
-                    $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>.', true );
+                    $logs->set( 'CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.', true );
 
-                    return wp_send_json_error('CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>.');
+                    return wp_send_json_error('CPTUI\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.');
                 }
 
                 if ( ! $receiver_plugin_info->acf_version_synced ) {
                     $logs = new Logs();
-                    $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>.', true );
+                    $logs->set( 'ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.', true );
 
-                    return wp_send_json_error('ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>.');
+                    return wp_send_json_error('ACF\'s plugin version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.');
                 }
 
                 if ( ! $receiver_plugin_info->wp_version_synced ) {
                     $logs = new Logs();
-                    $logs->set( 'The WordPress core version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>.', true );
+                    $logs->set( 'The WordPress core version is different on <a target="_blank" href="' . $receiver_plugin_info->data->site_admin_url . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.', true );
 
-                    return wp_send_json_error('The WordPress core version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $site->name . '</a>.');
+                    return wp_send_json_error('The WordPress core version is different on <a target="_blank" href="' . $receiver_plugin_info->data['site_admin_url'] . '">' . $site->name . '</a>. Update receiver or source site to resolve this error.');
                 }
             }
         }
