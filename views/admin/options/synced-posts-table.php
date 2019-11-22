@@ -92,7 +92,8 @@ function display_post_syndication_details_per_site( $syndication_info, $connecte
             }
 
             if ( ! empty( $connected_site_synced_post ) ) {
-                $local_timestamp = date( 'g:i:s a n/d/Y', get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $connected_site_synced_post->date_modified ) ), 'U' ) );
+
+                $local_timestamp = date( 'g:i:s a n/d/Y', strtotime( $connected_site_synced_post->date_modified ) + ( (int) get_option( 'gmt_offset' ) * 3600 ) );
 
                 echo '<span>Last syndication: ' . $local_timestamp . '</span>';
 

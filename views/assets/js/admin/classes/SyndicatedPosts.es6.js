@@ -152,6 +152,7 @@ class SyndicatedPosts {
                         admin_message.process_id = process.id
                         admin_message.success = false
                         admin_message.message = 'Please wait for previous sync on this post to finish.'
+
                         Message.handle_error(admin_message, process)
                         create_new_process = false
                     }
