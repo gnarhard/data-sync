@@ -1,4 +1,4 @@
-import Constants from '../../Constants.es6'
+import Constants from '../../Constants.es6.js'
 
 class Processes {
 

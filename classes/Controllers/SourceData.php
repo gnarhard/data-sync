@@ -7,8 +7,8 @@ use DataSync\Controllers\Logs;
 use DataSync\Controllers\Options;
 use DataSync\Controllers\ConnectedSites;
 use DataSync\Models\ConnectedSite;
+use DataSync\Routes\SourceDataRoutes;
 use WP_REST_Request;
-use WP_REST_Server;
 use ACF_Admin_Tool_Export;
 use stdClass;
 use DataSync\Models\DB;
@@ -39,7 +39,7 @@ class SourceData {
      * Instantiate RESTful Route
      */
     public function __construct() {
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+        new SourceDataRoutes($this);
     }
 
 
@@ -366,61 +366,6 @@ class SourceData {
         wp_send_json( $source_data );
     }
 
-    /**
-     * Register RESTful routes for Data Sync API
-     *
-     */
-    public function register_routes() {
 
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_source_data' ),
-                'args'     => array(
-                    'action'         => array(
-                        'description' => 'Action to tell backend which content to provide.',
-                        'type'        => 'string',
-                    ),
-                    'source_post_id' => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source/start_fresh', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'start_fresh' ),
-            ),
-        ) );
-
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'prep' ),
-                'args'     => array(
-                    'source_post_id'   => array(
-                        'description' => 'Source Post ID',
-                        'type'        => 'int',
-                    ),
-                    'receiver_site_id' => array(
-                        'description' => 'Receiver Site ID',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'prevalidate' ),
-            ),
-        ) );
-
-    }
 
 }

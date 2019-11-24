@@ -4,9 +4,9 @@ let mix = require('laravel-mix');
  * Sets the development path to assets. By default, this is the `/resources`
  * folder in the theme.
  */
-const devPath  = 'views/assets';
+const devPath  = 'public/views/assets/src';
 
-mix.setPublicPath('views/dist');
+mix.setPublicPath('public/views/dist');
 
 /*
  * Set Laravel Mix options.

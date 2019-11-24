@@ -1,7 +1,7 @@
 import AJAX from '../../AJAX.es6.js'
 import Message from './Message.es6.js';
-import Logs from './Logs.es6'
-import Processes from './Processes.es6'
+import Logs from './Logs.es6.js'
+import Processes from './Processes.es6.js'
 
 class SyndicatedTemplates {
 

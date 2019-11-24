@@ -1,10 +1,10 @@
 import ConnectedSites from './ConnectedSites.es6.js'
 import SyndicatedPosts from './SyndicatedPosts.es6.js'
-import SyndicatedTemplates from './SyndicatedTemplates.es6'
-import EnabledPostTypes from './EnabledPostTypes.es6'
-import Logs from './Logs.es6'
-import Settings from './Settings.es6'
-import AppStore from '../../AppStore.es6'
+import SyndicatedTemplates from './SyndicatedTemplates.es6.js'
+import EnabledPostTypes from './EnabledPostTypes.es6.js'
+import Logs from './Logs.es6.js'
+import Settings from './Settings.es6.js'
+import AppStore from '../../AppStore.es6.js'
 
 class Load {
 

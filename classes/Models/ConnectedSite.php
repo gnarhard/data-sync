@@ -4,7 +4,7 @@
 namespace DataSync\Models;
 
 use DataSync\Models\DB;
-use DataSync\Helpers;
+use DataSync\Tools\Helpers;
 
 class ConnectedSite
 {

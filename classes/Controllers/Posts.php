@@ -5,12 +5,12 @@ namespace DataSync\Controllers;
 
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
+use DataSync\Routes\PostsRoutes;
 use WP_Query;
 use stdClass;
-use WP_REST_Server;
 use WP_REST_Request;
 use WPSEO_Meta;
-use DataSync\Helpers;
+use DataSync\Tools\Helpers;
 
 
 class Posts {
@@ -20,14 +20,14 @@ class Posts {
         if ( '1' === get_option( 'source_site' ) ) {
             add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
             add_action( 'save_post', [ $this, 'save_custom_values' ] );
-            require_once DATA_SYNC_PATH . 'views/admin/post/meta-boxes.php';
+            require_once DATA_SYNC_PATH . 'public/views/admin/post/meta-boxes.php';
             add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
             add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
         } elseif ( '0' === get_option( 'source_site' ) ) {
             add_filter( 'pre_render_block', [ $this, 'update_block_id_attrs' ], 10, 2 );
         }
 
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+        new PostsRoutes($this);
     }
 
     public function display_admin_notices() {
@@ -628,50 +628,5 @@ class Posts {
         }
     }
 
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/post_meta/(?P<id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_custom_post_meta' ),
-                'args'     => array(
-                    'id' => array(
-                        'description'       => 'ID of post',
-                        'type'              => 'int',
-                        'validate_callback' => 'is_numeric',
-                    ),
-                ),
-            ),
-        ) );
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/posts/(?P<id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_post' ),
-                'args'     => array(
-                    'id' => array(
-                        'description' => 'ID of post',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/posts/all', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_all_posts' ),
-            ),
-        ) );
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/status_data/(?P<post_id>\d+)', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'get_syndicated_post_status_data' ),
-                'args'     => array(
-                    'post_id' => array(
-                        'description' => 'ID of post',
-                        'type'        => 'int',
-                    ),
-                ),
-            ),
-        ) );
 
-    }
 }

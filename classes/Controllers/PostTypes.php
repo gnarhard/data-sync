@@ -6,7 +6,7 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\Logs;
 use DataSync\Models\PostType;
 use DataSync\Controllers\Options;
-use WP_REST_Server;
+use DataSync\Routes\PostTypesRoutes;
 use stdClass;
 
 /**
@@ -23,7 +23,7 @@ class PostTypes
     public function __construct()
     {
         add_action('init', [ $this, 'register' ]);
-        add_action('rest_api_init', [ $this, 'register_routes' ]);
+        new PostTypesRoutes($this);
     }
 
     /**
@@ -182,17 +182,4 @@ class PostTypes
         }
     }
 
-    public function register_routes()
-    {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/post_types/check',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_enabled_post_types' ),
-                ),
-            )
-        );
-    }
 }

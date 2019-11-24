@@ -6,8 +6,8 @@ namespace DataSync\Controllers;
 use DataSync\Controllers\File;
 use DataSync\Models\DB;
 use DataSync\Models\SyncedPost;
+use DataSync\Routes\MediaRoutes;
 use stdClass;
-use WP_REST_Server;
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\Log;
 
@@ -23,8 +23,7 @@ class Media {
      * @param null $all_posts
      */
     public function __construct() {
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-
+        new MediaRoutes($this);
     }
 
 
@@ -222,31 +221,4 @@ class Media {
         }
     }
 
-
-    /**
-     *
-     */
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/update', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'update' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/sync', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'sync' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/prep', array(
-            array(
-                'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array( $this, 'prep' ),
-            ),
-        ) );
-    }
 }

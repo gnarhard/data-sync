@@ -4,10 +4,10 @@
 namespace DataSync\Controllers;
 
 use DataSync\Models\SyncedPost;
-use DataSync\Helpers;
+use DataSync\Routes\SyncedPostsRoutes;
+use DataSync\Tools\Helpers;
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_REST_Server;
 use stdClass;
 use DataSync\Models\DB;
 use DataSync\Models\ConnectedSite;
@@ -16,7 +16,7 @@ class SyncedPosts
 {
     public function __construct()
     {
-        add_action('rest_api_init', [ $this, 'register_routes' ]);
+        new SyncedPostsRoutes($this);
         add_action('delete_post', [ $this, 'delete' ], 10);
     }
 
@@ -379,110 +379,7 @@ class SyncedPosts
     public function display_post( WP_REST_Request $request ) {
         $request_body = json_decode( $request->get_body() );
         $post       = $request_body->post_to_get;
-        include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+        include_once DATA_SYNC_PATH . 'public/views/admin/options/synced-posts-table.php';
         \DataSync\display_post( $post, $request_body->source_data->connected_sites, (array) $request_body->receiver_data );
-    }
-
-
-    public function register_routes() {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/sync_post/',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'save_to_source' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/all',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_all' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/retrieve_from_receiver',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get_after_date' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/delete_receiver_post/',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'delete_post' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/delete_synced_post/',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'delete_synced_post' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/synced_posts/(?P<receiver_site_id>\d+)/(?P<source_post_id>\d+)',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array( $this, 'get' ),
-                    'args'     => array(
-                        'source_post_id'   => array(
-                            'description' => 'Source Post ID',
-                            'type'        => 'int',
-                        ),
-                        'receiver_site_id' => array(
-                            'description' => 'Receiver Site ID',
-                            'type'        => 'int',
-                        ),
-                    ),
-                ),
-            )
-        );
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/syndicated_post/(?P<post_id>\d+)',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'display_post' ),
-                    'args'     => array(
-                        'post_id' => array(
-                            'description' => 'Post ID',
-                            'type'        => 'int',
-                        ),
-                    ),
-                ),
-            )
-        );
     }
 }

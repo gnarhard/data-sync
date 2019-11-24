@@ -5,8 +5,8 @@ namespace DataSync\Controllers;
 
 use DataSync\Models\SyncedPost;
 use DataSync\Models\ConnectedSite;
+use DataSync\Routes\ReceiverRoutes;
 use WP_REST_Request;
-use WP_REST_Server;
 use DataSync\Models\DB;
 use DataSync\Controllers\Users;
 use DataSync\Models\Log;
@@ -26,18 +26,9 @@ class Receiver {
      * Receiver constructor.
      */
     public function __construct() {
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-        if ( '0' === get_option( 'source_site' ) ) {
-            add_action( 'rest_pre_dispatch', [ $this, 'authorize_source_cors_http_header' ] );
-        }
+        new ReceiverRoutes($this);
     }
 
-
-    public function authorize_source_cors_http_header() {
-        if ( get_option( 'data_sync_source_site_url' ) ) {
-            header( "Access-Control-Allow-Origin: " . get_option( 'data_sync_source_site_url' ) );
-        }
-    }
 
     /**
      *
@@ -256,47 +247,5 @@ class Receiver {
         return $receiver_data;
     }
 
-
-    /**
-     *
-     */
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/sync', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'sync' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/overwrite', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'sync' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/start_fresh', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'start_fresh' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receiver/get_data', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'give_receiver_data' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/receiver/prevalidate', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'prevalidate' ),
-            ),
-        ) );
-    }
 
 }

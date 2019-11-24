@@ -24,7 +24,7 @@ class Enqueue
      */
     public function admin_scripts( $hook_suffix )
     {
-        wp_register_script('data-sync-admin', DATA_SYNC_URL . 'views/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true);
+        wp_register_script('data-sync-admin', DATA_SYNC_URL . 'public/views/assets/dist/js/admin-autoloader.es6.js', array( 'jquery' ), 1, true);
 
         $localized_data = array(
             'strings' => array(
@@ -59,7 +59,7 @@ class Enqueue
     {
         wp_enqueue_style('jquery-ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
 
-        wp_register_style('data-sync-admin', DATA_SYNC_URL . 'views/dist/styles/data-sync.css', false, 1);
+        wp_register_style('data-sync-admin', DATA_SYNC_URL . 'public/views/assets/dist/styles/data-sync.css', false, 1);
         wp_enqueue_style('data-sync-admin');
     }
 }

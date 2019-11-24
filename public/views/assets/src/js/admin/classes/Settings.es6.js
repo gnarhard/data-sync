@@ -1,4 +1,4 @@
-import AJAX from '../../AJAX.es6'
+import AJAX from '../../AJAX.es6.js'
 import Message from './Message.es6.js'
 
 class Settings {

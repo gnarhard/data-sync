@@ -3,7 +3,7 @@
 
 namespace DataSync\Controllers;
 
-use DataSync\Helpers;
+use DataSync\Tools\Helpers;
 use WP_Query;
 use stdClass;
 

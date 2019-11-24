@@ -4,7 +4,7 @@
 namespace DataSync\Models;
 
 use DataSync\Controllers\Logs;
-use DataSync\Helpers;
+use DataSync\Tools\Helpers;
 use WP_Error;
 
 /**

@@ -1,5 +1,5 @@
-import SyndicatedPosts from './SyndicatedPosts.es6'
-import Processes from './Processes.es6'
+import SyndicatedPosts from './SyndicatedPosts.es6.js'
+import Processes from './Processes.es6.js'
 
 class Message {
 

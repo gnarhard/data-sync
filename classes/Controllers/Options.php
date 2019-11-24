@@ -2,6 +2,7 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Routes\OptionsRoutes;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -42,11 +43,11 @@ class Options {
      * Options constructor.
      */
     public function __construct() {
-        require_once DATA_SYNC_PATH . 'views/admin/options/page.php';
-        require_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
+        require_once DATA_SYNC_PATH . 'public/views/admin/options/page.php';
+        require_once DATA_SYNC_PATH . 'public/views/admin/options/fields.php';
         add_action( 'admin_menu', [ $this, 'admin_menu' ] );
         add_action( 'admin_init', [ $this, 'register' ] );
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+        new OptionsRoutes($this);
     }
 
     /**
@@ -152,19 +153,19 @@ class Options {
         $settings_content = new stdClass();
 
         if ( 'syndicated_posts' === $settings_request ) {
-            include_once DATA_SYNC_PATH . 'views/admin/options/synced-posts-table.php';
+            include_once DATA_SYNC_PATH . 'public/views/admin/options/synced-posts-table.php';
             \DataSync\display_syndicated_posts_table();
         } elseif ( 'connected_sites' === $settings_request ) {
-            include_once DATA_SYNC_PATH . 'views/admin/options/connected-sites.php';
+            include_once DATA_SYNC_PATH . 'public/views/admin/options/connected-sites.php';
             \DataSync\display_connected_sites();
         } elseif ( 'enabled_post_types' === $settings_request ) {
-            include_once DATA_SYNC_PATH . 'views/admin/options/enabled-post-types-dashboard.php';
+            include_once DATA_SYNC_PATH . 'public/views/admin/options/enabled-post-types-dashboard.php';
             \DataSync\display_enabled_post_types();
         } elseif ( 'templates' === $settings_request ) {
-            include_once DATA_SYNC_PATH . 'views/admin/options/template-sync.php';
+            include_once DATA_SYNC_PATH . 'public/views/admin/options/template-sync.php';
             \DataSync\display_synced_templates();
         } elseif ( 'awareness_messages' === $settings_request ) {
-            include_once DATA_SYNC_PATH . 'views/admin/options/fields.php';
+            include_once DATA_SYNC_PATH . 'public/views/admin/options/fields.php';
             \DataSync\display_awareness_messages();
         }
     }
@@ -275,61 +276,6 @@ class Options {
         return true;
     }
 
-
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/options/(?P<option>[a-zA-Z-_]+)', array(
-            array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array( $this, 'get' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                'args'                => array(
-                    'option' => array(
-                        'description' => 'Option key',
-                        'type'        => 'string',
-                    ),
-                ),
-            ),
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'save' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                'args'                => array(
-                    'option' => array(
-                        'description' => 'Option key',
-                        'type'        => 'string',
-                    ),
-                ),
-            ),
-            array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array( $this, 'delete' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                'args'                => array(
-                    'option' => array(
-                        'description' => 'Option key',
-                        'type'        => 'string',
-//							'validate_callback' => function ( $param, $request, $key ) {
-//								return true;
-//							},
-                    ),
-                ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/settings_tab/(?P<tab>[a-zA-Z-_]+)', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_settings_tab_html' ),
-                'args'     => array(
-                    'tab' => array(
-                        'description' => 'Tab to get',
-                        'type'        => 'string',
-                    ),
-                ),
-            ),
-        ) );
-
-    }
 
     /**
      * Add sections and options to Data Sync WordPress admin options page.

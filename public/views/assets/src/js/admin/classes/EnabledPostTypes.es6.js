@@ -1,7 +1,7 @@
 import AJAX from '../../AJAX.es6.js'
 import Helpers from '../../Helpers.es6.js'
 import Message from './Message.es6.js'
-import Processes from './Processes.es6'
+import Processes from './Processes.es6.js'
 
 class EnabledPostTypes {
     constructor () {

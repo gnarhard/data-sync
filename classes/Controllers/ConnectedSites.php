@@ -3,70 +3,17 @@
 
 namespace DataSync\Controllers;
 
+use DataSync\Routes\ConnectedSitesRoutes;
 use WP_REST_Request;
 use DataSync\Models\ConnectedSite;
 use DataSync\Controllers\Logs;
-use WP_REST_Response;
-use WP_REST_Server;
 use WP_Error;
 
 class ConnectedSites
 {
     public function __construct()
     {
-        add_action('rest_api_init', [ $this, 'register_routes' ]);
-    }
-
-    public function register_routes()
-    {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/connected_sites',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::READABLE,
-                    'callback'            => array( 'DataSync\Models\ConnectedSite', 'get_all' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                ),
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'save' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                ),
-            )
-
-        );
-
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/connected_sites/(?P<id>\d+)',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::READABLE,
-                    'callback'            => array( $this, 'get' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                    'args'                => array(
-                        'id' => array(
-                            'description'       => 'ID of connected_site',
-                            'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
-                        ),
-                    ),
-                ),
-                array(
-                    'methods'             => WP_REST_Server::DELETABLE,
-                    'callback'            => array( $this, 'delete' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-                    'args'                => array(
-                        'id' => array(
-                            'description'       => 'ID of connected_site',
-                            'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
-                        ),
-                    ),
-                ),
-            )
-        );
+        new ConnectedSitesRoutes($this);
     }
 
     public function get(WP_REST_Request $request)

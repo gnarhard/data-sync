@@ -1,6 +1,6 @@
 <?php
 
-namespace DataSync;
+namespace DataSync\Tools;
 
 use DataSync\Controllers\Logs;
 use WP_Error;

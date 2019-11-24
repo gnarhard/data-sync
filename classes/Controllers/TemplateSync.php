@@ -4,7 +4,7 @@
 namespace DataSync\Controllers;
 
 use DataSync\Controllers\File;
-use WP_REST_Server;
+use DataSync\Routes\TemplateSyncRoutes;
 use stdClass;
 use DataSync\Controllers\Logs;
 use DataSync\Models\ConnectedSite;
@@ -13,35 +13,8 @@ class TemplateSync
 {
     public function __construct()
     {
-        add_action('rest_api_init', [ $this, 'register_routes' ]);
+        new TemplateSyncRoutes($this);
     }
-
-    public function register_routes()
-    {
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/templates/start_sync',
-            array(
-                array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array( $this, 'initiate' ),
-                ),
-            )
-        );
-
-        $registered = register_rest_route(
-            DATA_SYNC_API_BASE_URL,
-            '/templates/sync',
-            array(
-                array(
-                    'methods'             => WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'receive' ),
-                    'permission_callback' => array( __NAMESPACE__ . '\Auth', 'authorize' ),
-                ),
-            )
-        );
-    }
-
 
     public static function get_template_files()
     {

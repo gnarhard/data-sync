@@ -1,7 +1,7 @@
 import Message from './Message.es6.js'
 import Sync from './Sync.es6.js'
-import Processes from './Processes.es6'
-import Constants from '../../Constants.es6'
+import Processes from './Processes.es6.js'
+import Constants from '../../Constants.es6.js'
 
 class SyndicatedPosts {
 
@@ -92,7 +92,7 @@ class SyndicatedPosts {
             })
             .then(() => sync.show_posts(process.id))
             .then(() => this.finish_refresh(process.id))
-            .catch(message => Message.handle_error(message))
+            .catch(message => Message.handle_error(message, process))
 
     }
 

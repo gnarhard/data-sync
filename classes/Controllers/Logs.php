@@ -5,10 +5,9 @@ namespace DataSync\Controllers;
 
 use DataSync\Models\ConnectedSite;
 use DataSync\Models\Log;
-use WP_REST_Server;
-use DataSync\Helpers;
+use DataSync\Routes\LogsRoutes;
+use DataSync\Tools\Helpers;
 use stdClass;
-use WP_REST_Response;
 use WP_REST_Request;
 use function DataSync\display_log;
 
@@ -23,7 +22,7 @@ class Logs {
     public $log;
 
     public function __construct() {
-        add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+        new LogsRoutes($this);
     }
 
     public function set( $message = false, $error = false, $type = false ) {
@@ -131,7 +130,7 @@ class Logs {
     }
 
     public function refresh_log() {
-        include_once ABSPATH . 'wp-content/plugins/data-sync/views/admin/options/log.php';
+        include_once ABSPATH . 'wp-content/plugins/data-sync/public/views/admin/options/log.php';
         $data       = new stdClass();
         $data->html = wp_json_encode( display_log() );
 
@@ -144,35 +143,4 @@ class Logs {
         wp_send_json( $result );
     }
 
-    public function register_routes() {
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/get', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'refresh_log' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/create', array(
-            array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array( $this, 'create' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/delete', array(
-            array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array( $this, 'delete_all' ),
-                'permission_callback' => array( __NAMESPACE__ . '\Auth', 'permissions' ),
-            ),
-        ) );
-
-        $registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/fetch_receiver', array(
-            array(
-                'methods'  => WP_REST_Server::READABLE,
-                'callback' => array( $this, 'get_log' ),
-            ),
-        ) );
-    }
 }
