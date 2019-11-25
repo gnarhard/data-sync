@@ -60,6 +60,7 @@ class SyndicatedPosts {
                 running: false,
             }
             Processes.create(process)
+            process_id = process.id;
         } else {
             process = Processes.get(process_id)
         }
@@ -80,19 +81,20 @@ class SyndicatedPosts {
 
         sync.get_source_data(process.id)
             .then(source_data => {
+                let process = Processes.get(process_id);
                 process.data = {}
                 process.data.source_data = source_data
                 Processes.set(process)
             })
             .then(() => sync.get_receiver_data(process.id))
             .then(receiver_data => {
-                // console.log(receiver_data)
+                let process = Processes.get(process_id);
                 process.data.receiver_data = receiver_data
                 Processes.set(process)
             })
             .then(() => sync.show_posts(process.id))
             .then(() => this.finish_refresh(process.id))
-            .catch(message => Message.handle_error(message, process))
+            .catch(message => Message.handle_error(message, Processes.get(process_id))) // still doesn't send process.
 
     }
 
