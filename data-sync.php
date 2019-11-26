@@ -28,10 +28,10 @@ use DataSync\Controllers\Load;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if (! function_exists('add_filter')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
+if ( ! function_exists( 'add_filter' ) ) {
+	header( 'Status: 403 Forbidden' );
+	header( 'HTTP/1.1 403 Forbidden' );
+	exit();
 }
 
 /**
@@ -41,38 +41,36 @@ if (! function_exists('add_filter')) {
  *
  * @return array
  */
-function add_settings_link($links)
-{
-    $my_links = array(
-        '<a href="' . admin_url('options-general.php?page=data-sync-options') . '">Settings</a>',
-    );
+function add_settings_link( $links ) {
+	$my_links = array(
+		'<a href="' . admin_url( 'options-general.php?page=data-sync-options' ) . '">Settings</a>',
+	);
 
-    return array_merge($links, $my_links);
+	return array_merge( $links, $my_links );
 }
 
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), __NAMESPACE__ . '\add_settings_link');
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), __NAMESPACE__ . '\add_settings_link' );
 
-if (! defined('DATA_SYNC_PATH')) {
-    define('DATA_SYNC_PATH', plugin_dir_path(__FILE__));
+if ( ! defined( 'DATA_SYNC_PATH' ) ) {
+	define( 'DATA_SYNC_PATH', plugin_dir_path( __FILE__ ) );
 }
 
-if (! defined('DATA_SYNC_URL')) {
-    define('DATA_SYNC_URL', plugin_dir_url(__FILE__));
+if ( ! defined( 'DATA_SYNC_URL' ) ) {
+	define( 'DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if (! defined('DATA_SYNC_BASENAME')) {
-    define('DATA_SYNC_BASENAME', 'data-sync');
+if ( ! defined( 'DATA_SYNC_BASENAME' ) ) {
+	define( 'DATA_SYNC_BASENAME', 'data-sync' );
 }
 
-if (! defined('DATA_SYNC_API_BASE_URL')) {
-    define('DATA_SYNC_API_BASE_URL', 'data-sync/v1');
+if ( ! defined( 'DATA_SYNC_API_BASE_URL' ) ) {
+	define( 'DATA_SYNC_API_BASE_URL', 'data-sync/v1' );
 }
 
 // Load the plugin classes.
-if (file_exists(DATA_SYNC_PATH . 'vendor/autoload.php')) {
-    require_once DATA_SYNC_PATH . 'vendor/autoload.php';
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+	new Load();
 }
 
-add_filter('https_local_ssl_verify', '__return_true');
-
-new Load();
+add_filter( 'https_local_ssl_verify', '__return_true' );
