@@ -10,7 +10,8 @@ use WP_REST_Server;
  */
 class ReceiverRoutes {
 
-	const AUTH = 'DataSync\Controllers\Auth';
+	const AUTH = __NAMESPACE__ . '\Controllers\Auth';
+	public $controller_class = null;
 
 	/**
 	 * Receiver constructor.

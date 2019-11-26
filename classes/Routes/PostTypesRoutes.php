@@ -11,7 +11,8 @@ use WP_REST_Server;
  */
 class PostTypesRoutes {
 
-	const AUTH = 'DataSync\Controllers\Auth';
+	const AUTH = __NAMESPACE__ . '\Controllers\Auth';
+	public $controller_class = null;
 
 	public function __construct( $controller ) {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
