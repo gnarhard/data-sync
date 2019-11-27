@@ -11,7 +11,7 @@ use WP_REST_Server;
  */
 class SourceDataRoutes {
 
-	const AUTH = __NAMESPACE__ . '\Controllers\Auth';
+	const AUTH = 'DataSync\Controllers\Auth';
 	public $controller_class = null;
 
 	/**

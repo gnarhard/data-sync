@@ -7,7 +7,7 @@ use WP_REST_Server;
 
 class TemplateSyncRoutes {
 
-	const AUTH = __NAMESPACE__ . '\Controllers\Auth';
+	const AUTH = 'DataSync\Controllers\Auth';
 	public $controller_class = null;
 
 	/**
@@ -20,18 +20,18 @@ class TemplateSyncRoutes {
 
 	public function register_routes() {
 		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/templates/start_sync', array(
-				array(
-					'methods'  => WP_REST_Server::EDITABLE,
-					'callback' => array( $this->controller_class, 'initiate' ),
-				),
-			) );
+			array(
+				'methods'  => WP_REST_Server::EDITABLE,
+				'callback' => array( $this->controller_class, 'initiate' ),
+			),
+		) );
 
 		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/templates/sync', array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this->controller_class, 'receive' ),
-					'permission_callback' => array( $this::AUTH, 'authorize' ),
-				),
-			) );
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this->controller_class, 'receive' ),
+				'permission_callback' => array( $this::AUTH, 'authorize' ),
+			),
+		) );
 	}
 }

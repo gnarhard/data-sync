@@ -78,15 +78,6 @@ class Auth
             return $auth->verify_signature($data, $secret_key_of_receiver);
         }
 
-
-        //		var_dump( $data );
-        //		if ( isset( $data->log_entry ) ) {
-        //echo 'here';
-        //			if ( strpos( $data->log_entry, 'Finished syncing post types.' ) !== false ) {
-        //				die();
-        //			}
-//
-        //		}
         $error_msg = 'Failed to authorize cross-site connection.';
         $error_msg.= '<br>Data package: ' . wp_json_encode($data);
         $error_msg.= '<br>JSON: ' .  file_get_contents('php://input');

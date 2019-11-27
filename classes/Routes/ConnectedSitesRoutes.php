@@ -8,7 +8,8 @@ use WP_REST_Server;
 class ConnectedSitesRoutes
 {
 
-	const AUTH = __NAMESPACE__ . '\Controllers\Auth';
+	const AUTH = 'DataSync\Controllers\Auth';
+	const MODEL = 'DataSync\Models\ConnectedSite';
 	public $controller_class = null;
 
 	public function __construct( $controller ) {
@@ -24,7 +25,7 @@ class ConnectedSitesRoutes
             array(
                 array(
                     'methods'             => WP_REST_Server::READABLE,
-                    'callback'            => array( $this->controller_class, 'get_all' ),
+                    'callback'            => array( $this::MODEL, 'get_all' ),
                     'permission_callback' => array( $this::AUTH, 'permissions' ),
                 ),
                 array(
