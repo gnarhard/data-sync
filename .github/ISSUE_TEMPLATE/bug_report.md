@@ -10,6 +10,14 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Does the error log have any red error messages?**
+
+**Please copy and paste what the status messages at the top say up until the error, if applicable:**
+eg.:
+Post 446, Receiver 11: Server error encountered.
+Post 446, Receiver 11: Building posts table. . .
+Post 446, Receiver 11: Getting data from receivers. . .
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
