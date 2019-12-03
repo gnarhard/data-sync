@@ -24,6 +24,29 @@ class SyncedTerms {
 		// NOTHING RIGHT NOW.
 	}
 
+	public static function get_all() {
+		//Array of taxonomies to get terms for
+		$taxonomies = get_taxonomies();
+		//Set arguments - don't 'hide' empty terms.
+		$args = array(
+			'hide_empty' => 0
+		);
+
+		$terms       = get_terms( $taxonomies, $args );
+		$empty_terms = array();
+
+		foreach ( $terms as $term ) {
+			if ( 0 == $term->count ) {
+				$empty_terms[] = $term;
+			}
+
+		}
+
+		$merged_terms = array_merge( $terms, $empty_terms );
+
+		return array_unique( $merged_terms, SORT_REGULAR );
+	}
+
 	public static function save( object $source_data ) {
 		$prepared_data = self::prep( $source_data );
 
@@ -65,6 +88,7 @@ class SyncedTerms {
 		foreach ( $taxonomies as $taxonomy_slug => $taxonomy_data ) {
 
 			// REMOVE ALL TERMS FROM POST IMMEDIATELY.
+			// TODO: CHECK FOR RECEIVER TERMS BEFORE?
 			wp_set_object_terms( $post_id, null, $taxonomy_slug );
 
 			if ( false !== $taxonomy_data ) {
@@ -80,9 +104,10 @@ class SyncedTerms {
 						if ( '' !== $term->description ) {
 							wp_update_term( $flattened_new_term_id, $taxonomy_slug, [ 'description' => $term->description ] );
 						}
-						$new_synced_term = SyncedTerms::save( $term );
+						// TODO: NOT USING THIS RIGHT NOW.
+//						$new_synced_term = SyncedTerms::save( $term );
 					} else {
-						$registered_taxonomies = get_taxonomies();
+//						$registered_taxonomies = get_taxonomies();
 						$logs                  = new Logs();
 						$logs->set( 'Term: ' . $term->slug . ' failed to connect to post. ' . $new_term->get_error_message(), true );
 
@@ -92,7 +117,8 @@ class SyncedTerms {
 			}
 		}
 
-		SyncedTerms::update();
+		// TODO: NOT USING THIS RIGHT NOW.
+//		SyncedTerms::update();
 
 	}
 

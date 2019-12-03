@@ -175,10 +175,10 @@ class Receiver {
     private function sync_options_and_meta() {
 
         // UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
-        $this->update_wp_options( $this->source_data );
+        $this->update_wp_options();
 
         // ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT. IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
-        $this->update_post_types( $this->source_data );
+        $this->update_post_types();
 
         // ADD AND SAVE ACF FIELDS
         ACFs::save_acf_fields( $this->source_data->acf );
@@ -186,7 +186,14 @@ class Receiver {
         $logs->set( 'ACF fields synced.' );
 
         // ADD AND SAVE ALL TAXONOMIES.
-        $this->update_taxonomies( $this->source_data );
+        $this->update_taxonomies();
+
+        // ADD AND SAVE ALL TERMS.
+	    $this->update_terms();
+    }
+
+    private function update_terms() {
+//	    $this->source_data
     }
 
     private function update_wp_options() {

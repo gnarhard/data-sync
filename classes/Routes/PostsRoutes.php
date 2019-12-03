@@ -49,6 +49,12 @@ class PostsRoutes {
 				'callback' => array( $this->controller_class, 'get_all_posts' ),
 			),
 		) );
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/posts/update_post_settings', array(
+			array(
+				'methods'  => WP_REST_Server::EDITABLE,
+				'callback' => array( $this->controller_class, 'update_post_settings' ),
+			),
+		) );
 		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/status_data/(?P<post_id>\d+)', array(
 			array(
 				'methods'  => WP_REST_Server::EDITABLE,
