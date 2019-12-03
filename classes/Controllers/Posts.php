@@ -599,9 +599,10 @@ class Posts {
 
 				// THESE YOAST VALUES NEED TO BE DELETED EVERY TIME YOAST SETTINGS ARE UPDATED.
 				if ( $override_post_yoast ) {
-					delete_post_meta( $receiver_post_id, '_yoast_wpseo_is_cornerstone');
-					delete_post_meta( $receiver_post_id, '_yoast_wpseo_meta-robots-noindex');
-					delete_post_meta( $receiver_post_id, '_yoast_wpseo_meta-robots-nofollow');
+					$yoast_meta_keys = Posts::get_yoast_meta_keys();
+					foreach( $yoast_meta_keys as $meta_key ) {
+						delete_post_meta( $receiver_post_id, $meta_key);
+					}
 				}
 
 				// Yoast and ACF data will be in here.
@@ -656,5 +657,41 @@ class Posts {
 		}
 	}
 
+
+	public static function get_yoast_meta_keys() {
+		return [
+			'_yoast_wpseo_opengraph-title',
+			'_yoast_wpseo_opengraph-description',
+			'_yoast_wpseo_opengraph-image',
+			'_yoast_wpseo_opengraph-image-id',
+			'_yoast_wpseo_twitter-title',
+			'_yoast_wpseo_twitter-description',
+			'_yoast_wpseo_twitter-image',
+			'_yoast_wpseo_twitter-image-id',
+			'_yoast_wpseo_is_cornerstone',
+			'_yoast_wpseo_meta-robots-noindex',
+			'_yoast_wpseo_meta-robots-nofollow',
+			'_yoast_wpseo_metadesc',
+			'_yoast_wpseo_meta-robots-adv',
+			'_yoast_wpseo_primary_category',
+			'_yoast_wpseo_focuskw',
+			'_yoast_wpseo_linkdex', // TODO: POINTS TO AN ID?
+			'_yoast_wpseo_content_score',
+		];
+	}
+
+	public function update_post_settings( WP_REST_Request $request ) {
+
+		$data = json_decode( $request->get_body() );
+
+		foreach( $data->posts as $post ) {
+			$result = update_post_meta( $post->ID, '_override_post_yoast', 0 );
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( $result );
+			}
+		}
+
+		wp_send_json_success();
+	}
 
 }
