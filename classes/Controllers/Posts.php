@@ -659,6 +659,7 @@ class Posts {
 
 
 	public static function get_yoast_meta_keys() {
+		// TODO: PULL THIS FROM YOAST?
 		return [
 			'_yoast_wpseo_opengraph-title',
 			'_yoast_wpseo_opengraph-description',
