@@ -623,7 +623,14 @@ class Posts {
 						// FIX EVERYTHING ELSE
 						$value = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $value );
 
-						$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
+						$unserialized_value = unserialize($value);
+
+						if ( false === $unserialized_value ) {
+							$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
+						} else {
+							$updated = update_post_meta( $receiver_post_id, $meta_key, $unserialized_value );
+						}
+
 					}
 				}
 			}
