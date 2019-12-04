@@ -600,8 +600,8 @@ class Posts {
 				// THESE YOAST VALUES NEED TO BE DELETED EVERY TIME YOAST SETTINGS ARE UPDATED.
 				if ( $override_post_yoast ) {
 					$yoast_meta_keys = Posts::get_yoast_meta_keys();
-					foreach( $yoast_meta_keys as $meta_key ) {
-						delete_post_meta( $receiver_post_id, $meta_key);
+					foreach ( $yoast_meta_keys as $meta_key ) {
+						delete_post_meta( $receiver_post_id, $meta_key );
 					}
 				}
 
@@ -623,13 +623,18 @@ class Posts {
 						// FIX EVERYTHING ELSE
 						$value = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $value );
 
-						$unserialized_value = unserialize($value);
-
-						if ( false === $unserialized_value ) {
-							$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
-						} else {
-							$updated = update_post_meta( $receiver_post_id, $meta_key, $unserialized_value );
+						if ( Helpers::is_serialized( $value ) ) {
+							$unserialized_value = unserialize( $value );
 						}
+
+						if ( isset( $unserialized_value ) ) {
+							if ( false !== $unserialized_value ) {
+								$updated = update_post_meta( $receiver_post_id, $meta_key, $unserialized_value );
+							}
+						}
+
+						$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
+
 
 					}
 				}
@@ -692,7 +697,7 @@ class Posts {
 
 		$data = json_decode( $request->get_body() );
 
-		foreach( $data->posts as $post ) {
+		foreach ( $data->posts as $post ) {
 			$result = update_post_meta( $post->ID, '_override_post_yoast', 0 );
 			if ( is_wp_error( $result ) ) {
 				wp_send_json_error( $result );
