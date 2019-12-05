@@ -623,13 +623,12 @@ class Posts {
 						// FIX EVERYTHING ELSE
 						$value = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $value );
 
+						$unserialized_value = false;
+
 						if ( Helpers::is_serialized( $value ) ) {
 							$unserialized_value = unserialize( $value );
-						}
-
-						if ( isset( $unserialized_value ) ) {
 							if ( false !== $unserialized_value ) {
-								$updated = update_post_meta( $receiver_post_id, $meta_key, $unserialized_value );
+								$value = $unserialized_value;
 							}
 						}
 
