@@ -279,19 +279,29 @@ class Options {
 
 
 	public function delete_post_type_option_data( $data ) {
-		$post_types            = get_option( 'push_enabled_post_types' );
-		$registered_post_types = get_post_types();
-		$deleted_post_type     = $data['cpt_custom_post_type']['name'];
+		$post_types                   = get_option( 'push_enabled_post_types' );
+		$cleaned_post_types           = $post_types;
+		$registered_post_types        = get_post_types( [
+			'public' => true,
+		], 'names', 'and' );
+		$deleted_post_type            = $data['cpt_custom_post_type']['name'];
+		$registered_custom_post_types = cptui_get_post_type_data();
+
+		foreach ( $registered_custom_post_types as $registered_custom_post_type ) {
+			$registered_post_types[] = $registered_custom_post_type['name'];
+		}
 
 		foreach ( $post_types as $key => $post_type ) {
 			if ( $deleted_post_type === $post_type ) {
-				unset( $post_types[ $key ] );
+				unset( $cleaned_post_types[ $key ] );
 			} elseif ( ! in_array( $post_type, $registered_post_types ) ) {
-				unset( $post_types[ $key ] );
+				unset( $cleaned_post_types[ $key ] );
 			}
 		}
 
-		update_option( 'push_enabled_post_types', $post_types );
+		update_option( 'push_enabled_post_types', $cleaned_post_types );
+
+		return $data;
 	}
 
 

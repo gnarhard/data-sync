@@ -123,8 +123,9 @@ class Receiver {
 
             $this->sync_posts();
 
-            //		$email = new Email();
-            //		unset( $email );
+	        // ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT. IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
+	        // NEEDS TO BE AFTER SYNC POSTS TO ENSURE NEW POSTS FROM NEW POST TYPES AREN'T ADDED.
+	        $this->update_post_types();
 
             $logs = new Logs();
             $logs->set( 'POSTS SYNCED.' );
@@ -176,9 +177,6 @@ class Receiver {
 
         // UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
         $this->update_wp_options();
-
-        // ADD ALL CUSTOM POST TYPES AND CHECK IF THEY ARE ENABLED BY DEFAULT. IF SO, SAVE THE OPTIONS, IF NOT, MOVE ON.
-        $this->update_post_types();
 
         // ADD AND SAVE ACF FIELDS
         ACFs::save_acf_fields( $this->source_data->acf );
