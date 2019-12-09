@@ -1,4 +1,9 @@
 #enabled_post_types {
+
+  span {
+    display: block;
+  }
+
   select {
     width: 100%;
     min-height: 200px;
@@ -6,13 +11,14 @@
 
   #save_push_enabled_post_types {
     padding: 10px;
-    width: 100%;
-    margin-top: 20px;
+    width: 400px;
+    margin: 40px 0;
     background: #0073aa;
     color: white;
     border-radius: 4px;
     text-transform: uppercase;
     cursor: pointer;
+    display: block;
   }
 
   #save_push_enabled_post_types:hover {

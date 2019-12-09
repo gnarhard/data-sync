@@ -1825,8 +1825,8 @@ eval("// removed by extract-text-webpack-plugin//# sourceURL=[module]\n//# sourc
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/gerhard/Sites/flywheel/sites/chancelight/app/public/wp-content/plugins/data-sync/public/assets/src/js/admin/admin-autoloader.es6.js */"./public/assets/src/js/admin/admin-autoloader.es6.js");
-module.exports = __webpack_require__(/*! /Users/gerhard/Sites/flywheel/sites/chancelight/app/public/wp-content/plugins/data-sync/public/assets/src/sass/data-sync.scss */"./public/assets/src/sass/data-sync.scss");
+__webpack_require__(/*! /Users/gerhard/Sites/flywheel/sites/cldatasource/app/public/wp-content/plugins/data-sync/public/assets/src/js/admin/admin-autoloader.es6.js */"./public/assets/src/js/admin/admin-autoloader.es6.js");
+module.exports = __webpack_require__(/*! /Users/gerhard/Sites/flywheel/sites/cldatasource/app/public/wp-content/plugins/data-sync/public/assets/src/sass/data-sync.scss */"./public/assets/src/sass/data-sync.scss");
 
 
 /***/ })
