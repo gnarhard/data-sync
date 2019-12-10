@@ -208,7 +208,9 @@ class Receiver {
 	}
 
 	private function update_post_types() {
+		// SAVES POST TYPES TO DB.
 		PostTypes::process( $this->source_data->options->push_enabled_post_types );
+
 		if ( true === $this->source_data->options->enable_new_cpts ) {
 			PostTypes::save_options();
 		}
