@@ -191,6 +191,7 @@ class Sync
                             admin_message.success = true;
                             admin_message.message = '<span class="dashicons dashicons-yes-alt"></span> Syndication complete!';
                             Message.admin_message(admin_message);
+
                         })
                         .catch(message => Message.handle_error(message, process));
                 }
@@ -226,10 +227,10 @@ class Sync
 
                 process = Processes.get(process_id);
                 process.posts = [];
-                if ( false === process.source_post_id ) {
+                if(false === process.source_post_id) {
                     process.posts = posts;
                 } else {
-                    process.posts[0] = posts;
+                    process.posts[ 0 ] = posts;
                 }
 
                 Processes.set(process);
@@ -418,7 +419,7 @@ class Sync
                     Processes.set(process);
                     Message.update_status_count(process);
                 })
-                .catch(message => Message.handle_error(message));
+                .catch(message => Message.handle_error(message, process));
         }
 
         let admin_message = {};
