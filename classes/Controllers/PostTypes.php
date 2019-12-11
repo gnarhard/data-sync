@@ -128,10 +128,8 @@ class PostTypes {
 	 *
 	 */
 	public static function save_options() {
-		$enabled_post_types = get_option( 'enabled_post_types' );
-		if ( false === $enabled_post_types ) {
-			$enabled_post_types = [];
-		}
+
+		$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : [];
 		$synced_custom_post_types        = PostType::get_all();
 		$synced_custom_post_types_to_add = array();
 		$registered_custom_post_types    = cptui_get_post_type_data();
@@ -178,6 +176,7 @@ class PostTypes {
 	 */
 	public function register() {
 		$synced_custom_post_types = PostType::get_all();
+		$enabled_post_types       = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : [];
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );
@@ -191,7 +190,9 @@ class PostTypes {
 			$args['labels']    = array( 'menu_name' => $args['label'] );
 			$args['menu_icon'] = ( '' === $args['menu_icon'] ) ? 'dashicons-admin-post' : $args['menu_icon'];
 
-			$result = register_post_type( $post_type->name, $args );
+			if ( in_array( $post_type->name, $enabled_post_types ) ) {
+				$result = register_post_type( $post_type->name, $args );
+			}
 		}
 	}
 
