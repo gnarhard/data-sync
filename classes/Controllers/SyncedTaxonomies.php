@@ -35,6 +35,7 @@ class SyncedTaxonomies
 
     public static function save(object $data)
     {
+//    	$existing_taxonomy = SyncedTaxonomy::get( $id );
         $existing_taxonomies = (array) self::get_id_from_slug($data->name);
 
         if (count($existing_taxonomies)) {

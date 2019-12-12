@@ -5,80 +5,72 @@ namespace DataSync\Models;
 
 use DataSync\Models\DB;
 
-class SyncedTaxonomy
-{
-    public static $table_name = 'data_sync_custom_taxonomies';
+class SyncedTaxonomy {
+	public static $table_name = 'data_sync_custom_taxonomies';
 
-    public static function get(int $id)
-    {
-        $db = new DB(self::$table_name);
+	public static function get( int $id ) {
+		$db = new DB( self::$table_name );
 
-        return $db->get($id);
-    }
+		return $db->get( $id );
+	}
 
-    public static function get_all()
-    {
-        $db = new DB(self::$table_name);
+	public static function get_all() {
+		$db = new DB( self::$table_name );
 
-        return $db->get_all();
-    }
+		return $db->get_all();
+	}
 
-    public static function get_where(array $args)
-    {
-        $db = new DB(self::$table_name);
+	public static function get_where( array $args ) {
+		$db = new DB( self::$table_name );
 
-        return $db->get_where($args);
-    }
+		return $db->get_where( $args );
+	}
 
-    public static function create(object $data)
-    {
-        $args    = array(
-            'name'         => $data->name,
-            'data'         => wp_json_encode($data),
-            'date_created' => current_time('mysql', 1),
-        );
-        $sprintf = array(
-            '%s',
-            '%s',
-        );
+	public static function create( object $data ) {
+		$args    = array(
+			'name'         => $data->name,
+			'data'         => wp_json_encode( $data ),
+			'date_created' => current_time( 'mysql', 1 ),
+		);
+		$sprintf = array(
+			'%s',
+			'%s',
+		);
 
-        $db = new DB(self::$table_name);
+		$db = new DB( self::$table_name );
 
-        return $db->create($args, $sprintf);
-    }
+		return $db->create( $args, $sprintf );
+	}
 
-    public static function update(object $data)
-    {
-        $args = array(
-            'name' => $data->name,
-            'data' => wp_json_encode($data)
-        );
+	public static function update( object $data ) {
+		$args = array(
+			'name' => $data->name,
+			'data' => wp_json_encode( $data )
+		);
 
-        $where = [ 'id' => $data->id ];
+		$where = [ 'id' => $data->id ];
 
-        $db = new DB(self::$table_name);
+		$db = new DB( self::$table_name );
 
-        return $db->update($args, $where);
-    }
+		return $db->update( $args, $where );
+	}
 
-    public static function delete($id)
-    {
-        $db = new DB(self::$table_name);
+	public static function delete( $id ) {
+		$db = new DB( self::$table_name );
 
-        return $db->delete($id);
-    }
+		return $db->delete( $id );
+	}
 
-    public function create_db_table()
-    {
-        global $wpdb;
-        $result = $wpdb->query(
-            'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
+	public function create_db_table() {
+		global $wpdb;
+		$result = $wpdb->query( 'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
 	        id INT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        name              VARCHAR(255),
 	        data              json,
+	        source_object_id    INT,
+	        receiver_object_id      INT,
 	        date_created    DATETIME NOT NULL
-	    );'
-        );
-    }
+	    );' );
+	}
 }

@@ -67,17 +67,18 @@ class Message
             result.message = 'Server error encountered.';
         }
 
-        // console.log(result)
+        Message.admin_message(result);
+
+        Processes.delete(process.id);
 
         $ = jQuery;
         $('#synced_post-' + process.source_post_id).removeClass('loading');
         $('#synced_post-' + process.source_post_id).addClass('flash_error');
-        $('#post-189').toggle();
-
-        Message.admin_message(result);
+        $('#post-'+process.source_post_id).toggle();
 
         $('#' + 'push_post_now_' + process.source_post_id).attr('disabled', false);
-        Processes.delete(process.id);
+        $('#bulk_data_push').removeAttribute('disabled');
+        $('#bulk_data_push').removeClass('loading');
 
         return result;
     }
