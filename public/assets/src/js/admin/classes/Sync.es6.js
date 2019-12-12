@@ -346,7 +346,8 @@ class Sync
                     admin_message.message = single_receiver_data.data.message;
                     Message.admin_message(admin_message);
                 });
-            });
+            })
+            .catch(message => Message.handle_error(message, process));
 
     }
 
