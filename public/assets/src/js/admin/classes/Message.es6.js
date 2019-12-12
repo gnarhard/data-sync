@@ -69,16 +69,22 @@ class Message
 
         Message.admin_message(result);
 
-        Processes.delete(process.id);
-
         $ = jQuery;
-        $('#synced_post-' + process.source_post_id).removeClass('loading');
-        $('#synced_post-' + process.source_post_id).addClass('flash_error');
-        $('#post-'+process.source_post_id).toggle();
 
-        $('#' + 'push_post_now_' + process.source_post_id).attr('disabled', false);
-        $('#bulk_data_push').removeAttribute('disabled');
-        $('#bulk_data_push').removeClass('loading');
+        if ( process.source_post_id ) {
+            $('#synced_post-' + process.source_post_id).removeClass('loading');
+            $('#synced_post-' + process.source_post_id).addClass('flash_error');
+            $('#post-'+process.source_post_id).toggle();
+            $('#' + 'push_post_now_' + process.source_post_id).attr('disabled', false);
+        } else {
+            document.getElementById('bulk_data_push').removeAttribute('disabled');
+            $('#bulk_data_push').removeClass('loading');
+
+            let syndicated_posts = new SyndicatedPosts();
+            syndicated_posts.refresh_view(process.id);
+        }
+
+        Processes.delete(process.id);
 
         return result;
     }

@@ -124,9 +124,17 @@ class Receiver {
 			$response->message      = $this->source_data->filename . ' synced to ' . $this->source_data->receiver_site_url;
 
 		} elseif ( false === $this->source_data->media_package ) {
-			$this->sync_options_and_meta();
+
+			// UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
+			$this->update_wp_options();
+
 			$logs = new Logs();
-			$logs->set( 'OPTIONS AND META SYNCED.' );
+			$logs->set( 'Options synced.' );
+
+			// ADD AND SAVE ACF FIELDS
+			ACFs::save_acf_fields( $this->source_data->acf );
+			$logs = new Logs();
+			$logs->set( 'ACF fields synced.' );
 
 			$this->sync_posts();
 
@@ -135,7 +143,17 @@ class Receiver {
 			$this->update_post_types();
 
 			$logs = new Logs();
-			$logs->set( 'POSTS SYNCED.' );
+			$logs->set( 'Post types synced.' );
+
+			// ADD AND SAVE ALL TAXONOMIES.
+			$this->update_taxonomies();
+			$logs = new Logs();
+			$logs->set( 'Taxonomies synced.' );
+
+			// ADD AND SAVE ALL TERMS.
+			$this->update_terms();
+			$logs = new Logs();
+			$logs->set( 'Terms synced.' );
 
 			$response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
 			$response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
@@ -178,23 +196,6 @@ class Receiver {
 				}
 			}
 		}
-	}
-
-	private function sync_options_and_meta() {
-
-		// UPDATE LOCAL OPTIONS WITH FRESH SOURCE OPTION DATA.
-		$this->update_wp_options();
-
-		// ADD AND SAVE ACF FIELDS
-		ACFs::save_acf_fields( $this->source_data->acf );
-		$logs = new Logs();
-		$logs->set( 'ACF fields synced.' );
-
-		// ADD AND SAVE ALL TAXONOMIES.
-		$this->update_taxonomies();
-
-		// ADD AND SAVE ALL TERMS.
-		$this->update_terms();
 	}
 
 	private function update_terms() {
