@@ -121,6 +121,7 @@ class Receiver {
 		if ( $this->source_data->media_package ) {
 			$media = new Media();
 			$media->update( $this->source_data );
+			$media->repair_acf_media_ids();
 
 			$response->synced_posts = SyncedPost::get_all_and_sort( [ 'date_modified' => 'DESC' ], $this->source_data->start_time );
 			$response->logs         = Log::get_all_and_sort( [ 'datetime' => 'DESC' ], $this->source_data->start_time );
