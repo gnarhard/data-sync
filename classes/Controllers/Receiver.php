@@ -37,11 +37,14 @@ class Receiver {
 		global $wpdb;
 		$db               = new DB();
 		$sql_statements   = array();
-		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_post_types';
-		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_taxonomies';
+
+		if ( '0' === get_option( 'source_site' ) ) {
+			$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_post_types';
+			$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_taxonomies';
+			$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_terms';
+		}
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_log';
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_posts';
-		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_terms';
 
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'posts';
 		$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'postmeta';
