@@ -212,11 +212,18 @@ class Posts {
 		foreach ( $post_meta as $meta ) {
 			foreach ( $meta as $value ) {
 				if ( false !== strpos( $value, get_site_url() ) ) {
+					// Get any images that are saved by url
 					$value  = str_replace( '-scaled', '', $value );
 					$query  = "SELECT ID FROM {$wpdb->prefix}posts WHERE guid = '$value' AND post_type = 'attachment'";
 					$result = $wpdb->get_results( $query );
 					if ( ( ! is_wp_error( $result ) ) && ( ! empty( $result ) ) ) {
 						$image_ids[] = (int) $result[0]->ID;
+					}
+				} elseif ( is_numeric( $value ) ) {
+					// get any images that are saved by ID.
+					$media_post = get_post( $value );
+					if ( ! empty( $media_post ) ) {
+						$image_ids[] = (int) $media_post->ID;
 					}
 				}
 			}
