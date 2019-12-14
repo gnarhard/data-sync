@@ -14,6 +14,7 @@ use DataSync\Tools\Helpers;
 
 
 class Posts {
+
 	public $view_namespace = 'DataSync';
 
 	public function __construct() {
@@ -605,6 +606,27 @@ class Posts {
 					}
 				}
 
+				// Get orphaned media before ACF messes with the metadata
+//				foreach ( $post->post_meta as $meta_key => $meta_value ) {
+//					foreach ( $meta_value as $value ) {
+//						$acf_field = get_field_object( $value, $post->ID );
+//
+//						if ( false !== $acf_field ) {
+//							if ( ( 'image' === $acf_field['type'] ) || ( 'file' === $acf_field['type'] ) ) {
+//
+//								$orphaned_media   = get_post_meta( $receiver_post_id, 'orphaned_media' );
+//								$orphaned_media[] = array(
+//									'source_post_id' => (int) get_field( $acf_field['name'], $receiver_post_id ),
+//									'meta_key'       => $meta_key,
+//								);
+//								update_post_meta( $receiver_post_id, 'orphaned_media', $orphaned_media );
+//
+//							}
+//						}
+//					}
+//				}
+
+
 				// Yoast and ACF data will be in here.
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
@@ -614,7 +636,28 @@ class Posts {
 						continue;
 					}
 
+
 					foreach ( $meta_value as $value ) {
+
+						$acf_field = get_field_object( $value, $post->ID );
+
+						if ( false !== $acf_field ) {
+							if ( ( 'image' === $acf_field['type'] ) || ( 'file' === $acf_field['type'] ) ) {
+
+								$acf_meta_key   = $acf_field['name'];
+								$source_post_id = (int) $post->post_meta->$acf_meta_key[0];
+								$orphaned_media = get_post_meta( $receiver_post_id, 'orphaned_media' );
+								if ( ! empty( $orphaned_media ) ) {
+									$orphaned_media = $orphaned_media[0];
+								}
+								$orphaned_media[] = array(
+									'source_post_id' => $source_post_id,
+									'meta_key'       => $acf_field['name'],
+								);
+								update_post_meta( $receiver_post_id, 'orphaned_media', $orphaned_media );
+
+							}
+						}
 
 						// FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
 						$upload_dir = wp_get_upload_dir();
@@ -633,7 +676,6 @@ class Posts {
 						}
 
 						$updated = update_post_meta( $receiver_post_id, $meta_key, $value );
-
 
 					}
 				}

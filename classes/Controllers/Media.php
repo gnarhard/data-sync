@@ -220,4 +220,36 @@ class Media {
 		}
 	}
 
+	public function repair_acf_media_ids() {
+
+		$post_types = Options::receiver()->enabled_post_types;
+		$posts      = Posts::get_all( $post_types );
+
+		foreach ( $posts as $post_types ) {
+			foreach ( $post_types as $post ) {
+
+				$orphaned_media = get_post_meta( $post->ID, 'orphaned_media' );
+
+				if ( ! empty( $orphaned_media ) ) {
+					$orphaned_media = $orphaned_media[0];
+					foreach ( $orphaned_media as $orphan ) {
+						$args = array(
+							'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+							'source_post_id'   => $orphan['source_post_id'],
+						);
+
+						$synced_post = SyncedPost::get_where( $args );
+
+						if ( $synced_post ) {
+							$updated = update_post_meta( $post->ID, $orphan['meta_key'], (int) $synced_post[0]->receiver_post_id );
+						}
+					}
+					$deleted = delete_post_meta( $post->ID, 'orphaned_media' );
+				}
+
+			}
+		}
+
+	}
+
 }
