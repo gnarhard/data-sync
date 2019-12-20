@@ -54,14 +54,14 @@ class Load
                 $this->load_once();
             }
 
-            foreach ($blog_ids as $index => $blog_id) {
+            foreach ($blog_ids as $index => $wp_site) {
 
                 // NEVER INSTALL ON MASTER NETWORK SITE.
                 if ($network_blog_id === get_current_blog_id()) {
                     continue;
                 }
 
-                switch_to_blog($blog_id);
+                switch_to_blog($wp_site->blog_id);
                 $this->activate();
                 restore_current_blog();
             }

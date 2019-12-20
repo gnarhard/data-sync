@@ -442,7 +442,6 @@ class Sync
 	async send_media( media_package )
 	{
 		let source_package = JSON.parse( media_package );
-		// console.log('Source package before create_remote_request(): ',source_package)
 
 		const response = await fetch( Helpers.trailingslashit( source_package.receiver_site_url ) + 'wp-json/data-sync/v1/sync', {
 			method: 'POST',
