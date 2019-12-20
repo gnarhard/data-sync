@@ -10,11 +10,11 @@ use DataSync\Controllers\Logs;
  *
  */
 function display_source_input() { ?>
-    <input type="radio" name="source_site" id="source_site"
-           value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
+    <input type="radio" name="source_site""
+    value="1" <?php checked( '1', get_option( 'source_site' ) ); ?>/> Source
     <br>
-    <input type="radio" name="source_site" id="source_site"
-           value="0" <?php checked( '0', get_option( 'source_site' ) ); ?>/> Receiver
+    <input type="radio" name="source_site""
+    value="0" <?php checked( '0', get_option( 'source_site' ) ); ?>/> Receiver
 	<?php
 }
 
@@ -53,10 +53,12 @@ function display_auto_add_cpt_checkbox() {
 
 function display_secret_key() {
 	$auth             = new Auth();
-	$secret_key       = $auth->generate_key();
 	$saved_secret_key = get_option( 'secret_key' );
 	if ( $saved_secret_key ) {
 		$secret_key = $saved_secret_key;
+	} else {
+		$secret_key = $auth->generate_key();
+		update_option( 'secret_key', $secret_key );
 	} ?>
     <input type="text" name="secret_key" value="<?php echo $secret_key; ?>" id="secret_key"/>
 	<?php
@@ -67,9 +69,9 @@ function display_secret_key() {
  */
 function display_notified_users() {
 	$users_query = new WP_User_Query( array(
-			// 'role' => 'administrator',
-			'orderby' => 'display_name',
-		) );  // query to get admin users
+		// 'role' => 'administrator',
+		'orderby' => 'display_name',
+	) );  // query to get admin users
 
 	$users = $users_query->get_results();
 

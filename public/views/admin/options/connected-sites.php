@@ -17,7 +17,7 @@ function display_connected_sites() {
             <th>Name</th>
             <th>URL</th>
             <th>Sync Start</th>
-<!--            <th>Actions</th>-->
+            <th>Actions</th>
         </tr>
         </thead>
 
@@ -31,8 +31,8 @@ function display_connected_sites() {
                     <td id="name"><?php echo esc_html( $site->name ); ?></td>
                     <td id="url"><?php echo esc_url( $site->url ); ?></td>
                     <td id="sync_start"><?php echo esc_html( date( 'g:i a - F j, Y', $local_time ) ); ?></td>
-<!--                    <td id="site---><?php //echo esc_html( $site->id ); ?><!--">-->
-<!--                        <span class="dashicons dashicons-trash remove_site"></span>-->
+                    <td id="site-<?php echo esc_html( $site->id ); ?>">
+                        <span class="dashicons dashicons-trash remove_site"></span>
 <!--                    </td>-->
                 </tr>
                 <?php
