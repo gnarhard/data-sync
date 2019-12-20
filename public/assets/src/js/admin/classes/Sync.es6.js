@@ -5,6 +5,7 @@ import ConnectedSites from './ConnectedSites.es6.js';
 import Settings from './Settings.es6.js';
 import SyndicatedPosts from './SyndicatedPosts.es6.js';
 import Processes from './Processes.es6.js';
+import Helpers from '../../Helpers.es6';
 
 class Sync
 {
@@ -95,7 +96,7 @@ class Sync
 		let receiver_data_requests = [];
 
 		for ( const [ index, site ] of process.data.source_data.connected_sites.entries() ) {
-			receiver_data_requests.push( fetch( site.url + '/wp-json/data-sync/v1/receiver/get_data' ) );
+			receiver_data_requests.push( fetch( Helpers.trailingslashit( site.url ) + 'wp-json/data-sync/v1/receiver/get_data' ) );
 		}
 
 		return Promise.all( receiver_data_requests ) // send all requests for package
@@ -443,7 +444,7 @@ class Sync
 		let source_package = JSON.parse( media_package );
 		// console.log('Source package before create_remote_request(): ',source_package)
 
-		const response = await fetch( source_package.receiver_site_url + '/wp-json/data-sync/v1/sync', {
+		const response = await fetch( Helpers.trailingslashit( source_package.receiver_site_url ) + 'wp-json/data-sync/v1/sync', {
 			method: 'POST',
 			body: JSON.stringify( source_package )
 		} );
@@ -521,7 +522,7 @@ class Sync
 		let receiver_prevalidation_requests = [];
 
 		process.connected_sites.forEach( site => {
-			receiver_prevalidation_requests.push( fetch( site.url + '/wp-json/data-sync/v1/receiver/prevalidate' ) );
+			receiver_prevalidation_requests.push( fetch( Helpers.trailingslashit( site.url ) + 'wp-json/data-sync/v1/receiver/prevalidate' ) );
 		} );
 
 		return Promise.all( receiver_prevalidation_requests ) // send all requests for package
@@ -539,7 +540,7 @@ class Sync
 		let source_package = JSON.parse( prepped_source_package );
 
 		process.receiver_sync_requests.push(
-			fetch( source_package.receiver_site_url + '/wp-json/data-sync/v1/sync', {
+			fetch( Helpers.trailingslashit( source_package.receiver_site_url )+ 'wp-json/data-sync/v1/sync', {
 				method: 'POST',
 				body: JSON.stringify( source_package )
 			} )
