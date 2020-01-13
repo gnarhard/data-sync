@@ -185,7 +185,7 @@ class Posts {
 		$media->image = Posts::get_images( $post_id );
 
 		if ( has_post_thumbnail( $post_id ) ) {
-			$media->featured_image              = get_post( get_post_thumbnail_id( $post_id ) );
+			$media->featured_image              = ( null === get_post( get_post_thumbnail_id( $post_id ) ) ) ? new stdClass() : get_post( get_post_thumbnail_id( $post_id ) );
 			$media->featured_image->featured    = true;
 			$media->featured_image->type        = 'image';
 			$media->featured_image->post_parent = $post_id;
@@ -268,7 +268,7 @@ class Posts {
 		$unique_image_ids = array_unique( $image_ids );
 
 		foreach ( $unique_image_ids as $image_id ) {
-			$post              = get_post( $image_id );
+			$post              = ( empty( get_post( $image_id ) ) ) ? new stdClass() : get_post( $image_id );
 			$post->post_parent = $post_id;
 			$images[]          = $post;
 		}
