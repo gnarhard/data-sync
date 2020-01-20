@@ -637,7 +637,7 @@ class Posts {
 //					}
 //				}
 
-
+echo;
 				// Yoast and ACF data will be in here.
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
