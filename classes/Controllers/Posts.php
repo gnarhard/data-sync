@@ -184,12 +184,16 @@ class Posts {
 
 		$media->image = Posts::get_images( $post_id );
 
-		if ( has_post_thumbnail( $post_id ) ) {
-			$media->featured_image              = get_post( get_post_thumbnail_id( $post_id ) );
-			$media->featured_image->featured    = true;
-			$media->featured_image->type        = 'image';
-			$media->featured_image->post_parent = $post_id;
+		// Checks if image exists before adding data.
+		if ( null !== get_post( get_post_thumbnail_id( $post_id ) ) ) {
+			if ( has_post_thumbnail( $post_id ) ) {
+				$media->featured_image              = get_post( get_post_thumbnail_id( $post_id ) );
+				$media->featured_image->featured    = true;
+				$media->featured_image->type        = 'image';
+				$media->featured_image->post_parent = $post_id;
+			}
 		}
+
 
 		$media->audio = Posts::get_audio( $post_id );
 		$media->video = Posts::get_video( $post_id );
