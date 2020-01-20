@@ -65,6 +65,8 @@ class Message
 
         if('Unexpected token < in JSON at position 0' === result.message) {
             result.message = 'Server error encountered.';
+            result.message += '<br>';
+            result.message += error.html();
         }
 
         Message.admin_message(result);
