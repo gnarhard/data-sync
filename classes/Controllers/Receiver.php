@@ -35,8 +35,8 @@ class Receiver {
 	 */
 	public function start_fresh() {
 		global $wpdb;
-		$db               = new DB();
-		$sql_statements   = array();
+		$db             = new DB();
+		$sql_statements = array();
 
 		if ( '0' === get_option( 'source_site' ) ) {
 			$sql_statements[] = 'TRUNCATE TABLE ' . $wpdb->prefix . 'data_sync_custom_post_types';
@@ -213,12 +213,12 @@ class Receiver {
 	}
 
 	private function update_post_types() {
+
+		PostTypes::save_options( $this->source_data->options->push_enabled_post_types, $this->source_data->options->enable_new_cpts );
+
 		// SAVES POST TYPES TO DB.
 		PostTypes::process( $this->source_data->options->push_enabled_post_types );
 
-		if ( true === $this->source_data->options->enable_new_cpts ) {
-			PostTypes::save_options();
-		}
 		$logs = new Logs();
 		$logs->set( 'Post types synced.' );
 	}

@@ -208,9 +208,11 @@ function display_post_types_to_accept() {
 	$synced_post_types = array();
 
 	if ( ! empty( $synced_post_types_db_data ) ) {
-	    foreach ($synced_post_types_db_data as $synced_post_type ) {
-		    $synced_post_types[] = $synced_post_type->name;
-        }
+		foreach ( $synced_post_types_db_data as $cpt ) {
+			if ( '' !== $cpt->name ) {
+				$synced_post_types[] = $cpt->name;
+			}
+		}
     }
 
 	$registered_post_types = get_post_types( $args, $output, $operator );
