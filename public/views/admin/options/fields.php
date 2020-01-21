@@ -3,6 +3,7 @@
 use DataSync\Controllers\Auth;
 use DataSync\Controllers\Receiver;
 use DataSync\Models\ConnectedSite;
+use DataSync\Models\PostType;
 use WP_User_Query;
 use DataSync\Controllers\Logs;
 
@@ -203,21 +204,29 @@ function display_post_types_to_accept() {
 	$output   = 'names'; // names or objects, note names is the default
 	$operator = 'and'; // 'and' or 'or'
 
-	$registered_post_types = get_post_types( $args, $output, $operator );
+	$synced_post_types_db_data = PostType::get_all();
+	$synced_post_types = array();
 
-	$allowed_post_types = get_option( 'enabled_post_types' );
-	if ( ! $allowed_post_types ) {
-		$allowed_post_types = array();
-	} ?>
+	if ( ! empty( $synced_post_types_db_data ) ) {
+	    foreach ($synced_post_types_db_data as $synced_post_type ) {
+		    $synced_post_types[] = $synced_post_type->name;
+        }
+    }
+
+	$registered_post_types = get_post_types( $args, $output, $operator );
+	$allowed_post_types = ( ! get_option( 'enabled_post_types' ) ) ? array() : get_option( 'enabled_post_types' );
+	$available_post_types = array_unique( array_merge( $synced_post_types, $registered_post_types ) );
+	?>
     <select name="enabled_post_types[]" multiple id="enabled_post_types">
 		<?php
 
-		foreach ( $registered_post_types as $key => $post_type ) {
+		foreach ( $available_post_types as $key => $post_type ) {
 			if ( ( 'page' === $post_type ) || ( 'attachment' === $post_type ) ) {
 				continue;
 			}
-			$post_type_object = get_post_type_object( $post_type ); ?>
-            <option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ), $allowed_post_types ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
+//			$post_type_object = get_post_type_object( $post_type );
+			?>
+            <option value="<?php echo esc_html( $post_type ); ?>" <?php echo selected( in_array( trim( $post_type ), $allowed_post_types ) ); ?>><?php echo esc_html( $post_type ); ?></option>
 			<?php
 		} ?>
     </select>
