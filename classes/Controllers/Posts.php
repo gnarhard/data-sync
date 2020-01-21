@@ -273,6 +273,9 @@ class Posts {
 
 		foreach ( $unique_image_ids as $image_id ) {
 			$post              = get_post( $image_id );
+			if ( null === $post ) {
+				continue;
+			}
 			$post->post_parent = $post_id;
 			$images[]          = $post;
 		}
