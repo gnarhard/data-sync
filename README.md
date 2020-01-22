@@ -8,6 +8,7 @@ Multi-site compatible WordPress data syndicator. Syndicates post data, post meta
 <li>Install Custom Post Types UI</li>
 <li>Set source site in plugin settings</li>
 <li>Add connected sites</li>
+<li>Double check everything has an SSL (https)</li>
 </ol>
 
 <b>Syncing</b>
