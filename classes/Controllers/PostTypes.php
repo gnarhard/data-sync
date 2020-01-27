@@ -11,6 +11,7 @@ use stdClass;
 
 /**
  * Class PostTypes
+ *
  * @package DataSync\Controllers
  */
 class PostTypes {
@@ -20,7 +21,7 @@ class PostTypes {
 	 * Registers all CTPs
 	 */
 	public function __construct() {
-		add_action( 'init', [ $this, 'register' ] );
+		add_action( 'init', array( $this, 'register' ) );
 		new PostTypesRoutes( $this );
 	}
 
@@ -30,7 +31,7 @@ class PostTypes {
 	 * @return mixed
 	 */
 	public static function get_id_from_slug( string $slug ) {
-		$args = [ 'name' => $slug ];
+		$args = array( 'name' => $slug );
 
 		return PostType::get_where( $args );
 	}
@@ -125,17 +126,20 @@ class PostTypes {
 	/**
 	 *
 	 * Saves enabled custom post types for plugin option
-	 *
 	 */
 	public static function save_options( $push_enabled_post_types_from_source, $enable_new_cpts ) {
 
-		$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : [];
+		$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : array();
 		$synced_custom_post_types        = PostType::get_all();
 		$synced_custom_post_types_to_add = array();
 		$registered_custom_post_types    = cptui_get_post_type_data();
-		$registered_post_types           = get_post_types( [
-			'public' => true,
-		], 'names', 'and' );
+		$registered_post_types           = get_post_types(
+			array(
+				'public' => true,
+			),
+			'names',
+			'and'
+		);
 		$push_enabled_post_types         = array();
 		foreach ( (array) $push_enabled_post_types_from_source as $post_type => $post_type_data ) {
 			$push_enabled_post_types[] = $post_type;
@@ -180,7 +184,7 @@ class PostTypes {
 				}
 			}
 
-			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( in_array( ! $available_cpt, $enabled_post_types ) ) ) {
+			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
 				// If post type is synced or registered but not enabled, remove it from enabled post types.
 				foreach ( $updated_enabled_post_types as $key => $ept ) {
 					if ( $available_cpt === $ept ) {
@@ -189,7 +193,7 @@ class PostTypes {
 				}
 			}
 
-			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) ) {
+			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
 				// If post type isn't synced and the option to auto enable on first push is off, remove it from enabled post types.
 				foreach ( $updated_enabled_post_types as $key => $ept ) {
 					if ( $available_cpt === $ept ) {
@@ -197,7 +201,6 @@ class PostTypes {
 					}
 				}
 			}
-
 		}
 
 		$unique_updated_enabled_post_types = array_unique( $updated_enabled_post_types );
@@ -214,11 +217,10 @@ class PostTypes {
 
 	/**
 	 * Registers CTPs on plugin load
-	 *
 	 */
 	public function register() {
 		$synced_custom_post_types = PostType::get_all();
-		$enabled_post_types       = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : [];
+		$enabled_post_types       = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : array();
 
 		foreach ( $synced_custom_post_types as $post_type ) {
 			$args = (array) json_decode( $post_type->data );

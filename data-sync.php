@@ -6,7 +6,7 @@ use DataSync\Controllers\Load;
 
 /**
  * Plugin Name: Data Sync
- * Version:     1.0.0
+ * Version:     v1.0.1-beta
  * Description: Multi-site compatible WordPress data syndicator. Syndicates post data, post meta, custom post types, custom ACF fields and data, and Yoast data with multiple authenticated sites.
  * Author:      Copper Leaf Creative
  * Author URI:  https://copperleafcreative.com
