@@ -180,7 +180,7 @@ class PostTypes {
 				}
 			}
 
-			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( in_array( ! $available_cpt, $enabled_post_types ) ) ) {
+			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
 				// If post type is synced or registered but not enabled, remove it from enabled post types.
 				foreach ( $updated_enabled_post_types as $key => $ept ) {
 					if ( $available_cpt === $ept ) {
@@ -189,7 +189,7 @@ class PostTypes {
 				}
 			}
 
-			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) ) {
+			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
 				// If post type isn't synced and the option to auto enable on first push is off, remove it from enabled post types.
 				foreach ( $updated_enabled_post_types as $key => $ept ) {
 					if ( $available_cpt === $ept ) {
