@@ -620,26 +620,6 @@ class Posts {
 					}
 				}
 
-				// Get orphaned media before ACF messes with the metadata
-//				foreach ( $post->post_meta as $meta_key => $meta_value ) {
-//					foreach ( $meta_value as $value ) {
-//						$acf_field = get_field_object( $value, $post->ID );
-//
-//						if ( false !== $acf_field ) {
-//							if ( ( 'image' === $acf_field['type'] ) || ( 'file' === $acf_field['type'] ) ) {
-//
-//								$orphaned_media   = get_post_meta( $receiver_post_id, 'orphaned_media' );
-//								$orphaned_media[] = array(
-//									'source_post_id' => (int) get_field( $acf_field['name'], $receiver_post_id ),
-//									'meta_key'       => $meta_key,
-//								);
-//								update_post_meta( $receiver_post_id, 'orphaned_media', $orphaned_media );
-//
-//							}
-//						}
-//					}
-//				}
-
 				// Yoast and ACF data will be in here.
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
