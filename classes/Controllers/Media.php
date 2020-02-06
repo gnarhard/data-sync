@@ -13,6 +13,7 @@ use DataSync\Models\Log;
 
 /**
  * Class Media
+ *
  * @package DataSync\Controllers
  */
 class Media {
@@ -24,6 +25,22 @@ class Media {
 	 */
 	public function __construct() {
 		new MediaRoutes( $this );
+		// add_action( 'updated_postmeta', array( $this, 'update_post_modified' ), 4, 10 );
+	}
+
+	public function update_post_modified( $meta_id, $object_id, $meta_key, $meta_value ) {
+		if ( ( $object_id ) && ( '_featured_image' === $meta_key ) ) {
+			// Get the current time
+			$time = current_time( 'mysql' );
+			// Form an array of data to be updated
+			$post_data = array(
+				'ID'                => $object_id,
+				'post_modified'     => $time,
+				'post_modified_gmt' => get_gmt_from_date( $time ),
+			);
+			// Update the post
+			wp_update_post( $post_data );
+		}
 	}
 
 
@@ -35,7 +52,7 @@ class Media {
 		$synced_posts = new SyncedPosts();
 		$synced_posts = (array) $synced_posts->get_all()->get_data();
 
-		$this->media = [];
+		$this->media = array();
 
 		foreach ( $all_posts as $post_type ) {
 			foreach ( $post_type as $post ) {
@@ -60,7 +77,6 @@ class Media {
 						}
 					}
 				}
-
 
 				$audio_attachments = (array) $post->media->audio;
 				foreach ( $audio_attachments as $key => $audio ) {
@@ -88,15 +104,16 @@ class Media {
 			}
 		}
 
-
 		$this->json = array();
 		$url        = get_site_url();
+		$options    = Options::source();
 
 		foreach ( $this->media as $media ) {
 			$path                            = wp_parse_url( $media->guid ); // ['host'], ['scheme'], and ['path'].
 			$data                            = new stdClass();
 			$data->media                     = $media;
 			$data->media_package             = true;
+			$data->options                   = $options;
 			$data->receiver_parent_post_type = get_post_type( (int) $media->post_parent );
 			$data->filename                  = basename( $path['path'] );
 			$data->receiver_site_id          = (int) $site->id;
@@ -139,7 +156,19 @@ class Media {
 
 		// CHECK IF PARENT POST TYPE MATCHES ENABLED POST TYPES ON RECEIVER.
 		if ( in_array( $media->receiver_parent_post_type, $receiver_options->enabled_post_types ) ) {
-			$this->insert_into_wp( $media );
+
+			$args        = array(
+				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
+				'source_post_id'   => (int) $media->media->post_parent,
+			);
+			$synced_post = SyncedPost::get_where( $args );
+
+			// Check if image's parent is diverged and shouldn't be synced.
+			if ( ! empty( $synced_post ) ) {
+				if ( ( '1' !== $synced_post[0]->diverged ) || ( true === $media->options->overwrite_receiver_post_on_conflict ) ) {
+					$this->insert_into_wp( $media );
+				}
+			}
 		}
 
 	}
@@ -167,18 +196,18 @@ class Media {
 				'guid'           => (string) $file_url,
 			);
 
-			$args        = array(
+			$args              = array(
 				'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 				'source_post_id'   => (int) $source_data->media->ID,
 			);
-			$synced_post = SyncedPost::get_where( $args );
+			$synced_media_post = SyncedPost::get_where( $args );
 
 			// SET DIVERGED TO FALSE TO OVERWRITE EVERY TIME.
 			$source_data->media->diverged = false;
 
-			if ( count( $synced_post ) ) {
+			if ( count( $synced_media_post ) ) {
 				$source_data->media->diverged = false;
-				$attachment_id                = $synced_post[0]->receiver_post_id;
+				$attachment_id                = $synced_media_post[0]->receiver_post_id;
 			} else {
 				$attachment_id = wp_insert_attachment( $attachment, $file_path, (int) $source_data->media->receiver_post_id );
 			}
@@ -207,13 +236,13 @@ class Media {
 	 */
 	private function update_thumbnail_id( $post, $attachment_id ) {
 
-		$args               = array(
+		$args                     = array(
 			'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
 			'source_post_id'   => $post->post_parent,
 		);
-		$synced_post_parent = SyncedPost::get_where( $args );
-		if ( $synced_post_parent ) {
-			$updated = update_post_meta( (int) $synced_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
+		$synced_media_post_parent = SyncedPost::get_where( $args );
+		if ( $synced_media_post_parent ) {
+			$updated = update_post_meta( (int) $synced_media_post_parent[0]->receiver_post_id, '_thumbnail_id', $attachment_id );
 		} else {
 			$logs = new Logs();
 			$logs->set( 'Post thumbnail not updated for ' . $post->post_title, true );
@@ -246,7 +275,6 @@ class Media {
 					}
 					$deleted = delete_post_meta( $post->ID, 'orphaned_media' );
 				}
-
 			}
 		}
 
