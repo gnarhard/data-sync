@@ -34,6 +34,15 @@ class Load
             $this->no_site_type_setting = false;
         }
 
+	    // ALLOW CORS. Has to be init if you want headers changed globally for any request!
+	    add_action( 'init', function() {
+		    header( 'Access-Control-Allow-Origin: *' );
+		    header( 'Access-Control-Allow-Methods: *' );
+		    header( 'Access-Control-Allow-Credentials: true' );
+		    // This allows us to discover wp-json or ?rest_route= with CORS.
+		    header( 'Access-Control-Expose-Headers: Link', false );
+	    } );
+
         $this->check_multisite();
     }
 
@@ -76,10 +85,6 @@ class Load
 
     public function activate()
     {
-
-        // PLUGIN WON'T WORK WITHOUT POSTNAME PERMALINK STRUCTURE. SO THIS NEEDS TO BE HARDCODED.
-        update_option('permalink_structure', '/%postname%/');
-
         // FLUSH REWRITE RULES TO PREPARE FOR NEW WP API ROUTES
         register_activation_hook(DATA_SYNC_PATH . 'data-sync.php', 'flush_rewrite_rules');
     }

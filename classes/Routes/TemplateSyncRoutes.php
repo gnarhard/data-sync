@@ -19,14 +19,14 @@ class TemplateSyncRoutes {
 	}
 
 	public function register_routes() {
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/templates/start_sync', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'templates/start_sync', array(
 			array(
 				'methods'  => WP_REST_Server::EDITABLE,
 				'callback' => array( $this->controller_class, 'initiate' ),
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/templates/sync', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'templates/sync', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this->controller_class, 'receive' ),

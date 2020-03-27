@@ -17,6 +17,7 @@ use WP_Http_Cookie;
 
 /**
  * Class SourceData
+ *
  * @package DataSync\Controllers
  */
 class SourceData {
@@ -51,11 +52,11 @@ class SourceData {
 
 		if ( 0 !== $post_id ) {
 			// NOT BULK PACKAGE, CLEAR AND SET FOR ONE POST.
-			$post                                                            = (object) Posts::get_single( $post_id );
-			$post_type                                                       = $post->post_type;
+			$post      = (object) Posts::get_single( $post_id );
+			$post_type = $post->post_type;
 			$this->source_data->options->overwrite_receiver_post_on_conflict = true;
 			$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
-			$this->source_data->posts->$post_type                            = [ $post ]; // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
+			$this->source_data->posts->$post_type                            = array( $post ); // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
 		} else {
 			// LOAD ALL POSTS DUE TO BULK REQUEST.
 			$this->source_data->posts = (object) Posts::get_all( array_keys( $this->source_data->options->push_enabled_post_types ) );
@@ -64,9 +65,8 @@ class SourceData {
 		$this->validate();
 		$this->configure_canonical_urls();
 
-
 		$this->source_data->receiver_site_id  = (int) $request->get_url_params()['receiver_site_id'];
-		$args                                 = [ 'id' => $this->source_data->receiver_site_id ];
+		$args                                 = array( 'id' => $this->source_data->receiver_site_id );
 		$connected_site                       = ConnectedSite::get_where( $args );
 		$connected_site                       = $connected_site[0];
 		$this->source_data->receiver_site_url = $connected_site->url;
@@ -78,77 +78,10 @@ class SourceData {
 	}
 
 
-	public function create_request_data( $site ) {
-
-		$post_data                           = new stdClass();
-		$this->source_data->receiver_site_id = (int) $site->id;
-		$post_data->url                      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/receive';
-		$auth                                = new Auth();
-		$post_data->json                     = $auth->prepare( $this->source_data, $site->secret_key );
-
-		return $post_data;
-	}
-
-
-	/**
-	 * Send data to all authorized connected sites
-	 *
-	 */
-	public function push() {
-
-		// COULD BE EMPTY FROM VALIDATION.
-		if ( ! empty( $this->source_data ) ) {
-
-			foreach ( $this->source_data->connected_sites as $site ) {
-
-				$post_data = $this->create_request_data( $site );
-
-				$response = wp_remote_post( $post_data->url, [
-					'body'        => $post_data->json,
-					'httpversion' => '1.0',
-					'sslverify'   => false,
-					'timeout'     => 10,
-					'blocking'    => true,
-				] );
-
-				if ( is_wp_error( $response ) ) {
-					$logs = new Logs();
-					$logs->set( 'Error in SourceData->push() received from ' . $site->url . '. ' . $response->get_error_message(), true );
-
-					return $response;
-				}
-
-			}
-
-			$this->finish_push( wp_remote_retrieve_body( $response ) );
-
-		} else {
-			wp_send_json_error( 'Validation failed.' );
-		}
-
-	}
-
-
-	public function finish_push( $response ) {
-
-		// GET NEW SYNCED POSTS AND LOGS BEFORE MEDIA.
-		$this->get_receiver_data();
-		$this->save_receiver_data();
-
-		// DON'T MOVE!!! NEED NEW SYNCED POSTS FOR THIS TO WORK BUG-FREE.
-		new Media( $this->source_data->posts );
-
-		$this->get_receiver_data();
-		$this->save_receiver_data();
-
-		wp_send_json_success( json_decode( $response ) );
-	}
-
 
 	/**
 	 *
 	 * Truncate source tables for a fresh testing start
-	 *
 	 */
 	public function start_fresh() {
 
@@ -165,7 +98,8 @@ class SourceData {
 
 		foreach ( $connected_sites as $site ) {
 
-			$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/start_fresh';
+			$site     = ConnectedSites::get_api_url( $site );
+			$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'start_fresh';
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
@@ -174,7 +108,6 @@ class SourceData {
 
 				return $response;
 			}
-
 		}
 
 		wp_send_json_success( 'Source and receiver table truncations complete.' );
@@ -182,29 +115,7 @@ class SourceData {
 	}
 
 	/**
-	 *
-	 * Pull receiver logs and synced posts
-	 */
-	private function get_receiver_data() {
-		$this->receiver_logs         = Logs::retrieve_receiver_logs( $this->source_data->start_time );
-		$this->receiver_synced_posts = SyncedPosts::retrieve_from_receiver( $this->source_data->start_time );
-	}
-
-	/**
-	 * Save pulled receiver logs and synced posts to source database
-	 *
-	 */
-	private function save_receiver_data() {
-		Logs::save_to_source( $this->receiver_logs );
-		SyncedPosts::save_all_to_source( $this->receiver_synced_posts );
-		$logs = new Logs();
-		$logs->set( 'Synced receiver error logs to source.' );
-		$logs->set( 'Added receiver synced posts to source.' );
-	}
-
-	/**
 	 * Organize all source data before push
-	 *
 	 */
 	private function consolidate() {
 
@@ -254,9 +165,7 @@ class SourceData {
 						$logs = new Logs();
 						$logs->set( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
 					}
-
 				}
-
 			}
 		}
 
@@ -288,7 +197,7 @@ class SourceData {
 	 */
 	private function validate() {
 		$connected_sites = (array) ConnectedSite::get_all();
-		$site_ids        = [];
+		$site_ids        = array();
 
 		foreach ( $connected_sites as $site ) {
 			$site_ids[] = (int) $site->id;
@@ -351,8 +260,6 @@ class SourceData {
 				$source_data->post_types = array_keys( $source_data->source_options->push_enabled_post_types );
 				$source_data->posts[]    = (object) Posts::get_single( $post_id );
 			}
-
-
 		} elseif ( 'push' === $request->get_url_params()['action'] ) {
 
 			$this->consolidate();

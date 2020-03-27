@@ -1,232 +1,237 @@
-import Message from './Message.es6.js'
-import Sync from './Sync.es6.js'
-import Processes from './Processes.es6.js'
-import Constants from '../../Constants.es6.js'
+import Message from './Message.es6.js';
+import Sync from './Sync.es6.js';
+import Processes from './Processes.es6.js';
+import Constants from '../../Constants.es6.js';
+import ConnectedSites from './ConnectedSites.es6';
+
 
 class SyndicatedPosts {
 
-    constructor () {
+	constructor() {
 
-    }
+	}
 
-    init () {
-        $ = jQuery
-        let self = this
 
-        if (document.getElementById('bulk_data_push')) {
-            document.getElementById('bulk_data_push').onclick = function (e) {
-                e.preventDefault()
+	init() {
+		$        = jQuery;
+		let self = this;
 
-                document.getElementById('syndicated_posts_data').innerHTML = ''
-                document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
+		if ( document.getElementById( 'bulk_data_push' ) ) {
+			document.getElementById( 'bulk_data_push' ).onclick = function( e ) {
+				e.preventDefault();
 
-                $('#bulk_data_push').attr('disabled', 'disabled')
-                $('#bulk_data_push').addClass('loading')
+				document.getElementById( 'syndicated_posts_data' ).innerHTML = '';
+				document.querySelector( '#syndicated_posts_wrap .loading_spinner' ).classList.remove( 'hidden' ); // SHOW
+				// LOADING
+				// SPINNER.
 
-                let process = {
-                    id: btoa(Math.random().toString()),
-                    source_post_id: false,
-                    receiver_site_id: false,
-                    topic: 'Bulk push',
-                    running: true,
-                    button_id: 'bulk_data_push'
-                }
-                Processes.create(process)
+				$( '#bulk_data_push' ).attr( 'disabled', 'disabled' );
+				$( '#bulk_data_push' ).addClass( 'loading' );
 
-                let sync = new Sync()
-                sync.start(process.id)
-            }
-        }
+				let process = {
+					id:               btoa( Math.random().toString() ),
+					source_post_id:   false,
+					receiver_site_id: false,
+					topic:            'Bulk push',
+					running:          true,
+					button_id:        'bulk_data_push'
+				};
+				Processes.create( process );
 
-        if (document.getElementById('refresh_syndicated_posts')) {
-            document.getElementById('refresh_syndicated_posts').onclick = function (e) {
-                document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.remove('hidden') // SHOW LOADING SPINNER.
-                self.refresh_view()
-            }
-        }
+				let sync = new Sync();
+				sync.start( process.id );
+			};
+		}
 
-    }
+		if ( document.getElementById( 'refresh_syndicated_posts' ) ) {
+			document.getElementById( 'refresh_syndicated_posts' ).onclick = function( e ) {
+				document.querySelector( '#syndicated_posts_wrap .loading_spinner' ).classList.remove( 'hidden' ); // SHOW
+				// LOADING
+				// SPINNER.
+				self.refresh_view();
+			};
+		}
 
-    refresh_view (process_id = false) {
+	}
 
-        let process = false
 
-        if (false === process_id) {
-            process = {
-                id: btoa(Math.random().toString()),
-                source_post_id: false,
-                receiver_site_id: false,
-                topic: 'Loading',
-                running: false,
-            }
-            Processes.create(process)
-            process_id = process.id;
-        } else {
-            process = Processes.get(process_id)
-        }
+	refresh_view( process_id = false ) {
 
-        let sync = new Sync()
+		let process = false;
 
-        if (false === process.source_post_id) {
-            document.getElementById('syndicated_posts_data').innerHTML = ''
-        }
+		if ( false === process_id ) {
+			process = {
+				id:               btoa( Math.random().toString() ),
+				source_post_id:   false,
+				receiver_site_id: false,
+				topic:            'Loading',
+				running:          false,
+			};
+			Processes.create( process );
+			process_id = process.id;
+		} else {
+			process = Processes.get( process_id );
+		}
 
-        let admin_message = {}
-        admin_message.process_id = process.id
+		let sync = new Sync();
 
-        admin_message.topic = process.topic
-        admin_message.success = true
-        admin_message.message = 'Starting.'
-        Message.admin_message(admin_message)
+		if ( false === process.source_post_id ) {
+			document.getElementById( 'syndicated_posts_data' ).innerHTML = '';
+		}
 
-        sync.get_source_data(process.id)
-            .then(source_data => {
-                let process = Processes.get(process_id);
-                process.data = {}
-                process.data.source_data = source_data
-                Processes.set(process)
-            })
-            .then(() => sync.get_receiver_data(process.id))
-            .then(receiver_data => {
-                let process = Processes.get(process_id);
-                process.data.receiver_data = receiver_data
-                Processes.set(process)
-            })
-            .then(() => sync.show_posts(process.id))
-            .then(() => this.finish_refresh(process.id))
-            .catch(message => Message.handle_error(message, Processes.get(process_id))) // still doesn't send process.
+		let admin_message        = {};
+		admin_message.process_id = process.id;
+		admin_message.topic      = process.topic;
+		admin_message.success    = true;
+		admin_message.message    = 'Starting. . .';
+		Message.admin_message( admin_message );
 
-    }
+		ConnectedSites.get_all( process.id )
+			.then( () => sync.get_source_data( process.id ) )
+			.then( source_data => {
+				let process              = Processes.get( process_id );
+				process.data             = {};
+				process.data.source_data = source_data;
+				Processes.set( process );
+			} )
+			.then( () => sync.get_receiver_data( process.id ) )
+			.then( () => sync.show_posts( process.id ) )
+			.then( () => this.finish_refresh( process.id ) )
+			.catch( message => Message.handle_error( message, process ) );
 
-    finish_refresh (process_id) {
-        document.querySelector('#syndicated_posts_wrap .loading_spinner').classList.add('hidden')
+	}
 
-        let process = Processes.get(process_id)
 
-        this.init()
-        let admin_message = {}
-        admin_message.process_id = process_id
+	finish_refresh( process_id ) {
+		document.querySelector( '#syndicated_posts_wrap .loading_spinner' ).classList.add( 'hidden' );
 
-        admin_message.topic = process.topic
-        admin_message.success = true
-        admin_message.message = 'Done.'
-        Message.admin_message(admin_message)
-    }
+		let process = Processes.get( process_id );
 
-    display_refreshed_post (retrieved_post, process_id) {
-        let result_array = retrieved_post.split('null')
-        result_array.slice(-1)[0]
-        let html = result_array.join(' ')
-        $ = jQuery
+		this.init();
+		let admin_message        = {};
+		admin_message.process_id = process_id;
 
-        let process = Processes.get(process_id)
+		admin_message.topic   = process.topic;
+		admin_message.success = true;
+		admin_message.message = 'Done.';
+		Message.admin_message( admin_message );
+	}
 
-        if (false === process.source_post_id) {
-            // BULK LOAD ALL
-            $('#syndicated_posts_data').append(html)
-        } else {
-            // REFRESH SINGLE POST
-            $('#post-' + process.source_post_id).remove()
-            $('#synced_post-' + process.source_post_id).replaceWith(html)
-            $('#synced_post-' + process.source_post_id).addClass('flash_success')
-        }
 
-        this.single_post_actions_init()
-    }
+	display_refreshed_post( retrieved_post, process_id ) {
+		let result_array = retrieved_post.split( 'null' );
+		result_array.slice( -1 )[ 0 ];
+		let html = result_array.join( ' ' );
+		$        = jQuery;
 
-    single_post_actions_init () {
-        let self = this
-        $ = jQuery
+		let process = Processes.get( process_id );
 
-        $('.expand_post_details').unbind().click(e => $('#post-' + e.target.dataset.id).toggle())
+		if ( false === process.source_post_id ) {
+			// BULK LOAD ALL
+			$( '#syndicated_posts_data' ).append( html );
+		} else {
+			// REFRESH SINGLE POST
+			$( '#post-' + process.source_post_id ).remove();
+			$( '#synced_post-' + process.source_post_id ).replaceWith( html );
+			$( '#synced_post-' + process.source_post_id ).addClass( 'flash_success' );
+		}
 
-        $('.push_post_now').unbind().click(e => {
-                e.preventDefault()
+		this.single_post_actions_init();
+	}
 
-                let processes = _store.get(Constants.PROCESS)
 
-                let source_post_id = parseInt(e.target.dataset.sourcePostId)
-                let create_new_process = true
+	single_post_actions_init() {
+		let self = this;
+		$        = jQuery;
 
-                processes.forEach(process => {
-                    if (source_post_id === parseInt(process.source_post_id)) {
-                        let admin_message = {}
-                        admin_message.process_id = process.id
-                        admin_message.success = false
-                        admin_message.message = 'Please wait for previous sync on this post to finish.'
+		$( '.expand_post_details' ).unbind().click( e => $( '#post-' + e.target.dataset.id ).toggle() );
 
-                        Message.handle_error(admin_message, process)
-                        create_new_process = false
-                    }
-                })
+		$( '.push_post_now' ).unbind().click( e => {
+			e.preventDefault();
 
-                if (create_new_process) {
-                    $('#' + 'push_post_now_' + source_post_id).attr('disabled', 'disabled')
-                    $('#synced_post-' + source_post_id).addClass('loading')
-                    $('#post-' + source_post_id).addClass('loading')
+			let processes = _store.get( Constants.PROCESS );
 
-                    let process = {
-                        id: btoa(e.target.dataset.sourcePostId),
-                        source_post_id: source_post_id,
-                        receiver_site_id: false,
-                        topic: 'Post ' + source_post_id + ', All receivers',
-                        running: true,
-                        button_id: 'push_post_now_' + source_post_id
-                    }
-                    Processes.create(process)
+			let source_post_id     = parseInt( e.target.dataset.sourcePostId );
+			let create_new_process = true;
 
-                    let sync = new Sync()
-                    sync.start(process.id)
-                }
+			processes.forEach( process => {
+				if ( source_post_id === parseInt( process.source_post_id ) ) {
+					let admin_message        = {};
+					admin_message.process_id = process.id;
+					admin_message.success    = false;
+					admin_message.message    = 'Please wait for previous sync on this post to finish.';
 
-            }
-        )
+					Message.handle_error( admin_message, process );
+					create_new_process = false;
+				}
+			} );
 
-        $('.overwrite_single_receiver').unbind().click(e => {
-                e.preventDefault()
+			if ( create_new_process ) {
+				$( '#' + 'push_post_now_' + source_post_id ).attr( 'disabled', 'disabled' );
+				$( '#synced_post-' + source_post_id ).addClass( 'loading' );
+				$( '#post-' + source_post_id ).addClass( 'loading' );
 
-                let processes = _store.get(Constants.PROCESS)
+				let process = {
+					id:               btoa( e.target.dataset.sourcePostId ),
+					source_post_id:   source_post_id,
+					receiver_site_id: false,
+					topic:            'Post ' + source_post_id + ', All receivers',
+					running:          true,
+					button_id:        'push_post_now_' + source_post_id
+				};
+				Processes.create( process );
 
-                let source_post_id = parseInt(e.target.dataset.sourcePostId)
-                let receiver_site_id = parseInt(e.target.dataset.receiverSiteId)
-                let create_new_process = true
+				let sync = new Sync();
+				sync.start( process.id );
+			}
 
-                processes.forEach(process => {
-                    if ((source_post_id === parseInt(process.source_post_id)) && (receiver_site_id === parseInt(process.receiver_site_id))) {
-                        if ('push_post_now_' + source_post_id === process.button_id) {
-                            let admin_message = {}
-                            admin_message.process_id = process.id
-                            admin_message.success = false
-                            admin_message.message = 'Please wait for previous sync on this post to finish.'
-                            Message.handle_error(admin_message, process)
-                            create_new_process = false
-                        }
-                    }
-                })
+		} );
 
-                if (create_new_process) {
-                    $('#synced_post-' + source_post_id).addClass('loading')
-                    $('#post-' + source_post_id).addClass('loading')
+		$( '.overwrite_single_receiver' ).unbind().click( e => {
+			e.preventDefault();
 
-                    let process = {
-                        id: btoa(e.target.dataset.sourcePostId),
-                        source_post_id: source_post_id,
-                        receiver_site_id: receiver_site_id,
-                        topic: 'Post ' + source_post_id + ', Receiver ' + receiver_site_id,
-                        running: true,
-                        button_id: 'overwrite_single_receiver_' + source_post_id
-                    }
-                    Processes.create(process)
+			let processes = _store.get( Constants.PROCESS );
 
-                    let sync = new Sync()
-                    sync.start(process.id)
-                }
+			let source_post_id     = parseInt( e.target.dataset.sourcePostId );
+			let receiver_site_id   = parseInt( e.target.dataset.receiverSiteId );
+			let create_new_process = true;
 
-            }
-        )
+			processes.forEach( process => {
+				if ( ( source_post_id === parseInt( process.source_post_id ) ) && ( receiver_site_id === parseInt( process.receiver_site_id ) ) ) {
+					if ( 'push_post_now_' + source_post_id === process.button_id ) {
+						let admin_message        = {};
+						admin_message.process_id = process.id;
+						admin_message.success    = false;
+						admin_message.message    = 'Please wait for previous sync on this post to finish.';
+						Message.handle_error( admin_message, process );
+						create_new_process = false;
+					}
+				}
+			} );
 
-    }
+			if ( create_new_process ) {
+				$( '#synced_post-' + source_post_id ).addClass( 'loading' );
+				$( '#post-' + source_post_id ).addClass( 'loading' );
+
+				let process = {
+					id:               btoa( e.target.dataset.sourcePostId ),
+					source_post_id:   source_post_id,
+					receiver_site_id: receiver_site_id,
+					topic:            'Post ' + source_post_id + ', Receiver ' + receiver_site_id,
+					running:          true,
+					button_id:        'overwrite_single_receiver_' + source_post_id
+				};
+				Processes.create( process );
+
+				let sync = new Sync();
+				sync.start( process.id );
+			}
+
+		} );
+
+	}
 
 }
 
-export default SyndicatedPosts
+
+export default SyndicatedPosts;

@@ -7,6 +7,7 @@ use DataSync\Controllers\Logs;
 use DataSync\Models\PostType;
 use DataSync\Controllers\Options;
 use DataSync\Routes\PostTypesRoutes;
+use DataSync\Controllers\ConnectedSites;
 use stdClass;
 
 /**
@@ -53,7 +54,8 @@ class PostTypes {
 
 
 	public static function check_enabled_post_types_on_receiver( object $site ) {
-		$url      = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/post_types/check';
+		$site = ConnectedSites::get_api_url($site);
+		$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'post_types/check';
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {

@@ -29,7 +29,7 @@ class SourceDataRoutes {
 	 */
 	public function register_routes() {
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'source_data/(?P<action>[a-zA-Z-_]+)/(?P<source_post_id>\d+)', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'get_source_data' ),
@@ -46,7 +46,7 @@ class SourceDataRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source/start_fresh', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'source/start_fresh', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'start_fresh' ),
@@ -54,7 +54,7 @@ class SourceDataRoutes {
 		) );
 
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'source_data/prep/(?P<source_post_id>\d+)/(?P<receiver_site_id>\d+)', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'prep' ),
@@ -71,7 +71,7 @@ class SourceDataRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/prevalidate', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'prevalidate', array(
 			array(
 				'methods'  => WP_REST_Server::EDITABLE,
 				'callback' => array( $this->controller_class, 'prevalidate' ),
