@@ -3,12 +3,11 @@ Multi-site compatible WordPress data syndicator. Syndicates post data, post meta
 
 <b>Installation</b>
 <ol>
-<li>Understand that this plugin changes permalink structure to /%postname%/ or it won't work. This will break the option in the backend if you try to change it yourself.</li>
 <li>Install Advanced Custom Fields Pro</li>
 <li>Install Custom Post Types UI</li>
 <li>Set source site in plugin settings</li>
 <li>Add connected sites</li>
-<li>Double check everything has an SSL (https)</li>
+<li>Double check everything has an SSL installed (https)</li>
 </ol>
 
 <b>Syncing</b>
