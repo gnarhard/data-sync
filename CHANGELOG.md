@@ -1,3 +1,18 @@
+## 2.0.0 (2020-03-30)
+
+##### Build System / Dependencies
+
+*  Built production assets. ([3273798f](https://github.com/GraysonE/data-sync/commit/3273798f5d510098abe408b95189509801a24980))
+
+##### Documentation Changes
+
+*  Updated readme. ([2448d5ed](https://github.com/GraysonE/data-sync/commit/2448d5ede0b2154ed759ae38c8fe4bc8f4864387))
+
+##### Bug Fixes
+
+*  CORS bugs resolved on local and staging environments. ([3bb8f0a4](https://github.com/GraysonE/data-sync/commit/3bb8f0a426dae2a32f6e47ff11c8ad9eb757552a))
+*  Custom permalinks are now allowed. ([0629dcb1](https://github.com/GraysonE/data-sync/commit/0629dcb18e30a2a66018fe7d2991b36532ce3383))
+
 #### 1.0.1 (2020-02-06)
 
 ##### Build System / Dependencies
