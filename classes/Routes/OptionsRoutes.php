@@ -20,7 +20,7 @@ class OptionsRoutes {
 
 
 	public function register_routes() {
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/options/(?P<option>[a-zA-Z-_]+)', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'options/(?P<option>[a-zA-Z-_]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this->controller_class, 'get' ),
@@ -56,7 +56,7 @@ class OptionsRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/settings_tab/(?P<tab>[a-zA-Z-_]+)', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'settings_tab/(?P<tab>[a-zA-Z-_]+)', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'get_settings_tab_html' ),

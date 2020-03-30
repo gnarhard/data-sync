@@ -21,14 +21,14 @@ class LogsRoutes {
 
 
 	public function register_routes() {
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/get', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'log/get', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'refresh_log' ),
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/create', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'log/create', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this->controller_class, 'create' ),
@@ -36,7 +36,7 @@ class LogsRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/delete', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'log/delete', array(
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this->controller_class, 'delete_all' ),
@@ -44,7 +44,7 @@ class LogsRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/log/fetch_receiver', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'log/fetch_receiver', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this->controller_class, 'get_log' ),

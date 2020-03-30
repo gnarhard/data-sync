@@ -504,45 +504,45 @@ class Posts {
 	}
 
 
-	public static function get_all_receiver_posts( $connected_sites ) {
-		$receiver_posts = array();
-		$index          = 0;
+//	public static function get_all_receiver_posts( $connected_sites ) {
+//		$receiver_posts = array();
+//		$index          = 0;
+//
+//		foreach ( $connected_sites as $site ) {
+//			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'posts/all' );
+//			$response = wp_remote_get( $url );
+//
+//			if ( is_wp_error( $response ) ) {
+//				$logs = new Logs();
+//				$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+//
+//				return $response;
+//			} else {
+//				$receiver_posts[ $index ]          = new stdClass();
+//				$receiver_posts[ $index ]->site_id = (int) $site->id;
+//				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
+//				$index ++;
+//			}
+//		}
+//
+//		return $receiver_posts;
+//	}
 
-		foreach ( $connected_sites as $site ) {
-			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/all' );
-			$response = wp_remote_get( $url );
 
-			if ( is_wp_error( $response ) ) {
-				$logs = new Logs();
-				$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-
-				return $response;
-			} else {
-				$receiver_posts[ $index ]          = new stdClass();
-				$receiver_posts[ $index ]->site_id = (int) $site->id;
-				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
-				$index ++;
-			}
-		}
-
-		return $receiver_posts;
-	}
-
-
-	public static function get_receiver_post( $receiver_post_id, $site_id ) {
-		$connected_site = ConnectedSite::get( $site_id )[0];
-		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/posts/' . $receiver_post_id );
-		$response       = wp_remote_get( $url );
-
-		if ( is_wp_error( $response ) ) {
-			$logs = new Logs();
-			$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-
-			return $response;
-		} else {
-			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
-		}
-	}
+//	public static function get_receiver_post( $receiver_post_id, $site_id ) {
+//		$connected_site = ConnectedSite::get( $site_id )[0];
+//		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'posts/' . $receiver_post_id );
+//		$response       = wp_remote_get( $url );
+//
+//		if ( is_wp_error( $response ) ) {
+//			$logs = new Logs();
+//			$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
+//
+//			return $response;
+//		} else {
+//			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
+//		}
+//	}
 
 	public function get_post( WP_REST_Request $request ) {
 		return get_post( $request->get_param( 'id' ) );

@@ -23,7 +23,7 @@ class MediaRoutes {
 	 *
 	 */
 	public function register_routes() {
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/update', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'media/update', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this->controller_class, 'update' ),
@@ -31,14 +31,14 @@ class MediaRoutes {
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/sync', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'media/sync', array(
 			array(
 				'methods'  => WP_REST_Server::EDITABLE,
 				'callback' => array( $this->controller_class, 'sync' ),
 			),
 		) );
 
-		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, '/media/prep', array(
+		$registered = register_rest_route( DATA_SYNC_API_BASE_URL, 'media/prep', array(
 			array(
 				'methods'  => WP_REST_Server::EDITABLE,
 				'callback' => array( $this->controller_class, 'prep' ),

@@ -168,19 +168,11 @@ function display_overwrite_receiver_post_checkbox() {
 	<?php
 }
 
-function display_show_body_responses_checkbox() {
-	?>
-    <span>This will break the dashboard widget's functionality.</span><br>
-    <span>Only use if you're debugging the <a href="/wp-json/data-sync/v1/source_data/bulk_push" target="_blank">push page</a></span>
-    <br>
-    <input type="checkbox" value="1"
-           name="show_body_responses" <?php checked( '1', get_option( 'show_body_responses' ) ); ?>/>
-	<?php
-}
-
 function display_start_fresh_link() {
+
+    $url = get_rest_url( null, DATA_SYNC_API_BASE_URL . 'source/start_fresh');
 	?>
-    <span><a href="/wp-json/data-sync/v1/source/start_fresh" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
+    <span><a href="<?php echo $url ?>" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
     <ol>
         <li><code>data_sync_custom_post_types</code></li>
         <li><code>data_sync_custom_taxonomies</code></li>

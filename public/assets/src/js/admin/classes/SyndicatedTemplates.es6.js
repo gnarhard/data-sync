@@ -13,7 +13,7 @@ class SyndicatedTemplates {
 
     e.preventDefault()
 
-    AJAX.post(DataSync.api.url + '/templates/start_sync').then(function (result) {
+    AJAX.post(DataSync.api.url + 'templates/start_sync').then(function (result) {
 
       let process = {
         id: btoa(Math.random().toString()),
@@ -58,7 +58,7 @@ class SyndicatedTemplates {
     let self = this;
     // LOAD TEMPLATE LIST
     if (document.getElementById('templates_wrap')) {
-      AJAX.get_html(DataSync.api.url + '/settings_tab/templates' ).then(function( result) {
+      AJAX.get_html(DataSync.api.url + 'settings_tab/templates' ).then(function( result) {
         Message.display_html( result, 'templates', 'Templates' )
         document.querySelector('#templates_wrap').classList.remove('hidden');
         self.init();

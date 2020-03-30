@@ -209,6 +209,7 @@ class Receiver {
 	private function update_wp_options() {
 		update_option( 'data_sync_receiver_site_id', (int) $this->source_data->receiver_site_id );
 		update_option( 'data_sync_source_site_url', $this->source_data->url );
+		update_option( 'data_sync_source_site_api_url', $this->source_data->api_url );
 		update_option( 'overwrite_receiver_post_on_conflict', (bool) $this->source_data->options->overwrite_receiver_post_on_conflict );
 	}
 
@@ -260,6 +261,7 @@ class Receiver {
 		$receiver_data->site_id            = (int) get_option( 'data_sync_receiver_site_id' );
 		$receiver_data->posts              = $posts_obj->get_all_posts();
 		$receiver_data->enabled_post_types = $post_types_obj->get_enabled_post_types();
+		$receiver_data->api_url            = get_rest_url( get_current_blog_id(), DATA_SYNC_API_BASE_URL );
 
 		return $receiver_data;
 	}
