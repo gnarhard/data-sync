@@ -27,7 +27,9 @@ function display_connected_sites_enabled_post_types()
     $connected_sites             = (array) ConnectedSite::get_all();
 
     foreach ($connected_sites as $index => $site) {
-        $enabled_post_type_site_data = PostTypes::check_enabled_post_types_on_receiver($site); ?><strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong><?php
+        $enabled_post_type_site_data = PostTypes::check_enabled_post_types_on_receiver($site); ?>
+
+        <strong>Site ID: <?php echo $site->id ?> &middot; <?php echo $site->url ?></strong><?php
 
         if (! empty($enabled_post_type_site_data)) {
             ?>

@@ -175,9 +175,6 @@ class Sync {
 							process.running = false;
 							Processes.set( process );
 
-							let syndicated_posts = new SyndicatedPosts();
-							syndicated_posts.refresh_view( process.id );
-
 							$ = jQuery;
 
 							if ( false === process.source_post_id ) {
@@ -193,6 +190,9 @@ class Sync {
 							admin_message.success    = true;
 							admin_message.message    = '<span class="dashicons dashicons-yes-alt"></span> Syndication complete!';
 							Message.admin_message( admin_message );
+
+							let syndicated_posts = new SyndicatedPosts();
+							syndicated_posts.refresh_view( process.id );
 
 						} )
 						.catch( message => Message.handle_error( message, process ) );
@@ -288,8 +288,9 @@ class Sync {
 		admin_message.message = 'Preparing media items. . .';
 		Message.admin_message( admin_message );
 
-		let requests = this.prepare_media_packages( process_id ); // prep requests for creating bulk packages to send
-	                                                              // to receivers
+		// prep requests for creating bulk packages to send to receivers
+		let requests = this.prepare_media_packages( process_id );
+
 		return Promise.all( requests ) // send all requests for package
 			.then( responses => {return responses;} ) // all responses are resolved successfully
 			.then( responses => Promise.all( responses.map( r => r.json() ) ) )// map array of responses into array of
@@ -353,13 +354,13 @@ class Sync {
 		Processes.set( process );
 
 		if ( false === process.receiver_site_id ) {
-			for ( const site of process.connected_sites.entries() ) {
+			process.connected_sites.forEach(site => {
 				if ( false === process.source_post_id ) {
 					requests.push( fetch( DataSync.api.url + 'source_data/prep/0/' + site.id ) );
 				} else {
 					requests.push( fetch( DataSync.api.url + 'source_data/prep/' + process.source_post_id + '/' + site.id ) );
 				}
-			}
+			});
 		} else {
 			requests.push( fetch( DataSync.api.url + 'source_data/prep/' + process.source_post_id + '/' + process.receiver_site_id ) );
 		}
@@ -375,10 +376,8 @@ class Sync {
 		let requests                   = [];
 		process.receiver_sync_requests = []; // will be compiled in create_send_requests().
 
-		for ( const site of process.connected_sites.entries() ) {
-
+		process.connected_sites.forEach(site => {
 			if ( ( false === process.receiver_site_id ) || ( parseInt( site.id ) === process.receiver_site_id ) ) {
-
 				process.prepped_source_packages.forEach( prepped_source_package => {
 					let decoded_package = JSON.parse( prepped_source_package );
 					// console.log('Prepared media source packages: ',decoded_package)
@@ -391,8 +390,7 @@ class Sync {
 					}
 				} );
 			}
-
-		}
+		});
 
 		return requests;
 	}
@@ -405,7 +403,7 @@ class Sync {
 		process.media_sync_responses = [];
 
 		for ( const media_package of prepared_media_packages ) {
-			await this.send_media( media_package )
+			await this.send_media( media_package, process_id )
 				.then( media_sync_response => {
 					process.media_sync_responses.push( media_sync_response );
 					Processes.set( process );
@@ -414,21 +412,16 @@ class Sync {
 				.catch( message => Message.handle_error( message, process ) );
 		}
 
-		let admin_message        = {};
-		admin_message.process_id = process.id;
-
-		admin_message.topic   = process.topic;
-		admin_message.success = true;
-		admin_message.message = 'Media synced.';
-		Message.admin_message( admin_message );
-
 	}
 
 
-	async send_media( media_package ) {
+	async send_media( media_package, process_id ) {
 		let source_package = JSON.parse( media_package );
 
-		const response = await fetch( Helpers.trailingslashit( source_package.receiver_site_url ) + 'wp-json/data-sync/v1/sync', {
+		let process = Processes.get(process_id);
+		let i = process.connected_sites.findIndex(site => site.id == source_package.receiver_site_id);
+
+		const response = await fetch( process.connected_sites[i].api_url + 'data-sync/v1/sync', {
 			method: 'POST', body: JSON.stringify( source_package )
 		} );
 		return await response.json()
@@ -510,7 +503,8 @@ class Sync {
 			.then( responses => {return responses;} ) // all responses are resolved successfully
 			.then( responses => Promise.all( responses.map( r => r.json() ) ) )// map array of responses into array of
 			// response.json() to read their content
-			.then( receiver_packages => {return receiver_packages;} );
+			.then( receiver_packages => {return receiver_packages;} )
+			.catch( message => Message.handle_error( message, process ) );
 	}
 
 
@@ -521,7 +515,9 @@ class Sync {
 		// DON'T ADD ANYTHING TO THIS FROM HERE ON OR IT WILL TRIP THE AUTH SIG CHECK.
 		let source_package = JSON.parse( prepped_source_package );
 
-		process.receiver_sync_requests.push( fetch( Helpers.trailingslashit( source_package.receiver_site_url ) + 'wp-json/data-sync/v1/sync', {
+		const i = process.connected_sites.findIndex(site => site.id == source_package.receiver_site_id);
+
+		process.receiver_sync_requests.push( fetch( process.connected_sites[i].api_url + 'data-sync/v1/sync', {
 			method: 'POST', body: JSON.stringify( source_package )
 		} ) );
 

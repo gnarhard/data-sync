@@ -260,7 +260,8 @@ class SyncedPosts {
 					$source_data->receiver_site_id = (int) $site->id;
 					$auth                          = new Auth();
 					$json                          = $auth->prepare( $source_data, $site->secret_key );
-					$url                           = trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_receiver_post/';
+					$site = ConnectedSites::get_api_url($site);
+					$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_receiver_post/';
 					$response                      = wp_remote_post(
 						$url,
 						array(
@@ -303,7 +304,7 @@ class SyncedPosts {
 				$receiver_data->receiver_site_id = $receiver_site_id;
 				$auth                            = new Auth();
 				$json                            = $auth->prepare( $receiver_data, get_option( 'secret_key' ) );
-				$url                             = trailingslashit( get_option( 'data_sync_source_site_url' ) ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_synced_post/';
+				$url                             = trailingslashit( get_option( 'data_sync_source_site_api_url' ) ) . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_synced_post/';
 				$response                        = wp_remote_post(
 					$url,
 					array(

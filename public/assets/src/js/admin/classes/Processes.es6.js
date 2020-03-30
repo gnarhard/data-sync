@@ -42,7 +42,7 @@ class Processes {
         let processes = _store.get(Constants.PROCESS)
 
         processes.forEach((process, i) => {
-            if (id === process.id) {
+            if (id == process.id) {
                 processes.splice(i, 1) // not tested!
                 _store.set(Constants.PROCESS, processes)
             }

@@ -28,7 +28,7 @@ class ConnectedSites {
 					if ( header[1].includes( 'wp-json' ) ) {
 						sites[ i ].api_url = Helpers.trailingslashit( site.url ) + 'wp-json/';
 					} else if ( header[1].includes( '?rest_route=' ) ) {
-						sites[ i ].api_url = Helpers.trailingslashit( site.url ) + '?rest_route=';
+						sites[ i ].api_url = Helpers.trailingslashit( site.url ) + 'index.php?rest_route=/';
 					}
 				}
 

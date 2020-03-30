@@ -115,6 +115,8 @@ class SyndicatedPosts {
 		admin_message.success = true;
 		admin_message.message = 'Done.';
 		Message.admin_message( admin_message );
+
+		Processes.delete( process_id );
 	}
 
 

@@ -38,7 +38,7 @@ class ConnectedSites {
 			if ( -1 !== strpos( $api_link_header, 'wp-json' ) ) {
 				$site->api_url = trailingslashit( $site->url ) . 'wp-json/';
 			} elseif ( -1 !== strpos( $api_link_header, '?rest_route=' ) ) {
-				$site->api_url = trailingslashit( $site->url ) . '?rest_route=';
+				$site->api_url = trailingslashit( $site->url ) . '?rest_route=/';
 			}
 		}
 

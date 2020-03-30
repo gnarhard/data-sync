@@ -130,6 +130,7 @@ class SourceData {
 		$this->source_data->start_time      = (string) current_time( 'mysql', 1 );
 		$this->source_data->options         = (object) $options;
 		$this->source_data->url             = (string) get_site_url();
+		$this->source_data->api_url         = (string) get_rest_url();
 		$this->source_data->connected_sites = (array) ConnectedSite::get_all();
 		$this->source_data->synced_posts    = (array) $synced_posts->get_all()->get_data();
 		$this->source_data->canonical_urls  = array();

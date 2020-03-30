@@ -209,6 +209,7 @@ class Receiver {
 	private function update_wp_options() {
 		update_option( 'data_sync_receiver_site_id', (int) $this->source_data->receiver_site_id );
 		update_option( 'data_sync_source_site_url', $this->source_data->url );
+		update_option( 'data_sync_source_site_api_url', $this->source_data->api_url );
 		update_option( 'overwrite_receiver_post_on_conflict', (bool) $this->source_data->options->overwrite_receiver_post_on_conflict );
 	}
 

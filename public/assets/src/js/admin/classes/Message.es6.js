@@ -57,6 +57,7 @@ class Message {
 
 
 	static handle_error( error, process ) {
+
 		let result     = {};
 		result.success = false;
 		result.message = error.message;
@@ -78,14 +79,17 @@ class Message {
 		} else {
 			document.getElementById( 'bulk_data_push' ).removeAttribute( 'disabled' );
 			$( '#bulk_data_push' ).removeClass( 'loading' );
-
-			// let syndicated_posts = new SyndicatedPosts();
-			// syndicated_posts.refresh_view( process.id );
 		}
 
 		Processes.delete( process.id );
 
-		console.log( new Error( 'Something went wrong!' ) );
+		if ( ! error.ok ) {
+			throw new Error( error.statusText );
+			console.log( error.stack );
+		}
+
+		return error;
+
 	}
 
 
