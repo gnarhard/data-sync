@@ -1,3 +1,14 @@
+#### 2.0.1 (2020-04-06)
+
+##### Bug Fixes
+
+*  Templates path had two slashes. ([91b5d104](https://github.com/GraysonE/data-sync/commit/91b5d1042318669d7d7d77d0bf44a03b7bcf0146))
+*  Removed hard-coded path in Logs. ([d59a1035](https://github.com/GraysonE/data-sync/commit/d59a10358001d4c8cc2855e8d10bbbbf61e1fd09))
+*  Images in ACF wysiwyg areas now get synced. ([f064a217](https://github.com/GraysonE/data-sync/commit/f064a2176f02609d40c6db18ef84af24751a507b))
+*  Silenced empty error messages. ([e4d9e8bd](https://github.com/GraysonE/data-sync/commit/e4d9e8bdcf4840cfe78d4e77732aacb3f58d9ee9))
+*  Validation bug that was trying to make an object an array. Removed debugging. ([5cc59a00](https://github.com/GraysonE/data-sync/commit/5cc59a00ec32f4a45e743c6993d465f1753241b5))
+*  Validation bug that was trying to make an object an array. ([d0188b68](https://github.com/GraysonE/data-sync/commit/d0188b68e57e41549fd7713305b866aa39cd0566))
+
 ## 2.0.0 (2020-03-30)
 
 ##### Build System / Dependencies
