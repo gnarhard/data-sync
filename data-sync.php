@@ -59,10 +59,6 @@ if ( ! defined( 'DATA_SYNC_URL' ) ) {
 	define( 'DATA_SYNC_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if ( ! defined( 'DATA_SYNC_BASENAME' ) ) {
-	define( 'DATA_SYNC_BASENAME', 'data-sync' );
-}
-
 if ( ! defined( 'DATA_SYNC_API_BASE_URL' ) ) {
 	define( 'DATA_SYNC_API_BASE_URL', 'data-sync/v1/' );
 }

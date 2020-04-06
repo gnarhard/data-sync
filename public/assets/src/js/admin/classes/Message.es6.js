@@ -58,6 +58,10 @@ class Message {
 
 	static handle_error( error, process ) {
 
+		if ( '' == error.message ) {
+			return error;
+		}
+
 		let result     = {};
 		result.success = false;
 		result.message = error.message;

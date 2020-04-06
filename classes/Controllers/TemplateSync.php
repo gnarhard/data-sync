@@ -18,7 +18,7 @@ class TemplateSync
 
     public static function get_template_files()
     {
-        $template_dir = DATA_SYNC_PATH . '/templates';
+        $template_dir = DATA_SYNC_PATH . 'templates';
 
         return scandir($template_dir);
     }
