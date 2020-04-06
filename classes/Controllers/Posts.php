@@ -3,7 +3,6 @@
 
 namespace DataSync\Controllers;
 
-use DataSync\Models\ConnectedSite;
 use DataSync\Models\SyncedPost;
 use DataSync\Routes\PostsRoutes;
 use WP_Query;
@@ -19,13 +18,13 @@ class Posts {
 
 	public function __construct() {
 		if ( '1' === get_option( 'source_site' ) ) {
-			add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-			add_action( 'save_post', [ $this, 'save_custom_values' ] );
+			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+			add_action( 'save_post', array( $this, 'save_custom_values' ) );
 			require_once DATA_SYNC_PATH . 'public/views/admin/post/meta-boxes.php';
-			add_filter( 'cptui_pre_register_post_type', [ $this, 'add_meta_boxes_into_cpts' ], 1 );
-			add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
+			add_filter( 'cptui_pre_register_post_type', array( $this, 'add_meta_boxes_into_cpts' ), 1 );
+			add_action( 'admin_notices', array( $this, 'display_admin_notices' ) );
 		} elseif ( '0' === get_option( 'source_site' ) ) {
-			add_filter( 'pre_render_block', [ $this, 'update_block_id_attrs' ], 10, 2 );
+			add_filter( 'pre_render_block', array( $this, 'update_block_id_attrs' ), 10, 2 );
 		}
 
 		new PostsRoutes( $this );
@@ -40,7 +39,7 @@ class Posts {
 	}
 
 	public function add_meta_boxes_into_cpts( $args ) {
-		$args['register_meta_box_cb'] = [ $this, 'add_meta_boxes' ];
+		$args['register_meta_box_cb'] = array( $this, 'add_meta_boxes' );
 
 		return $args;
 	}
@@ -129,7 +128,7 @@ class Posts {
 		foreach ( $types as $type ) {
 
 			// Must convert single string to array.
-			$posts->$type = self::get_wp_posts( [ $type ] );
+			$posts->$type = self::get_wp_posts( array( $type ) );
 
 			foreach ( $posts->$type as $post ) {
 				$post = self::get_post_data( $post );
@@ -182,7 +181,7 @@ class Posts {
 	private static function get_media( int $post_id ) {
 		$media = new stdClass();
 
-		$media->image = Posts::get_images( $post_id );
+		$media->image = self::get_images( $post_id );
 
 		// Checks if image exists before adding data.
 		if ( null !== get_post( get_post_thumbnail_id( $post_id ) ) ) {
@@ -194,16 +193,15 @@ class Posts {
 			}
 		}
 
-
-		$media->audio = Posts::get_audio( $post_id );
-		$media->video = Posts::get_video( $post_id );
+		$media->audio = self::get_audio( $post_id );
+		$media->video = self::get_video( $post_id );
 
 		return $media;
 	}
 
 	private static function get_images( $post_id ) {
-		$images          = [];
-		$image_ids       = [];
+		$images          = array();
+		$image_ids       = array();
 		$attached_images = get_attached_media( 'image', $post_id );
 
 		foreach ( $attached_images as $attached_image ) {
@@ -213,15 +211,43 @@ class Posts {
 		// GET ALL IMAGES IN POST META.
 		global $wpdb;
 		$post_meta = get_post_meta( $post_id );
+
 		foreach ( $post_meta as $meta ) {
 			foreach ( $meta as $value ) {
 				if ( false !== strpos( $value, get_site_url() ) ) {
-					// Get any images that are saved by url
-					$value  = str_replace( '-scaled', '', $value );
-					$query  = "SELECT ID FROM {$wpdb->prefix}posts WHERE guid = '$value' AND post_type = 'attachment'";
-					$result = $wpdb->get_results( $query );
-					if ( ( ! is_wp_error( $result ) ) && ( ! empty( $result ) ) ) {
-						$image_ids[] = (int) $result[0]->ID;
+
+					if ( 0 == strpos( $value, 'http' ) ) {
+						// Get any images that are saved by url and are the only value in the post_meta
+						$value          = str_replace( '-scaled', '', $value );
+						$query          = "SELECT ID FROM {$wpdb->prefix}posts WHERE guid = '%s' AND post_type = 'attachment'";
+						$prepared_query = $wpdb->prepare( $query, $value );
+						$result         = $wpdb->get_results( $prepared_query );
+						if ( ( ! is_wp_error( $result ) ) && ( ! empty( $result ) ) ) {
+							$image_ids[] = (int) $result[0]->ID;
+						}
+					} else {
+						// Get any images that are mentioned in text or wysiwygs
+						preg_match_all( '/<img[^>]+>/i', $value, $result );
+
+						$img_srcs = array();
+
+						foreach ( $result as $img_tags ) {
+							foreach ( $img_tags as $img_tag ) {
+								$matches = preg_match( '/src="([^"]+)/i', $img_tag, $match );
+								if ( ( $matches ) && ( ! empty( $match ) ) ) {
+									$img_srcs[] = $match[1];
+								}
+							}
+						}
+
+						foreach ( $img_srcs as $img_src ) {
+							$query          = "SELECT ID FROM {$wpdb->prefix}posts WHERE guid = '%s' AND post_type = 'attachment'";
+							$prepared_query = $wpdb->prepare( $query, $img_src );
+							$result         = $wpdb->get_results( $prepared_query );
+							if ( ( ! is_wp_error( $result ) ) && ( ! empty( $result ) ) ) {
+								$image_ids[] = (int) $result[0]->ID;
+							}
+						}
 					}
 				} elseif ( is_numeric( $value ) ) {
 					// get any images that are saved by ID.
@@ -234,7 +260,7 @@ class Posts {
 		}
 
 		// get all the galleries in the post
-		$gallery_image_ids = [];
+		$gallery_image_ids = array();
 		if ( $galleries = get_post_galleries( $post_id, false ) ) {
 			foreach ( $galleries as $gallery ) {
 
@@ -246,7 +272,6 @@ class Posts {
 				}
 			}
 		}
-
 
 		$post = get_post( $post_id );
 
@@ -272,7 +297,7 @@ class Posts {
 		$unique_image_ids = array_unique( $image_ids );
 
 		foreach ( $unique_image_ids as $image_id ) {
-			$post              = get_post( $image_id );
+			$post = get_post( $image_id );
 			if ( null === $post ) {
 				continue;
 			}
@@ -285,8 +310,8 @@ class Posts {
 
 
 	private static function get_audio( $post_id ) {
-		$audio          = [];
-		$audio_ids      = [];
+		$audio          = array();
+		$audio_ids      = array();
 		$attached_audio = get_attached_media( 'audio', $post_id );
 
 		foreach ( $attached_audio as $attached_a ) {
@@ -321,8 +346,8 @@ class Posts {
 
 
 	private static function get_video( $post_id ) {
-		$video          = [];
-		$video_ids      = [];
+		$video          = array();
+		$video_ids      = array();
 		$attached_video = get_attached_media( 'video', $post_id );
 
 		foreach ( $attached_video as $attached_a ) {
@@ -374,14 +399,14 @@ class Posts {
 	public static function get_syndication_info_of_post( $post, $connected_sites, $receiver_data ) {
 		$syndication_info                             = new stdClass();
 		$syndication_info->status                     = 'unsynced';
-		$syndication_info->trash_class                = "";
+		$syndication_info->trash_class                = '';
 		$syndication_info->receiver_version_edited[0] = false;
 		$syndication_info->source_version_edited      = false;
 
 		$number_of_sites_connected       = count( $connected_sites );
 		$post_meta                       = get_post_meta( $post->ID );
 		$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
-		$synced_post_result              = SyncedPost::get_where( [ 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ] );
+		$synced_post_result              = SyncedPost::get_where( array( 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ) );
 		$number_of_synced_posts_returned = count( $synced_post_result );
 
 		// CHECK EXCLUDED SITES' DEFAULT VALUE OF 0 FOR NO EXCLUDED SITES.
@@ -402,21 +427,21 @@ class Posts {
 				foreach ( $synced_post_result as $synced_post ) {
 					$synced_post_modified_time     = strtotime( $synced_post->date_modified );
 					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
-					$receiver_post                 = Posts::find_receiver_post( (array) $receiver_data, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_post                 = self::find_receiver_post( (array) $receiver_data, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
 					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
 					$syndication_info->synced_post = $synced_post;
 
 					if ( null !== $receiver_post ) {
 						$receiver_modified_time = strtotime( $receiver_post->post_modified_gmt );
 						if ( $receiver_modified_time > $synced_post_modified_time ) {
-							$syndication_info->receiver_version_edited = [ true, $synced_post->receiver_site_id ];
+							$syndication_info->receiver_version_edited = array( true, $synced_post->receiver_site_id );
 							$statuses[]                                = 'diverged';
-						} else if ( $source_post_modified_time > $synced_post_modified_time ) {
+						} elseif ( $source_post_modified_time > $synced_post_modified_time ) {
 							$syndication_info->source_version_edited = true;
 							$statuses[]                              = 'diverged';
-						} else if ( $synced_post_modified_time >= $receiver_modified_time ) {
+						} elseif ( $synced_post_modified_time >= $receiver_modified_time ) {
 							$statuses[] = 'synced';
-						} else if ( 0 === $receiver_modified_time ) {
+						} elseif ( 0 === $receiver_modified_time ) {
 							$statuses[] = 'unsynced';
 						}
 					} else {
@@ -457,7 +482,7 @@ class Posts {
 
 		if ( 'trash' === $post->post_status ) {
 			$syndication_info->status      = 'trashed';
-			$syndication_info->trash_class = "trashed";
+			$syndication_info->trash_class = 'trashed';
 		}
 
 		if ( 'synced' === $syndication_info->status ) {
@@ -470,21 +495,20 @@ class Posts {
 				$syndication_info->source_message = '<span class="warning">A receiver post was updated after the last sync.</span>';
 			}
 
-			$syndication_info->icon           = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
+			$syndication_info->icon            = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'partial' === $syndication_info->status ) {
-			$syndication_info->icon           = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
-			$syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
+			$syndication_info->icon            = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
+			$syndication_info->source_message  = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'unsynced' === $syndication_info->status ) {
-			$syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
-			$syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
+			$syndication_info->icon            = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+			$syndication_info->source_message  = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'trashed' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
 			$syndication_info->source_message = '<span class="warning">This post is in the trash, but is still on receiver sites (if it was previously synced). Please delete from trash/permanent delete to remove from receiver sites.</span>';
 		}
-
 
 		return $syndication_info;
 	}
@@ -502,47 +526,6 @@ class Posts {
 		}
 
 	}
-
-
-//	public static function get_all_receiver_posts( $connected_sites ) {
-//		$receiver_posts = array();
-//		$index          = 0;
-//
-//		foreach ( $connected_sites as $site ) {
-//			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'posts/all' );
-//			$response = wp_remote_get( $url );
-//
-//			if ( is_wp_error( $response ) ) {
-//				$logs = new Logs();
-//				$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-//
-//				return $response;
-//			} else {
-//				$receiver_posts[ $index ]          = new stdClass();
-//				$receiver_posts[ $index ]->site_id = (int) $site->id;
-//				$receiver_posts[ $index ]->posts   = json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
-//				$index ++;
-//			}
-//		}
-//
-//		return $receiver_posts;
-//	}
-
-
-//	public static function get_receiver_post( $receiver_post_id, $site_id ) {
-//		$connected_site = ConnectedSite::get( $site_id )[0];
-//		$url            = Helpers::format_url( trailingslashit( $connected_site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'posts/' . $receiver_post_id );
-//		$response       = wp_remote_get( $url );
-//
-//		if ( is_wp_error( $response ) ) {
-//			$logs = new Logs();
-//			$logs->set( 'Error in Post::get_receiver_post received from ' . get_site_url() . '. ' . $response->get_error_message(), true );
-//
-//			return $response;
-//		} else {
-//			return (object) json_decode( wp_remote_retrieve_body( $response ) ); // Receiver post object.
-//		}
-//	}
 
 	public function get_post( WP_REST_Request $request ) {
 		return get_post( $request->get_param( 'id' ) );
@@ -614,7 +597,7 @@ class Posts {
 
 				// THESE YOAST VALUES NEED TO BE DELETED EVERY TIME YOAST SETTINGS ARE UPDATED.
 				if ( $override_post_yoast ) {
-					$yoast_meta_keys = Posts::get_yoast_meta_keys();
+					$yoast_meta_keys = self::get_yoast_meta_keys();
 					foreach ( $yoast_meta_keys as $meta_key ) {
 						delete_post_meta( $receiver_post_id, $meta_key );
 					}
@@ -628,7 +611,6 @@ class Posts {
 						unset( $post->post_meta->$meta_key ); // DELETES SOURCE POST'S META DATA RELATED TO YOAST TO NOT OVERWRITE.
 						continue;
 					}
-
 
 					foreach ( $meta_value as $value ) {
 
@@ -693,8 +675,8 @@ class Posts {
 				if ( ! empty( $synced_post ) ) {
 					if ( (int) $block['attrs']['id'] !== (int) $synced_post[0]->receiver_post_id ) {
 						$block['attrs']['id'] = (int) $synced_post[0]->receiver_post_id;
-						//					$guid = get_post( (int) $synced_post[0]->receiver_post_id )->guid;
-						//					preg_replace("~src=[']([^']+)[']~", 'src="' . $guid . '"', $block['innerHTML']);
+						// $guid = get_post( (int) $synced_post[0]->receiver_post_id )->guid;
+						// preg_replace("~src=[']([^']+)[']~", 'src="' . $guid . '"', $block['innerHTML']);
 
 						return render_block( $block );
 					}
@@ -706,7 +688,7 @@ class Posts {
 
 	public static function get_yoast_meta_keys() {
 		// TODO: PULL THIS FROM YOAST?
-		return [
+		return array(
 			'_yoast_wpseo_opengraph-title',
 			'_yoast_wpseo_opengraph-description',
 			'_yoast_wpseo_opengraph-image',
@@ -724,7 +706,7 @@ class Posts {
 			'_yoast_wpseo_focuskw',
 			'_yoast_wpseo_linkdex', // TODO: POINTS TO AN ID?
 			'_yoast_wpseo_content_score',
-		];
+		);
 	}
 
 	public function update_post_settings( WP_REST_Request $request ) {
