@@ -132,7 +132,7 @@ class Logs {
 	}
 
 	public function refresh_log() {
-		include_once ABSPATH . 'wp-content/plugins/data-sync/public/views/admin/options/log.php';
+		include_once DATA_SYNC_PATH . 'public/views/admin/options/log.php';
 		$data       = new stdClass();
 		$data->html = wp_json_encode( display_log() );
 
