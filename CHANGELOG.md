@@ -1,3 +1,9 @@
+#### 2.0.2 (2020-06-18)
+
+##### Bug Fixes
+
+*  Updated all routes to be compatible with v5.4.2 of WordPress. ([da124c24](https://github.com/GraysonE/data-sync/commit/da124c2457bbfc46064c5f6b9b28105a984d6a9e))
+
 #### 2.0.1 (2020-04-06)
 
 ##### Bug Fixes
