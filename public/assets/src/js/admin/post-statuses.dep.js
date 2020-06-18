@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
       let connected_site_count = connected_site_ids_int.length
 
       // BEGIN DATA PUSH
-      AJAX.get(DataSync.api.url + 'source_data/bulk_push').then(function (push_result) {
+      AJAX.get(DataSync.api.url + '/source_data/bulk_push').then(function (push_result) {
 
         console.log(push_result)
 
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let post_status_interval = setInterval(function () {
 
           // GET ALL SYNCED POSTS
-          AJAX.get(DataSync.api.url + 'synced_posts/all').then(function (synced_posts) {
+          AJAX.get(DataSync.api.url + '/synced_posts/all').then(function (synced_posts) {
 
             let sites_left_to_check = connected_site_count
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
                       let synced_post_id = parseInt(synced_post.source_post_id)
 
                       // GET EXCLUDED SITES FROM POST TO MAKE SURE UI REPORTS COMPLETED CORRECTLY
-                      AJAX.get(DataSync.api.url + 'post_meta/' + synced_post_id).then(function (postmeta) {
+                      AJAX.get(DataSync.api.url + '/post_meta/' + synced_post_id).then(function (postmeta) {
                         if (postmeta) {
                           console.log(postmeta._excluded_sites)
                           // SUBTRACT THE NUMBER OF EXCLUDED SITES FROM THE SITES LEFT TO CHECK.
@@ -227,7 +227,7 @@ function diverged_post_init () {
 }
 
 function push_single_post_to_all_receivers( receiver_site_id, source_post_id ) {
-  AJAX.get(DataSync.api.url + 'source_data/overwrite/' + source_post_id).then(function (result) {
+  AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id).then(function (result) {
     console.log(result)
     if (result) {
       show_success();
@@ -237,7 +237,7 @@ function push_single_post_to_all_receivers( receiver_site_id, source_post_id ) {
 }
 
 function push_single_post_to_single_receiver( receiver_site_id, source_post_id ) {
-  AJAX.get(DataSync.api.url + 'source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
+  AJAX.get(DataSync.api.url + '/source_data/overwrite/' + source_post_id + '/' + + receiver_site_id).then(function (result) {
     console.log(result)
     if (result) {
       show_success( result );

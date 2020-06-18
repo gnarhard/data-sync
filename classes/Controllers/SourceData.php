@@ -99,7 +99,7 @@ class SourceData {
 		foreach ( $connected_sites as $site ) {
 
 			$site     = ConnectedSites::get_api_url( $site );
-			$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'start_fresh';
+			$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/start_fresh';
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {

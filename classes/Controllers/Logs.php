@@ -75,7 +75,7 @@ class Logs {
 		foreach ( $connected_sites as $site ) {
 
 			$site     = ConnectedSites::get_api_url( $site );
-			$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'log/fetch_receiver';
+			$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/log/fetch_receiver';
 			$args     = array(
 				'body' => array( 'datetime' => $data_sync_start_time ),
 			);

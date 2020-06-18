@@ -51,7 +51,7 @@ class ConnectedSites {
 
 
 	static async get_sites() {
-		const r = await fetch( DataSync.api.url + 'connected_sites', {
+		const r = await fetch( DataSync.api.url + '/connected_sites', {
 			headers: {
 				'X-WP-Nonce': DataSync.api.nonce
 			},
@@ -79,7 +79,7 @@ class ConnectedSites {
 		let sync_start_date  = document.getElementById( 'site_sync_start' ).value + ' ' + moment().format( 'HH:mm' ) + ':00';
 		data[ 0 ].sync_start = moment( sync_start_date ).utc().format();
 
-		AJAX.post( DataSync.api.url + 'connected_sites', data ).then( ( result ) => {
+		AJAX.post( DataSync.api.url + '/connected_sites', data ).then( ( result ) => {
 
 			let process = {
 				id: btoa( Math.random().toString() ), topic: 'Connected sites', running: true,
@@ -114,7 +114,7 @@ class ConnectedSites {
 		if ( confirmed ) {
 			document.getElementById( 'site-' + site_id ).remove();
 
-			AJAX.delete( DataSync.api.url + 'connected_sites/' + site_id ).then( function( response ) {
+			AJAX.delete( DataSync.api.url + '/connected_sites/' + site_id ).then( function( response ) {
 				if ( response.success ) {
 
 					let process = {
@@ -185,7 +185,7 @@ class ConnectedSites {
 	refresh_view() {
 		let self = this;
 		if ( document.getElementById( 'connected_sites_wrap' ) ) {
-			AJAX.get_html( DataSync.api.url + 'settings_tab/connected_sites' ).then( function( result ) {
+			AJAX.get_html( DataSync.api.url + '/settings_tab/connected_sites' ).then( function( result ) {
 				Message.display_html( result, 'connected_sites', 'Connected site' );
 				self.init();
 			} );

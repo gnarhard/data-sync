@@ -41,7 +41,7 @@ class Sync {
 
 
 	async get_syndicated_post_details( post_id, data ) {
-		const response = await fetch( DataSync.api.url + 'syndicated_post/' + post_id, {
+		const response = await fetch( DataSync.api.url + '/syndicated_post/' + post_id, {
 			method:  'POST', headers: {
 				'Content-Type': 'text/html; charset=utf-8', 'X-WP-Nonce': DataSync.api.nonce
 			}, body: JSON.stringify( data )
@@ -66,7 +66,7 @@ class Sync {
 		// source_post_id=0 for bulk load.
 		let source_post_id = ( false === process.source_post_id ) ? 0 : process.source_post_id;
 
-		const response = await fetch( DataSync.api.url + 'source_data/load/' + source_post_id ); // LOAD BULK
+		const response = await fetch( DataSync.api.url + '/source_data/load/' + source_post_id ); // LOAD BULK
 
 		return await response.json()
 			.catch( message => Message.handle_error( message, process ) );
@@ -110,11 +110,11 @@ class Sync {
 		// console.log(process)
 
 		if ( false === process.source_post_id ) {
-			const response = await fetch( DataSync.api.url + 'posts/all' );
+			const response = await fetch( DataSync.api.url + '/posts/all' );
 			return await response.json()
 				.catch( message => Message.handle_error( message, process ) );
 		} else {
-			const response = await fetch( DataSync.api.url + 'posts/' + process.source_post_id );
+			const response = await fetch( DataSync.api.url + '/posts/' + process.source_post_id );
 			return await response.json()
 				.catch( message => Message.handle_error( message, process ) );
 		}
@@ -212,7 +212,7 @@ class Sync {
 		admin_message.message    = 'Turning off "Override Receiver Yoast" setting.';
 		Message.admin_message( admin_message );
 
-		const response = await fetch( DataSync.api.url + 'posts/update_post_settings', {
+		const response = await fetch( DataSync.api.url + '/posts/update_post_settings', {
 			method: 'POST', body: JSON.stringify( process )
 		} );
 		return await response.json()
@@ -356,13 +356,13 @@ class Sync {
 		if ( false === process.receiver_site_id ) {
 			process.connected_sites.forEach(site => {
 				if ( false === process.source_post_id ) {
-					requests.push( fetch( DataSync.api.url + 'source_data/prep/0/' + site.id ) );
+					requests.push( fetch( DataSync.api.url + '/source_data/prep/0/' + site.id ) );
 				} else {
-					requests.push( fetch( DataSync.api.url + 'source_data/prep/' + process.source_post_id + '/' + site.id ) );
+					requests.push( fetch( DataSync.api.url + '/source_data/prep/' + process.source_post_id + '/' + site.id ) );
 				}
 			});
 		} else {
-			requests.push( fetch( DataSync.api.url + 'source_data/prep/' + process.source_post_id + '/' + process.receiver_site_id ) );
+			requests.push( fetch( DataSync.api.url + '/source_data/prep/' + process.source_post_id + '/' + process.receiver_site_id ) );
 		}
 
 		return requests;
@@ -384,7 +384,7 @@ class Sync {
 					if ( parseInt( site.id ) === parseInt( decoded_package.receiver_site_id ) ) {
 						data.site  = site;
 						data.posts = decoded_package.posts;
-						requests.push( fetch( DataSync.api.url + 'media/prep', {
+						requests.push( fetch( DataSync.api.url + '/media/prep', {
 							method: 'POST', body: JSON.stringify( data )
 						} ) );
 					}
@@ -449,7 +449,7 @@ class Sync {
 
 
 	async save_receiver_synced_posts( synced_posts ) {
-		const response = await fetch( DataSync.api.url + 'sync_post', {
+		const response = await fetch( DataSync.api.url + '/sync_post', {
 			method:  'POST', headers: {
 				'X-WP-Nonce': DataSync.api.nonce
 			}, body: JSON.stringify( synced_posts )
@@ -482,7 +482,7 @@ class Sync {
 
 
 	async verify_prevalidation( process ) {
-		const response = await fetch( DataSync.api.url + 'prevalidate', {
+		const response = await fetch( DataSync.api.url + '/prevalidate', {
 			method: 'POST', body: JSON.stringify( process )
 		} );
 		return await response.json()

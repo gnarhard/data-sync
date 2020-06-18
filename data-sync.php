@@ -60,7 +60,7 @@ if ( ! defined( 'DATA_SYNC_URL' ) ) {
 }
 
 if ( ! defined( 'DATA_SYNC_API_BASE_URL' ) ) {
-	define( 'DATA_SYNC_API_BASE_URL', 'data-sync/v1/' );
+	define( 'DATA_SYNC_API_BASE_URL', 'data-sync/v1' );
 }
 
 // Load the plugin classes.
