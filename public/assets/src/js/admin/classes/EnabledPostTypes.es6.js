@@ -23,7 +23,7 @@ class EnabledPostTypes {
 				let input_name = document.getElementById( 'push_enabled_post_types' ).getAttribute( 'name' ).replace( /[^a-z0-9_]/gi, '' );
 				data           = Helpers.getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
 				// console.log(data);
-				AJAX.post( DataSync.api.url + 'options/push_enabled_post_types', data ).then( function( result ) {
+				AJAX.post( DataSync.api.url + '/options/push_enabled_post_types', data ).then( function( result ) {
 
 					let process = {
 						id: btoa( Math.random().toString() ), topic: 'Push-enabled post types', running: true,
@@ -53,7 +53,7 @@ class EnabledPostTypes {
 	refresh_view() {
 		let self = this;
 		if ( document.getElementById( 'enabled_post_types_wrap' ) ) {
-			AJAX.get_html( DataSync.api.url + 'settings_tab/enabled_post_types' ).then( function( result ) {
+			AJAX.get_html( DataSync.api.url + '/settings_tab/enabled_post_types' ).then( function( result ) {
 				Message.display_html( result, 'enabled_post_types', 'Enabled post types' );
 				self.init();
 			} );

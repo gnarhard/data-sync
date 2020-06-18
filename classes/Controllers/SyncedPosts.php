@@ -101,7 +101,7 @@ class SyncedPosts {
 //		$all_data        = array();
 //
 //		foreach ( $connected_sites as $site ) {
-//			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'synced_posts/all' );
+//			$url      = Helpers::format_url( trailingslashit( $site->url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/all' );
 //			$args     = array(
 //				'body' => array( 'datetime' => $data_sync_start_time ),
 //			);
@@ -132,7 +132,7 @@ class SyncedPosts {
 
 
 //	public static function get_synced_post_data( object $post ) {
-//		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'synced_posts/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $post->ID;
+//		$url = trailingslashit( $post->source_url ) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/synced_posts/' . get_option( 'data_sync_receiver_site_id' ) . '/' . $post->ID;
 //		$url = Helpers::format_url( $url );
 //
 //		$response = wp_remote_get( $url );
@@ -261,7 +261,7 @@ class SyncedPosts {
 					$auth                          = new Auth();
 					$json                          = $auth->prepare( $source_data, $site->secret_key );
 					$site = ConnectedSites::get_api_url($site);
-					$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_receiver_post/';
+					$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_receiver_post/';
 					$response                      = wp_remote_post(
 						$url,
 						array(
@@ -304,7 +304,7 @@ class SyncedPosts {
 				$receiver_data->receiver_site_id = $receiver_site_id;
 				$auth                            = new Auth();
 				$json                            = $auth->prepare( $receiver_data, get_option( 'secret_key' ) );
-				$url                             = trailingslashit( get_option( 'data_sync_source_site_api_url' ) ) . DATA_SYNC_API_BASE_URL . 'synced_posts/delete_synced_post/';
+				$url                             = trailingslashit( get_option( 'data_sync_source_site_api_url' ) ) . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_synced_post/';
 				$response                        = wp_remote_post(
 					$url,
 					array(

@@ -170,7 +170,7 @@ function display_overwrite_receiver_post_checkbox() {
 
 function display_start_fresh_link() {
 
-    $url = get_rest_url( null, DATA_SYNC_API_BASE_URL . 'source/start_fresh');
+    $url = get_rest_url( null, DATA_SYNC_API_BASE_URL . '/source/start_fresh');
 	?>
     <span><a href="<?php echo $url ?>" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
     <ol>

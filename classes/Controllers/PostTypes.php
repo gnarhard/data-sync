@@ -55,7 +55,7 @@ class PostTypes {
 
 	public static function check_enabled_post_types_on_receiver( object $site ) {
 		$site = ConnectedSites::get_api_url($site);
-		$url      = $site->api_url . DATA_SYNC_API_BASE_URL . 'post_types/check';
+		$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/post_types/check';
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {

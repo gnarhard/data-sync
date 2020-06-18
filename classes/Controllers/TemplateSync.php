@@ -60,7 +60,7 @@ class TemplateSync
     {
         $auth     = new Auth();
         $json     = $auth->prepare($source_data, $connected_site->secret_key);
-        $url      = trailingslashit($connected_site->url) . 'wp-json/' . DATA_SYNC_API_BASE_URL . 'templates/sync';
+        $url      = trailingslashit($connected_site->url) . 'wp-json/' . DATA_SYNC_API_BASE_URL . '/templates/sync';
         $response = wp_remote_post($url, [
             'body' => $json,
             'httpversion' => '1.0',
