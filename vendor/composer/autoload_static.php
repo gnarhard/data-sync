@@ -20,11 +20,53 @@ class ComposerStaticInit00116c29cef5b046903fd990a91a2556
         ),
     );
 
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'DataSync\\Controllers\\ACFs' => __DIR__ . '/../..' . '/classes/Controllers/ACFs.php',
+        'DataSync\\Controllers\\Auth' => __DIR__ . '/../..' . '/classes/Controllers/Auth.php',
+        'DataSync\\Controllers\\ConnectedSites' => __DIR__ . '/../..' . '/classes/Controllers/ConnectedSites.php',
+        'DataSync\\Controllers\\Email' => __DIR__ . '/../..' . '/classes/Controllers/Email.php',
+        'DataSync\\Controllers\\Enqueue' => __DIR__ . '/../..' . '/classes/Controllers/Enqueue.php',
+        'DataSync\\Controllers\\File' => __DIR__ . '/../..' . '/classes/Controllers/File.php',
+        'DataSync\\Controllers\\Load' => __DIR__ . '/../..' . '/classes/Controllers/Load.php',
+        'DataSync\\Controllers\\Logs' => __DIR__ . '/../..' . '/classes/Controllers/Logs.php',
+        'DataSync\\Controllers\\Media' => __DIR__ . '/../..' . '/classes/Controllers/Media.php',
+        'DataSync\\Controllers\\Options' => __DIR__ . '/../..' . '/classes/Controllers/Options.php',
+        'DataSync\\Controllers\\PostTypes' => __DIR__ . '/../..' . '/classes/Controllers/PostTypes.php',
+        'DataSync\\Controllers\\Posts' => __DIR__ . '/../..' . '/classes/Controllers/Posts.php',
+        'DataSync\\Controllers\\Receiver' => __DIR__ . '/../..' . '/classes/Controllers/Receiver.php',
+        'DataSync\\Controllers\\SourceData' => __DIR__ . '/../..' . '/classes/Controllers/SourceData.php',
+        'DataSync\\Controllers\\SyncedPosts' => __DIR__ . '/../..' . '/classes/Controllers/SyncedPosts.php',
+        'DataSync\\Controllers\\SyncedTaxonomies' => __DIR__ . '/../..' . '/classes/Controllers/SyncedTaxonomies.php',
+        'DataSync\\Controllers\\SyncedTerms' => __DIR__ . '/../..' . '/classes/Controllers/SyncedTerms.php',
+        'DataSync\\Controllers\\TemplateSync' => __DIR__ . '/../..' . '/classes/Controllers/TemplateSync.php',
+        'DataSync\\Controllers\\Users' => __DIR__ . '/../..' . '/classes/Controllers/Users.php',
+        'DataSync\\Models\\ConnectedSite' => __DIR__ . '/../..' . '/classes/Models/ConnectedSite.php',
+        'DataSync\\Models\\DB' => __DIR__ . '/../..' . '/classes/Models/DB.php',
+        'DataSync\\Models\\Log' => __DIR__ . '/../..' . '/classes/Models/Log.php',
+        'DataSync\\Models\\PostType' => __DIR__ . '/../..' . '/classes/Models/PostType.php',
+        'DataSync\\Models\\SyncedPost' => __DIR__ . '/../..' . '/classes/Models/SyncedPost.php',
+        'DataSync\\Models\\SyncedTaxonomy' => __DIR__ . '/../..' . '/classes/Models/SyncedTaxonomy.php',
+        'DataSync\\Models\\SyncedTerm' => __DIR__ . '/../..' . '/classes/Models/SyncedTerm.php',
+        'DataSync\\Routes\\ConnectedSitesRoutes' => __DIR__ . '/../..' . '/classes/Routes/ConnectedSitesRoutes.php',
+        'DataSync\\Routes\\LogsRoutes' => __DIR__ . '/../..' . '/classes/Routes/LogsRoutes.php',
+        'DataSync\\Routes\\MediaRoutes' => __DIR__ . '/../..' . '/classes/Routes/MediaRoutes.php',
+        'DataSync\\Routes\\OptionsRoutes' => __DIR__ . '/../..' . '/classes/Routes/OptionsRoutes.php',
+        'DataSync\\Routes\\PostTypesRoutes' => __DIR__ . '/../..' . '/classes/Routes/PostTypesRoutes.php',
+        'DataSync\\Routes\\PostsRoutes' => __DIR__ . '/../..' . '/classes/Routes/PostsRoutes.php',
+        'DataSync\\Routes\\ReceiverRoutes' => __DIR__ . '/../..' . '/classes/Routes/ReceiverRoutes.php',
+        'DataSync\\Routes\\SourceDataRoutes' => __DIR__ . '/../..' . '/classes/Routes/SourceDataRoutes.php',
+        'DataSync\\Routes\\SyncedPostsRoutes' => __DIR__ . '/../..' . '/classes/Routes/SyncedPostsRoutes.php',
+        'DataSync\\Routes\\TemplateSyncRoutes' => __DIR__ . '/../..' . '/classes/Routes/TemplateSyncRoutes.php',
+        'DataSync\\Tools\\Helpers' => __DIR__ . '/../..' . '/classes/Tools/Helpers.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit00116c29cef5b046903fd990a91a2556::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit00116c29cef5b046903fd990a91a2556::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit00116c29cef5b046903fd990a91a2556::$classMap;
 
         }, null, ClassLoader::class);
     }
