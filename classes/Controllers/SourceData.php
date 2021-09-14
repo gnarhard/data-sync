@@ -52,8 +52,8 @@ class SourceData {
 
 		if ( 0 !== $post_id ) {
 			// NOT BULK PACKAGE, CLEAR AND SET FOR ONE POST.
-			$post      = (object) Posts::get_single( $post_id );
-			$post_type = $post->post_type;
+			$post                                                            = (object) Posts::get_single( $post_id );
+			$post_type                                                       = $post->post_type;
 			$this->source_data->options->overwrite_receiver_post_on_conflict = true;
 			$this->source_data->posts                                        = new stdClass(); // CLEAR ALL OTHER POSTS.
 			$this->source_data->posts->$post_type                            = array( $post ); // CREATE POSTS ARRAY WITH POST_TYPE FOR RECEIVER COMPATIBILITY.
@@ -76,7 +76,6 @@ class SourceData {
 
 		return $json;
 	}
-
 
 
 	/**
@@ -104,7 +103,8 @@ class SourceData {
 
 			if ( is_wp_error( $response ) ) {
 				$logs = new Logs();
-				$logs->set( 'Error in SourceData->start_fresh() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+				$logs->set( 'Error in SourceData->start_fresh() received from ' . $site->url . '. ' . $response->get_error_message(),
+					true );
 
 				return $response;
 			}
@@ -164,7 +164,8 @@ class SourceData {
 						$post->post_meta['_yoast_wpseo_canonical'][0] = $canonical_link;
 					} else {
 						$logs = new Logs();
-						$logs->set( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.', true );
+						$logs->set( 'Canonical site url could not connect to ' . $post->post_title . ' because a previously connected site must have been deleted.',
+							true );
 					}
 				}
 			}
@@ -223,7 +224,8 @@ class SourceData {
 							// REMOVE POST FROM SYNDICATION BECAUSE IT HAS FAULTY DATA.
 							unset( $this->source_data->posts->$post_type_slug[ $key ] );
 							$logs = new Logs();
-							$logs->set( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.', true, 'orphaned_site' );
+							$logs->set( $post->post_title . ' (ID: ' . $post->ID . ') in ' . $post->post_type . ' has a canonical site orphan.',
+								true, 'orphaned_site' );
 						}
 					}
 
@@ -247,10 +249,24 @@ class SourceData {
 			$source_data->source_options  = Options::source();
 			$source_data->connected_sites = (array) ConnectedSite::get_all();
 			if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
-				$source_data->error_msg = '<span>Required plugins not installed. Please turn on debugging and view error log for more details.</span>';
+				$error                  = 'Required plugins not installed.';
+				$source_data->error_msg = "<span>$error</span>";
+				$source_data->posts     = []; // Set as empty for error message.
+				$logs                   = new Logs();
+				$logs->set( $error, true );
+				wp_send_json_error( $source_data );
 			}
 
 			$post_id = (int) $request->get_url_params()['source_post_id'];
+
+			if ( ! isset( $source_data->source_options->push_enabled_post_types ) ) {
+				$error                  = 'Please select post types for syncing.';
+				$source_data->error_msg = "<span>$error</span>";
+				$source_data->posts     = []; // Set as empty for error message.
+				$logs                   = new Logs();
+				$logs->set( $error, true );
+				wp_send_json_error( $source_data );
+			}
 
 			if ( 0 === $post_id ) {
 				// GET BULK
@@ -272,7 +288,7 @@ class SourceData {
 
 		}
 
-		wp_send_json( $source_data );
+		wp_send_json_sucess( $source_data );
 	}
 
 

@@ -88,6 +88,7 @@ class Message {
 		Processes.delete( process.id );
 
 		if ( ! error.ok ) {
+			console.log(error);
 			throw new Error( error.statusText );
 			console.log( error.stack );
 		}

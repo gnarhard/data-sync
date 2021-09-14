@@ -83,12 +83,15 @@ class Options {
 
 		if ( function_exists( 'cptui_get_post_type_data' ) ) {
 			$cpt_data = cptui_get_post_type_data();
+			$push_enabled_post_types = get_option( 'push_enabled_post_types' );
 
-			foreach ( get_option( 'push_enabled_post_types' ) as $post_type ) {
-				if ( 'post' === $post_type ) {
-					$options->push_enabled_post_types['post'] = array( 'post' => array() );
-				} else {
-					$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
+			if ( ! empty($push_enabled_post_types)) {
+				foreach ( $push_enabled_post_types as $post_type ) {
+					if ( 'post' === $post_type ) {
+						$options->push_enabled_post_types['post'] = array( 'post' => array() );
+					} else {
+						$options->push_enabled_post_types[ $post_type ] = $cpt_data[ $post_type ];
+					}
 				}
 			}
 		}
@@ -177,13 +180,13 @@ class Options {
 		$prevalidation_data->source = new stdClass();
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		if ( ! \is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
+		if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
 			$prevalidation_data->source->acf = false;
 		} else {
 			$prevalidation_data->source->acf = true;
 		}
 
-		if ( ! \is_plugin_active( 'custom-post-type-ui/custom-post-type-ui.php' ) ) {
+		if ( ! is_plugin_active( 'custom-post-type-ui/custom-post-type-ui.php' ) ) {
 			$prevalidation_data->source->cptui = false;
 		} else {
 			$prevalidation_data->source->cptui = true;
