@@ -140,7 +140,7 @@ class Options {
 			wp_send_json_success( $data );
 		} else {
 			$logs = new Logs();
-			$logs->set( 'ERROR: Options not saved.', true );
+			$logs->set( 'Warning: Options not saved or were saved previously.', true );
 			wp_send_json_error();
 		}
 	}

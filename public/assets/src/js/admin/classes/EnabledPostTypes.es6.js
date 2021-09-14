@@ -24,7 +24,7 @@ class EnabledPostTypes {
 				data           = Helpers.getSelectValues( document.getElementById( 'push_enabled_post_types' ) );
 				// console.log(data);
 				AJAX.post( DataSync.api.url + '/options/push_enabled_post_types', data ).then( function( result ) {
-
+					console.log(result);
 					let process = {
 						id: btoa( Math.random().toString() ), topic: 'Push-enabled post types', running: true,
 					};

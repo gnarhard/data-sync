@@ -36,12 +36,12 @@ function display_push_enabled_post_types() {
 				continue;
 			}
 			$post_type_object = get_post_type_object( $post_type );
-			$push_enabled_post_types = get_option( 'push_enabled_post_types' );
+			$push_enabled_post_types = (!get_option( 'push_enabled_post_types' )) ? [] : get_option('push_enabled_post_types');
 			// DO NOT SEPARATE OUT OPTION CODE INTO DIFFERENT LINES. IT MAKES THE DATA SAVE WITH LINE BREAKS.
-			if ( false !== $push_enabled_post_types ) : ?>
+			?>
             <option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ),
 	            $push_enabled_post_types ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
-			<?php endif;
+			<?php
 		} ?>
     </select>
 	<?php

@@ -288,7 +288,7 @@ class SourceData {
 
 		}
 
-		wp_send_json_sucess( $source_data );
+		wp_send_json_success( $source_data );
 	}
 
 
