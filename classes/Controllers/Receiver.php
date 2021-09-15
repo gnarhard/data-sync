@@ -97,6 +97,7 @@ class Receiver {
 	 * @return mixed
 	 */
 	public function prevalidate() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins = get_plugins();
 
 		$prevalidation_data                    = new \stdClass();
