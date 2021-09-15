@@ -248,6 +248,16 @@ class SourceData {
 
 			$source_data->source_options  = Options::source();
 			$source_data->connected_sites = (array) ConnectedSite::get_all();
+
+			if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
+				$error                  = 'No connected sites.';
+				$source_data->error_msg = "<span>$error</span>";
+				$source_data->posts     = []; // Set as empty for error message.
+				$logs                   = new Logs();
+				$logs->set( $error, true );
+				wp_send_json_error( $source_data );
+			}
+
 			if ( empty( $source_data->source_options->push_enabled_post_types ) ) {
 				$error                  = 'Required plugins not installed.';
 				$source_data->error_msg = "<span>$error</span>";
@@ -288,7 +298,7 @@ class SourceData {
 
 		}
 
-		wp_send_json_success( $source_data );
+		wp_send_json( $source_data );
 	}
 
 

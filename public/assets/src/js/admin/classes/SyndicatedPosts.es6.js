@@ -92,7 +92,7 @@ class SyndicatedPosts
                 process.data.source_data = source_data;
                 Processes.set(process);
 
-                if ( !source_data.success ) {
+                if ( typeof source_data.success !== 'undefined' ) {
                     let admin_message = {};
                     admin_message.process_id = process.id;
                     admin_message.topic = process.topic;

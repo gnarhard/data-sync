@@ -46,6 +46,7 @@ class Sync
 
     async get_syndicated_post_details( post_id, data )
     {
+        console.log(data);
         const response = await fetch(DataSync.api.url + '/syndicated_post/' +
             post_id, {
             method: 'POST', headers: {
