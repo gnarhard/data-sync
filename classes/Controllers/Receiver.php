@@ -104,8 +104,9 @@ class Receiver {
 		$prevalidation_data->site_id           = (int) get_option( 'data_sync_receiver_site_id' );
 		$prevalidation_data->site_admin_url    = get_site_url() . '/wp-admin/plugins.php';
 		$prevalidation_data->versions          = array();
-		$prevalidation_data->versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'];
-		$prevalidation_data->versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'];
+		$prevalidation_data->versions['acf']   = $plugins['advanced-custom-fields-pro/acf.php']['Version'] ?? false;
+		$prevalidation_data->versions['cptui'] = $plugins['custom-post-type-ui/custom-post-type-ui.php']['Version'] ?? false;
+		$prevalidation_data->versions['yoast'] = $plugins['wordpress-seo/wp-seo.php']['Version'] ?? false;
 		$prevalidation_data->versions['wp']    = get_bloginfo( 'version' );
 
 		return $prevalidation_data;

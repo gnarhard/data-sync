@@ -149,6 +149,7 @@ class Sync
         this.consolidate(process.id).
             then(() => this.prevalidate(process.id)).
             then(prevalidation => {
+                // Only packages validation data to be validated on /sync.
                 if ( !prevalidation.success ) {
                     let admin_message = {};
                     admin_message.process_id = process.id;

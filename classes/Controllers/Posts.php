@@ -256,7 +256,9 @@ class Posts {
 					// get any images that are saved by ID.
 					$media_post = get_post( $value );
 					if ( ! empty( $media_post ) ) {
-						$image_ids[] = (int) $media_post->ID;
+						if ('attachment' == $media_post->post_type) {
+							$image_ids[] = (int) $media_post->ID;
+						}
 					}
 				}
 			}
