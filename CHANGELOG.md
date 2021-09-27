@@ -1,3 +1,9 @@
+#### 2.1.1 (2021-09-27)
+
+##### New Features
+
+*  Added Yoast detection. ([437838b1](https://github.com/GraysonE/data-sync/commit/437838b1cf01177c8e8a9163ca75013125f484fd))
+
 ### 2.1.0 (2021-09-27)
 
 ##### Bug Fixes
