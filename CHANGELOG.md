@@ -1,3 +1,16 @@
+### 2.1.0 (2021-09-27)
+
+##### Bug Fixes
+
+*  PHP 8.0 compatibility. ([dd1f6211](https://github.com/GraysonE/data-sync/commit/dd1f6211e0f7f320865aadbbee5482cab855f92a))
+*  Fixed post detail errors. ([cf7f1f32](https://github.com/GraysonE/data-sync/commit/cf7f1f32ade51eed6f3569b398fddeef0df81005))
+*  Fixed concerning options error message and addtional load errors. ([0ef053df](https://github.com/GraysonE/data-sync/commit/0ef053df9abcc9727bf8ebcd008d1fc4b9a1fbb0))
+*  Fixed several initial install bugs. ([969d41b3](https://github.com/GraysonE/data-sync/commit/969d41b377996b97352577ad6c096765677846f6))
+
+##### Performance Improvements
+
+*  Updated dependencies ([da1f3985](https://github.com/GraysonE/data-sync/commit/da1f39857002427dff34297e8bbef7e6d11dcdc8))
+
 #### 2.0.2 (2020-06-18)
 
 ##### Bug Fixes
