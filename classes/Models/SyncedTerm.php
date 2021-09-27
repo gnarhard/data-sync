@@ -88,12 +88,12 @@ class SyncedTerm
         global $wpdb;
         $result = $wpdb->query(
             'CREATE TABLE IF NOT EXISTS ' . $wpdb->prefix . self::$table_name . ' (
-	        id INT NOT NULL AUTO_INCREMENT,
+	        id BIGINT NOT NULL AUTO_INCREMENT,
 	        PRIMARY KEY(id),
 	        slug              VARCHAR(255) NOT NULL,
-	        source_term_id     INT NOT NULL,
-	        receiver_term_id   INT NOT NULL,
-	        source_parent_id   INT,
+	        source_term_id     BIGINT NOT NULL,
+	        receiver_term_id   BIGINT NOT NULL,
+	        source_parent_id   BIGINT,
 	        receiver_site_id            INT NOT NULL,
 	        diverged        TINYINT(1),
 	        date_modified    DATETIME NOT NULL
@@ -116,7 +116,7 @@ class SyncedTerm
         $result = $wpdb->query(
             'ALTER TABLE ' . $wpdb->prefix . self::$table_name . ' 
 			ADD CONSTRAINT fk_receiver_term_id FOREIGN KEY (receiver_term_id) 
-			REFERENCES ' . $wpdb->prefix . 'wp_posts' . '(id)
+			REFERENCES ' . $wpdb->posts . '(ID)
 			ON DELETE CASCADE
 			ON UPDATE CASCADE
 			;'

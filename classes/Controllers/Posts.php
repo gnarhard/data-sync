@@ -48,11 +48,14 @@ class Posts {
 		$registered_post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
 		unset( $registered_post_types['attachment'] );
 
-		add_meta_box( 'override_post_yoast', __( 'Override Receiver Yoast Settings', 'textdomain' ), $this->view_namespace . '\add_override_post_yoast_checkbox', $registered_post_types, 'side', );
+		add_meta_box( 'override_post_yoast', __( 'Override Receiver Yoast Settings', 'textdomain' ),
+			$this->view_namespace . '\add_override_post_yoast_checkbox', $registered_post_types, 'side', );
 
-		add_meta_box( 'canonical_site', __( 'Canonical Site', 'textdomain' ), $this->view_namespace . '\add_canonical_radio_inputs', $registered_post_types, 'side', );
+		add_meta_box( 'canonical_site', __( 'Canonical Site', 'textdomain' ),
+			$this->view_namespace . '\add_canonical_radio_inputs', $registered_post_types, 'side', );
 
-		add_meta_box( 'excluded_site_meta', __( 'Sites Excluded From Sync', 'textdomain' ), $this->view_namespace . '\add_excluded_sites_select_field', $registered_post_types, 'side', );
+		add_meta_box( 'excluded_site_meta', __( 'Sites Excluded From Sync', 'textdomain' ),
+			$this->view_namespace . '\add_excluded_sites_select_field', $registered_post_types, 'side', );
 	}
 
 	public function save_custom_values( int $post_id ) {
@@ -253,7 +256,9 @@ class Posts {
 					// get any images that are saved by ID.
 					$media_post = get_post( $value );
 					if ( ! empty( $media_post ) ) {
-						$image_ids[] = (int) $media_post->ID;
+						if ('attachment' == $media_post->post_type) {
+							$image_ids[] = (int) $media_post->ID;
+						}
 					}
 				}
 			}
@@ -403,14 +408,16 @@ class Posts {
 		$syndication_info->receiver_version_edited[0] = false;
 		$syndication_info->source_version_edited      = false;
 
-		$number_of_sites_connected       = count( $connected_sites );
+		$number_of_sites_connected       = ( $connected_sites ) ? count( $connected_sites ) : 0;
 		$post_meta                       = get_post_meta( $post->ID );
-		$excluded_sites                  = unserialize( $post_meta['_excluded_sites'][0] );
-		$synced_post_result              = SyncedPost::get_where( array( 'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ) ) );
+		$excluded_sites                  = ('' == get_post_meta( $post->ID, '_excluded_sites', true )) ? [0 => 0] : get_post_meta( $post->ID, '_excluded_sites', true );
+		$synced_post_result              = SyncedPost::get_where( array(
+			'source_post_id' => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT )
+		) );
 		$number_of_synced_posts_returned = count( $synced_post_result );
 
 		// CHECK EXCLUDED SITES' DEFAULT VALUE OF 0 FOR NO EXCLUDED SITES.
-		if ( 0 === (int) $excluded_sites[0] ) {
+		if ( 0 === $excluded_sites[0] ) {
 			$sites_syndicating = $number_of_sites_connected;
 		} else {
 			$sites_syndicating = $number_of_sites_connected - count( $excluded_sites );
@@ -427,7 +434,8 @@ class Posts {
 				foreach ( $synced_post_result as $synced_post ) {
 					$synced_post_modified_time     = strtotime( $synced_post->date_modified );
 					$source_post_modified_time     = strtotime( $post->post_modified_gmt );
-					$receiver_post                 = self::find_receiver_post( (array) $receiver_data, $synced_post->receiver_site_id, $synced_post->receiver_post_id );
+					$receiver_post                 = self::find_receiver_post( (array) $receiver_data,
+						$synced_post->receiver_site_id, $synced_post->receiver_post_id );
 					$receiver_modified_time        = strtotime( $receiver_post->post_modified_gmt );
 					$syndication_info->synced_post = $synced_post;
 
@@ -454,22 +462,28 @@ class Posts {
 					}
 				}
 
-				if ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+				if ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced',
+						$statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
 					// ALL POSTS ARE DIVERGED.
 					$syndication_info->status = 'diverged';
-				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced',
+						$statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
 					// ALL POSTS SYNCED.
 					$syndication_info->status = 'synced';
-				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+				} elseif ( ( ! in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced',
+						$statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
 					// ALL POSTS UNSYNCED.
 					$syndication_info->status = 'unsynced';
-				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced',
+						$statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
 					// SOME POSTS ARE DIVERGED, UNSYNCED, AND SYNCED.
 					$syndication_info->status = 'partial';
-				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced', $statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( ! in_array( 'unsynced',
+						$statuses ) ) && ( in_array( 'synced', $statuses ) ) ) {
 					// SOME POSTS ARE DIVERGED AND SYNCED.
 					$syndication_info->status = 'partial';
-				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced', $statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
+				} elseif ( ( in_array( 'diverged', $statuses ) ) && ( in_array( 'unsynced',
+						$statuses ) ) && ( ! in_array( 'synced', $statuses ) ) ) {
 					// SOME POSTS ARE DIVERGED AND UNSYNCED.
 					$syndication_info->status = 'diverged';
 				}
@@ -495,15 +509,15 @@ class Posts {
 				$syndication_info->source_message = '<span class="warning">A receiver post was updated after the last sync.</span>';
 			}
 
-			$syndication_info->icon            = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
+			$syndication_info->icon           = '<i class="dashicons dashicons-editor-unlink" title="A receiver post was updated after the last sync. Click to overwrite with source post." data-receiver-site-id="' . $synced_post->receiver_site_id . '" data-source-post-id="' . $post->ID . '"></i>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'partial' === $syndication_info->status ) {
-			$syndication_info->icon            = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
-			$syndication_info->source_message  = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
+			$syndication_info->icon           = '<i class="dashicons dashicons-info" title="Partially synced."></i>';
+			$syndication_info->source_message = '<span class="warning">Partially syndicated. Some posts may have failed to syndicate with or were updated more recently on a connected site. Please check connected site info and logs for more details.</span>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'unsynced' === $syndication_info->status ) {
-			$syndication_info->icon            = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
-			$syndication_info->source_message  = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
+			$syndication_info->icon           = '<i class="dashicons dashicons-warning warning" title="Not synced. Sync now or check error log if problem persists."></i>';
+			$syndication_info->source_message = '<span class="warning">Unsynced. Please check connected site info or logs for more details.</span>';
 			$syndication_info->source_message .= '<button class="button danger_button push_post_now" id="push_post_now_' . $post->ID . '" data-source-post-id="' . $post->ID . '">Overwrite all receivers</button></span>';
 		} elseif ( 'trashed' === $syndication_info->status ) {
 			$syndication_info->icon           = '<i class="dashicons dashicons-trash" title="Trashed at source but still live on receivers. To delete on receivers, delete permanently at source."></i>';
@@ -568,9 +582,11 @@ class Posts {
 			// FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
 			$upload_dir = wp_get_upload_dir();
 			// FIX IMAGES CORRECTLY WITH UPLOAD DIR
-			$post_array['post_content'] = str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $post_array['post_content'] );
+			$post_array['post_content'] = str_replace( $post_array['source_url'] . '/wp-content/uploads',
+				$upload_dir['baseurl'], $post_array['post_content'] );
 			// FIX EVERYTHING ELSE
-			$post_array['post_content'] = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $post_array['post_content'] );
+			$post_array['post_content'] = str_replace( trailingslashit( $post_array['source_url'] ),
+				trailingslashit( get_site_url() ), $post_array['post_content'] );
 
 		}
 
@@ -607,7 +623,8 @@ class Posts {
 				foreach ( $post->post_meta as $meta_key => $meta_value ) {
 
 					// IF POST IS ALREADY SYNCED AND THE POST-LEVEL SETTING DOES NOT ALLOW OVERWRITING OF YOAST DATA, UNSET/DELETE SOURCE YOAST DATA SO IT DOESN'T OVERWRITE RECEIVER YOAST DATA.
-					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key, $yoast_meta_prefix ) ) && ( $post->synced ) ) {
+					if ( ( ! $override_post_yoast ) && ( false !== strpos( $meta_key,
+								$yoast_meta_prefix ) ) && ( $post->synced ) ) {
 						unset( $post->post_meta->$meta_key ); // DELETES SOURCE POST'S META DATA RELATED TO YOAST TO NOT OVERWRITE.
 						continue;
 					}
@@ -637,9 +654,11 @@ class Posts {
 						// FIX ANY URLS THAT WOULD POSSIBLY BE INCORRECT.
 						$upload_dir = wp_get_upload_dir();
 						// FIX IMAGES CORRECTLY WITH UPLOAD DIR
-						$value = str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'], $value );
+						$value = str_replace( $post_array['source_url'] . '/wp-content/uploads', $upload_dir['baseurl'],
+							$value );
 						// FIX EVERYTHING ELSE
-						$value = str_replace( trailingslashit( $post_array['source_url'] ), trailingslashit( get_site_url() ), $value );
+						$value = str_replace( trailingslashit( $post_array['source_url'] ),
+							trailingslashit( get_site_url() ), $value );
 
 						$unserialized_value = false;
 

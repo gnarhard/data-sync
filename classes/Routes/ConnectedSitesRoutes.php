@@ -49,7 +49,7 @@ class ConnectedSitesRoutes
                         'id' => array(
                             'description'       => 'ID of connected_site',
                             'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
+//                            'validate_callback' => 'is_numeric',
                         ),
                     ),
                 ),
@@ -61,7 +61,7 @@ class ConnectedSitesRoutes
                         'id' => array(
                             'description'       => 'ID of connected_site',
                             'type'              => 'int',
-                            'validate_callback' => 'is_numeric',
+//                            'validate_callback' => 'is_numeric',
                         ),
                     ),
                 ),

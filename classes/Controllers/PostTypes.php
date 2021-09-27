@@ -131,89 +131,92 @@ class PostTypes {
 	 */
 	public static function save_options( $push_enabled_post_types_from_source, $enable_new_cpts ) {
 
-		$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : array();
-		$synced_custom_post_types        = PostType::get_all();
-		$synced_custom_post_types_to_add = array();
-		$registered_custom_post_types    = cptui_get_post_type_data();
-		$registered_post_types           = get_post_types(
-			array(
-				'public' => true,
-			),
-			'names',
-			'and'
-		);
-		$push_enabled_post_types         = array();
-		foreach ( (array) $push_enabled_post_types_from_source as $post_type => $post_type_data ) {
-			$push_enabled_post_types[] = $post_type;
-		}
-
-		// Merge registered default and custom post types together.
-		foreach ( $registered_custom_post_types as $registered_custom_post_type ) {
-			$registered_post_types[] = $registered_custom_post_type['name'];
-		}
-
-		// Consolidate synced custom post types that may or may not have been registered.
-		foreach ( $synced_custom_post_types as $cpt ) {
-			if ( '' !== $cpt->name ) {
-				$synced_custom_post_types_to_add[] = $cpt->name;
-			}
-		}
-
-		// Get all currently enabled post types on receiver.
-		foreach ( $enabled_post_types as $key => $enabled_post_type ) {
-			if ( '' === $enabled_post_type ) {
-				unset( $enabled_post_types[ $key ] );
-			}
-		}
-
-		// All post types that have eligibility to be enabled.
-		$available_post_types       = array_merge( $synced_custom_post_types_to_add, $registered_post_types );
-		$available_post_types       = array_merge( $push_enabled_post_types, $available_post_types );
-		$available_post_types       = array_unique( $available_post_types );
-		$updated_enabled_post_types = $enabled_post_types;
-
-		foreach ( $available_post_types as $available_cpt ) {
-
-			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( in_array( $available_cpt, $enabled_post_types ) ) ) {
-				// If post type is registered and synced and already in enabled posts, either ignore it, or add it back in without redundancy.
-				$updated_enabled_post_types[] = $available_cpt;
+		if (function_exists('cptui_get_post_type_data')) {
+			$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : array();
+			$synced_custom_post_types        = PostType::get_all();
+			$synced_custom_post_types_to_add = array();
+			$registered_custom_post_types    = cptui_get_post_type_data();
+			$registered_post_types           = get_post_types(
+				array(
+					'public' => true,
+				),
+				'names',
+				'and'
+			);
+			$push_enabled_post_types         = array();
+			foreach ( (array) $push_enabled_post_types_from_source as $post_type => $post_type_data ) {
+				$push_enabled_post_types[] = $post_type;
 			}
 
-			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( $enable_new_cpts ) ) {
-				// If post type isn't synced and the option to auto enable on first push is on, add to enabled post types.
-				if ( 'post' !== $available_cpt ) {
+			// Merge registered default and custom post types together.
+			foreach ( $registered_custom_post_types as $registered_custom_post_type ) {
+				$registered_post_types[] = $registered_custom_post_type['name'];
+			}
+
+			// Consolidate synced custom post types that may or may not have been registered.
+			foreach ( $synced_custom_post_types as $cpt ) {
+				if ( '' !== $cpt->name ) {
+					$synced_custom_post_types_to_add[] = $cpt->name;
+				}
+			}
+
+			// Get all currently enabled post types on receiver.
+			foreach ( $enabled_post_types as $key => $enabled_post_type ) {
+				if ( '' === $enabled_post_type ) {
+					unset( $enabled_post_types[ $key ] );
+				}
+			}
+
+			// All post types that have eligibility to be enabled.
+			$available_post_types       = array_merge( $synced_custom_post_types_to_add, $registered_post_types );
+			$available_post_types       = array_merge( $push_enabled_post_types, $available_post_types );
+			$available_post_types       = array_unique( $available_post_types );
+			$updated_enabled_post_types = $enabled_post_types;
+
+			foreach ( $available_post_types as $available_cpt ) {
+
+				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( in_array( $available_cpt, $enabled_post_types ) ) ) {
+					// If post type is registered and synced and already in enabled posts, either ignore it, or add it back in without redundancy.
 					$updated_enabled_post_types[] = $available_cpt;
 				}
-			}
 
-			if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
-				// If post type is synced or registered but not enabled, remove it from enabled post types.
-				foreach ( $updated_enabled_post_types as $key => $ept ) {
-					if ( $available_cpt === $ept ) {
-						unset( $updated_enabled_post_types[ $key ] );
+				if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( $enable_new_cpts ) ) {
+					// If post type isn't synced and the option to auto enable on first push is on, add to enabled post types.
+					if ( 'post' !== $available_cpt ) {
+						$updated_enabled_post_types[] = $available_cpt;
+					}
+				}
+
+				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
+					// If post type is synced or registered but not enabled, remove it from enabled post types.
+					foreach ( $updated_enabled_post_types as $key => $ept ) {
+						if ( $available_cpt === $ept ) {
+							unset( $updated_enabled_post_types[ $key ] );
+						}
+					}
+				}
+
+				if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
+					// If post type isn't synced and the option to auto enable on first push is off, remove it from enabled post types.
+					foreach ( $updated_enabled_post_types as $key => $ept ) {
+						if ( $available_cpt === $ept ) {
+							unset( $updated_enabled_post_types[ $key ] );
+						}
 					}
 				}
 			}
 
-			if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
-				// If post type isn't synced and the option to auto enable on first push is off, remove it from enabled post types.
-				foreach ( $updated_enabled_post_types as $key => $ept ) {
-					if ( $available_cpt === $ept ) {
-						unset( $updated_enabled_post_types[ $key ] );
-					}
+			$unique_updated_enabled_post_types = array_unique( $updated_enabled_post_types );
+			foreach ( $unique_updated_enabled_post_types as $key => $pt ) {
+				if ( 'attachment' === $pt ) {
+					unset( $unique_updated_enabled_post_types[ $key ] );
+				} elseif ( 'page' === $pt ) {
+					unset( $unique_updated_enabled_post_types[ $key ] );
 				}
 			}
-		}
 
-		$unique_updated_enabled_post_types = array_unique( $updated_enabled_post_types );
-		foreach ( $unique_updated_enabled_post_types as $key => $pt ) {
-			if ( 'attachment' === $pt ) {
-				unset( $unique_updated_enabled_post_types[ $key ] );
-			} elseif ( 'page' === $pt ) {
-				unset( $unique_updated_enabled_post_types[ $key ] );
-			}
+			update_option( 'enabled_post_types', $unique_updated_enabled_post_types );
 		}
-		update_option( 'enabled_post_types', $unique_updated_enabled_post_types );
 
 	}
 

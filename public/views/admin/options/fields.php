@@ -36,8 +36,11 @@ function display_push_enabled_post_types() {
 				continue;
 			}
 			$post_type_object = get_post_type_object( $post_type );
-			// DO NOT SEPARATE OUT OPTION CODE INTO DIFFERENT LINES. IT MAKES THE DATA SAVE WITH LINE BREAKS.?>
-            <option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ), get_option( 'push_enabled_post_types' ) ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
+			$push_enabled_post_types = (!get_option( 'push_enabled_post_types' )) ? [] : get_option('push_enabled_post_types');
+			// DO NOT SEPARATE OUT OPTION CODE INTO DIFFERENT LINES. IT MAKES THE DATA SAVE WITH LINE BREAKS.
+			?>
+            <option value="<?php echo esc_html( $post_type_object->name ); ?>" <?php echo selected( in_array( trim( $post_type_object->name ),
+	            $push_enabled_post_types ) ); ?>><?php echo esc_html( $post_type_object->label ); ?></option>
 			<?php
 		} ?>
     </select>
@@ -87,7 +90,8 @@ function display_notified_users() {
 		foreach ( $users as $user ) {
 			?>
             <option
-                    value="<?php echo $user->ID; ?>" <?php selected( in_array( $user->ID, $notified_users ) ); ?>><?php echo $user->user_nicename; ?></option>
+                    value="<?php echo $user->ID; ?>" <?php selected( in_array( $user->ID,
+				$notified_users ) ); ?>><?php echo $user->user_nicename; ?></option>
 			<?php
 		} ?>
     </select>
@@ -96,16 +100,20 @@ function display_notified_users() {
 
 
 function awareness_messages() {
+	$site_type     = get_option( 'source_site' );
+	$site_type_set = ( '1' === $site_type || '0' === $site_type );
 	?>
-    <div id="awareness_message_wrap">
+    <div id="awareness_message_wrap" data-site-type-set="<?= $site_type_set ?>">
         <div id="awareness_message">
-            <span class="loading_spinner plugin_versions"><i class="dashicons dashicons-update"></i> Getting plugin versions. . .</span>
+            <span class="loading_spinner plugin_versions"></span>
         </div>
     </div>
 	<?php
 }
 
 function display_awareness_messages() {
+
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
 		?>
@@ -164,13 +172,14 @@ function display_overwrite_yoast_checkbox() {
 function display_overwrite_receiver_post_checkbox() {
 	?>
     <input type="checkbox" value="1"
-           name="overwrite_receiver_post_on_conflict" <?php checked( '1', get_option( 'overwrite_receiver_post_on_conflict' ) ); ?>/>
+           name="overwrite_receiver_post_on_conflict" <?php checked( '1',
+		get_option( 'overwrite_receiver_post_on_conflict' ) ); ?>/>
 	<?php
 }
 
 function display_start_fresh_link() {
 
-    $url = get_rest_url( null, DATA_SYNC_API_BASE_URL . '/source/start_fresh');
+	$url = get_rest_url( null, DATA_SYNC_API_BASE_URL . '/source/start_fresh' );
 	?>
     <span><a href="<?php echo $url ?>" target="_blank">Starting fresh</a> will truncate these tables on each receiver site:</span>
     <ol>
@@ -197,7 +206,7 @@ function display_post_types_to_accept() {
 	$operator = 'and'; // 'and' or 'or'
 
 	$synced_post_types_db_data = PostType::get_all();
-	$synced_post_types = array();
+	$synced_post_types         = array();
 
 	if ( ! empty( $synced_post_types_db_data ) ) {
 		foreach ( $synced_post_types_db_data as $cpt ) {
@@ -205,11 +214,11 @@ function display_post_types_to_accept() {
 				$synced_post_types[] = $cpt->name;
 			}
 		}
-    }
+	}
 
 	$registered_post_types = get_post_types( $args, $output, $operator );
-	$allowed_post_types = ( ! get_option( 'enabled_post_types' ) ) ? array() : get_option( 'enabled_post_types' );
-	$available_post_types = array_unique( array_merge( $synced_post_types, $registered_post_types ) );
+	$allowed_post_types    = ( ! get_option( 'enabled_post_types' ) ) ? array() : get_option( 'enabled_post_types' );
+	$available_post_types  = array_unique( array_merge( $synced_post_types, $registered_post_types ) );
 	?>
     <select name="enabled_post_types[]" multiple id="enabled_post_types">
 		<?php
@@ -220,7 +229,8 @@ function display_post_types_to_accept() {
 			}
 //			$post_type_object = get_post_type_object( $post_type );
 			?>
-            <option value="<?php echo esc_html( $post_type ); ?>" <?php echo selected( in_array( trim( $post_type ), $allowed_post_types ) ); ?>><?php echo esc_html( $post_type ); ?></option>
+            <option value="<?php echo esc_html( $post_type ); ?>" <?php echo selected( in_array( trim( $post_type ),
+				$allowed_post_types ) ); ?>><?php echo esc_html( $post_type ); ?></option>
 			<?php
 		} ?>
     </select>
@@ -234,16 +244,20 @@ function display_post_type_permissions_options( $post_type_object ) {
 	$post_type_object = $post_type_object[0]; ?>
     <select name="<?php echo $post_type_object->name . '_perms[]'; ?>" multiple>
         <option
-                value="create_posts" <?php selected( in_array( 'create_posts', get_option( $post_type_object->name . '_perms' ) ) ); ?>>
+                value="create_posts" <?php selected( in_array( 'create_posts',
+			get_option( $post_type_object->name . '_perms' ) ) ); ?>>
             Create Posts<br>
         <option
-                value="create_terms" <?php selected( in_array( 'create_terms', get_option( $post_type_object->name . '_perms' ) ) ); ?>>
+                value="create_terms" <?php selected( in_array( 'create_terms',
+			get_option( $post_type_object->name . '_perms' ) ) ); ?>>
             Create Terms<br>
         <option
-                value="edit_content" <?php selected( in_array( 'edit_content', get_option( $post_type_object->name . '_perms' ) ) ); ?>>
+                value="edit_content" <?php selected( in_array( 'edit_content',
+			get_option( $post_type_object->name . '_perms' ) ) ); ?>>
             Edit Content<br>
         <option
-                value="edit_status" <?php selected( in_array( 'edit_status', get_option( $post_type_object->name . '_perms' ) ) ); ?>>
+                value="edit_status" <?php selected( in_array( 'edit_status',
+			get_option( $post_type_object->name . '_perms' ) ) ); ?>>
             Edit Status & Visibility<br>
     </select>
 	<?php

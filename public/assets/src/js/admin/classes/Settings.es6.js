@@ -1,30 +1,46 @@
-import AJAX from '../../AJAX.es6.js'
-import Message from './Message.es6.js'
+import AJAX from '../../AJAX.es6.js';
+import Message from './Message.es6.js';
 
-class Settings {
+class Settings
+{
 
-    constructor () {
-        this.refresh_awareness_messages()
+    constructor()
+    {
+        this.refresh_awareness_messages();
     }
 
-    init () {
-        document.querySelector('#settings').classList.remove('hidden')
+    init()
+    {
+        document.querySelector('#settings').classList.remove('hidden');
     }
 
-    refresh_awareness_messages () {
-        let self = this
-        if (document.getElementById('awareness_message_wrap')) {
-            AJAX.get_html(DataSync.api.url + '/settings_tab/awareness_messages').then(result => {
-                    if (result === 'null') {
-                        result = '<span>Plugins up to date on all receivers.</span>' + result
-                    }
+    refresh_awareness_messages()
+    {
+        let self = this;
+        if ( document.getElementById('awareness_message_wrap') ) {
 
-                    Message.display_html(result, 'awareness_message', 'Awareness messages')
-                    self.init()
-                }
-            )
+            let site_type_set = document.getElementById('awareness_message_wrap').dataset.siteTypeSet;
+
+            if ( site_type_set ) {
+
+                AJAX.get_html(DataSync.api.url +
+                    '/settings_tab/awareness_messages').then(result => {
+                        if ( result === 'null' ) {
+                            result = '<span>Plugins up to date on all receivers.</span>' +
+                                result;
+                        }
+
+                        Message.display_html(result,
+                            'awareness_message',
+                            'Awareness messages');
+                        self.init();
+                    },
+                );
+            } else {
+                self.init();
+            }
         }
     }
 }
 
-export default Settings
+export default Settings;
