@@ -1,3 +1,9 @@
+#### 2.1.2 (2021-10-11)
+
+##### Bug Fixes
+
+*  Fixed undefined rest route from not setting api_url default. ([a1be4d67](https://github.com/GraysonE/data-sync/commit/a1be4d67019e72744f607070eb2ee75a595ffdbb))
+
 #### 2.1.1 (2021-09-27)
 
 ##### New Features
