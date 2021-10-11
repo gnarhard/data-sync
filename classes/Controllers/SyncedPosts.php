@@ -44,12 +44,10 @@ class SyncedPosts {
 						$logs = new Logs();
 						$logs->set( 'Post ' . $post->post_title . ' was updated more recently on receiver.', true );
 
-						$synced_post = SyncedPost::get_where(
-							array(
+						$synced_post = SyncedPost::get_where( array(
 								'source_post_id'   => (int) filter_var( $post->ID, FILTER_SANITIZE_NUMBER_INT ),
 								'receiver_site_id' => (int) get_option( 'data_sync_receiver_site_id' ),
-							)
-						);
+							) );
 
 						// UPDATE SYNCED POSTS DATABASE TABLE BUT ONLY CHANGE DIVERGED VALUE. DO NOT CHANGE THE DATE MODIFIED!
 						$args  = array(
@@ -73,7 +71,8 @@ class SyncedPosts {
 		foreach ( $synced_posts as $synced_post ) {
 			if ( ( (int) $post->ID === (int) $synced_post->source_post_id ) && ( (int) get_option( 'data_sync_receiver_site_id' ) === (int) $synced_post->receiver_site_id ) ) {
 				$synced_modified_timestamp   = strtotime( $synced_post->date_modified );
-				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $synced_post->receiver_post_id, false );
+				$receiver_modified_timestamp = get_post_modified_time( 'U', true, $synced_post->receiver_post_id,
+					false );
 
 				// IF RECEIVER POST WAS MODIFIED LATER THAN THE SYNCED POST WAS.
 				if ( $receiver_modified_timestamp > $synced_modified_timestamp ) {
@@ -151,12 +150,10 @@ class SyncedPosts {
 	public function get( WP_REST_Request $request ) {
 		$data = (object) $request->get_url_params();
 
-		$result = SyncedPost::get_where(
-			array(
+		$result = SyncedPost::get_where( array(
 				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $data->receiver_site_id, FILTER_SANITIZE_NUMBER_INT ),
-			)
-		);
+			) );
 
 		wp_send_json_success( $result );
 	}
@@ -198,12 +195,10 @@ class SyncedPosts {
 	}
 
 	public static function save( $data ) {
-		$existing_synced_post = SyncedPost::get_where(
-			array(
+		$existing_synced_post = SyncedPost::get_where( array(
 				'source_post_id'   => (int) filter_var( $data->source_post_id, FILTER_SANITIZE_NUMBER_INT ),
 				'receiver_site_id' => (int) filter_var( $data->receiver_site_id, FILTER_SANITIZE_NUMBER_INT ),
-			)
-		);
+			) );
 
 		if ( count( $existing_synced_post ) ) {
 			$data->id = $existing_synced_post[0]->id;
@@ -260,22 +255,21 @@ class SyncedPosts {
 					$source_data->receiver_site_id = (int) $site->id;
 					$auth                          = new Auth();
 					$json                          = $auth->prepare( $source_data, $site->secret_key );
-					$site = ConnectedSites::get_api_url($site);
-					$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_receiver_post/';
-					$response                      = wp_remote_post(
-						$url,
-						array(
+					$site                          = ConnectedSites::get_api_url( $site );
+					$url                           = $site->api_url . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_receiver_post/';
+					$response                      = wp_remote_post( $url, array(
 							'body'        => $json,
 							'httpversion' => '1.0',
 							'sslverify'   => false,
 							'timeout'     => 10,
 							'blocking'    => true,
-						)
-					);
+						) );
 
 					if ( is_wp_error( $response ) ) {
 						$logs = new Logs();
-						$logs->set( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+						$logs->set( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(),
+							true );
+
 						return $response;
 					} else {
 						SyncedPost::delete( $synced_post->id );
@@ -305,20 +299,19 @@ class SyncedPosts {
 				$auth                            = new Auth();
 				$json                            = $auth->prepare( $receiver_data, get_option( 'secret_key' ) );
 				$url                             = trailingslashit( get_option( 'data_sync_source_site_api_url' ) ) . DATA_SYNC_API_BASE_URL . '/synced_posts/delete_synced_post/';
-				$response                        = wp_remote_post(
-					$url,
-					array(
+				$response                        = wp_remote_post( $url, array(
 						'body'        => $json,
 						'httpversion' => '1.0',
 						'sslverify'   => false,
 						'timeout'     => 10,
 						'blocking'    => true,
-					)
-				);
+					) );
 
 				if ( is_wp_error( $response ) ) {
 					$logs = new Logs();
-					$logs->set( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(), true );
+					$logs->set( 'Failed to delete post: ' . $post->post_title . '(' . $post->post_type . '). ' . $response->get_error_message(),
+						true );
+
 					return $response;
 				} else {
 					$deleted = SyncedPost::delete( $synced_post[0]->id );
@@ -371,6 +364,7 @@ class SyncedPosts {
 		$request_body = json_decode( $request->get_body() );
 		$post         = $request_body->post_to_get;
 		include_once DATA_SYNC_PATH . 'public/views/admin/options/synced-posts-table.php';
-		\DataSync\display_post( $post, $request_body->source_data->connected_sites, (array) $request_body->receiver_data );
+		\DataSync\display_post( $post, $request_body->source_data->connected_sites,
+			(array) $request_body->receiver_data );
 	}
 }

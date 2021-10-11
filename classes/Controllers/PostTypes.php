@@ -27,7 +27,7 @@ class PostTypes {
 	}
 
 	/**
-	 * @param string $slug
+	 * @param  string  $slug
 	 *
 	 * @return mixed
 	 */
@@ -54,13 +54,14 @@ class PostTypes {
 
 
 	public static function check_enabled_post_types_on_receiver( object $site ) {
-		$site = ConnectedSites::get_api_url($site);
+		$site     = ConnectedSites::get_api_url( $site );
 		$url      = $site->api_url . DATA_SYNC_API_BASE_URL . '/post_types/check';
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
 			$logs = new Logs();
-			$logs->set( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(), true );
+			$logs->set( 'Error in PostTypes->check_enabled_post_types_on_receiver() received from ' . $site->url . '. ' . $response->get_error_message(),
+				true );
 
 			return false;
 		} else {
@@ -76,7 +77,7 @@ class PostTypes {
 	 * Saves all Custom Post Types to database table
 	 * DB Table: data_sync_custom_post_types
 	 *
-	 * @param object $post_types
+	 * @param  object  $post_types
 	 */
 	public static function process( object $post_types ) {
 		foreach ( $post_types as $post_type => $post_type_data ) :
@@ -92,7 +93,7 @@ class PostTypes {
 
 
 	/**
-	 * @param object $data
+	 * @param  object  $data
 	 *
 	 * Saves all custom post types to database
 	 * DB Table Name: data_sync_custom_post_types
@@ -131,18 +132,14 @@ class PostTypes {
 	 */
 	public static function save_options( $push_enabled_post_types_from_source, $enable_new_cpts ) {
 
-		if (function_exists('cptui_get_post_type_data')) {
+		if ( function_exists( 'cptui_get_post_type_data' ) ) {
 			$enabled_post_types              = ( false !== get_option( 'enabled_post_types' ) ) ? get_option( 'enabled_post_types' ) : array();
 			$synced_custom_post_types        = PostType::get_all();
 			$synced_custom_post_types_to_add = array();
 			$registered_custom_post_types    = cptui_get_post_type_data();
-			$registered_post_types           = get_post_types(
-				array(
+			$registered_post_types           = get_post_types( array(
 					'public' => true,
-				),
-				'names',
-				'and'
-			);
+				), 'names', 'and' );
 			$push_enabled_post_types         = array();
 			foreach ( (array) $push_enabled_post_types_from_source as $post_type => $post_type_data ) {
 				$push_enabled_post_types[] = $post_type;
@@ -175,7 +172,8 @@ class PostTypes {
 
 			foreach ( $available_post_types as $available_cpt ) {
 
-				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( in_array( $available_cpt, $enabled_post_types ) ) ) {
+				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt,
+						$registered_post_types ) ) && ( in_array( $available_cpt, $enabled_post_types ) ) ) {
 					// If post type is registered and synced and already in enabled posts, either ignore it, or add it back in without redundancy.
 					$updated_enabled_post_types[] = $available_cpt;
 				}
@@ -187,7 +185,8 @@ class PostTypes {
 					}
 				}
 
-				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt, $registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
+				if ( ( in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( in_array( $available_cpt,
+						$registered_post_types ) ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
 					// If post type is synced or registered but not enabled, remove it from enabled post types.
 					foreach ( $updated_enabled_post_types as $key => $ept ) {
 						if ( $available_cpt === $ept ) {
@@ -196,7 +195,9 @@ class PostTypes {
 					}
 				}
 
-				if ( ( ! in_array( $available_cpt, $synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt, $enabled_post_types ) ) ) {
+				if ( ( ! in_array( $available_cpt,
+						$synced_custom_post_types_to_add ) ) && ( ! $enable_new_cpts ) && ( ! in_array( $available_cpt,
+						$enabled_post_types ) ) ) {
 					// If post type isn't synced and the option to auto enable on first push is off, remove it from enabled post types.
 					foreach ( $updated_enabled_post_types as $key => $ept ) {
 						if ( $available_cpt === $ept ) {

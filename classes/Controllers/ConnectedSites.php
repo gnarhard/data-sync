@@ -26,18 +26,18 @@ class ConnectedSites {
 
 		$response = wp_remote_get( $site->url );
 
+		// Set default.
+		$site->api_url = trailingslashit( $site->url ) . 'wp-json/';
+
 		if ( is_wp_error( $response ) ) {
 			$logs = new Logs();
 			$logs->set( 'Error in ConnectedSites::get_api_url() received from ' . $site->url . '. ' . $response->get_error_message(), true );
 
-			$site->api_url = trailingslashit( $site->url ) . 'wp-json/';
 		} else {
 			$link_headers    = wp_remote_retrieve_headers( $response )->offsetGet( 'link' );
 			$api_link_header = $link_headers[0];
 
-			if ( -1 !== strpos( $api_link_header, 'wp-json' ) ) {
-				$site->api_url = trailingslashit( $site->url ) . 'wp-json/';
-			} elseif ( -1 !== strpos( $api_link_header, '?rest_route=' ) ) {
+			if ( -1 !== strpos( $api_link_header, '?rest_route=' ) ) {
 				$site->api_url = trailingslashit( $site->url ) . '?rest_route=/';
 			}
 		}
