@@ -23,11 +23,12 @@ class ConnectedSites {
 		for ( const [ i, site ] of sites.entries() ) {
 			const r = await ConnectedSites.get_rest_url( site );
 
+			// Set default.
+			sites[ i ].api_url = Helpers.trailingslashit( site.url ) + 'wp-json/';
+
 			for ( const header of r.headers ) {
 				if ( 'link' == header[0] ) {
-					if ( header[1].includes( 'wp-json' ) ) {
-						sites[ i ].api_url = Helpers.trailingslashit( site.url ) + 'wp-json/';
-					} else if ( header[1].includes( '?rest_route=' ) ) {
+					if ( header[1].includes( '?rest_route=' ) ) {
 						sites[ i ].api_url = Helpers.trailingslashit( site.url ) + 'index.php?rest_route=/';
 					}
 				}
