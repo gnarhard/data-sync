@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/GraysonE/data-sync"
   },
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "",
   "main": "index.php",
   "scripts": {
